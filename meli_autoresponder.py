@@ -338,9 +338,7 @@ def handle_claims(token, state):
         emoji = TYPE_EMOJI.get(tipo, "❓")
         order_id = (cl.get("resource_sub_type") or cl.get("resource_id") or "")
 
-        # Ack inicial al comprador
-        if not cl.get("claimer_got_response"):
-            claim_send_msg(token, cid, "Hola, recibimos tu reclamo y lo estamos revisando. Te contactamos en menos de 24hrs con una solución.")
+        # (Ack automático al comprador DESHABILITADO — decisión del vendedor)
 
         # Mensaje Telegram con botones
         txt = (
@@ -416,6 +414,14 @@ def process_telegram_callbacks(token, state):
 
         result = ""
         try:
+            # Test mode: si el cid empieza con "DEMO" no llama API real
+            if str(cid).startswith("DEMO"):
+                result = f"🧪 Demo: acción `{action}` registrada (no se llamó MELI). Funcional ✓"
+                tg_edit(cb["message"]["chat"]["id"], cb["message"]["message_id"],
+                        orig_text + f"\n\n*Demo OK:* `{action}`\n_{result}_")
+                tg_answer_cb(cb["id"], result[:200])
+                continue
+
             if action == "ar":  # allow return
                 c, r = claim_action(token, cid, "allow_return")
                 result = "✅ Devolución aceptada" if c in (200,201) else f"✗ err {c}"
