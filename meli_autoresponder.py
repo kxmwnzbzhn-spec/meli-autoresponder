@@ -30,6 +30,7 @@ STATE_FILE = ".seen_claims.json"
 
 TG_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
 TG_CHAT = os.environ.get("TELEGRAM_CHAT_ID")
+SHEETS_WEBHOOK_URL = os.environ.get("SHEETS_WEBHOOK_URL")  # Apps Script Web App URL
 
 
 def _log(msg):
@@ -148,6 +149,31 @@ def tg_edit(chat_id, msg_id, text, buttons=None):
 
 def tg_answer_cb(cb_id, text):
     return tg("answerCallbackQuery", {"callback_query_id": cb_id, "text": text[:200]})
+
+
+# ============================================================
+# Google Sheets (vía Apps Script webhook)
+# ============================================================
+
+def push_to_sheets(payload):
+    """POST a la URL del Web App de Apps Script para agregar fila."""
+    if not SHEETS_WEBHOOK_URL:
+        _log("  sheets: no webhook configurado")
+        return False
+    try:
+        req = urllib.request.Request(
+            SHEETS_WEBHOOK_URL,
+            headers={"Content-Type": "application/json"},
+            data=json.dumps(payload).encode(),
+            method="POST",
+        )
+        with urllib.request.urlopen(req, timeout=15) as r:
+            resp = r.read().decode()
+        _log(f"  ✓ sheets push: {resp[:100]}")
+        return True
+    except Exception as e:
+        _log(f"  ✗ sheets err: {e}")
+        return False
 
 
 # ============================================================
@@ -351,36 +377,51 @@ def handle_claims(token, state):
         emoji = TYPE_EMOJI.get(tipo, "❓")
         order_id = (cl.get("resource_sub_type") or cl.get("resource_id") or "")
 
-        # Extraer monto de la orden (para auto-decisión arrepentimiento)
-        amount = 0
+        # Extraer datos de la orden
+        amount = 0; product_title = ""; product_item = ""
         try:
             if order_id and str(order_id).isdigit():
                 c_ord, ord_data = meli("GET", f"/orders/{order_id}", token)
                 amount = float(ord_data.get("total_amount") or 0)
+                items = ord_data.get("order_items") or []
+                if items:
+                    product_title = (items[0].get("item") or {}).get("title", "")
+                    product_item = (items[0].get("item") or {}).get("id", "")
         except Exception:
-            amount = 0
+            pass
 
         # Guardar estado inicial + timestamp creación
         state["claim_states"][cid] = {
-            "type": tipo,
-            "stage": stage,
-            "reason": reason,
-            "amount": amount,
+            "type": tipo, "stage": stage, "reason": reason, "amount": amount,
+            "product_title": product_title, "product_item": product_item,
             "created_at": int(time.time()),
             "last_status": stage,
             "step": "pending_user_action",
         }
 
-        # (b) Auto-aceptar arrepentimiento con monto < $500
-        if tipo == "arrepentimiento" and 0 < amount < 500:
-            _log(f"  auto-arrepentimiento #{cid} (${amount})")
-            result = start_playbook(token, cid, tipo, state)
-            tg_send(
-                f"↩️ *Arrepentimiento auto-aceptado* — #{cid}\n\n"
-                f"Monto ${amount:.0f} (< $500 umbral) → devolución aceptada automáticamente.\n"
-                f"_{result}_"
-            )
+        # ARREPENTIMIENTO: SIEMPRE auto-aceptar sin notificar a Telegram
+        if tipo == "arrepentimiento":
+            _log(f"  auto-arrepentimiento #{cid}")
+            try:
+                start_playbook(token, cid, tipo, state)
+            except Exception as e:
+                _log(f"    err: {e}")
             continue
+
+        # DEFECTO o NO_ORIGINAL: registrar en Google Sheets
+        if tipo in ("defecto", "no_original"):
+            push_to_sheets({
+                "claim_id": cid,
+                "date": datetime.utcnow().strftime("%Y-%m-%d %H:%M"),
+                "month": datetime.utcnow().strftime("%Y-%m"),
+                "type": tipo,
+                "reason": reason,
+                "stage": stage,
+                "product_title": product_title,
+                "product_item": product_item,
+                "amount": amount,
+                "order_id": str(order_id),
+            })
 
         # Mensaje Telegram con botones
         amount_line = f"\nMonto: ${amount:.0f} MXN" if amount else ""
