@@ -182,84 +182,8 @@ ACCEPT_SOLUTION_MSG = "Acepto la solucion sugerida"
 
 
 # ============================================================
-# Reglas de preguntas (mismo del paso anterior)
+# Preguntas: DESHABILITADO — las responde Mercabot aparte
 # ============================================================
-
-RULES = [
-    {"patterns": [r"original", r"aut[eé]ntic", r"\bjbl\b.*\?", r"\bbose\b.*\?", r"\bsony\b.*\?"],
-     "reply": "Hola, gracias por tu consulta. Si, es un producto original de marca, remanufacturado y revisado por nuestro equipo tecnico. Incluye factura electronica y 12 meses de garantia directa con el vendedor. Saludos."},
-    {"patterns": [r"cu[aá]nto\s+tarda", r"cu[aá]ndo\s+llega", r"tiempo\s+de\s+env", r"d[ií]as?\s+de\s+entrega"],
-     "reply": "Hola, gracias por tu consulta. Con Mercado Envios la entrega es al dia siguiente habil en zona metropolitana y de 1 a 3 dias al resto del pais. Saludos."},
-    {"patterns": [r"\bnueva?\b", r"producto\s+nuevo", r"sin\s+uso"],
-     "reply": "Hola, gracias por tu consulta. Para transparencia: es un producto remanufacturado original, revisado y probado, con 12 meses de garantia directa con nosotros. No es nuevo de fabrica pero funciona al 100%. Saludos."},
-    {"patterns": [r"factura", r"cfdi"],
-     "reply": "Hola, gracias por tu consulta. Si, incluimos factura electronica CFDI. Al momento de compra escribenos tus datos fiscales y la emitimos en 24 horas. Saludos."},
-    {"patterns": [r"garant[ií]a"],
-     "reply": "Hola, gracias por tu consulta. La garantia es de 12 meses directa con el vendedor. Cubre defectos de funcionamiento. Saludos."},
-    {"patterns": [r"disponib", r"en\s+stock", r"tienen\s+(este|esta|en)"],
-     "reply": "Hola, gracias por tu consulta. Si, hay stock disponible. Haz tu compra y procesamos el envio en menos de 24 horas habiles. Saludos."},
-    {"patterns": [r"android", r"iphone", r"ios", r"(se\s+conecta|compatib)"],
-     "reply": "Hola, gracias por tu consulta. Si, se conecta vía Bluetooth con cualquier dispositivo (Android, iPhone, iPad, laptop Windows o Mac). Es un estandar universal. Saludos."},
-]
-
-
-def match_rule(text):
-    t = (text or "").lower()
-    for rule in RULES:
-        for p in rule["patterns"]:
-            if re.search(p, t): return rule["reply"]
-    return None
-
-
-def handle_questions(token, seller_id, state):
-    _log("Preguntas sin responder...")
-    code, data = meli("GET", f"/questions/search?seller_id={seller_id}&status=UNANSWERED&limit=50", token)
-    if code != 200:
-        _log(f"  err {code}"); return
-    qs = data.get("questions") or []
-    _log(f"  {len(qs)} pendientes")
-
-    seen = set(state.get("questions_seen", []))
-    with_reply = []   # preguntas que matchearon una regla → sugiero respuesta
-    escalated  = []   # preguntas sin match → solo aviso
-
-    for q in qs:
-        if q["id"] in seen:
-            continue
-        reply = match_rule(q.get("text"))
-        if reply:
-            with_reply.append((q, reply))
-        else:
-            escalated.append(q)
-
-    # Enviar sugerencias a Telegram — el usuario las copia/pega en MELI panel
-    # (MELI bloquea POST /answers desde apps no certificadas)
-    for q, reply in with_reply[:10]:
-        item_id = q.get("item_id","?")
-        txt = (
-            f"💬 *Pregunta nueva — respuesta sugerida*\n\n"
-            f"Item: `{item_id}`\n"
-            f"*Pregunta:*\n_{q['text'][:400]}_\n\n"
-            f"*Respuesta sugerida (matcheó regla):*\n```\n{reply}\n```\n\n"
-            f"👉 Responde en el panel: https://www.mercadolibre.com.mx/preguntas-respuestas/preguntas-sin-responder"
-        )
-        tg_send(txt)
-        seen.add(q["id"])
-        _log(f"  📩 sugerida #{q['id']}: {q['text'][:60]}")
-
-    if escalated:
-        lines = ["🔔 *Preguntas sin regla — requieren respuesta humana*\n"]
-        for q in escalated[:5]:
-            lines.append(f"• item `{q.get('item_id','?')}`")
-            lines.append(f"  _{q['text'][:180]}_\n")
-        if len(escalated) > 5: lines.append(f"_(+{len(escalated)-5} más)_")
-        lines.append("\n👉 https://www.mercadolibre.com.mx/preguntas-respuestas/preguntas-sin-responder")
-        tg_send("\n".join(lines))
-        for q in escalated:
-            seen.add(q["id"])
-        _log(f"  🔔 escaladas: {len(escalated)}")
-
-    state["questions_seen"] = list(seen)[-500:]
 
 
 # ============================================================
@@ -564,7 +488,6 @@ def main():
     _log(f"Auth: {me.get('nickname')} ({seller_id})")
 
     try:
-        handle_questions(token, seller_id, state)
         handle_claims(token, state)
         process_telegram_callbacks(token, state)
         advance_pending_playbooks(token, state)
