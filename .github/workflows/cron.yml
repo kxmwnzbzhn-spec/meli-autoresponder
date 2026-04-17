@@ -2,11 +2,11 @@ name: MELI Auto-Responder
 
 on:
   schedule:
-    - cron: '*/10 * * * *'  # cada 10 minutos (288 runs/dia, bien dentro del tier gratis)
-  workflow_dispatch:  # permite correr manualmente desde la UI de GitHub
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
 
 permissions:
-  contents: write  # necesario para commitear el token rotado
+  contents: write
 
 jobs:
   run:
@@ -28,11 +28,20 @@ jobs:
           key: meli-refresh-token
           restore-keys: meli-refresh-token
 
+      - name: Restore seen state
+        uses: actions/cache@v4
+        with:
+          path: .seen_claims.json
+          key: seen-state
+          restore-keys: seen-state
+
       - name: Run auto-responder
         env:
           MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
           MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
           MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: python meli_autoresponder.py
 
       - name: Save token cache
@@ -41,3 +50,10 @@ jobs:
         with:
           path: .meli_token.json
           key: meli-refresh-token-${{ github.run_id }}
+
+      - name: Save seen state
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: .seen_claims.json
+          key: seen-state-${{ github.run_id }}
