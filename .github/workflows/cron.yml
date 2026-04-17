@@ -1,0 +1,43 @@
+name: MELI Auto-Responder
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'  # cada 10 minutos (288 runs/dia, bien dentro del tier gratis)
+  workflow_dispatch:  # permite correr manualmente desde la UI de GitHub
+
+permissions:
+  contents: write  # necesario para commitear el token rotado
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Restore cached token
+        uses: actions/cache@v4
+        with:
+          path: .meli_token.json
+          key: meli-refresh-token
+          restore-keys: meli-refresh-token
+
+      - name: Run auto-responder
+        env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+        run: python meli_autoresponder.py
+
+      - name: Save token cache
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: .meli_token.json
+          key: meli-refresh-token-${{ github.run_id }}
