@@ -218,26 +218,48 @@ def handle_questions(token, seller_id, state):
         _log(f"  err {code}"); return
     qs = data.get("questions") or []
     _log(f"  {len(qs)} pendientes")
-    escalated = []
+
+    seen = set(state.get("questions_seen", []))
+    with_reply = []   # preguntas que matchearon una regla → sugiero respuesta
+    escalated  = []   # preguntas sin match → solo aviso
+
     for q in qs:
+        if q["id"] in seen:
+            continue
         reply = match_rule(q.get("text"))
         if reply:
-            c, r = meli("POST", "/answers", token, {"question_id": q["id"], "text": reply})
-            _log(f"  {'✓' if c in (200,201) else '✗'} resp #{q['id']}: {q['text'][:50]}")
+            with_reply.append((q, reply))
         else:
             escalated.append(q)
 
-    seen = set(state.get("questions_seen", []))
-    new_esc = [q for q in escalated if q["id"] not in seen]
-    if new_esc:
-        lines = ["🔔 *Preguntas escaladas* (no matchearon reglas)\n"]
-        for q in new_esc[:5]:
+    # Enviar sugerencias a Telegram — el usuario las copia/pega en MELI panel
+    # (MELI bloquea POST /answers desde apps no certificadas)
+    for q, reply in with_reply[:10]:
+        item_id = q.get("item_id","?")
+        txt = (
+            f"💬 *Pregunta nueva — respuesta sugerida*\n\n"
+            f"Item: `{item_id}`\n"
+            f"*Pregunta:*\n_{q['text'][:400]}_\n\n"
+            f"*Respuesta sugerida (matcheó regla):*\n```\n{reply}\n```\n\n"
+            f"👉 Responde en el panel: https://www.mercadolibre.com.mx/preguntas-respuestas/preguntas-sin-responder"
+        )
+        tg_send(txt)
+        seen.add(q["id"])
+        _log(f"  📩 sugerida #{q['id']}: {q['text'][:60]}")
+
+    if escalated:
+        lines = ["🔔 *Preguntas sin regla — requieren respuesta humana*\n"]
+        for q in escalated[:5]:
             lines.append(f"• item `{q.get('item_id','?')}`")
             lines.append(f"  _{q['text'][:180]}_\n")
-        if len(new_esc) > 5: lines.append(f"_(+{len(new_esc)-5} más)_")
-        lines.append("\n👉 https://www.mercadolibre.com.mx/myaccount/messages")
+        if len(escalated) > 5: lines.append(f"_(+{len(escalated)-5} más)_")
+        lines.append("\n👉 https://www.mercadolibre.com.mx/preguntas-respuestas/preguntas-sin-responder")
         tg_send("\n".join(lines))
-        state["questions_seen"] = list(seen | {q["id"] for q in new_esc})[-500:]
+        for q in escalated:
+            seen.add(q["id"])
+        _log(f"  🔔 escaladas: {len(escalated)}")
+
+    state["questions_seen"] = list(seen)[-500:]
 
 
 # ============================================================
