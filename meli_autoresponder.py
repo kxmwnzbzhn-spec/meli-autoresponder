@@ -338,14 +338,45 @@ def handle_claims(token, state):
         emoji = TYPE_EMOJI.get(tipo, "❓")
         order_id = (cl.get("resource_sub_type") or cl.get("resource_id") or "")
 
-        # (Ack automático al comprador DESHABILITADO — decisión del vendedor)
+        # Extraer monto de la orden (para auto-decisión arrepentimiento)
+        amount = 0
+        try:
+            if order_id and str(order_id).isdigit():
+                c_ord, ord_data = meli("GET", f"/orders/{order_id}", token)
+                amount = float(ord_data.get("total_amount") or 0)
+        except Exception:
+            amount = 0
+
+        # Guardar estado inicial + timestamp creación
+        state["claim_states"][cid] = {
+            "type": tipo,
+            "stage": stage,
+            "reason": reason,
+            "amount": amount,
+            "created_at": int(time.time()),
+            "last_status": stage,
+            "step": "pending_user_action",
+        }
+
+        # (b) Auto-aceptar arrepentimiento con monto < $500
+        if tipo == "arrepentimiento" and 0 < amount < 500:
+            _log(f"  auto-arrepentimiento #{cid} (${amount})")
+            result = start_playbook(token, cid, tipo, state)
+            tg_send(
+                f"↩️ *Arrepentimiento auto-aceptado* — #{cid}\n\n"
+                f"Monto ${amount:.0f} (< $500 umbral) → devolución aceptada automáticamente.\n"
+                f"_{result}_"
+            )
+            continue
 
         # Mensaje Telegram con botones
+        amount_line = f"\nMonto: ${amount:.0f} MXN" if amount else ""
         txt = (
             f"🚨 *Reclamo nuevo #{cid}*\n\n"
             f"{emoji} Tipo: *{tipo.upper()}*\n"
             f"Motivo MELI: `{reason}`\n"
-            f"Stage: `{stage}`\n"
+            f"Stage: `{stage}`"
+            f"{amount_line}\n"
             f"Orden: `{order_id}`\n\n"
             f"Elige acción:"
         )
@@ -364,6 +395,113 @@ def handle_claims(token, state):
         tg_send(txt, buttons)
 
     state["claims_seen"] = list(seen)[-500:]
+
+
+# ============================================================
+# (a) Tracking de status — detectar cambios de fase
+# ============================================================
+
+STATUS_LABELS = {
+    "opened": "abierto",
+    "closed": "cerrado",
+    "in_process": "en proceso",
+    "claim": "reclamo",
+    "dispute": "mediación MELI",
+    "return": "devolución en camino",
+}
+
+def track_status_changes(token, state):
+    """Revisa cada claim_state activo y avisa si cambió de status."""
+    for cid, cst in list(state.get("claim_states", {}).items()):
+        if cst.get("step") in ("completed", "stuck"):
+            continue
+        c, d = meli("GET", f"/post-purchase/v1/claims/{cid}", token)
+        if c != 200: continue
+        curr = d.get("stage") or d.get("status") or ""
+        prev = cst.get("last_status")
+        if curr and curr != prev:
+            prev_lbl = STATUS_LABELS.get(prev, prev or "?")
+            curr_lbl = STATUS_LABELS.get(curr, curr)
+            tg_send(
+                f"🔄 *Status de reclamo #{cid} cambió*\n\n"
+                f"`{prev_lbl}` → *{curr_lbl}*\n"
+                f"Tipo: {cst.get('type')}\n"
+                f"Edad: {int((time.time() - cst.get('created_at',time.time()))/3600)}hrs"
+            )
+            cst["last_status"] = curr
+
+
+# ============================================================
+# (c) Alerta de reclamos por vencerse (>20hrs sin resolver)
+# ============================================================
+
+def check_overdue_claims(state):
+    now = int(time.time())
+    for cid, cst in (state.get("claim_states") or {}).items():
+        if cst.get("step") in ("completed", "stuck"):
+            continue
+        age_hrs = (now - cst.get("created_at", now)) / 3600
+        if age_hrs < 20: continue
+        if cst.get("urgent_alerted_at"): continue  # ya alertado
+        tg_send(
+            f"🔥 *URGENTE — Reclamo #{cid}*\n\n"
+            f"Lleva {age_hrs:.1f}hrs abierto sin resolverse.\n"
+            f"A las 24hrs pierdes la protección reputacional.\n\n"
+            f"Tipo: {cst.get('type')} | Monto: ${cst.get('amount',0):.0f}\n"
+            f"Step actual: `{cst.get('step')}`\n\n"
+            f"👉 https://www.mercadolibre.com.mx/myaccount/sales/claims/{cid}"
+        )
+        cst["urgent_alerted_at"] = now
+
+
+# ============================================================
+# (d) Estadísticas semanales — resumen los lunes
+# ============================================================
+
+def send_weekly_stats_if_monday(state):
+    now = int(time.time())
+    last = state.get("last_weekly_sent", 0)
+    if now - last < 6 * 24 * 3600:  # menos de 6 días, no enviar
+        return
+    # Lunes en UTC; GitHub Actions corre en UTC
+    weekday = datetime.utcfromtimestamp(now).weekday()  # 0=lunes
+    if weekday != 0:
+        return
+
+    week_ago = now - 7 * 24 * 3600
+    claims = state.get("claim_states", {})
+    recent = [c for c in claims.values() if c.get("created_at", 0) >= week_ago]
+    completed = [c for c in recent if c.get("step") == "completed"]
+    stuck = [c for c in recent if c.get("step") == "stuck"]
+
+    # Tiempo promedio de resolución (completed con timestamp)
+    times = []
+    for c in completed:
+        if c.get("accepted_at") and c.get("created_at"):
+            times.append(c["accepted_at"] - c["created_at"])
+    avg_hrs = (sum(times) / len(times) / 3600) if times else 0
+
+    # Por tipo
+    by_type = {}
+    for c in recent:
+        t = c.get("type", "otro")
+        by_type[t] = by_type.get(t, 0) + 1
+
+    breakdown = "\n".join(f"  • {k}: {v}" for k, v in sorted(by_type.items(), key=lambda x: -x[1])) or "  (sin reclamos)"
+
+    tg_send(
+        f"📊 *Resumen semanal de reclamos*\n"
+        f"_Semana terminando {datetime.utcnow().strftime('%d %b %Y')}_\n\n"
+        f"Total reclamos: *{len(recent)}*\n"
+        f"Resueltos (completed): *{len(completed)}*\n"
+        f"Estancados (stuck): *{len(stuck)}*\n"
+        f"Tiempo promedio resolución: *{avg_hrs:.1f}hrs*\n\n"
+        f"*Desglose por tipo:*\n{breakdown}\n\n"
+        f"✅ Protección reputacional efectiva: "
+        f"{sum(1 for c in completed if c.get('type') in ('defecto','no_original'))}/"
+        f"{sum(1 for c in recent if c.get('type') in ('defecto','no_original'))}"
+    )
+    state["last_weekly_sent"] = now
 
 
 # ============================================================
@@ -497,6 +635,9 @@ def main():
         handle_claims(token, state)
         process_telegram_callbacks(token, state)
         advance_pending_playbooks(token, state)
+        track_status_changes(token, state)
+        check_overdue_claims(state)
+        send_weekly_stats_if_monday(state)
     except Exception as e:
         tg_send(f"❌ *Auto-Responder error*\n\n`{e}`")
         _log(f"main err: {e}"); save_json(STATE_FILE, state); sys.exit(1)
