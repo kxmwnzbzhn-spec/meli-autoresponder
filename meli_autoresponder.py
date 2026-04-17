@@ -116,6 +116,12 @@ def tg(method, body):
         )
         with urllib.request.urlopen(req, timeout=15) as r:
             return json.loads(r.read().decode())
+    except urllib.error.HTTPError as e:
+        try:
+            err_body = json.loads(e.read().decode())
+            return {"ok": False, "error_code": e.code, "description": err_body.get("description","")}
+        except Exception:
+            return {"ok": False, "error_code": e.code}
     except Exception as e:
         _log(f"  telegram err: {e}")
         return None
@@ -128,9 +134,16 @@ def tg_send(text, buttons=None):
 
 
 def tg_edit(chat_id, msg_id, text, buttons=None):
+    # Intentar editar con Markdown, si falla reintenta sin parse_mode, y si falla manda mensaje nuevo
     body = {"chat_id": chat_id, "message_id": msg_id, "text": text, "parse_mode": "Markdown", "disable_web_page_preview": True}
     if buttons: body["reply_markup"] = {"inline_keyboard": buttons}
-    return tg("editMessageText", body)
+    r = tg("editMessageText", body)
+    if r and r.get("ok"): return r
+    body.pop("parse_mode", None)
+    r = tg("editMessageText", body)
+    if r and r.get("ok"): return r
+    # Fallback: mensaje nuevo
+    return tg_send(text)
 
 
 def tg_answer_cb(cb_id, text):
