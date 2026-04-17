@@ -186,18 +186,20 @@ ACCEPT_SOLUTION_MSG = "Acepto la solucion sugerida"
 # ============================================================
 
 RULES = [
-    {"patterns": [r"es\s+original", r"100\s*%\s*original", r"aut[eé]ntic"],
+    {"patterns": [r"original", r"aut[eé]ntic", r"\bjbl\b.*\?", r"\bbose\b.*\?", r"\bsony\b.*\?"],
      "reply": "Hola, gracias por tu consulta. Si, es un producto original de marca, remanufacturado y revisado por nuestro equipo tecnico. Incluye factura electronica y 12 meses de garantia directa con el vendedor. Saludos."},
     {"patterns": [r"cu[aá]nto\s+tarda", r"cu[aá]ndo\s+llega", r"tiempo\s+de\s+env", r"d[ií]as?\s+de\s+entrega"],
      "reply": "Hola, gracias por tu consulta. Con Mercado Envios la entrega es al dia siguiente habil en zona metropolitana y de 1 a 3 dias al resto del pais. Saludos."},
-    {"patterns": [r"es\s+nueva?", r"esta\s+nueva?", r"producto\s+nuevo"],
-     "reply": "Hola, gracias por tu consulta. Para transparencia: es un producto remanufacturado original, revisado y probado, con 12 meses de garantia directa con nosotros. Saludos."},
+    {"patterns": [r"\bnueva?\b", r"producto\s+nuevo", r"sin\s+uso"],
+     "reply": "Hola, gracias por tu consulta. Para transparencia: es un producto remanufacturado original, revisado y probado, con 12 meses de garantia directa con nosotros. No es nuevo de fabrica pero funciona al 100%. Saludos."},
     {"patterns": [r"factura", r"cfdi"],
      "reply": "Hola, gracias por tu consulta. Si, incluimos factura electronica CFDI. Al momento de compra escribenos tus datos fiscales y la emitimos en 24 horas. Saludos."},
     {"patterns": [r"garant[ií]a"],
      "reply": "Hola, gracias por tu consulta. La garantia es de 12 meses directa con el vendedor. Cubre defectos de funcionamiento. Saludos."},
-    {"patterns": [r"disponib", r"en\s+stock", r"tienen"],
+    {"patterns": [r"disponib", r"en\s+stock", r"tienen\s+(este|esta|en)"],
      "reply": "Hola, gracias por tu consulta. Si, hay stock disponible. Haz tu compra y procesamos el envio en menos de 24 horas habiles. Saludos."},
+    {"patterns": [r"android", r"iphone", r"ios", r"(se\s+conecta|compatib)"],
+     "reply": "Hola, gracias por tu consulta. Si, se conecta vía Bluetooth con cualquier dispositivo (Android, iPhone, iPad, laptop Windows o Mac). Es un estandar universal. Saludos."},
 ]
 
 
