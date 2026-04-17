@@ -13,28 +13,20 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-
-      - name: Restore cached token
-        uses: actions/cache@v4
+      - uses: actions/cache@v4
         with:
           path: .meli_token.json
           key: meli-refresh-token
           restore-keys: meli-refresh-token
-
-      - name: Restore seen state
-        uses: actions/cache@v4
+      - uses: actions/cache@v4
         with:
           path: .seen_claims.json
           key: seen-state
           restore-keys: seen-state
-
       - name: Run auto-responder
         env:
           MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
@@ -42,17 +34,14 @@ jobs:
           MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          SHEETS_WEBHOOK_URL: ${{ secrets.SHEETS_WEBHOOK_URL }}
         run: python meli_autoresponder.py
-
-      - name: Save token cache
-        if: always()
+      - if: always()
         uses: actions/cache/save@v4
         with:
           path: .meli_token.json
           key: meli-refresh-token-${{ github.run_id }}
-
-      - name: Save seen state
-        if: always()
+      - if: always()
         uses: actions/cache/save@v4
         with:
           path: .seen_claims.json
