@@ -1,0 +1,42 @@
+name: Probe sale terms (one-shot)
+on:
+  workflow_dispatch:
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - run: pip install requests
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+        run: |
+          python3 <<'PY'
+          import os, json, requests
+          tk = requests.post("https://api.mercadolibre.com/oauth/token",
+              data={"grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],
+                    "client_secret":os.environ["MELI_APP_SECRET"],
+                    "refresh_token":os.environ["MELI_REFRESH_TOKEN"]}).json()
+          AT = tk["access_token"]
+          H = {"Authorization": f"Bearer {AT}"}
+
+          # Sale terms permitidos en MLM59800
+          r = requests.get("https://api.mercadolibre.com/categories/MLM59800/sale_terms", headers=H)
+          print(f"[cat sale_terms] status={r.status_code}")
+          data = r.json()
+          if isinstance(data, list):
+              for st in data:
+                  print(f"  - {st.get('id')}: {st.get('name')} | type={st.get('value_type')} | values={[v.get('name') for v in (st.get('values') or [])][:5]}")
+          else:
+              print(json.dumps(data, indent=2)[:2000])
+
+          # También categoría general attrs
+          print()
+          r2 = requests.get("https://api.mercadolibre.com/categories/MLM59800/attributes", headers=H)
+          if r2.status_code == 200:
+              attrs = r2.json()
+              # filtrar por si hay attribute tipo "maximum purchase"
+              for a in attrs:
+                  if "MAX" in a.get("id","") or "purchase" in a.get("id","").lower() or "compra" in a.get("name","").lower():
+                      print(f"  attr {a.get('id')}: {a.get('name')}")
+          PY
