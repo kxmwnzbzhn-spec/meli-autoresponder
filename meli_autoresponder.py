@@ -1133,8 +1133,9 @@ def check_and_replenish_stock(token, state):
 
             if status == "closed" and sold > 0:
                 # Item cerrado con venta -> relistar (crea ID nuevo)
+                ltype = it.get("listing_type_id") or "gold_pro"
                 rcode, rresp = meli("POST", f"/items/{item_id}/relist", token,
-                                    body={"quantity": qty})
+                                    body={"quantity": qty, "listing_type_id": ltype})
                 if rcode >= 400:
                     _log(f"  {item_id}: relist err {rcode} {rresp}")
                     tg_send(f"⚠️ *Auto-replenish falló*\n\n"
