@@ -2,7 +2,7 @@ name: MELI Auto-Responder
 
 on:
   schedule:
-    - cron: '*/10 * * * *'
+    - cron: '*/5 * * * *'
   workflow_dispatch:
 
 permissions:
@@ -27,7 +27,7 @@ jobs:
           path: .seen_claims.json
           key: seen-state
           restore-keys: seen-state
-      - name: Run auto-responder
+      - name: Run auto-responder loop (30s polling, 4 min)
         env:
           MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
           MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
@@ -36,7 +36,21 @@ jobs:
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           TELEGRAM_RETURNS_BOT_TOKEN: ${{ secrets.TELEGRAM_RETURNS_BOT_TOKEN }}
           SHEETS_WEBHOOK_URL: ${{ secrets.SHEETS_WEBHOOK_URL }}
-        run: python meli_autoresponder.py
+        run: |
+          END=$(( $(date +%s) + 240 ))
+          iter=0
+          while [ $(date +%s) -lt $END ]; do
+            iter=$((iter+1))
+            echo "--- iter $iter $(date -u +%H:%M:%S) ---"
+            python meli_autoresponder.py || echo "iter failed (non-fatal)"
+            # no dormir en la última iteración
+            if [ $(( $(date +%s) + 35 )) -lt $END ]; then
+              sleep 30
+            else
+              break
+            fi
+          done
+          echo "total iteraciones: $iter"
       - name: Commit stock_config.json if changed
         if: always()
         run: |
