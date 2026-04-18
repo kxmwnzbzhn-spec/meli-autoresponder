@@ -1,0 +1,71 @@
+name: Ads status check (read-only)
+on:
+  workflow_dispatch:
+    inputs:
+      item_id:
+        required: true
+        type: string
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    steps:
+      - run: pip install requests
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+          ITEM_ID: ${{ inputs.item_id }}
+        run: |
+          python3 <<'PY'
+          import os, json, requests
+          tk = requests.post("https://api.mercadolibre.com/oauth/token",
+              data={"grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],
+                    "client_secret":os.environ["MELI_APP_SECRET"],
+                    "refresh_token":os.environ["MELI_REFRESH_TOKEN"]}).json()
+          AT = tk["access_token"]
+          H = {"Authorization": f"Bearer {AT}"}
+          item_id = os.environ["ITEM_ID"]
+
+          me = requests.get("https://api.mercadolibre.com/users/me", headers=H).json()
+          sid = me["id"]
+
+          print("=== ADVERTISERS (Product Ads access) ===")
+          adv = requests.get(
+              "https://api.mercadolibre.com/advertising/advertisers",
+              params={"product_id":"PADS"},
+              headers={**H, "api-version":"1"}).json()
+          print(json.dumps(adv, indent=2)[:2000])
+
+          print("\n=== ITEM en Product Ads (si existe) ===")
+          # intentar varios endpoints de product ads
+          endpoints = [
+              f"https://api.mercadolibre.com/advertising/product_ads/items/{item_id}",
+              f"https://api.mercadolibre.com/advertising/product_ads/v1/items/{item_id}",
+              f"https://api.mercadolibre.com/advertising/product_ads/items?item_id={item_id}",
+          ]
+          for ep in endpoints:
+              r = requests.get(ep, headers={**H, "api-version":"2"})
+              print(f"\n  GET {ep}")
+              print(f"  status={r.status_code}")
+              try:
+                  print(f"  body: {json.dumps(r.json(), indent=2)[:1200]}")
+              except:
+                  print(f"  text: {r.text[:400]}")
+
+          print("\n=== CAMPAIGNS (product ads) ===")
+          c = requests.get(
+              "https://api.mercadolibre.com/advertising/product_ads/campaigns",
+              headers={**H, "api-version":"2"}).json()
+          print(json.dumps(c, indent=2)[:1500])
+
+          # Sugerencia de bid
+          print("\n=== BID SUGERIDO para item ===")
+          rb = requests.get(
+              f"https://api.mercadolibre.com/advertising/product_ads/items/{item_id}/recommendations/bid",
+              headers={**H, "api-version":"2"})
+          print(f"status={rb.status_code}")
+          try:
+              print(json.dumps(rb.json(), indent=2)[:1500])
+          except:
+              print(rb.text[:400])
+          PY
