@@ -393,34 +393,36 @@ def send_claim_message(token, claim_id, text, attachment_ids=None):
 
 
 def start_return_playbook(token, cid, claim, state):
-    """Al detectar claim de devolución: registrar y mandar alerta con deep-link."""
+    """Al detectar claim de devolución: registrar y mandar alerta al BOT DE DEVOLUCIONES."""
     rs = state.setdefault("return_states", {})
     if cid in rs and rs[cid].get("step") not in ("cancelled",):
         return  # ya iniciado
     buyer_id = (claim.get("players") or [{}])[0].get("user_id")
     resource_id = claim.get("resource_id") or claim.get("resource", {}).get("id")
-    order_id = claim.get("resource_id") if claim.get("resource") == "order" else None
     rs[cid] = {
         "claim_id": cid,
         "step": "awaiting_arrival",
         "buyer_id": buyer_id,
         "resource_id": resource_id,
-        "attachments": [],      # [{telegram_file_id, kind, meli_attachment_id}]
-        "ret_chat_id": None,    # set when user /starts return bot
+        "attachments": [],
+        "ret_chat_id": TG_CHAT,   # por default el mismo chat privado
         "active": False,
         "created_at": int(time.time()),
         "deadline_at": int(time.time()) + 48*3600,
     }
-    deep = f"https://t.me/{RETURNS_BOT_USERNAME}?start={cid}"
-    tg_send(
+    # Alerta directa al bot de devoluciones (todo el flujo vive ahi)
+    msg = (
         f"🚨 *DEVOLUCION ABIERTA*\n\n"
         f"Claim: `{cid}`\n"
         f"Comprador: `{buyer_id}`\n"
         f"Motivo: `{claim.get('reason_id','')}`\n"
         f"Deadline MELI: 48 h\n\n"
-        f"Cuando llegue el paquete, toca el boton para subir evidencia:",
-        buttons=[[{"text":"📦 Iniciar protocolo anti-fraude","url":deep}]]
+        f"Cuando llegue el paquete de vuelta, toca el boton:"
     )
+    tg_ret_send(TG_CHAT, msg, buttons=[
+        [{"text":"📦 Ya llego el paquete", "callback_data": f"ret_arrived|{cid}"}],
+        [{"text":"⏳ Aun no llega", "callback_data": f"ret_snooze|{cid}"}],
+    ])
     _log(f"Return playbook started for {cid}")
 
 
@@ -535,7 +537,26 @@ def _handle_return_update(token, u, state):
         if not rs:
             tg_ret_answer_cb(cb_id, "Claim no encontrado"); return
 
-        if action == "ret_fraud":
+        if action == "ret_arrived":
+            tg_ret_answer_cb(cb_id, "Protocolo activado")
+            rs["active"] = True
+            rs["ret_chat_id"] = chat_id
+            rs["step"] = "collecting"
+            tg_ret_send(chat_id,
+                f"🛡️ *Protocolo anti-fraude ACTIVO*\n\n"
+                f"Claim: `{cid}`\n\n"
+                f"Mandame AQUI todo lo que tengas:\n"
+                f"• Foto del paquete cerrado (folio/cinta intactos)\n"
+                f"• Foto del peso en bascula\n"
+                f"• Video continuo de apertura (sin cortes)\n"
+                f"• Fotos del contenido\n\n"
+                f"Cuando termines, usa los botones que te apareceran."
+            )
+        elif action == "ret_snooze":
+            tg_ret_answer_cb(cb_id, "Ok, te recuerdo en 12h")
+            rs["snooze_until"] = int(time.time()) + 12*3600
+            tg_ret_send(chat_id, f"⏰ Snooze activado para `{cid}`. Te vuelvo a preguntar en 12 h.")
+        elif action == "ret_fraud":
             tg_ret_answer_cb(cb_id, "Subiendo evidencia a MELI...")
             _return_submit_fraud(token, cid, rs, state)
         elif action == "ret_ok":
