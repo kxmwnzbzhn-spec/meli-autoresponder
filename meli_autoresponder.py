@@ -1105,12 +1105,12 @@ def _save_stock_config(cfg):
         return False
 
 def check_and_replenish_stock(token, state):
+    """Detecta items cerrados por venta y los relista desde inventario fisico."""
     cfg = _load_stock_config()
-    if not cfg:
-        return
-    items = [(k, v) for k, v in cfg.items() if not k.startswith("_") and isinstance(v, dict) and v.get("auto_replenish")]
-    if not items:
-        return
+    if not cfg: return
+    items = [(k, v) for k, v in cfg.items()
+             if not k.startswith("_") and isinstance(v, dict) and v.get("auto_replenish")]
+    if not items: return
     _log(f"Auto-replenish: revisando {len(items)} items")
     changed = False
     for item_id, meta in items:
@@ -1120,38 +1120,69 @@ def check_and_replenish_stock(token, state):
                 _log(f"  {item_id}: GET err {code}"); continue
             stock_meli = it.get("available_quantity", 0)
             status = it.get("status", "")
+            sold = it.get("sold_quantity", 0)
+            # Si esta activo con stock, dejarlo en paz
             if stock_meli > 0 and status == "active":
-                continue  # no hacer nada
-            # Item cerrado o sin stock: reponer si queda inventario real
+                continue
             real = int(meta.get("real_stock", 0))
             if real <= 0:
-                _log(f"  {item_id}: sin stock real, dejo closed")
+                _log(f"  {item_id}: sin inventario real, dejo closed")
                 continue
             qty = int(meta.get("replenish_quantity", 1))
             qty = min(qty, real)
-            # Reactivar + poner stock
-            body = {"available_quantity": qty}
-            code2, r2 = meli("PUT", f"/items/{item_id}", token, body=body)
-            if code2 >= 400:
-                _log(f"  {item_id}: PUT stock err {code2} {r2}")
-                continue
-            if status != "active":
-                code3, r3 = meli("PUT", f"/items/{item_id}", token, body={"status":"active"})
-                if code3 >= 400:
-                    _log(f"  {item_id}: reactivate err {code3} {r3}")
-            meta["real_stock"] = real - qty
-            cfg[item_id] = meta
-            changed = True
-            sold_qty = it.get("sold_quantity", 0)
-            _log(f"  {item_id}: repuesto +{qty} (quedan {meta['real_stock']} reales, vendido total {sold_qty})")
-            tg_send(
-                f"🔁 *Reposicion automatica*\n\n"
-                f"📦 {meta.get('label', item_id)}\n"
-                f"🆔 `{item_id}`\n"
-                f"Stock MELI: {qty}\n"
-                f"Inventario real restante: {meta['real_stock']}\n"
-                f"Vendidas total: {sold_qty}"
-            )
+
+            if status == "closed" and sold > 0:
+                # Item cerrado con venta -> relistar (crea ID nuevo)
+                rcode, rresp = meli("POST", f"/items/{item_id}/relist", token,
+                                    body={"quantity": qty})
+                if rcode >= 400:
+                    _log(f"  {item_id}: relist err {rcode} {rresp}")
+                    tg_send(f"⚠️ *Auto-replenish falló*\n\n"
+                            f"Item `{item_id}` cerrado por venta pero no se pudo relistar.\n"
+                            f"Error: `{rresp.get('message','')}`")
+                    continue
+                new_id = rresp.get("id")
+                new_link = rresp.get("permalink")
+                if not new_id:
+                    _log(f"  {item_id}: relist sin new_id: {rresp}")
+                    continue
+                # Migrar entrada en stock_config: borrar viejo, crear nuevo con real-qty
+                new_meta = dict(meta)
+                new_meta["real_stock"] = real - qty
+                new_meta["previous_ids"] = (meta.get("previous_ids") or []) + [item_id]
+                cfg[new_id] = new_meta
+                cfg.pop(item_id, None)
+                changed = True
+                sold_before = sold
+                _log(f"  {item_id} → {new_id}: relist OK qty={qty}, real restante={new_meta['real_stock']}")
+                tg_send(
+                    f"🔁 *Reposicion automatica (relist)*\n\n"
+                    f"📦 {meta.get('label', item_id)}\n"
+                    f"Antiguo: `{item_id}` (vendido, cerrado)\n"
+                    f"Nuevo: `{new_id}`\n"
+                    f"Stock MELI: {qty}\n"
+                    f"Inventario real restante: {new_meta['real_stock']}\n"
+                    f"Ventas totales historicas: {sold_before}\n"
+                    f"🔗 {new_link}"
+                )
+            else:
+                # Item closed sin ventas, o paused: intentar reactivar con PUT
+                body = {"available_quantity": qty, "status": "active"}
+                pcode, presp = meli("PUT", f"/items/{item_id}", token, body=body)
+                if pcode >= 400:
+                    _log(f"  {item_id}: reactivate err {pcode} {presp}")
+                    tg_send(f"⚠️ Auto-replenish: no pude reactivar `{item_id}`: {presp.get('message','')}")
+                    continue
+                meta["real_stock"] = real - qty
+                changed = True
+                _log(f"  {item_id}: reactivado qty={qty}, real restante={meta['real_stock']}")
+                tg_send(
+                    f"🔁 *Reposicion automatica (reactivar)*\n\n"
+                    f"📦 {meta.get('label', item_id)}\n"
+                    f"🆔 `{item_id}`\n"
+                    f"Stock MELI: {qty}\n"
+                    f"Inventario real restante: {meta['real_stock']}"
+                )
         except Exception as e:
             _log(f"  {item_id} auto-replenish err: {e}")
     if changed:
