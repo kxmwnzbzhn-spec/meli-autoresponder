@@ -278,8 +278,6 @@ def tg_ret(method, body, files=None):
     try:
         if files:
             # multipart
-            import urllib.request
-            import mimetypes
             boundary = "----sonixmxretunbnd" + str(int(time.time()))
             data = b""
             for k, v in body.items():
@@ -353,7 +351,6 @@ def tg_ret_download_file(file_id):
 
 def upload_claim_attachment(token, claim_id, file_bytes, filename, mime_type="application/octet-stream"):
     """Sube archivo a MELI claim via POST /v1/claims/{claim_id}/attachments."""
-    import urllib.request, urllib.error
     boundary = "----sonixmxclmbnd" + str(int(time.time()))
     data = b""
     data += f"--{boundary}\r\n".encode()
