@@ -1,0 +1,10 @@
+{
+  "_comment": "Stock real inventario físico. El bot decrementa aquí cada vez que repone el item en MELI.",
+  "MLM2872698375": {
+    "real_stock": 19,
+    "sku": "JBL-GO4-NGR-001",
+    "label": "JBL Go 4 Negro Usado - $300",
+    "auto_replenish": true,
+    "replenish_quantity": 1
+  }
+}
