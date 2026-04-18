@@ -30,6 +30,8 @@ STATE_FILE = ".seen_claims.json"
 
 TG_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
 TG_CHAT = os.environ.get("TELEGRAM_CHAT_ID")
+TG_RET_TOKEN = os.environ.get("TELEGRAM_RETURNS_BOT_TOKEN", "")
+RETURNS_BOT_USERNAME = "Sonixmx_devoluciones_bot"
 SHEETS_WEBHOOK_URL = os.environ.get("SHEETS_WEBHOOK_URL")  # Apps Script Web App URL
 
 
@@ -245,6 +247,417 @@ def claim_get_messages(token, cid):
 def claim_get_details(token, cid):
     c, d = meli("GET", f"/post-purchase/v1/claims/{cid}", token)
     return d
+
+
+
+
+# ============================================================
+# RETURNS PROTECTION — bot dedicado de devoluciones
+# ============================================================
+
+RETURN_REASONS = {
+    # Reasons que indican devolución entrante sospechosa
+    "product_not_as_described",
+    "return_by_product_not_as_described",
+    "product_defective",
+    "return_product_defective",
+    "return_change_of_mind",
+    "product_is_not_original",
+    "product_is_defective",
+    "return_by_change_of_mind",
+    "item_arrived_broken",
+    "not_delivered",
+    "wrong_product_received",
+}
+
+
+def tg_ret(method, body, files=None):
+    """Telegram Bot API al bot de DEVOLUCIONES."""
+    if not TG_RET_TOKEN:
+        return None
+    try:
+        if files:
+            # multipart
+            import urllib.request
+            import mimetypes
+            boundary = "----sonixmxretunbnd" + str(int(time.time()))
+            data = b""
+            for k, v in body.items():
+                data += f"--{boundary}\r\n".encode()
+                data += f'Content-Disposition: form-data; name="{k}"\r\n\r\n'.encode()
+                data += str(v).encode() + b"\r\n"
+            for fname, (content, mime) in files.items():
+                data += f"--{boundary}\r\n".encode()
+                data += f'Content-Disposition: form-data; name="{fname}"; filename="{fname}"\r\n'.encode()
+                data += f'Content-Type: {mime}\r\n\r\n'.encode()
+                data += content + b"\r\n"
+            data += f"--{boundary}--\r\n".encode()
+            req = urllib.request.Request(
+                f"https://api.telegram.org/bot{TG_RET_TOKEN}/{method}",
+                data=data,
+                headers={"Content-Type": f"multipart/form-data; boundary={boundary}"},
+                method="POST",
+            )
+        else:
+            req = urllib.request.Request(
+                f"https://api.telegram.org/bot{TG_RET_TOKEN}/{method}",
+                headers={"Content-Type": "application/json"},
+                data=json.dumps(body).encode(), method="POST",
+            )
+        with urllib.request.urlopen(req, timeout=30) as r:
+            return json.loads(r.read().decode())
+    except urllib.error.HTTPError as e:
+        try:
+            return {"ok": False, "error_code": e.code, "description": json.loads(e.read().decode()).get("description","")}
+        except Exception:
+            return {"ok": False, "error_code": e.code}
+    except Exception as e:
+        _log(f"  tg_ret err: {e}")
+        return None
+
+
+def tg_ret_send(chat_id, text, buttons=None, reply_to=None):
+    body = {"chat_id": chat_id, "text": text, "parse_mode": "Markdown", "disable_web_page_preview": True}
+    if buttons: body["reply_markup"] = {"inline_keyboard": buttons}
+    if reply_to: body["reply_to_message_id"] = reply_to
+    return tg_ret("sendMessage", body)
+
+
+def tg_ret_answer_cb(cb_id, text):
+    return tg_ret("answerCallbackQuery", {"callback_query_id": cb_id, "text": text[:200]})
+
+
+def tg_ret_get_file_url(file_id):
+    """Obtener la URL temporal para descargar un archivo de Telegram."""
+    r = tg_ret("getFile", {"file_id": file_id})
+    if not r or not r.get("ok"):
+        return None
+    path = r.get("result", {}).get("file_path")
+    if not path:
+        return None
+    return f"https://api.telegram.org/file/bot{TG_RET_TOKEN}/{path}"
+
+
+def tg_ret_download_file(file_id):
+    """Descarga bytes de un archivo de Telegram via file_id."""
+    url = tg_ret_get_file_url(file_id)
+    if not url: return None, None
+    try:
+        req = urllib.request.Request(url)
+        with urllib.request.urlopen(req, timeout=60) as r:
+            return r.read(), url.split("/")[-1]
+    except Exception as e:
+        _log(f"  tg_ret_download err: {e}")
+        return None, None
+
+
+def upload_claim_attachment(token, claim_id, file_bytes, filename, mime_type="application/octet-stream"):
+    """Sube archivo a MELI claim via POST /v1/claims/{claim_id}/attachments."""
+    import urllib.request, urllib.error
+    boundary = "----sonixmxclmbnd" + str(int(time.time()))
+    data = b""
+    data += f"--{boundary}\r\n".encode()
+    data += f'Content-Disposition: form-data; name="file"; filename="{filename}"\r\n'.encode()
+    data += f'Content-Type: {mime_type}\r\n\r\n'.encode()
+    data += file_bytes + b"\r\n"
+    data += f"--{boundary}--\r\n".encode()
+    req = urllib.request.Request(
+        f"https://api.mercadolibre.com/v1/claims/{claim_id}/attachments",
+        data=data,
+        headers={
+            "Authorization": f"Bearer {token}",
+            "Content-Type": f"multipart/form-data; boundary={boundary}",
+        },
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=60) as r:
+            return r.status, json.loads(r.read().decode() or "{}")
+    except urllib.error.HTTPError as e:
+        try:
+            return e.code, json.loads(e.read().decode())
+        except Exception:
+            return e.code, {}
+
+
+def send_claim_message(token, claim_id, text, attachment_ids=None):
+    """Envía mensaje formal al mediador del claim con adjuntos."""
+    body = {
+        "receiver_role": "respondent",
+        "message": text,
+    }
+    if attachment_ids:
+        body["attachments"] = attachment_ids
+    code, resp = meli("POST", f"/v1/claims/{claim_id}/messages", token, body=body)
+    return code, resp
+
+
+def start_return_playbook(token, cid, claim, state):
+    """Al detectar claim de devolución: registrar y mandar alerta con deep-link."""
+    rs = state.setdefault("return_states", {})
+    if cid in rs and rs[cid].get("step") not in ("cancelled",):
+        return  # ya iniciado
+    buyer_id = (claim.get("players") or [{}])[0].get("user_id")
+    resource_id = claim.get("resource_id") or claim.get("resource", {}).get("id")
+    order_id = claim.get("resource_id") if claim.get("resource") == "order" else None
+    rs[cid] = {
+        "claim_id": cid,
+        "step": "awaiting_arrival",
+        "buyer_id": buyer_id,
+        "resource_id": resource_id,
+        "attachments": [],      # [{telegram_file_id, kind, meli_attachment_id}]
+        "ret_chat_id": None,    # set when user /starts return bot
+        "active": False,
+        "created_at": int(time.time()),
+        "deadline_at": int(time.time()) + 48*3600,
+    }
+    deep = f"https://t.me/{RETURNS_BOT_USERNAME}?start={cid}"
+    tg_send(
+        f"🚨 *DEVOLUCION ABIERTA*\n\n"
+        f"Claim: `{cid}`\n"
+        f"Comprador: `{buyer_id}`\n"
+        f"Motivo: `{claim.get('reason_id','')}`\n"
+        f"Deadline MELI: 48 h\n\n"
+        f"Cuando llegue el paquete, toca el boton para subir evidencia:",
+        buttons=[[{"text":"📦 Iniciar protocolo anti-fraude","url":deep}]]
+    )
+    _log(f"Return playbook started for {cid}")
+
+
+def process_returns_bot(token, state):
+    """Loop del bot de devoluciones: lee getUpdates, procesa /start, media, callbacks."""
+    if not TG_RET_TOKEN:
+        return
+    rs = state.setdefault("return_states", {})
+    if not rs:
+        return  # nada que hacer
+    offset = state.get("returns_offset", 0)
+    try:
+        upd = tg_ret("getUpdates", {"offset": offset+1, "timeout": 0, "limit": 50})
+    except Exception as e:
+        _log(f"  returns getUpdates err: {e}"); return
+    if not upd or not upd.get("ok"):
+        return
+    updates = upd.get("result", [])
+    if not updates:
+        return
+    last_id = offset
+    for u in updates:
+        last_id = max(last_id, u.get("update_id", offset))
+        try:
+            _handle_return_update(token, u, state)
+        except Exception as e:
+            _log(f"  return update err: {e}")
+    state["returns_offset"] = last_id
+
+
+def _active_return_for_chat(state, chat_id):
+    """Devuelve (cid, rs_entry) del claim activo en ese chat, o (None, None)."""
+    for cid, rs in (state.get("return_states") or {}).items():
+        if rs.get("active") and rs.get("ret_chat_id") == chat_id and rs.get("step") == "collecting":
+            return cid, rs
+    return None, None
+
+
+def _handle_return_update(token, u, state):
+    # Caso 1: mensaje (texto, foto, video, documento)
+    msg = u.get("message") or u.get("edited_message")
+    if msg:
+        chat_id = msg.get("chat", {}).get("id")
+        txt = msg.get("text", "") or ""
+        # /start con deep-link
+        if txt.startswith("/start"):
+            parts = txt.split(maxsplit=1)
+            payload = parts[1] if len(parts) > 1 else ""
+            return _return_start(chat_id, payload, state)
+        if txt.strip().lower() in ("/cancel","cancelar","salir"):
+            return _return_cancel(chat_id, state)
+        # /status
+        if txt.startswith("/status"):
+            cid, rs = _active_return_for_chat(state, chat_id)
+            if rs:
+                tg_ret_send(chat_id, f"Claim `{cid}` — paso `{rs.get('step')}` — evidencias recibidas: {len(rs.get('attachments',[]))}")
+            else:
+                tg_ret_send(chat_id, "No hay protocolo activo. Toca el boton de \"Iniciar protocolo\" desde el bot principal.")
+            return
+        # Multimedia: asociar al claim activo del chat
+        media_file_id = None; mime = "application/octet-stream"; kind = "unknown"
+        if msg.get("photo"):
+            media_file_id = msg["photo"][-1]["file_id"]
+            mime = "image/jpeg"; kind = "photo"
+        elif msg.get("video"):
+            media_file_id = msg["video"]["file_id"]
+            mime = msg["video"].get("mime_type","video/mp4"); kind = "video"
+        elif msg.get("document"):
+            media_file_id = msg["document"]["file_id"]
+            mime = msg["document"].get("mime_type","application/octet-stream")
+            kind = "document"
+        elif msg.get("video_note"):
+            media_file_id = msg["video_note"]["file_id"]
+            mime = "video/mp4"; kind = "video_note"
+        if media_file_id:
+            cid, rs = _active_return_for_chat(state, chat_id)
+            if not rs:
+                tg_ret_send(chat_id, "No hay protocolo activo. Vuelve al bot principal y toca \"Iniciar protocolo anti-fraude\".")
+                return
+            rs["attachments"].append({"telegram_file_id": media_file_id, "kind": kind, "mime": mime,
+                                      "msg_id": msg.get("message_id"), "ts": int(time.time())})
+            n = len(rs["attachments"])
+            # Responder con feedback + botones finales
+            tg_ret_send(chat_id,
+                f"✅ Evidencia #{n} recibida ({kind}).\n\n"
+                "Manda todas las fotos/videos que tengas. Cuando termines, toca una opcion:",
+                buttons=[
+                    [{"text":"🚨 Es FRAUDE — abrir reclamo", "callback_data": f"ret_fraud|{cid}"}],
+                    [{"text":"✔️ Esta correcto — aceptar devolucion", "callback_data": f"ret_ok|{cid}"}],
+                    [{"text":"❌ Cancelar protocolo", "callback_data": f"ret_cancel|{cid}"}],
+                ])
+            return
+        # mensaje de texto sin saber qué hacer
+        if txt:
+            cid, rs = _active_return_for_chat(state, chat_id)
+            if rs:
+                tg_ret_send(chat_id, "Te escucho. Mandame fotos/videos del paquete y contenido. Cuando termines, usa los botones.")
+            else:
+                tg_ret_send(chat_id, "Hola. Inicia el protocolo desde el boton \"Iniciar protocolo anti-fraude\" del bot principal.")
+        return
+
+    # Caso 2: callback de botones
+    cb = u.get("callback_query")
+    if cb:
+        data = cb.get("data","") or ""
+        chat_id = cb.get("message",{}).get("chat",{}).get("id")
+        cb_id = cb.get("id")
+        if "|" not in data:
+            tg_ret_answer_cb(cb_id, "accion invalida"); return
+        action, cid = data.split("|", 1)
+        rs = state.get("return_states",{}).get(cid)
+        if not rs:
+            tg_ret_answer_cb(cb_id, "Claim no encontrado"); return
+
+        if action == "ret_fraud":
+            tg_ret_answer_cb(cb_id, "Subiendo evidencia a MELI...")
+            _return_submit_fraud(token, cid, rs, state)
+        elif action == "ret_ok":
+            tg_ret_answer_cb(cb_id, "Marcando como correcto...")
+            _return_accept(token, cid, rs, state)
+        elif action == "ret_cancel":
+            tg_ret_answer_cb(cb_id, "Protocolo cancelado")
+            rs["active"] = False; rs["step"] = "cancelled"
+            tg_ret_send(chat_id, f"Protocolo cancelado para `{cid}`. Puedes reiniciar cuando quieras.")
+        return
+
+
+def _return_start(chat_id, payload, state):
+    """/start CLM_XXX desde Telegram → activar modo captura."""
+    cid = payload.strip()
+    if not cid:
+        tg_ret_send(chat_id, "👋 Bot de devoluciones anti-fraude.\n\nCuando abras el protocolo desde el bot principal, serás dirigido aquí con un deep-link. Luego mándame las fotos/videos del paquete.")
+        return
+    rs = state.get("return_states",{}).get(cid)
+    if not rs:
+        tg_ret_send(chat_id, f"No tengo registro del claim `{cid}`. Verifica que el claim siga abierto.")
+        return
+    # activar captura
+    rs["active"] = True
+    rs["ret_chat_id"] = chat_id
+    rs["step"] = "collecting"
+    tg_ret_send(chat_id,
+        f"🛡️ *Protocolo anti-fraude activo*\n\n"
+        f"Claim: `{cid}`\n"
+        f"Motivo: devolución entrante\n\n"
+        f"Ahora mandame AQUI todo lo que tengas:\n"
+        f"• Foto del paquete cerrado (folio/cinta intactos)\n"
+        f"• Foto del peso en bascula\n"
+        f"• Video continuo de apertura (sin cortes)\n"
+        f"• Fotos del contenido\n\n"
+        f"Cuando termines, usa los botones que te iran apareciendo para enviar a MELI."
+    )
+
+
+def _return_cancel(chat_id, state):
+    for cid, rs in (state.get("return_states") or {}).items():
+        if rs.get("ret_chat_id") == chat_id and rs.get("active"):
+            rs["active"] = False; rs["step"] = "cancelled"
+            tg_ret_send(chat_id, f"Cancelado `{cid}`.")
+            return
+    tg_ret_send(chat_id, "No habia protocolo activo.")
+
+
+def _return_submit_fraud(token, cid, rs, state):
+    """Descargar media de Telegram, subir a MELI claim, mandar mensaje formal."""
+    chat_id = rs.get("ret_chat_id")
+    atts = rs.get("attachments", [])
+    if not atts:
+        tg_ret_send(chat_id, "No hay evidencia registrada. Manda al menos una foto o video.")
+        return
+    tg_ret_send(chat_id, f"⏳ Subiendo {len(atts)} archivos a MELI... esto puede tardar 1-2 min.")
+    uploaded_ids = []
+    failed = 0
+    for i, a in enumerate(atts):
+        content, _ = tg_ret_download_file(a["telegram_file_id"])
+        if not content:
+            failed += 1; continue
+        ext = ".jpg" if a["kind"]=="photo" else (".mp4" if a["kind"] in ("video","video_note") else ".bin")
+        fname = f"evidencia_{cid}_{i+1}{ext}"
+        code, resp = upload_claim_attachment(token, cid, content, fname, a.get("mime","application/octet-stream"))
+        if code >= 400:
+            _log(f"  upload_attachment err {code}: {resp}")
+            failed += 1; continue
+        att_id = resp.get("id") or resp.get("attachment_id")
+        if att_id:
+            a["meli_attachment_id"] = att_id
+            uploaded_ids.append(att_id)
+        else:
+            _log(f"  attachment sin id: {resp}")
+            failed += 1
+    if not uploaded_ids:
+        tg_ret_send(chat_id, f"❌ No pude subir evidencia a MELI ({failed} fallaron). Revisa el log; quizas el endpoint cambió. Te reporto para que lo escales manualmente.")
+        tg_send(f"⚠️ *Fallo upload evidencia* claim `{cid}` — {failed} archivos fallaron. Escalamiento manual requerido.")
+        return
+    # Mensaje formal al mediador
+    formal = (
+        "Buenas tardes. Al recibir el paquete de devolución del presente reclamo, "
+        "documenté íntegramente el estado del mismo conforme al protocolo de custodia y recepción. "
+        "Anexo a este mensaje evidencia audiovisual — fotografías y video continuo de la apertura — "
+        "que acreditan que el contenido recibido NO corresponde al producto originalmente despachado al comprador. "
+        "Con base en lo anterior, solicito respetuosamente a Mercado Libre que se pronuncie a mi favor "
+        "en este reclamo y que, en su caso, se retenga el reembolso al comprador hasta concluir la mediación. "
+        "Permanezco atento a sus observaciones y quedo a disposición para aportar cualquier evidencia adicional."
+    )
+    code_m, resp_m = send_claim_message(token, cid, formal, uploaded_ids)
+    _log(f"  claim message status={code_m}")
+    rs["step"] = "submitted"
+    rs["active"] = False
+    rs["submitted_at"] = int(time.time())
+    tg_ret_send(chat_id,
+        f"✅ *Reclamo enviado a MELI*\n\n"
+        f"Archivos subidos: {len(uploaded_ids)}\n"
+        f"Fallos: {failed}\n"
+        f"Mensaje al mediador: `{code_m}`\n\n"
+        f"Ahora esperamos respuesta de MELI. Te avisare cualquier cambio en el claim."
+    )
+    tg_send(f"🛡️ *Evidencia enviada* para claim `{cid}` — {len(uploaded_ids)} archivos + mensaje formal.")
+    # Agregar a blocklist al buyer
+    _blocklist_add(state, rs.get("buyer_id"), cid, reason="empty_box_or_swap")
+
+
+def _return_accept(token, cid, rs, state):
+    chat_id = rs.get("ret_chat_id")
+    rs["step"] = "accepted"
+    rs["active"] = False
+    tg_ret_send(chat_id, f"✔️ Devolución de `{cid}` aceptada. Sin accion adicional.")
+    tg_send(f"✔️ Devolución aceptada para `{cid}` (contenido correcto).")
+
+
+def _blocklist_add(state, buyer_id, cid, reason):
+    if not buyer_id: return
+    bl = state.setdefault("buyer_blocklist", {})
+    e = bl.setdefault(str(buyer_id), {"events": [], "risk": "NONE"})
+    e["events"].append({"ts": int(time.time()), "claim": cid, "reason": reason})
+    if len([x for x in e["events"] if x["reason"] in ("empty_box_or_swap",)]) >= 1:
+        e["risk"] = "CRITICAL"
+    _log(f"  blocklist buyer {buyer_id} risk={e['risk']}")
 
 
 # ============================================================
@@ -746,6 +1159,33 @@ def advance_pending_playbooks(token, state):
             _log(f"  playbook #{cid} err: {e}")
 
 
+
+
+def check_returns(token, state):
+    """Escanea claims recientes con reason de devolucion y dispara el playbook."""
+    seller_id = state.get("seller_id")
+    if not seller_id:
+        code, me = meli("GET", "/users/me", token)
+        if code == 200:
+            seller_id = me.get("id")
+            state["seller_id"] = seller_id
+    if not seller_id:
+        return
+    code, resp = meli("GET", f"/post-purchase/v1/claims/search?stage=dispute&limit=20&offset=0", token)
+    if code != 200:
+        return
+    seen = state.setdefault("seen_returns", {})
+    for claim in (resp.get("data") or []):
+        cid = str(claim.get("id"))
+        reason = claim.get("reason_id","")
+        if reason not in RETURN_REASONS:
+            continue
+        if cid in seen:
+            continue
+        seen[cid] = int(time.time())
+        start_return_playbook(token, cid, claim, state)
+
+
 # ============================================================
 # Main
 # ============================================================
@@ -769,6 +1209,8 @@ def main():
         process_telegram_callbacks(token, state)
         advance_pending_playbooks(token, state)
         check_and_replenish_stock(token, state)
+        check_returns(token, state)
+        process_returns_bot(token, state)
         track_status_changes(token, state)
         check_overdue_claims(state)
         send_weekly_stats_if_monday(state)
