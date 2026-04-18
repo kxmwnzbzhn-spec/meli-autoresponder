@@ -12,6 +12,9 @@ jobs:
         with:
           python-version: '3.11'
 
+      - name: Install deps
+        run: pip install requests
+
       - name: Restore cached token
         uses: actions/cache@v4
         with:
@@ -28,7 +31,7 @@ jobs:
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: |
           python3 <<'PY'
-          import os, json, time, requests, base64, sys
+          import os, json, time, requests, sys
 
           APP_ID = os.environ["MELI_APP_ID"]
           APP_SECRET = os.environ["MELI_APP_SECRET"]
@@ -36,7 +39,6 @@ jobs:
           TG_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN","")
           TG_CHAT = os.environ.get("TELEGRAM_CHAT_ID","")
 
-          # === Refresh token ===
           tcache = None
           try:
               with open(".meli_token.json") as f:
@@ -51,6 +53,8 @@ jobs:
                   headers={"Accept":"application/json","Content-Type":"application/x-www-form-urlencoded"},
                   data={"grant_type":"refresh_token","client_id":APP_ID,"client_secret":APP_SECRET,"refresh_token":RT})
               d = r.json()
+              if "access_token" not in d:
+                  print("REFRESH_FAILED:", d); sys.exit(1)
               AT = d["access_token"]
               print(f"[token] refreshed, user_id={d.get('user_id')}")
               with open(".meli_token.json","w") as f:
@@ -58,22 +62,21 @@ jobs:
 
           H = {"Authorization": f"Bearer {AT}", "Accept":"application/json"}
 
-          # === Verificar cuenta ===
           me = requests.get("https://api.mercadolibre.com/users/me", headers=H).json()
           print(f"[account] {me.get('nickname')} id={me.get('id')} status={me.get('status',{}).get('site_status')}")
-          sid = me["id"]
 
-          # === Predecir category ===
+          # Predict category
           title = "JBL Go 4 Bocina Bluetooth Portatil Negra Original Usada"
-          rp = requests.get(f"https://api.mercadolibre.com/sites/MLM/domain_discovery/search?q={requests.utils.quote(title)}", headers=H).json()
+          rp = requests.get("https://api.mercadolibre.com/sites/MLM/domain_discovery/search",
+              params={"q": title}, headers=H).json()
           if isinstance(rp, list) and len(rp) > 0:
               cat_id = rp[0].get("category_id")
-              print(f"[category] predicted {cat_id} {rp[0].get('category_name')}")
+              print(f"[category] predicted {cat_id} domain={rp[0].get('domain_id')}")
           else:
               cat_id = "MLM1183"
-              print(f"[category] fallback MLM1183 - Bocinas Portátiles")
+              print(f"[category] fallback MLM1183")
 
-          # === Upload 6 imágenes desde assets/go4_negro_001/ ===
+          # Upload 6 imagenes
           pic_ids = []
           for i in range(1,7):
               path = f"assets/go4_negro_001/img_{i}.jpg"
@@ -82,17 +85,16 @@ jobs:
                   rr = requests.post("https://api.mercadolibre.com/pictures/items/upload",
                       headers={"Authorization": f"Bearer {AT}"}, files=files)
               if rr.status_code >= 400:
-                  print(f"[pic] img_{i} ERROR {rr.status_code}: {rr.text[:200]}")
+                  print(f"[pic] img_{i} ERROR {rr.status_code}: {rr.text[:300]}")
                   sys.exit(1)
               pid = rr.json().get("id")
               pic_ids.append({"id": pid})
               print(f"[pic] img_{i}.jpg → {pid}")
 
-          # === Construir payload del item ===
           desc = (
-              "Bocina JBL Go 4 color negro en excelente estado, probada y funcionando al 100%. "
-              "Sonido potente y claro, conexion Bluetooth estable, bateria en buen estado. "
-              "Producto original JBL. Se entrega solo la bocina sin caja original ni accesorios extra. "
+              "Bocina JBL Go 4 color negro en excelente estado, probada y funcionando al 100 por ciento. "
+              "Sonido potente y claro, conexion Bluetooth estable y bateria en buen estado. "
+              "Producto original JBL. Se entrega solo la bocina, sin caja original ni accesorios extra. "
               "Ideal para uso diario, oficina o viajes. Envio seguro con Mercado Envios."
           )
 
@@ -106,14 +108,16 @@ jobs:
               "listing_type_id": "gold_special",
               "condition": "used",
               "pictures": pic_ids,
-              "description": {"plain_text": desc},
               "attributes": [
                   {"id":"BRAND","value_name":"JBL"},
                   {"id":"MODEL","value_name":"Go 4"},
                   {"id":"COLOR","value_name":"Negro"},
                   {"id":"LINE","value_name":"Go"},
                   {"id":"ITEM_CONDITION","value_name":"Usado"},
-                  {"id":"GTIN","value_name":""}
+                  {"id":"PACKAGE_LENGTH","value_name":"15 cm"},
+                  {"id":"PACKAGE_WIDTH","value_name":"10 cm"},
+                  {"id":"PACKAGE_HEIGHT","value_name":"8 cm"},
+                  {"id":"PACKAGE_WEIGHT","value_name":"300 g"}
               ],
               "sale_terms": [
                   {"id":"WARRANTY_TYPE","value_name":"Garantía del vendedor"},
@@ -132,29 +136,29 @@ jobs:
           print(f"[item] status={r.status_code}")
           resp = r.json()
           if r.status_code >= 400:
-              print(json.dumps(resp, indent=2, ensure_ascii=False)[:2000])
+              print(json.dumps(resp, indent=2, ensure_ascii=False)[:3000])
               sys.exit(1)
 
           item_id = resp.get("id")
           permalink = resp.get("permalink")
-          print(f"[item] ✓ id={item_id}")
+          print(f"[item] OK id={item_id}")
           print(f"[item] permalink={permalink}")
-          print(f"[item] description en /items/{item_id}/description")
 
-          # Set description via PUT
           dr = requests.put(f"https://api.mercadolibre.com/items/{item_id}/description",
               headers={"Authorization": f"Bearer {AT}","Content-Type":"application/json"},
               json={"plain_text": desc})
           print(f"[desc] status={dr.status_code}")
 
-          # Notificar en Telegram
           if TG_TOKEN and TG_CHAT:
-              msg = f"✅ *JBL Go 4 Negro* publicada en cuenta nueva\n\n📦 {title}\n💰 $300 usado\n🆔 `{item_id}`\n🔗 {permalink}"
+              msg = (f"✅ *PRIMERA PUBLICACION cuenta nueva*\n\n"
+                     f"📦 {title}\n💰 $300 usado\n🆔 `{item_id}`\n🔗 {permalink}\n\n"
+                     f"Cuenta: {me.get('nickname')} (id {me.get('id')})")
               requests.post(f"https://api.telegram.org/bot{TG_TOKEN}/sendMessage",
-                  json={"chat_id": TG_CHAT, "text": msg, "parse_mode":"Markdown", "disable_web_page_preview": False})
+                  json={"chat_id": TG_CHAT, "text": msg, "parse_mode":"Markdown",
+                        "disable_web_page_preview": False})
               print("[tg] notified")
 
-          print("\n==PUBLISH_OK==")
+          print("==PUBLISH_OK==")
           print(f"==ITEM_ID={item_id}==")
           print(f"==PERMALINK={permalink}==")
           PY
