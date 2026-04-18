@@ -1,8 +1,8 @@
 name: MELI Auto-Responder
 
 on:
-  schedule:
-    - cron: '*/10 * * * *'
+  # schedule:
+  #   - cron: '*/10 * * * *'  # PAUSED durante migracion de credenciales
   workflow_dispatch:
 
 permissions:
