@@ -1,0 +1,67 @@
+name: Simulate return test (one-shot)
+on:
+  workflow_dispatch:
+jobs:
+  sim:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: actions/cache@v4
+        with:
+          path: .meli_token.json
+          key: meli-refresh-token
+          restore-keys: meli-refresh-token
+      - uses: actions/cache@v4
+        with:
+          path: .seen_claims.json
+          key: seen-state
+          restore-keys: seen-state
+      - name: Inject fake claim + send alert
+        env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          TELEGRAM_RETURNS_BOT_TOKEN: ${{ secrets.TELEGRAM_RETURNS_BOT_TOKEN }}
+        run: |
+          python3 <<'PY'
+          import sys
+          sys.path.insert(0, ".")
+          # Import funcs del bot (sin correr main)
+          import importlib.util
+          spec = importlib.util.spec_from_file_location("bot", "meli_autoresponder.py")
+          bot = importlib.util.module_from_spec(spec)
+          # Evitar que main() arranque
+          import meli_autoresponder as M  # fallback si el spec tiene problemas
+          
+          state = M.load_state()
+          state.setdefault("return_states", {})
+
+          # Fake claim
+          fake_cid = "TEST-DEV-001"
+          fake_claim = {
+              "id": fake_cid,
+              "reason_id": "product_not_as_described",
+              "players": [{"user_id": 999999999, "role": "complainant"}],
+              "resource_id": "9999999999",
+          }
+
+          # Dispara alerta y registro
+          M.start_return_playbook(M.refresh_access_token() if False else "FAKE_TOKEN_FOR_SIM", fake_cid, fake_claim, state)
+          M.save_json(M.STATE_FILE, state)
+
+          print("=== RETURN STATE after inject ===")
+          print(state.get("return_states"))
+          PY
+      - if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: .seen_claims.json
+          key: seen-state-${{ github.run_id }}
