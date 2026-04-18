@@ -1,0 +1,80 @@
+name: Check item health v2 (one-shot)
+on:
+  workflow_dispatch:
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    steps:
+      - run: pip install requests
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+        run: |
+          python3 <<'PY'
+          import os, json, requests
+          tk = requests.post("https://api.mercadolibre.com/oauth/token",
+              data={"grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],
+                    "client_secret":os.environ["MELI_APP_SECRET"],
+                    "refresh_token":os.environ["MELI_REFRESH_TOKEN"]}).json()
+          AT = tk["access_token"]
+          H = {"Authorization": f"Bearer {AT}"}
+          item_id = "MLM5206968736"
+
+          it = requests.get(f"https://api.mercadolibre.com/items/{item_id}", headers=H).json()
+          print("=== ITEM ===")
+          print(f"  id: {it.get('id')}")
+          print(f"  title: {it.get('title')}")
+          print(f"  status: {it.get('status')}  sub: {it.get('sub_status')}")
+          print(f"  price: ${it.get('price')} {it.get('currency_id')}")
+          print(f"  condition: {it.get('condition')}")
+          print(f"  stock: {it.get('available_quantity')}  vendidas: {it.get('sold_quantity')}")
+          print(f"  listing: {it.get('listing_type_id')}")
+          print(f"  categoria: {it.get('category_id')} domain: {it.get('domain_id')}")
+          print(f"  permalink: {it.get('permalink')}")
+          print(f"  creado: {it.get('date_created','')[:19]}")
+          print(f"  actualizado: {it.get('last_updated','')[:19]}")
+          print(f"  health: {it.get('health')}")
+          print(f"  tags: {it.get('tags')}")
+          print(f"  fotos: {len(it.get('pictures',[]))}")
+          filled = sum(1 for a in it.get('attributes',[]) if a.get('value_name') or a.get('value_struct'))
+          print(f"  atributos llenos: {filled}/{len(it.get('attributes',[]))}")
+
+          # Visitas por dia
+          v = requests.get(f"https://api.mercadolibre.com/items/visits/time_window",
+              params={"ids": item_id, "last": 7, "unit": "day"}, headers=H).json()
+          if isinstance(v, list) and v:
+              print(f"\n=== VISITAS 7 dias ===")
+              print(f"  total: {v[0].get('total_visits',0)}")
+              for r in v[0].get('results',[]):
+                  print(f"   {r.get('date','')[:10]}: {r.get('total',0)}")
+
+          # Preguntas
+          q = requests.get("https://api.mercadolibre.com/questions/search",
+              params={"item": item_id, "limit": 20}, headers=H).json()
+          print(f"\n=== PREGUNTAS: total={q.get('total', len(q.get('questions',[])))} ===")
+          for ques in q.get('questions',[])[:5]:
+              print(f"  [{ques.get('status','')}] {ques.get('date_created','')[:19]}")
+              print(f"    Q: {(ques.get('text') or '')[:100]}")
+              ans = (ques.get('answer') or {}).get('text','')
+              if ans: print(f"    A: {ans[:100]}")
+
+          # Órdenes recientes relacionadas
+          me = requests.get("https://api.mercadolibre.com/users/me", headers=H).json()
+          sid = me["id"]
+          ord_r = requests.get(f"https://api.mercadolibre.com/orders/search",
+              params={"seller": sid, "sort":"date_desc", "limit": 20}, headers=H).json()
+          print(f"\n=== ORDENES (total seller={ord_r.get('paging',{}).get('total',0)}) ===")
+          for o in ord_r.get("results",[])[:5]:
+              items = [(oi.get('item') or {}).get('id') for oi in o.get('order_items',[])]
+              pay = [p.get('status') for p in o.get('payments',[])]
+              ship_id = (o.get('shipping') or {}).get('id')
+              print(f"  order={o.get('id')} status={o.get('status')} pay={pay} ship={ship_id} items={items} ${o.get('total_amount')} {o.get('date_created','')[:19]}")
+
+          # Reviews
+          try:
+              rv = requests.get(f"https://api.mercadolibre.com/reviews/item/{item_id}", headers=H).json()
+              if isinstance(rv, dict):
+                  print(f"\n=== REVIEWS: rating={rv.get('rating_average',0)} total={rv.get('paging',{}).get('total',0)} ===")
+          except Exception: pass
+          PY
