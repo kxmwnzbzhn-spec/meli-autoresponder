@@ -1,0 +1,126 @@
+name: Relist with max-1 + stock20 (one-shot)
+on:
+  workflow_dispatch:
+    inputs:
+      old_item_id:
+        required: true
+        type: string
+      stock:
+        required: true
+        type: string
+      max_per_buy:
+        required: true
+        type: string
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    steps:
+      - run: pip install requests
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          OLD_ID: ${{ inputs.old_item_id }}
+          STOCK: ${{ inputs.stock }}
+          MAXB: ${{ inputs.max_per_buy }}
+        run: |
+          python3 <<'PY'
+          import os, json, requests, sys
+
+          tk = requests.post("https://api.mercadolibre.com/oauth/token",
+              data={"grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],
+                    "client_secret":os.environ["MELI_APP_SECRET"],
+                    "refresh_token":os.environ["MELI_REFRESH_TOKEN"]}).json()
+          AT = tk["access_token"]
+          H = {"Authorization": f"Bearer {AT}", "Content-Type":"application/json"}
+
+          old_id = os.environ["OLD_ID"]
+          stock = int(os.environ["STOCK"])
+          maxb = int(os.environ["MAXB"])
+
+          # 1. Leer item actual completo (pictures, atributos, etc)
+          cur = requests.get(f"https://api.mercadolibre.com/items/{old_id}", headers=H).json()
+          pictures = [{"id": p["id"]} for p in cur.get("pictures", [])]
+          print(f"[source] {old_id} pics={len(pictures)} cat={cur.get('category_id')} cond={cur.get('condition')}")
+
+          # 2. Nueva descripción
+          new_desc = (
+              "Bocina JBL Go 4 color negro en perfecto estado, practicamente sin uso: "
+              "solo se abrio y se uso una vez. Se entrega con su caja original y todos los accesorios originales. "
+              "Producto 100 por ciento original JBL. Sonido potente y claro, conexion Bluetooth estable, "
+              "bateria en excelente estado. Envio seguro con Mercado Envios. "
+              "Compra limitada a 1 unidad por transaccion."
+          )
+
+          # 3. Crear item nuevo
+          new_item = {
+              "title": cur["title"],
+              "category_id": cur["category_id"],
+              "price": cur["price"],
+              "currency_id": cur["currency_id"],
+              "available_quantity": stock,
+              "buying_mode": "buy_it_now",
+              "listing_type_id": cur.get("listing_type_id", "gold_special"),
+              "condition": cur["condition"],
+              "pictures": pictures,
+              "attributes": [
+                  {"id": a["id"], "value_name": a.get("value_name")}
+                  for a in cur.get("attributes", [])
+                  if a.get("value_name") and a["id"] in
+                     ("BRAND","MODEL","COLOR","LINE","ITEM_CONDITION",
+                      "PACKAGE_LENGTH","PACKAGE_WIDTH","PACKAGE_HEIGHT","PACKAGE_WEIGHT")
+              ],
+              "sale_terms": [
+                  {"id":"WARRANTY_TYPE","value_name":"Garantía del vendedor"},
+                  {"id":"WARRANTY_TIME","value_name":"7 días"},
+                  {"id":"PURCHASE_MAX_QUANTITY","value_name": str(maxb)},
+              ],
+              "shipping": {
+                  "mode": "me2",
+                  "local_pick_up": False,
+                  "free_shipping": False
+              }
+          }
+
+          r = requests.post("https://api.mercadolibre.com/items", headers=H, json=new_item)
+          print(f"[create] status={r.status_code}")
+          resp = r.json()
+          if r.status_code >= 400:
+              print(json.dumps(resp, indent=2, ensure_ascii=False)[:3000])
+              sys.exit(1)
+
+          new_id = resp["id"]
+          new_link = resp.get("permalink")
+          print(f"[create] new_id={new_id}")
+          print(f"[create] permalink={new_link}")
+          print(f"[create] sale_terms={[(t['id'],t.get('value_name')) for t in resp.get('sale_terms',[])]}")
+
+          # 4. Descripción
+          dr = requests.put(f"https://api.mercadolibre.com/items/{new_id}/description", headers=H,
+              json={"plain_text": new_desc})
+          print(f"[desc] status={dr.status_code}")
+
+          # 5. Cerrar el viejo
+          cr = requests.put(f"https://api.mercadolibre.com/items/{old_id}", headers=H,
+              json={"status":"closed"})
+          print(f"[close_old] status={cr.status_code}")
+
+          # 6. Notify Telegram
+          tg_t = os.environ.get("TELEGRAM_BOT_TOKEN")
+          tg_c = os.environ.get("TELEGRAM_CHAT_ID")
+          if tg_t and tg_c:
+              msg = (f"🔁 *Relist JBL Go 4 Negro*\n\n"
+                     f"Viejo: `{old_id}` (closed)\n"
+                     f"Nuevo: `{new_id}`\n"
+                     f"Stock: {stock}  |  Max por compra: {maxb}\n"
+                     f"🔗 {new_link}")
+              requests.post(f"https://api.telegram.org/bot{tg_t}/sendMessage",
+                  json={"chat_id": tg_c, "text": msg, "parse_mode":"Markdown"})
+              print("[tg] notified")
+
+          print("\n==RELIST_OK==")
+          print(f"==NEW_ID={new_id}==")
+          print(f"==PERMALINK={new_link}==")
+          PY
