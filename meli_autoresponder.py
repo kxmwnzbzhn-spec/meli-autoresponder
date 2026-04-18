@@ -648,6 +648,85 @@ def process_telegram_callbacks(token, state):
         tg_answer_cb(cb["id"], result[:200])
 
 
+
+# ============================================================
+# Auto-replenish stock (stock_config.json)
+# ============================================================
+
+STOCK_CONFIG_FILE = "stock_config.json"
+
+def _load_stock_config():
+    try:
+        with open(STOCK_CONFIG_FILE) as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+def _save_stock_config(cfg):
+    # commit en el repo via git (lo hace el step posterior del workflow);
+    # aqui solo escribimos el archivo
+    try:
+        with open(STOCK_CONFIG_FILE, "w") as f:
+            json.dump(cfg, f, indent=2, ensure_ascii=False)
+        return True
+    except Exception as e:
+        _log(f"  _save_stock_config err: {e}")
+        return False
+
+def check_and_replenish_stock(token, state):
+    cfg = _load_stock_config()
+    if not cfg:
+        return
+    items = [(k, v) for k, v in cfg.items() if not k.startswith("_") and isinstance(v, dict) and v.get("auto_replenish")]
+    if not items:
+        return
+    _log(f"Auto-replenish: revisando {len(items)} items")
+    changed = False
+    for item_id, meta in items:
+        try:
+            code, it = meli("GET", f"/items/{item_id}", token)
+            if code != 200:
+                _log(f"  {item_id}: GET err {code}"); continue
+            stock_meli = it.get("available_quantity", 0)
+            status = it.get("status", "")
+            if stock_meli > 0 and status == "active":
+                continue  # no hacer nada
+            # Item cerrado o sin stock: reponer si queda inventario real
+            real = int(meta.get("real_stock", 0))
+            if real <= 0:
+                _log(f"  {item_id}: sin stock real, dejo closed")
+                continue
+            qty = int(meta.get("replenish_quantity", 1))
+            qty = min(qty, real)
+            # Reactivar + poner stock
+            body = {"available_quantity": qty}
+            code2, r2 = meli("PUT", f"/items/{item_id}", token, body=body)
+            if code2 >= 400:
+                _log(f"  {item_id}: PUT stock err {code2} {r2}")
+                continue
+            if status != "active":
+                code3, r3 = meli("PUT", f"/items/{item_id}", token, body={"status":"active"})
+                if code3 >= 400:
+                    _log(f"  {item_id}: reactivate err {code3} {r3}")
+            meta["real_stock"] = real - qty
+            cfg[item_id] = meta
+            changed = True
+            sold_qty = it.get("sold_quantity", 0)
+            _log(f"  {item_id}: repuesto +{qty} (quedan {meta['real_stock']} reales, vendido total {sold_qty})")
+            tg_send(
+                f"🔁 *Reposicion automatica*\n\n"
+                f"📦 {meta.get('label', item_id)}\n"
+                f"🆔 `{item_id}`\n"
+                f"Stock MELI: {qty}\n"
+                f"Inventario real restante: {meta['real_stock']}\n"
+                f"Vendidas total: {sold_qty}"
+            )
+        except Exception as e:
+            _log(f"  {item_id} auto-replenish err: {e}")
+    if changed:
+        _save_stock_config(cfg)
+        state["_stock_config_dirty"] = True
+
 # ============================================================
 # Avanzar playbooks pendientes (state machine)
 # ============================================================
@@ -689,6 +768,7 @@ def main():
         handle_claims(token, state)
         process_telegram_callbacks(token, state)
         advance_pending_playbooks(token, state)
+        check_and_replenish_stock(token, state)
         track_status_changes(token, state)
         check_overdue_claims(state)
         send_weekly_stats_if_monday(state)
