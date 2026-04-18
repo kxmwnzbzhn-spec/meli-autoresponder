@@ -1,0 +1,34 @@
+name: Pause item (one-shot)
+on:
+  workflow_dispatch:
+    inputs:
+      item_id:
+        required: true
+        type: string
+jobs:
+  pause:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install deps
+        run: pip install requests
+      - name: Pause
+        env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+          ITEM_ID: ${{ inputs.item_id }}
+        run: |
+          python3 <<'PY'
+          import os, json, requests, sys
+          r = requests.post("https://api.mercadolibre.com/oauth/token",
+              data={"grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],
+                    "client_secret":os.environ["MELI_APP_SECRET"],
+                    "refresh_token":os.environ["MELI_REFRESH_TOKEN"]}).json()
+          AT = r["access_token"]
+          item_id = os.environ["ITEM_ID"]
+          rr = requests.put(f"https://api.mercadolibre.com/items/{item_id}",
+              headers={"Authorization": f"Bearer {AT}", "Content-Type":"application/json"},
+              json={"status": "paused"})
+          print(f"status={rr.status_code}")
+          print(json.dumps(rr.json(), indent=2)[:800])
+          PY
