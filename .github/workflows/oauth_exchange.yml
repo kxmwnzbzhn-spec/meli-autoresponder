@@ -1,0 +1,34 @@
+name: OAuth Exchange (temporal)
+
+on:
+  workflow_dispatch:
+    inputs:
+      code:
+        description: 'Authorization code de MELI'
+        required: true
+        type: string
+
+jobs:
+  exchange:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Exchange code for refresh_token
+        env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          CODE: ${{ inputs.code }}
+        run: |
+          RESP=$(curl -s -X POST https://api.mercadolibre.com/oauth/token \
+            -H "Accept: application/json" \
+            -H "Content-Type: application/x-www-form-urlencoded" \
+            -d "grant_type=authorization_code&client_id=${MELI_APP_ID}&client_secret=${MELI_APP_SECRET}&code=${CODE}&redirect_uri=https://oauth.pstmn.io/v1/callback")
+          echo "RAW_RESPONSE=$RESP"
+          REFRESH=$(echo "$RESP" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('refresh_token',''))")
+          ACCESS=$(echo "$RESP" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('access_token',''))")
+          USER_ID=$(echo "$RESP" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('user_id',''))")
+          if [ -z "$REFRESH" ]; then echo "ERROR_NO_REFRESH_TOKEN"; exit 1; fi
+          # Imprimir en formato fácil de parsear
+          echo "==OAUTH_REFRESH_TOKEN=${REFRESH}=="
+          echo "==OAUTH_USER_ID=${USER_ID}=="
+          # Access token lo dejamos fuera del log (vive solo 6 hrs)
+          echo "access_token length: ${#ACCESS}"
