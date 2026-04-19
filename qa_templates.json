@@ -1,22 +1,22 @@
 {
-  "_comment": "Auto-respuestas para preguntas frecuentes. Match por palabras clave (lowercase, sin acentos). Primer match gana.",
+  "_comment": "Auto-respuestas FAQ. Primer match gana. Reglas principales: NO Auracast, NO app compatible, SI es original.",
   "_mode": "auto",
   "signature": "\n\nQuedamos a sus ordenes. Saludos cordiales.",
   "templates": [
     {
-      "id": "app_jbl",
-      "match": ["jbl portable", "aplicacion jbl", "aplicación jbl", "app jbl", "con la app", "la aplicacion", "la aplicación"],
-      "response": "Buenas tardes. Agradecemos su interes. Este modelo no es compatible con la aplicacion JBL Portable ni con ninguna app de JBL; su operacion es directa por Bluetooth sin requerir configuracion adicional."
+      "id": "auracast",
+      "match": ["auracast", "autocast", "aura cast", "conecta con otra bocina", "conectar dos bocinas", "bocinas en pareja", "varias bocinas", "party boost", "partyboost"],
+      "response": "Buenas tardes. Este modelo NO es compatible con la tecnologia Auracast; no permite vincularse con otras bocinas para reproduccion simultanea. Su operacion es Bluetooth estandar, un dispositivo a la vez."
     },
     {
-      "id": "auracast",
-      "match": ["auracast", "autocast", "conecta con otra bocina", "conectar dos bocinas", "bocinas en pareja", "varias bocinas"],
-      "response": "Buenas tardes. La JBL Go 4 cuenta con tecnologia Auracast via Bluetooth 5.3, lo que permite vincularla con otras bocinas JBL compatibles para reproduccion simultanea."
+      "id": "app_jbl",
+      "match": ["jbl portable", "aplicacion jbl", "aplicación jbl", "app jbl", "con la app", "la aplicacion", "la aplicación", "compatible con app", "compatible con la app"],
+      "response": "Buenas tardes. Este modelo NO es compatible con la aplicacion JBL Portable ni con ninguna app de JBL. Su operacion es directa por Bluetooth sin requerir configuracion adicional."
     },
     {
       "id": "original",
-      "match": ["es original", "son originales", "es autentica", "auténtica", "genuina", "no es replica", "no es réplica", "clon", "imitacion", "imitación"],
-      "response": "Buenas tardes. El producto es 100% original JBL, con su empaque y accesorios de fabrica. Puede verificar los sellos y codigo de serie al recibirlo."
+      "match": ["es original", "son originales", "es autentica", "auténtica", "genuina", "no es replica", "no es réplica", "clon", "imitacion", "imitación", "oficial", "nueva o usada"],
+      "response": "Buenas tardes. SI, el producto es 100% original JBL. Tome en cuenta que este modelo no es compatible con la aplicacion JBL Portable ni con Auracast; su operacion es Bluetooth estandar."
     },
     {
       "id": "garantia",
