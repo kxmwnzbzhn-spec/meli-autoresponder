@@ -1,0 +1,68 @@
+name: Block buyer (one-shot)
+on:
+  workflow_dispatch:
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    steps:
+      - run: pip install requests
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+        run: |
+          python3 <<'PY'
+          import os, json, requests
+          tk = requests.post("https://api.mercadolibre.com/oauth/token",
+              data={"grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],
+                    "client_secret":os.environ["MELI_APP_SECRET"],
+                    "refresh_token":os.environ["MELI_REFRESH_TOKEN"]}).json()
+          AT = tk["access_token"]
+          H = {"Authorization": f"Bearer {AT}", "Content-Type":"application/json"}
+          BUYER = 1928752871
+          SID = 2681696373
+
+          # Probar varios endpoints de blacklist
+          attempts = [
+              ("POST", "/users/me/blacklist", {"user_id": BUYER}),
+              ("POST", f"/users/{SID}/blacklist", {"user_id": BUYER}),
+              ("POST", f"/users/{SID}/blacklist/{BUYER}", {}),
+              ("POST", f"/users/blacklist/{BUYER}", {}),
+              ("POST", f"/marketplace/users/{SID}/blacklist", {"user_id": BUYER}),
+              ("POST", f"/restrictions/users/{BUYER}", {}),
+              ("POST", f"/myml/buyers/blocked", {"user_id": BUYER}),
+              ("POST", f"/users/{SID}/buyers/{BUYER}/block", {}),
+              ("PUT",  f"/users/{SID}/blacklist/{BUYER}", {}),
+          ]
+          for method, ep, body in attempts:
+              r = requests.request(method, f"https://api.mercadolibre.com{ep}",
+                  headers=H, json=body if body else None)
+              print(f"{method} {ep} → {r.status_code}")
+              try:
+                  txt = json.dumps(r.json())[:200]
+              except:
+                  txt = r.text[:200]
+              if r.status_code < 400:
+                  print(f"  ✓ ÉXITO: {txt}")
+              elif r.status_code in (401, 403):
+                  print(f"  ! {txt}")
+              else:
+                  print(f"  {txt}")
+              print()
+
+          # Responder la pregunta pendiente tambien (para no dejarla colgada aunque la bloqueemos)
+          print("\n=== Respondiendo pregunta pendiente ===")
+          qid = 13566565490
+          answer = (
+              "Buenas tardes. Su inquietud es valida, sin embargo le confirmamos "
+              "que esta bocina JBL Go 4 es 100% original. Este modelo en particular "
+              "no es compatible con la aplicacion JBL Portable ni con Auracast; su "
+              "operacion es Bluetooth estandar. Puede verificarlo en las "
+              "especificaciones oficiales de JBL. Agradecemos su interes."
+          )
+          r = requests.post("https://api.mercadolibre.com/answers",
+              headers=H, json={"question_id": qid, "text": answer})
+          print(f"answer status={r.status_code}")
+          try: print(json.dumps(r.json())[:500])
+          except: print(r.text[:300])
+          PY
