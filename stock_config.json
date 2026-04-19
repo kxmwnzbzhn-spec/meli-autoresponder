@@ -27,15 +27,6 @@
     "previous_ids": [],
     "seo_title": "Bocina Bluetooth JBL Go 3 Portatil Negra Original Usada"
   },
-  "MLM5209619958": {
-    "real_stock": 50,
-    "sku": "JBL-CHG6-NGR-001",
-    "label": "JBL Charge 6 Negro Usado - $499",
-    "auto_replenish": true,
-    "replenish_quantity": 1,
-    "previous_ids": [],
-    "seo_title": "Bocina Bluetooth JBL Charge 6 Portatil Negra Original Usada"
-  },
   "MLM2874596165": {
     "real_stock": 50,
     "sku": "JBL-CHG6-RED-001",
@@ -115,17 +106,6 @@
     ],
     "seo_title": "Bocina BT JBL Charge 6 Portatil Camuflaje Original Usada"
   },
-  "MLM5212320712": {
-    "real_stock": 49,
-    "sku": "JBL-GO4-AZMAR-001",
-    "label": "JBL Go 4 Azul Marino Usado - $299",
-    "auto_replenish": true,
-    "replenish_quantity": 1,
-    "previous_ids": [
-      "MLM2874595277"
-    ],
-    "seo_title": "Bocina BT JBL Go 4 Portatil Azul Marino Original Usada"
-  },
   "MLM5212679188": {
     "real_stock": 48,
     "sku": "JBL-GO4-CAMO-001",
@@ -138,15 +118,39 @@
     ],
     "seo_title": "Bocina Bluetooth JBL Go 4 Portatil Camuflaje Original Usada"
   },
-  "MLM5212803236": {
+  "MLM5212880744": {
+    "real_stock": 43,
+    "sku": "JBL-CHG6-NGR-001",
+    "label": "JBL Charge 6 Negro Usado - $499",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "previous_ids": [
+      "MLM5209619958"
+    ],
+    "seo_title": "Bocina Bluetooth JBL Charge 6 Portatil Negra Original Usada"
+  },
+  "MLM2875891653": {
     "real_stock": 48,
+    "sku": "JBL-GO4-AZMAR-001",
+    "label": "JBL Go 4 Azul Marino Usado - $299",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "previous_ids": [
+      "MLM2874595277",
+      "MLM5212320712"
+    ],
+    "seo_title": "Bocina BT JBL Go 4 Portatil Azul Marino Original Usada"
+  },
+  "MLM5212880764": {
+    "real_stock": 47,
     "sku": "JBL-FLIP7-NGR-001",
     "label": "JBL Flip 7 Negra Usada - $399",
     "auto_replenish": true,
     "replenish_quantity": 1,
     "previous_ids": [
       "MLM5209620060",
-      "MLM5212628500"
+      "MLM5212628500",
+      "MLM5212803236"
     ],
     "seo_title": "Bocina Bluetooth JBL Flip 7 Portatil Negra Original Usada"
   }
