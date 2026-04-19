@@ -1286,11 +1286,28 @@ def handle_questions(token, state):
     seen_q = state.setdefault("seen_questions", {})
     _log(f"Q&A: {len(questions)} preguntas sin responder")
     sig = cfg.get("signature", "")
+    blocklist = state.get("buyer_blocklist", {}) or {}
     for qu in questions:
         qid = str(qu.get("id"))
         item_id = qu.get("item_id")
         qtext = qu.get("text","") or ""
+        buyer_id = str((qu.get("from") or {}).get("id",""))
         if qid in seen_q:
+            continue
+        # Blocklist: si el comprador está en blocklist, NO responder automatico
+        bl_entry = blocklist.get(buyer_id)
+        if bl_entry and bl_entry.get("risk") not in (None, "NONE"):
+            seen_q[qid] = {"answered": False, "template": None, "ts": int(time.time()),
+                           "skipped_reason": "buyer_blocklisted"}
+            tg_send(
+                f"🚨 *PREGUNTA DE COMPRADOR EN BLOCKLIST*\n\n"
+                f"Item: `{item_id}`\n"
+                f"Comprador: `{buyer_id}` — risk `{bl_entry.get('risk')}`\n"
+                f"Motivo: `{(bl_entry.get('events') or [{}])[-1].get('reason','')}`\n\n"
+                f"Q: _{qtext[:250]}_\n\n"
+                f"⚠️ NO respondi automatico. Ignora o responde manual en MELI. "
+                f"Recuerda bloquearlo tambien desde el panel de MELI."
+            )
             continue
         matched = _match_template(qtext, cfg)
         if matched:
