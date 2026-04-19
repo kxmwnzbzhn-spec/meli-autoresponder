@@ -1,13 +1,127 @@
 {
   "_comment": "Stock real inventario físico. Solo visible aquí en el repo privado. El bot decrementa cada vez que repone el item en MELI.",
-  "MLM2874367731": {"real_stock": 47, "sku": "JBL-GO4-NGR-001", "label": "JBL Go 4 Negro Usado - $299", "auto_replenish": true, "replenish_quantity": 1, "previous_ids": ["MLM2872698375","MLM5206968736","MLM5209016022"]},
-  "MLM2874595277": {"real_stock": 50, "sku": "JBL-GO4-AZMAR-001", "label": "JBL Go 4 Azul Marino Usado - $299", "auto_replenish": true, "replenish_quantity": 1, "previous_ids": []},
-  "MLM2874595625": {"real_stock": 50, "sku": "JBL-GO4-RED-001", "label": "JBL Go 4 Rojo Usado - $299", "auto_replenish": true, "replenish_quantity": 1, "previous_ids": []},
-  "MLM5209619690": {"real_stock": 50, "sku": "JBL-GO4-CAMO-001", "label": "JBL Go 4 Camuflaje Usado - $299", "auto_replenish": true, "replenish_quantity": 1, "previous_ids": []},
-  "MLM2874536995": {"real_stock": 50, "sku": "JBL-GO4-ROSA-001", "label": "JBL Go 4 Rosa Chicle Usado - $299", "auto_replenish": true, "replenish_quantity": 1, "previous_ids": []},
-  "MLM2874537147": {"real_stock": 50, "sku": "JBL-GO3-NGR-001", "label": "JBL Go 3 Negro Usado - $299", "auto_replenish": true, "replenish_quantity": 1, "previous_ids": []},
-  "MLM5209619958": {"real_stock": 50, "sku": "JBL-CHG6-NGR-001", "label": "JBL Charge 6 Negro Usado - $499", "auto_replenish": true, "replenish_quantity": 1, "previous_ids": []},
-  "MLM2874596165": {"real_stock": 50, "sku": "JBL-CHG6-RED-001", "label": "JBL Charge 6 Rojo Usado - $499", "auto_replenish": true, "replenish_quantity": 1, "previous_ids": []},
-  "MLM2874607951": {"real_stock": 50, "sku": "JBL-CHG6-AZMAR-001", "label": "JBL Charge 6 Azul Marino Usado - $499", "auto_replenish": true, "replenish_quantity": 1, "previous_ids": []},
-  "MLM5209619970": {"real_stock": 50, "sku": "JBL-CHG6-SQUAD-001", "label": "JBL Charge 6 Camuflaje Usado - $499", "auto_replenish": true, "replenish_quantity": 1, "previous_ids": []}
+  "MLM2874367731": {
+    "real_stock": 47,
+    "sku": "JBL-GO4-NGR-001",
+    "label": "JBL Go 4 Negro Usado - $299",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "previous_ids": [
+      "MLM2872698375",
+      "MLM5206968736",
+      "MLM5209016022"
+    ]
+  },
+  "MLM2874595277": {
+    "real_stock": 50,
+    "sku": "JBL-GO4-AZMAR-001",
+    "label": "JBL Go 4 Azul Marino Usado - $299",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "previous_ids": []
+  },
+  "MLM2874595625": {
+    "real_stock": 50,
+    "sku": "JBL-GO4-RED-001",
+    "label": "JBL Go 4 Rojo Usado - $299",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "previous_ids": []
+  },
+  "MLM5209619690": {
+    "real_stock": 50,
+    "sku": "JBL-GO4-CAMO-001",
+    "label": "JBL Go 4 Camuflaje Usado - $299",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "previous_ids": []
+  },
+  "MLM2874536995": {
+    "real_stock": 50,
+    "sku": "JBL-GO4-ROSA-001",
+    "label": "JBL Go 4 Rosa Chicle Usado - $299",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "previous_ids": []
+  },
+  "MLM2874537147": {
+    "real_stock": 50,
+    "sku": "JBL-GO3-NGR-001",
+    "label": "JBL Go 3 Negro Usado - $299",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "previous_ids": []
+  },
+  "MLM5209619958": {
+    "real_stock": 50,
+    "sku": "JBL-CHG6-NGR-001",
+    "label": "JBL Charge 6 Negro Usado - $499",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "previous_ids": []
+  },
+  "MLM2874596165": {
+    "real_stock": 50,
+    "sku": "JBL-CHG6-RED-001",
+    "label": "JBL Charge 6 Rojo Usado - $499",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "previous_ids": []
+  },
+  "MLM2874607951": {
+    "real_stock": 50,
+    "sku": "JBL-CHG6-AZMAR-001",
+    "label": "JBL Charge 6 Azul Marino Usado - $499",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "previous_ids": []
+  },
+  "MLM5209619970": {
+    "real_stock": 50,
+    "sku": "JBL-CHG6-SQUAD-001",
+    "label": "JBL Charge 6 Camuflaje Usado - $499",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "previous_ids": []
+  },
+  "MLM5209620060": {
+    "real_stock": 50,
+    "sku": "JBL-FLIP7-NGR-001",
+    "label": "JBL Flip 7 Negra Usada - $399",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "previous_ids": []
+  },
+  "MLM2874537405": {
+    "real_stock": 50,
+    "sku": "JBL-CLIP5-NGR-001",
+    "label": "JBL Clip 5 Negro Usado - $299",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "previous_ids": []
+  },
+  "MLM2874608285": {
+    "real_stock": 50,
+    "sku": "JBL-CLIP5-ROSA-001",
+    "label": "JBL Clip 5 Rosa Usado - $299",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "previous_ids": []
+  },
+  "MLM2874537571": {
+    "real_stock": 50,
+    "sku": "JBL-CLIP5-MOR-001",
+    "label": "JBL Clip 5 Morado Usado - $299",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "previous_ids": []
+  },
+  "MLM2874596557": {
+    "real_stock": 50,
+    "sku": "JBL-GRIP-NGR-001",
+    "label": "JBL Grip Negra Usada - $399",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "previous_ids": []
+  }
 }
