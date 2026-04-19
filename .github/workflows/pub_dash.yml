@@ -1,0 +1,133 @@
+name: Publish Dashcam Asva DVR-3 (one-shot)
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    steps:
+      - run: pip install requests pillow
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          python3 <<'PY'
+          import os, json, requests, io, sys
+          from PIL import Image
+          tk = requests.post("https://api.mercadolibre.com/oauth/token",
+              data={"grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],
+                    "client_secret":os.environ["MELI_APP_SECRET"],
+                    "refresh_token":os.environ["MELI_REFRESH_TOKEN"]}).json()
+          AT = tk["access_token"]
+          H = {"Authorization": f"Bearer {AT}", "Content-Type":"application/json"}
+
+          # Product catalog Asva DVR-3
+          pid = "MLM45458769"
+          pr = requests.get(f"https://api.mercadolibre.com/products/{pid}", headers=H).json()
+          print(f"name: {pr.get('name')}")
+          print(f"category_id: {pr.get('category_id')}")
+          print(f"domain_id: {pr.get('domain_id')}")
+          urls = [p.get('url') or p.get('secure_url') for p in pr.get('pictures',[])]
+          print(f"fotos: {len(urls)}")
+
+          # Category via predict
+          cp = requests.get("https://api.mercadolibre.com/sites/MLM/domain_discovery/search",
+              params={"q":"Dashcam 3 camaras pantalla Full HD reversa Asva DVR-3"}, headers=H).json()
+          cat = cp[0].get("category_id") if isinstance(cp,list) and cp else "MLM429390"
+          print(f"cat_pred: {cat}")
+
+          # Subir fotos
+          pic_ids = []
+          for u in urls[:11]:
+              try:
+                  u2 = u.replace("-F.jpg","-O.jpg")
+                  rr = requests.get(u2, timeout=15)
+                  if rr.status_code != 200 or len(rr.content) < 3000:
+                      rr = requests.get(u, timeout=15)
+                  im = Image.open(io.BytesIO(rr.content))
+                  if im.mode != "RGB":
+                      if im.mode in ("RGBA","LA","P"):
+                          bg = Image.new("RGB", im.size, (255,255,255))
+                          if im.mode == "P": im = im.convert("RGBA")
+                          bg.paste(im, mask=im.split()[-1] if im.mode in ("RGBA","LA") else None)
+                          im = bg
+                      else: im = im.convert("RGB")
+                  w,h = im.size; ss = min(1200/w, 1200/h)
+                  nw, nh = int(w*ss), int(h*ss)
+                  im = im.resize((nw,nh), Image.LANCZOS)
+                  c = Image.new("RGB", (1200,1200), (255,255,255))
+                  c.paste(im, ((1200-nw)//2,(1200-nh)//2))
+                  buf = io.BytesIO(); c.save(buf, "JPEG", quality=92)
+                  up = requests.post("https://api.mercadolibre.com/pictures/items/upload",
+                      headers={"Authorization": f"Bearer {AT}"}, files={"file":("p.jpg",buf.getvalue(),"image/jpeg")})
+                  if up.status_code < 400: pic_ids.append({"id": up.json()["id"]})
+              except Exception as e:
+                  print(f"  pic err: {e}")
+          print(f"fotos subidas: {len(pic_ids)}")
+
+          title = "Dashcam 3 Camaras Pantalla Full HD Camara Reversa Asva DVR-3"
+          print(f"title len={len(title)}")
+          if len(title) > 60:
+              title = "Dashcam 3 Camaras Pantalla FHD Reversa Asva DVR-3"
+              print(f"  recortado a {len(title)}")
+
+          desc = (
+              "Dashcam Asva Electronics DVR-3 con 3 camaras (frontal, interior y de reversa) "
+              "y pantalla integrada. Grabacion Full HD 1080p, vision nocturna, angulo amplio, "
+              "grabacion en loop, sensor G y detector de movimiento. "
+              "Incluye camara de reversa para estacionamiento asistido y monitoreo "
+              "del interior del vehiculo. Fuente de alimentacion por toma de 12V del auto. "
+              "Producto NUEVO en caja sellada. Envio GRATIS con Mercado Envios desde Mexico. "
+              "Facturamos si se requiere."
+          )
+
+          attrs = [
+              {"id":"BRAND","value_name":"Asva Electronics"},
+              {"id":"MODEL","value_name":"DVR-3"},
+              {"id":"MPN","value_name":"ASV-CAM-DASH"},
+              {"id":"SELLER_SKU","value_name":"ASVA-DVR3-001"},
+              {"id":"ITEM_CONDITION","value_name":"Nuevo"},
+              {"id":"CAMERAS_QUANTITY","value_name":"3"},
+              {"id":"VIDEO_RESOLUTION","value_name":"1080p"},
+              {"id":"WITH_REVERSE_CAMERA","value_name":"Sí"},
+              {"id":"WITH_NIGHT_VISION","value_name":"Sí"},
+              {"id":"WITH_SCREEN","value_name":"Sí"},
+              {"id":"WITH_GPS","value_name":"No"},
+              {"id":"WITH_WI_FI","value_name":"No"},
+              {"id":"WITH_G_SENSOR","value_name":"Sí"},
+              {"id":"WITH_LOOP_RECORDING","value_name":"Sí"},
+              {"id":"WITH_MOTION_DETECTION","value_name":"Sí"},
+              {"id":"WITH_MICROPHONE","value_name":"Sí"},
+              {"id":"POWER_SUPPLY_TYPES","value_name":"Toma de encendedor"},
+              {"id":"MAIN_COLOR","value_name":"Negro"},
+          ]
+
+          item = {
+              "title":title,"category_id":cat,"price":299,"currency_id":"MXN",
+              "available_quantity":1,"buying_mode":"buy_it_now",
+              "listing_type_id":"gold_pro","condition":"new",
+              "pictures":pic_ids,"attributes":attrs,
+              "sale_terms":[
+                  {"id":"WARRANTY_TYPE","value_name":"Garantía del vendedor"},
+                  {"id":"WARRANTY_TIME","value_name":"30 días"},
+              ],
+              "shipping":{"mode":"me2","local_pick_up":False,"free_shipping":True}
+          }
+          r = requests.post("https://api.mercadolibre.com/items", headers=H, json=item)
+          print(f"POST={r.status_code}")
+          resp = r.json()
+          if r.status_code >= 400:
+              print(json.dumps(resp, ensure_ascii=False)[:2000]); sys.exit(1)
+          nid = resp["id"]
+          filled = sum(1 for a in resp.get("attributes",[]) if a.get("value_name") or a.get("value_struct") or a.get("values"))
+          print(f"OK id={nid} filled={filled} link={resp.get('permalink')}")
+          requests.put(f"https://api.mercadolibre.com/items/{nid}/description",
+              headers=H, json={"plain_text": desc})
+
+          tt=os.environ.get("TELEGRAM_BOT_TOKEN"); tc=os.environ.get("TELEGRAM_CHAT_ID")
+          if tt and tc:
+              requests.post(f"https://api.telegram.org/bot{tt}/sendMessage",
+                  json={"chat_id":tc,"parse_mode":"Markdown",
+                        "text":f"🆕 *Dashcam Asva DVR-3 publicada*\n\n🆔 `{nid}`\n💰 $299 NUEVO\n🔗 {resp.get('permalink')}"})
+          PY
