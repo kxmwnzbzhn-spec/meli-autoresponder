@@ -1,0 +1,79 @@
+name: Fix Flip7 pictures (one-shot)
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    steps:
+      - run: pip install requests pillow
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+        run: |
+          python3 <<'PY'
+          import os, json, requests, io, sys
+          from PIL import Image
+          tk = requests.post("https://api.mercadolibre.com/oauth/token",
+              data={"grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],
+                    "client_secret":os.environ["MELI_APP_SECRET"],
+                    "refresh_token":os.environ["MELI_REFRESH_TOKEN"]}).json()
+          AT = tk["access_token"]
+          H = {"Authorization": f"Bearer {AT}", "Content-Type":"application/json"}
+
+          # PAUSAR primero para evitar que alguien compre con fotos equivocadas
+          print("=== Pausando item ===")
+          r = requests.put("https://api.mercadolibre.com/items/MLM5209620060",
+              headers=H, json={"status":"paused"})
+          print(f"pause status={r.status_code}")
+
+          # Producto correcto Flip 7 Negro
+          pr = requests.get("https://api.mercadolibre.com/products/MLM63648346", headers=H).json()
+          print(f"\nproducto correcto: {pr.get('name')}")
+          urls = [p.get('url') or p.get('secure_url') for p in pr.get('pictures',[])]
+          print(f"fotos: {len(urls)}")
+
+          pic_ids = []
+          for u in urls[:11]:
+              try:
+                  u2 = u.replace("-F.jpg","-O.jpg")
+                  rr = requests.get(u2, timeout=15)
+                  if rr.status_code != 200 or len(rr.content) < 3000:
+                      rr = requests.get(u, timeout=15)
+                  im = Image.open(io.BytesIO(rr.content))
+                  if im.mode != "RGB":
+                      if im.mode in ("RGBA","LA","P"):
+                          bg = Image.new("RGB", im.size, (255,255,255))
+                          if im.mode == "P": im = im.convert("RGBA")
+                          bg.paste(im, mask=im.split()[-1] if im.mode in ("RGBA","LA") else None)
+                          im = bg
+                      else: im = im.convert("RGB")
+                  w,h = im.size
+                  s = min(1200/w, 1200/h)
+                  nw, nh = int(w*s), int(h*s)
+                  im = im.resize((nw,nh), Image.LANCZOS)
+                  c = Image.new("RGB", (1200,1200), (255,255,255))
+                  c.paste(im, ((1200-nw)//2,(1200-nh)//2))
+                  buf = io.BytesIO(); c.save(buf, "JPEG", quality=92)
+                  files = {"file":("pic.jpg", buf.getvalue(), "image/jpeg")}
+                  up = requests.post("https://api.mercadolibre.com/pictures/items/upload",
+                      headers={"Authorization": f"Bearer {AT}"}, files=files)
+                  if up.status_code < 400:
+                      pic_ids.append({"id": up.json()["id"]})
+              except Exception as e:
+                  print(f"  pic err: {e}")
+          print(f"fotos subidas: {len(pic_ids)}")
+
+          if not pic_ids:
+              print("ERR: sin fotos, no se puede corregir"); sys.exit(1)
+
+          # PUT con nuevas pictures y reactivar
+          r2 = requests.put("https://api.mercadolibre.com/items/MLM5209620060",
+              headers=H, json={"pictures": pic_ids, "status":"active"})
+          print(f"\nupdate pictures status={r2.status_code}")
+          if r2.status_code >= 400:
+              print(json.dumps(r2.json(), ensure_ascii=False)[:1500])
+          else:
+              print(f"OK  fotos actualizadas")
+              final = requests.get("https://api.mercadolibre.com/items/MLM5209620060", headers=H).json()
+              print(f"status final: {final.get('status')}  pics: {len(final.get('pictures',[]))}")
+          PY
