@@ -1,0 +1,146 @@
+name: Publish Redmi Buds 4 Lite (one-shot)
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    steps:
+      - run: pip install requests pillow
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          python3 <<'PY'
+          import os, json, requests, io, sys
+          from PIL import Image
+          tk = requests.post("https://api.mercadolibre.com/oauth/token",
+              data={"grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],
+                    "client_secret":os.environ["MELI_APP_SECRET"],
+                    "refresh_token":os.environ["MELI_REFRESH_TOKEN"]}).json()
+          AT = tk["access_token"]
+          H = {"Authorization": f"Bearer {AT}", "Content-Type":"application/json"}
+
+          # Obtener info del producto catalog
+          pid = "MLM40336571"
+          pr = requests.get(f"https://api.mercadolibre.com/products/{pid}", headers=H).json()
+          print(f"name: {pr.get('name')}")
+          print(f"domain_id: {pr.get('domain_id')}")
+
+          # Deducir category con predict
+          title = "Auriculares Xiaomi Redmi Buds 4 Lite Bluetooth 5.3 Negro"
+          cat_pred = requests.get("https://api.mercadolibre.com/sites/MLM/domain_discovery/search",
+              params={"q": title}, headers=H).json()
+          cat_id = None
+          if isinstance(cat_pred, list) and cat_pred:
+              cat_id = cat_pred[0].get("category_id")
+              print(f"category predicted: {cat_id} domain={cat_pred[0].get('domain_id')}")
+          if not cat_id:
+              cat_id = "MLM1055"
+              print("fallback cat MLM1055")
+
+          # Subir fotos
+          urls = [p.get('url') or p.get('secure_url') for p in pr.get('pictures',[])]
+          print(f"fotos disponibles: {len(urls)}")
+          pic_ids = []
+          for u in urls[:11]:
+              try:
+                  u2 = u.replace("-F.jpg","-O.jpg")
+                  rr = requests.get(u2, timeout=15)
+                  if rr.status_code != 200 or len(rr.content) < 3000:
+                      rr = requests.get(u, timeout=15)
+                  im = Image.open(io.BytesIO(rr.content))
+                  if im.mode != "RGB":
+                      if im.mode in ("RGBA","LA","P"):
+                          bg = Image.new("RGB", im.size, (255,255,255))
+                          if im.mode == "P": im = im.convert("RGBA")
+                          bg.paste(im, mask=im.split()[-1] if im.mode in ("RGBA","LA") else None)
+                          im = bg
+                      else: im = im.convert("RGB")
+                  w,h = im.size; ss = min(1200/w, 1200/h)
+                  nw, nh = int(w*ss), int(h*ss)
+                  im = im.resize((nw,nh), Image.LANCZOS)
+                  c = Image.new("RGB", (1200,1200), (255,255,255))
+                  c.paste(im, ((1200-nw)//2,(1200-nh)//2))
+                  buf = io.BytesIO(); c.save(buf, "JPEG", quality=92)
+                  up = requests.post("https://api.mercadolibre.com/pictures/items/upload",
+                      headers={"Authorization": f"Bearer {AT}"}, files={"file":("p.jpg",buf.getvalue(),"image/jpeg")})
+                  if up.status_code < 400: pic_ids.append({"id": up.json()["id"]})
+              except Exception as e:
+                  print(f"  pic err: {e}")
+          print(f"fotos subidas: {len(pic_ids)}")
+
+          title = "Xiaomi Redmi Buds 4 Lite Audifonos Bluetooth Negro"
+          print(f"title len={len(title)}")
+
+          desc = (
+              "Audifonos inalambricos Xiaomi Redmi Buds 4 Lite color negro REMANUFACTURADOS "
+              "en excelente estado, probados y funcionando al 100%. Se entregan con caja y cable USB-C de carga. "
+              "Reacondicionamiento profesional con prueba de sonido, microfono y bateria. "
+              "Bluetooth 5.3, microfono con reduccion de ruido, controles tactiles, IPX4 resistentes al sudor, "
+              "hasta 5 horas de autonomia por carga (20h con estuche). "
+              "Envio GRATIS con Mercado Envios desde Mexico. Facturamos si se requiere."
+          )
+
+          attrs = [
+              {"id":"BRAND","value_name":"Xiaomi"},
+              {"id":"MODEL","value_name":"Redmi Buds 4 Lite"},
+              {"id":"LINE","value_name":"Redmi Buds"},
+              {"id":"MPN","value_name":"M2231E1"},
+              {"id":"GTIN","value_name":"6934177767203"},
+              {"id":"MANUFACTURER","value_name":"Xiaomi"},
+              {"id":"SELLER_SKU","value_name":"XIAOMI-REDMI-BUDS4L-NGR-001"},
+              {"id":"COLOR","value_name":"Negro"},
+              {"id":"MAIN_COLOR","value_name":"Negro"},
+              {"id":"ITEM_CONDITION","value_name":"Reacondicionado"},
+              {"id":"GRADING","value_name":"Excelente"},
+              {"id":"WITH_BLUETOOTH","value_name":"Sí"},
+              {"id":"IS_WIRELESS","value_name":"Sí"},
+              {"id":"IS_WATERPROOF","value_name":"No"},
+              {"id":"WITH_MICROPHONE","value_name":"Sí"},
+              {"id":"INCLUDES_RECHARGEABLE_BATTERY","value_name":"Sí"},
+              {"id":"BATTERY_TYPE","value_name":"Ion de litio"},
+              {"id":"HEADPHONE_FORMAT","value_name":"In-ear"},
+              {"id":"CONNECTIVITY","value_name":"Inalámbrico"},
+              {"id":"IS_NOISE_CANCELLING","value_name":"No"},
+              {"id":"MAX_BATTERY_AUTONOMY","value_name":"5 h","value_struct":{"number":5,"unit":"h"}},
+              {"id":"IP_CLASSIFICATION","value_name":"IPX4"},
+          ]
+
+          item = {
+              "title": title,
+              "category_id": cat_id,
+              "price": 149,
+              "currency_id":"MXN",
+              "available_quantity": 1,
+              "buying_mode":"buy_it_now",
+              "listing_type_id":"gold_pro",
+              "condition":"refurbished",
+              "pictures": pic_ids,
+              "attributes": attrs,
+              "sale_terms":[
+                  {"id":"WARRANTY_TYPE","value_name":"Garantía del vendedor"},
+                  {"id":"WARRANTY_TIME","value_name":"15 días"},
+              ],
+              "shipping":{"mode":"me2","local_pick_up":False,"free_shipping":True}
+          }
+          r = requests.post("https://api.mercadolibre.com/items", headers=H, json=item)
+          print(f"POST={r.status_code}")
+          resp = r.json()
+          if r.status_code >= 400:
+              print(json.dumps(resp, ensure_ascii=False)[:2500])
+              sys.exit(1)
+          nid = resp["id"]
+          filled = sum(1 for a in resp.get("attributes",[]) if a.get("value_name") or a.get("value_struct") or a.get("values"))
+          print(f"OK id={nid} filled={filled} link={resp.get('permalink')}")
+
+          requests.put(f"https://api.mercadolibre.com/items/{nid}/description",
+              headers=H, json={"plain_text": desc})
+
+          tt=os.environ.get("TELEGRAM_BOT_TOKEN"); tc=os.environ.get("TELEGRAM_CHAT_ID")
+          if tt and tc:
+              requests.post(f"https://api.telegram.org/bot{tt}/sendMessage",
+                  json={"chat_id":tc,"parse_mode":"Markdown",
+                        "text":f"🆕 *Redmi Buds 4 Lite Negro publicado*\n\n🆔 `{nid}`\n💰 $149 remanufacturado\n🔗 {resp.get('permalink')}"})
+          PY
