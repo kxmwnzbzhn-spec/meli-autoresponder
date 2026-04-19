@@ -1,0 +1,206 @@
+name: Diag Charge6 + Publish Clip5 (one-shot)
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - run: pip install requests pillow
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          python3 <<'PY'
+          import os, json, requests, io, sys
+          from PIL import Image
+          tk = requests.post("https://api.mercadolibre.com/oauth/token",
+              data={"grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],
+                    "client_secret":os.environ["MELI_APP_SECRET"],
+                    "refresh_token":os.environ["MELI_REFRESH_TOKEN"]}).json()
+          AT = tk["access_token"]
+          H = {"Authorization": f"Bearer {AT}", "Content-Type":"application/json"}
+
+          # 1. Diagnostico Charge 6 Negro: ver moderations
+          iid = "MLM5209619958"
+          print(f"=== Charge 6 Negro {iid} ===")
+          for ep in [f"/items/{iid}/moderations", f"/items/{iid}", f"/my/reviews/items/{iid}"]:
+              r = requests.get(f"https://api.mercadolibre.com{ep}", headers=H)
+              print(f"GET {ep} → {r.status_code}")
+              try:
+                  d = r.json()
+                  if ep.endswith("moderations"):
+                      print(json.dumps(d, indent=2, ensure_ascii=False)[:2000])
+                  elif ep.endswith(iid):
+                      print(f"  status: {d.get('status')} sub: {d.get('sub_status')}")
+                      print(f"  tags: {d.get('tags')}")
+                      # Ver si tiene warnings/errors
+                      for k in ['warnings','errors','health']:
+                          v = d.get(k)
+                          if v: print(f"  {k}: {v}")
+              except Exception as e:
+                  print(f"  parse err: {e}")
+
+          # 2. Buscar productos Clip 5 para cada color
+          print("\n=== Buscando Clip 5 ===")
+          def find_clip5(color_query):
+              s = requests.get("https://api.mercadolibre.com/products/search",
+                  params={"site_id":"MLM","q":f"JBL Clip 5 {color_query}","limit":20}, headers=H).json()
+              best = None
+              for r in s.get('results',[]):
+                  rid = r.get('id')
+                  pr = requests.get(f"https://api.mercadolibre.com/products/{rid}", headers=H).json()
+                  col = None; mod = None
+                  for a in pr.get('attributes',[]):
+                      if a.get('id') == 'COLOR': col = a.get('value_name')
+                      if a.get('id') == 'MODEL': mod = a.get('value_name')
+                  pics = len(pr.get('pictures',[]))
+                  if mod and ('Clip 5' in str(mod) or 'CLIP 5' in str(mod).upper()):
+                      print(f"  {color_query}: {rid} model={mod} color={col} pics={pics}")
+                      if col and color_query.lower() in col.lower() and pics >= 4:
+                          if best is None or pics > best['pics']:
+                              best = {"id": rid, "color": col, "pics": pics}
+              return best
+
+          targets = []
+          for col_q, col_norm, main_col, mpn in [
+              ("Rosa","Rosa chicle","Rosa chicle","JBLCLIP5PKAM"),
+              ("Negro","Negro","Negro","JBLCLIP5BLKAM"),
+              ("Morado","Morado","Violeta","JBLCLIP5PURAM"),
+          ]:
+              b = find_clip5(col_q)
+              print(f"  BEST {col_q}: {b}")
+              targets.append({"col_q":col_q, "col_norm":col_norm, "main_col":main_col, "mpn":mpn, "product":b})
+
+          # 3. Optimizar y subir
+          def upload_from(product_id, limit=11):
+              pr = requests.get(f"https://api.mercadolibre.com/products/{product_id}", headers=H).json()
+              urls = [p.get('url') or p.get('secure_url') for p in pr.get('pictures',[])]
+              ids = []
+              for u in urls[:limit]:
+                  try:
+                      u2 = u.replace("-F.jpg","-O.jpg")
+                      rr = requests.get(u2, timeout=15)
+                      if rr.status_code != 200 or len(rr.content) < 3000:
+                          rr = requests.get(u, timeout=15)
+                      im = Image.open(io.BytesIO(rr.content))
+                      if im.mode != "RGB":
+                          if im.mode in ("RGBA","LA","P"):
+                              bg = Image.new("RGB", im.size, (255,255,255))
+                              if im.mode == "P": im = im.convert("RGBA")
+                              bg.paste(im, mask=im.split()[-1] if im.mode in ("RGBA","LA") else None)
+                              im = bg
+                          else: im = im.convert("RGB")
+                      w,h = im.size
+                      s = min(1200/w, 1200/h); nw, nh = int(w*s), int(h*s)
+                      im = im.resize((nw,nh), Image.LANCZOS)
+                      c = Image.new("RGB", (1200,1200), (255,255,255))
+                      c.paste(im, ((1200-nw)//2,(1200-nh)//2))
+                      buf = io.BytesIO(); c.save(buf, "JPEG", quality=92)
+                      up = requests.post("https://api.mercadolibre.com/pictures/items/upload",
+                          headers={"Authorization": f"Bearer {AT}"}, files={"file":("p.jpg",buf.getvalue(),"image/jpeg")})
+                      if up.status_code < 400: ids.append({"id": up.json()["id"]})
+                  except Exception as e:
+                      print(f"  pic err: {e}")
+              return ids
+
+          results = []
+          for t in targets:
+              if not t["product"]:
+                  print(f"SKIP {t['col_q']}: sin producto")
+                  continue
+              print(f"\n>>> Publicando Clip 5 {t['col_q']}")
+              pics = upload_from(t["product"]["id"], 11)
+              print(f"  fotos: {len(pics)}")
+              if not pics: continue
+
+              title_color = t['col_norm'] if 'Rosa' not in t['col_q'] else 'Rosa'
+              title = f"JBL Clip 5 Bocina Bluetooth Portatil {title_color} Original Usada"
+              if len(title) > 60:
+                  title = title.replace("Bocina Bluetooth Portatil","Bluetooth Portatil")
+              print(f"  title ({len(title)}): {title}")
+
+              desc = (
+                  f"Bocina JBL Clip 5 color {t['col_norm'].lower()} en perfecto estado, practicamente sin uso: "
+                  f"solo se abrio y se uso una vez. Se entrega con su caja original y todos sus accesorios originales. "
+                  f"Producto 100 por ciento original JBL. "
+                  f"IMPORTANTE: esta unidad NO es compatible con la aplicacion JBL Portable; "
+                  f"su operacion es Bluetooth estandar. "
+                  f"Mosqueton integrado para cuelgue facil, IP67, Bluetooth 5.3, "
+                  f"hasta 12 horas de reproduccion. "
+                  f"Envio GRATIS con Mercado Envios desde Mexico. Facturamos si se requiere."
+              )
+
+              attrs = [
+                  {"id":"BRAND","value_name":"JBL"},{"id":"MODEL","value_name":"Clip 5"},
+                  {"id":"MPN","value_name":t["mpn"]},{"id":"GTIN","value_name":"050036395984"},
+                  {"id":"MANUFACTURER","value_name":"Harman International Industries"},
+                  {"id":"SELLER_SKU","value_name":f"JBL-CLIP5-{t['col_q'].upper()[:3]}-001"},
+                  {"id":"COLOR","value_name":t["col_norm"]},{"id":"MAIN_COLOR","value_name":t["main_col"]},
+                  {"id":"ITEM_CONDITION","value_name":"Usado"},
+                  {"id":"POWER_OUTPUT_RMS","value_name":"7 W","value_struct":{"number":7,"unit":"W"}},
+                  {"id":"MIN_FREQUENCY_RESPONSE","value_name":"105 Hz","value_struct":{"number":105,"unit":"Hz"}},
+                  {"id":"MAX_FREQUENCY_RESPONSE","value_name":"20 kHz","value_struct":{"number":20,"unit":"kHz"}},
+                  {"id":"SOUND_RANGE","value_name":"15 m","value_struct":{"number":15,"unit":"m"}},
+                  {"id":"SPEAKERS_NUMBER","value_name":"1"},{"id":"SPEAKER_FORMAT","value_name":"Caja"},
+                  {"id":"SPEAKER_FILTER_TYPES","value_name":"Pasivo"},
+                  {"id":"POWER_SUPPLY_TYPES","value_name":"Batería"},
+                  {"id":"MAX_BATTERY_AUTONOMY","value_name":"12 h","value_struct":{"number":12,"unit":"h"}},
+                  {"id":"CHARGE_TIME","value_name":"3 h","value_struct":{"number":3,"unit":"h"}},
+                  {"id":"INCLUDES_RECHARGEABLE_BATTERY","value_name":"Sí"},
+                  {"id":"BATTERY_TYPE","value_name":"Ion de litio"},
+                  {"id":"WITH_BLUETOOTH","value_name":"Sí"},{"id":"WITH_WI_FI","value_name":"No"},
+                  {"id":"WITH_NFC","value_name":"No"},{"id":"WITH_RADIO","value_name":"No"},
+                  {"id":"IS_WIRELESS","value_name":"Sí"},
+                  {"id":"OS_COMPATIBLES","values":[{"name":"Android"},{"name":"iOS"},{"name":"Windows"},{"name":"macOS"}]},
+                  {"id":"IS_WATERPROOF","value_name":"Sí"},{"id":"IP_CLASSIFICATION","value_name":"IP67"},
+                  {"id":"IS_DUST_RESISTANT","value_name":"Sí"},{"id":"IS_SUITABLE_FOR_OUTDOOR_USE","value_name":"Sí"},
+                  {"id":"IS_PORTABLE","value_name":"Sí"},{"id":"WITH_BASE","value_name":"No"},
+                  {"id":"WITH_LED_LIGHTS","value_name":"No"},{"id":"WITH_MICROPHONE","value_name":"No"},
+                  {"id":"WITH_HANDS_FREE_MODE","value_name":"No"},{"id":"WITH_INTEGRATED_DJ_CONTROLLERS","value_name":"No"},
+                  {"id":"WITH_KARAOKE_FUNCTION","value_name":"No"},{"id":"WITH_VOICE_EFFECT","value_name":"No"},
+                  {"id":"WITH_SCREEN","value_name":"No"},{"id":"IS_GAMER","value_name":"No"},
+                  {"id":"IS_PROFESSIONAL","value_name":"No"},{"id":"IS_A_STAGE_MONITOR","value_name":"No"},
+                  {"id":"INCLUDES_SUPPORT","value_name":"No"},{"id":"INCLUDES_REMOTE_CONTROL","value_name":"No"},
+                  {"id":"INCLUDES_CHARGER","value_name":"No"},{"id":"INCLUDES_WHEELS","value_name":"No"},
+                  {"id":"INCLUDES_LATCH","value_name":"Sí"},
+                  {"id":"HEIGHT","value_name":"14 cm","value_struct":{"number":14,"unit":"cm"}},
+                  {"id":"WIDTH","value_name":"8.6 cm","value_struct":{"number":8.6,"unit":"cm"}},
+                  {"id":"DEPTH","value_name":"4.6 cm","value_struct":{"number":4.6,"unit":"cm"}},
+                  {"id":"WEIGHT","value_name":"285 g","value_struct":{"number":285,"unit":"g"}},
+              ]
+
+              item = {
+                  "title":title,"category_id":"MLM59800","price":299,"currency_id":"MXN",
+                  "available_quantity":1,"buying_mode":"buy_it_now",
+                  "listing_type_id":"gold_pro","condition":"used",
+                  "pictures":pics,"attributes":attrs,
+                  "sale_terms":[
+                      {"id":"WARRANTY_TYPE","value_name":"Garantía del vendedor"},
+                      {"id":"WARRANTY_TIME","value_name":"7 días"},
+                  ],
+                  "shipping":{"mode":"me2","local_pick_up":False,"free_shipping":True}
+              }
+              r = requests.post("https://api.mercadolibre.com/items", headers=H, json=item)
+              print(f"  POST={r.status_code}")
+              resp = r.json()
+              if r.status_code >= 400:
+                  print(f"  ERR: {json.dumps(resp, ensure_ascii=False)[:500]}")
+                  continue
+              nid = resp["id"]
+              requests.put(f"https://api.mercadolibre.com/items/{nid}/description",
+                  headers=H, json={"plain_text": desc})
+              print(f"  OK id={nid} link={resp.get('permalink')}")
+              results.append((t['col_q'], nid))
+
+          print("\n=== RESULTADOS Clip 5 ===")
+          for c, nid in results: print(f"  {c}: {nid}")
+
+          tt=os.environ.get("TELEGRAM_BOT_TOKEN"); tc=os.environ.get("TELEGRAM_CHAT_ID")
+          if tt and tc and results:
+              msg="🔗 *Clip 5 publicadas*\n\n" + "\n".join(f"• {c}: `{n}`" for c,n in results)
+              requests.post(f"https://api.telegram.org/bot{tt}/sendMessage",
+                  json={"chat_id":tc,"parse_mode":"Markdown","text":msg})
+          PY
