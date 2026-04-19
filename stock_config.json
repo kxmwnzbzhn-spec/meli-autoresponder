@@ -28,14 +28,6 @@
     "replenish_quantity": 1,
     "previous_ids": []
   },
-  "MLM5209619690": {
-    "real_stock": 50,
-    "sku": "JBL-GO4-CAMO-001",
-    "label": "JBL Go 4 Camuflaje Usado - $299",
-    "auto_replenish": true,
-    "replenish_quantity": 1,
-    "previous_ids": []
-  },
   "MLM2874536995": {
     "real_stock": 50,
     "sku": "JBL-GO4-ROSA-001",
@@ -123,5 +115,15 @@
     "auto_replenish": true,
     "replenish_quantity": 1,
     "previous_ids": []
+  },
+  "MLM2874538531": {
+    "real_stock": 49,
+    "sku": "JBL-GO4-CAMO-001",
+    "label": "JBL Go 4 Camuflaje Usado - $299",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "previous_ids": [
+      "MLM5209619690"
+    ]
   }
 }
