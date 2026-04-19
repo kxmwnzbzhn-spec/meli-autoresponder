@@ -1,0 +1,151 @@
+name: Publish Cam Asva ABQ-A6 WiFi (one-shot)
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    steps:
+      - run: pip install requests pillow
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          python3 <<'PY'
+          import os, json, requests, io, sys
+          from PIL import Image
+          tk = requests.post("https://api.mercadolibre.com/oauth/token",
+              data={"grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],
+                    "client_secret":os.environ["MELI_APP_SECRET"],
+                    "refresh_token":os.environ["MELI_REFRESH_TOKEN"]}).json()
+          AT = tk["access_token"]
+          H = {"Authorization": f"Bearer {AT}", "Content-Type":"application/json"}
+
+          # Buscar producto catalog
+          print("=== Buscando ABQ-A6-V360 ===")
+          best = None
+          for q in ["Asva ABQ-A6-V360","Camara de seguridad Asva 4G","Asva A6 V360"]:
+              s = requests.get("https://api.mercadolibre.com/products/search",
+                  params={"site_id":"MLM","q":q,"limit":10}, headers=H).json()
+              for r in s.get('results',[])[:10]:
+                  rid = r.get('id')
+                  pr = requests.get(f"https://api.mercadolibre.com/products/{rid}", headers=H).json()
+                  brand=None; model=None
+                  for a in pr.get('attributes',[]):
+                      if a.get('id')=='BRAND': brand=a.get('value_name')
+                      if a.get('id')=='MODEL': model=a.get('value_name')
+                  pics = len(pr.get('pictures',[]))
+                  if brand and 'Asva' in brand and model and ('ABQ-A6' in model or 'A6-V360' in model):
+                      print(f"  {rid}: brand={brand} model={model} pics={pics} name={r.get('name','')[:70]}")
+                      if best is None or pics > best['pics']:
+                          best = {"id": rid, "pics": pics}
+          if not best:
+              print("ERR no encontrado"); sys.exit(1)
+          print(f"BEST: {best}")
+
+          # Category predict (Cámaras de seguridad WiFi)
+          cp = requests.get("https://api.mercadolibre.com/sites/MLM/domain_discovery/search",
+              params={"q":"Camara de seguridad WiFi Full HD vision nocturna interior"}, headers=H).json()
+          cat = cp[0].get("category_id") if isinstance(cp,list) and cp else "MLM15252"
+          dom = cp[0].get("domain_id") if isinstance(cp,list) and cp else ""
+          print(f"cat: {cat} dom: {dom}")
+
+          pr = requests.get(f"https://api.mercadolibre.com/products/{best['id']}", headers=H).json()
+          urls = [p.get('url') or p.get('secure_url') for p in pr.get('pictures',[])]
+          pic_ids = []
+          for u in urls[:11]:
+              try:
+                  u2 = u.replace("-F.jpg","-O.jpg")
+                  rr = requests.get(u2, timeout=15)
+                  if rr.status_code != 200 or len(rr.content) < 3000:
+                      rr = requests.get(u, timeout=15)
+                  im = Image.open(io.BytesIO(rr.content))
+                  if im.mode != "RGB":
+                      if im.mode in ("RGBA","LA","P"):
+                          bg = Image.new("RGB", im.size, (255,255,255))
+                          if im.mode == "P": im = im.convert("RGBA")
+                          bg.paste(im, mask=im.split()[-1] if im.mode in ("RGBA","LA") else None)
+                          im = bg
+                      else: im = im.convert("RGB")
+                  w,h = im.size; ss = min(1200/w, 1200/h)
+                  nw, nh = int(w*ss), int(h*ss)
+                  im = im.resize((nw,nh), Image.LANCZOS)
+                  c = Image.new("RGB", (1200,1200), (255,255,255))
+                  c.paste(im, ((1200-nw)//2,(1200-nh)//2))
+                  buf = io.BytesIO(); c.save(buf, "JPEG", quality=92)
+                  up = requests.post("https://api.mercadolibre.com/pictures/items/upload",
+                      headers={"Authorization": f"Bearer {AT}"}, files={"file":("p.jpg",buf.getvalue(),"image/jpeg")})
+                  if up.status_code < 400: pic_ids.append({"id": up.json()["id"]})
+              except Exception as e:
+                  print(f"  pic err: {e}")
+          print(f"fotos: {len(pic_ids)}")
+
+          # Título WiFi (cambio 4G por WiFi)
+          title = "Camara Seguridad WiFi Full HD Asva Electronics Vision Nocturna"
+          print(f"title len={len(title)}")
+          if len(title) > 60:
+              title = "Camara Seguridad WiFi Full HD Asva Vision Nocturna ABQ-A6"
+              print(f"  recortado a {len(title)}")
+
+          desc = (
+              "Camara de seguridad WiFi Asva Electronics modelo ABQ-A6-V360 Full HD. "
+              "Se conecta a tu red WiFi 2.4 GHz, app movil para monitoreo remoto en tiempo real. "
+              "Vision nocturna por infrarrojos, deteccion de movimiento con alerta al celular, "
+              "audio bidireccional, rotacion motorizada 360 grados, rastreo automatico de movimiento, "
+              "grabacion continua en microSD (no incluida). "
+              "Ideal para interiores: casa, oficina, negocio, vigilancia de bebes o mascotas. "
+              "Producto NUEVO en caja sellada. Envio GRATIS con Mercado Envios desde Mexico. Facturamos si se requiere."
+          )
+
+          attrs = [
+              {"id":"BRAND","value_name":"Asva Electronics"},
+              {"id":"MODEL","value_name":"ABQ-A6-V360"},
+              {"id":"LINE","value_name":"WiFi Smart Camera"},
+              {"id":"SELLER_SKU","value_name":"ASVA-ABQA6-WIFI-001"},
+              {"id":"COLOR","value_name":"Negro"},{"id":"MAIN_COLOR","value_name":"Negro"},
+              {"id":"ITEM_CONDITION","value_name":"Nuevo"},
+              {"id":"PACKAGE_UNITS_PER_PACK","value_name":"1"},
+              {"id":"UNITS_PER_PACK","value_name":"1"},
+              {"id":"VIDEO_RESOLUTION","value_name":"1080p"},
+              {"id":"WITH_WI_FI","value_name":"Sí"},
+              {"id":"WITH_NIGHT_VISION","value_name":"Sí"},
+              {"id":"WITH_MOTION_DETECTION","value_name":"Sí"},
+              {"id":"WITH_MICROPHONE","value_name":"Sí"},
+              {"id":"WITH_SPEAKER","value_name":"Sí"},
+              {"id":"IS_SMART","value_name":"Sí"},
+              {"id":"IS_PAN_TILT","value_name":"Sí"},
+              {"id":"IS_INDOOR","value_name":"Sí"},
+              {"id":"IS_OUTDOOR","value_name":"No"},
+              {"id":"POWER_SUPPLY_TYPES","value_name":"Corriente doméstica"},
+              {"id":"FORMAT","value_name":"Unidad"},
+          ]
+
+          item = {
+              "title":title,"category_id":cat,"price":299,"currency_id":"MXN",
+              "available_quantity":1,"buying_mode":"buy_it_now",
+              "listing_type_id":"gold_pro","condition":"new",
+              "pictures":pic_ids,"attributes":attrs,
+              "sale_terms":[
+                  {"id":"WARRANTY_TYPE","value_name":"Garantía del vendedor"},
+                  {"id":"WARRANTY_TIME","value_name":"30 días"},
+              ],
+              "shipping":{"mode":"me2","local_pick_up":False,"free_shipping":True}
+          }
+          r = requests.post("https://api.mercadolibre.com/items", headers=H, json=item)
+          print(f"POST={r.status_code}")
+          resp = r.json()
+          if r.status_code >= 400:
+              print(json.dumps(resp, ensure_ascii=False)[:2500]); sys.exit(1)
+          nid = resp["id"]
+          requests.put(f"https://api.mercadolibre.com/items/{nid}/description",
+              headers=H, json={"plain_text": desc})
+          filled = sum(1 for a in resp.get("attributes",[]) if a.get("value_name") or a.get("value_struct") or a.get("values"))
+          print(f"OK id={nid} filled={filled} link={resp.get('permalink')}")
+
+          tt=os.environ.get("TELEGRAM_BOT_TOKEN"); tc=os.environ.get("TELEGRAM_CHAT_ID")
+          if tt and tc:
+              requests.post(f"https://api.telegram.org/bot{tt}/sendMessage",
+                  json={"chat_id":tc,"parse_mode":"Markdown",
+                        "text":f"🆕 *Camara WiFi Asva ABQ-A6 publicada*\n\n🆔 `{nid}`\n💰 $299 NUEVO\n🔗 {resp.get('permalink')}"})
+          PY
