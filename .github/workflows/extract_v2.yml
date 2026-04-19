@@ -1,0 +1,44 @@
+name: Extract v2 (robust)
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    steps:
+      - run: pip install requests
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+        run: |
+          python3 <<'PY'
+          import os, json, requests
+          tk = requests.post("https://api.mercadolibre.com/oauth/token",
+              data={"grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],
+                    "client_secret":os.environ["MELI_APP_SECRET"],
+                    "refresh_token":os.environ["MELI_REFRESH_TOKEN"]}).json()
+          AT = tk["access_token"]
+          H = {"Authorization": f"Bearer {AT}"}
+
+          # Buscar Charge 6 en los 4 colores
+          for q in ["JBL Charge 6 Negro","JBL Charge 6 Rojo","JBL Charge 6 Azul","JBL Charge 6 Squad","JBL Charge 6 Camuflaje"]:
+              print(f"\nq='{q}':")
+              try:
+                  s = requests.get("https://api.mercadolibre.com/products/search",
+                      params={"site_id":"MLM","q":q,"limit":6}, headers=H).json()
+                  for r in s.get('results',[])[:6]:
+                      print(f"  {r.get('id')} - {r.get('name','')[:90]}")
+              except Exception as e:
+                  print(f"  err: {e}")
+
+          # Probar directo los MLM IDs especificos que mando el usuario
+          for pid in ["MLM49006175","MLM48897018","MLM50286496"]:
+              try:
+                  pr = requests.get(f"https://api.mercadolibre.com/products/{pid}", headers=H).json()
+                  color = None
+                  for a in pr.get('attributes',[]):
+                      if a.get('id') in ('COLOR','MAIN_COLOR'):
+                          color = a.get('value_name'); break
+                  print(f"  {pid}: color={color}  n={pr.get('name','')[:70]}  pics={len(pr.get('pictures',[]))}")
+              except Exception as e:
+                  print(f"  {pid} err: {e}")
+          PY
