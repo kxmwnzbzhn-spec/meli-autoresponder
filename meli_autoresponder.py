@@ -1239,6 +1239,144 @@ def check_returns(token, state):
         start_return_playbook(token, cid, claim, state)
 
 
+
+
+# ============================================================
+# AUTO-Q&A + DAILY REVIEW
+# ============================================================
+
+QA_CONFIG_FILE = "qa_templates.json"
+
+def _normalize(s):
+    import unicodedata
+    s = s.lower()
+    s = unicodedata.normalize("NFD", s)
+    s = "".join(c for c in s if unicodedata.category(c) != "Mn")
+    return s
+
+def _load_qa_templates():
+    try:
+        with open(QA_CONFIG_FILE) as f:
+            return json.load(f)
+    except Exception:
+        return {"templates": [], "signature": ""}
+
+def _match_template(question_text, templates_cfg):
+    qn = _normalize(question_text)
+    for t in templates_cfg.get("templates", []):
+        for kw in t.get("match", []):
+            if _normalize(kw) in qn:
+                return t
+    return None
+
+def handle_questions(token, state):
+    """Escanea preguntas UNANSWERED y responde con templates o notifica a Telegram."""
+    cfg = _load_qa_templates()
+    if not cfg.get("templates"):
+        return
+    code, me = meli("GET", "/users/me", token)
+    if code != 200: return
+    sid = me.get("id")
+    code, qr = meli("GET", f"/questions/search?seller_id={sid}&status=UNANSWERED&limit=20", token)
+    if code != 200:
+        _log(f"  questions search err {code}"); return
+    questions = qr.get("questions", []) or []
+    if not questions:
+        return
+    seen_q = state.setdefault("seen_questions", {})
+    _log(f"Q&A: {len(questions)} preguntas sin responder")
+    sig = cfg.get("signature", "")
+    for qu in questions:
+        qid = str(qu.get("id"))
+        item_id = qu.get("item_id")
+        qtext = qu.get("text","") or ""
+        if qid in seen_q:
+            continue
+        matched = _match_template(qtext, cfg)
+        if matched:
+            answer_text = matched["response"] + sig
+            code_a, resp = meli("POST", "/answers", token,
+                                body={"question_id": int(qid), "text": answer_text})
+            if code_a == 200:
+                seen_q[qid] = {"answered": True, "template": matched["id"], "ts": int(time.time())}
+                _log(f"  Q&A auto-respondida [{qid}] template={matched['id']}")
+                tg_send(
+                    f"🤖 *Pregunta respondida auto*\n\n"
+                    f"Item: `{item_id}`\n"
+                    f"Q: _{qtext[:150]}_\n"
+                    f"Template: `{matched['id']}`"
+                )
+            else:
+                _log(f"  Q&A answer err {code_a}: {resp}")
+        else:
+            seen_q[qid] = {"answered": False, "template": None, "ts": int(time.time())}
+            # Notificar a Telegram con botones para responder manual
+            tg_send(
+                f"❓ *Pregunta sin template*\n\n"
+                f"Item: `{item_id}`\n"
+                f"Comprador: `{qu.get('from',{}).get('id')}`\n"
+                f"Q: _{qtext[:250]}_\n\n"
+                f"No hay template que aplique. Responde manualmente en MELI."
+            )
+
+
+def send_review_summary_if_due(token, state):
+    """Cada 10 min manda resumen a Telegram con metricas clave."""
+    now = int(time.time())
+    last = state.get("last_review_at", 0)
+    if now - last < 600:  # 10 min
+        return
+    try:
+        code, me = meli("GET", "/users/me", token)
+        if code != 200: return
+        sid = me.get("id")
+
+        # Items activos del seller
+        code2, r = meli("GET", f"/users/{sid}/items/search?status=active&limit=50", token)
+        active = r.get("results", []) if code2 == 200 else []
+
+        # Ventas ultimas 24h
+        from datetime import datetime, timedelta, timezone
+        since = (datetime.now(timezone.utc) - timedelta(hours=24)).strftime("%Y-%m-%dT%H:%M:%S.000Z")
+        code3, o = meli("GET", f"/orders/search?seller={sid}&order.date_created.from={since}&sort=date_desc&limit=50", token)
+        orders_24h = o.get("results", []) if code3 == 200 else []
+        sales_count = len(orders_24h)
+        revenue = sum(float(x.get("total_amount",0)) for x in orders_24h)
+
+        # Preguntas UNANSWERED
+        code4, q = meli("GET", f"/questions/search?seller_id={sid}&status=UNANSWERED&limit=50", token)
+        pending_q = len(q.get("questions", []) or []) if code4 == 200 else 0
+
+        # Visitas items activos
+        total_visits_7d = 0
+        for iid in active[:10]:  # limite para no saturar
+            code5, v = meli("GET", f"/items/visits/time_window?ids={iid}&last=7&unit=day", token)
+            if code5 == 200 and isinstance(v, list) and v:
+                total_visits_7d += v[0].get("total_visits", 0)
+
+        # Stock real total
+        cfg = _load_stock_config()
+        real_stock_total = sum(
+            int(v.get("real_stock",0))
+            for k,v in cfg.items()
+            if not k.startswith("_") and isinstance(v, dict)
+        )
+
+        msg = (
+            f"📊 *Review 10 min*\n\n"
+            f"🟢 Items activos: *{len(active)}*\n"
+            f"💰 Ventas 24h: *{sales_count}* (${revenue:,.0f} MXN)\n"
+            f"👁️ Visitas 7d: *{total_visits_7d}*\n"
+            f"❓ Preguntas pendientes: *{pending_q}*\n"
+            f"📦 Stock real bodega: *{real_stock_total}*"
+        )
+        tg_send(msg)
+        state["last_review_at"] = now
+        _log(f"Review enviado: ventas24h={sales_count} visitas7d={total_visits_7d} pending_q={pending_q}")
+    except Exception as e:
+        _log(f"  send_review err: {e}")
+
+
 # ============================================================
 # Main
 # ============================================================
