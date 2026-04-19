@@ -1,0 +1,92 @@
+name: Diff attrs azul vs negro + complete (one-shot)
+on:
+  workflow_dispatch:
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    steps:
+      - run: pip install requests
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+        run: |
+          python3 <<'PY'
+          import os, json, requests
+          tk = requests.post("https://api.mercadolibre.com/oauth/token",
+              data={"grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],
+                    "client_secret":os.environ["MELI_APP_SECRET"],
+                    "refresh_token":os.environ["MELI_REFRESH_TOKEN"]}).json()
+          AT = tk["access_token"]
+          H = {"Authorization": f"Bearer {AT}", "Content-Type":"application/json"}
+
+          # Traer ambos items
+          azul = requests.get(f"https://api.mercadolibre.com/items/MLM2874595277", headers=H).json()
+          negro = requests.get(f"https://api.mercadolibre.com/items/MLM2874367731", headers=H).json()
+
+          def attrs_map(it):
+              m = {}
+              for a in it.get("attributes",[]) or []:
+                  vn = a.get("value_name")
+                  vs = a.get("value_struct")
+                  vv = a.get("values")
+                  if vn or vs or vv:
+                      m[a["id"]] = {"value_name": vn, "value_struct": vs, "values": vv}
+              return m
+
+          am = attrs_map(azul)
+          nm = attrs_map(negro)
+          print(f"azul: {len(am)} attrs llenos")
+          print(f"negro: {len(nm)} attrs llenos")
+
+          # Atributos que tiene el negro y NO el azul
+          missing = {k: nm[k] for k in nm if k not in am}
+          print(f"\n=== Faltantes en azul ({len(missing)}): ===")
+          for k, v in missing.items():
+              print(f"  {k}: {v}")
+
+          # Construir payload de update (exclude read-only, color-sensitive)
+          SKIP_IDS = {
+              # color (ya lo tiene el azul con su color propio)
+              "COLOR", "MAIN_COLOR",
+              # read-only que el viejo tenga por cambios de MELI
+              "LINE", "ALPHANUMERIC_MODEL", "DETAILED_MODEL", "PRODUCT_DATA_SOURCE",
+              "CATALOG_TITLE", "SEARCH_ENHANCEMENT_FIELDS", "DESCRIPTIVE_TAGS",
+              "PACKAGE_HEIGHT", "PACKAGE_WIDTH", "PACKAGE_LENGTH", "PACKAGE_WEIGHT",
+              "SELLER_PACKAGE_WIDTH", "SELLER_PACKAGE_LENGTH", "SELLER_PACKAGE_HEIGHT",
+              "SELLER_PACKAGE_WEIGHT", "SELLER_PACKAGE_DATA_SOURCE", "PACKAGE_DATA_SOURCE",
+              "HAZMAT_TRANSPORTABILITY", "VALUE_ADDED_TAX", "IMPORT_DUTY",
+              "SUBTEL_CODE", "ANATEL_HOMOLOGATION_LABEL", "IS_SUITABLE_FOR_SHIPMENT",
+              "HAS_COMPATIBILITIES", "IS_NEW_OFFER",
+          }
+          to_push = []
+          for k, v in missing.items():
+              if k in SKIP_IDS: continue
+              body = {"id": k}
+              if v.get("value_name"): body["value_name"] = v["value_name"]
+              if v.get("value_struct"): body["value_struct"] = v["value_struct"]
+              if v.get("values"): body["values"] = v["values"]
+              to_push.append(body)
+
+          print(f"\n=== Atributos a copiar al azul ({len(to_push)}): ===")
+          for a in to_push: print(f"  {a['id']}")
+
+          if not to_push:
+              print("\n(No hay atributos que copiar)")
+              exit(0)
+
+          # Hacer PUT con los attrs faltantes
+          r = requests.put(f"https://api.mercadolibre.com/items/MLM2874595277",
+              headers=H, json={"attributes": to_push})
+          print(f"\n=== PUT status={r.status_code} ===")
+          rj = r.json()
+          if r.status_code >= 400:
+              print(json.dumps(rj, indent=2, ensure_ascii=False)[:2500])
+          else:
+              filled = sum(1 for a in rj.get("attributes",[]) if a.get("value_name") or a.get("value_struct") or a.get("values"))
+              print(f"azul attrs filled after: {filled}")
+              # Ver qué se ignoró
+              if "cause" in rj:
+                  for c in rj.get("cause",[])[:10]:
+                      print(f"  warn: {c.get('message','')[:160]}")
+          PY
