@@ -1,0 +1,39 @@
+name: Find rosa product (one-shot)
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    steps:
+      - run: pip install requests
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+        run: |
+          python3 <<'PY'
+          import os, json, requests
+          tk = requests.post("https://api.mercadolibre.com/oauth/token",
+              data={"grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],
+                    "client_secret":os.environ["MELI_APP_SECRET"],
+                    "refresh_token":os.environ["MELI_REFRESH_TOKEN"]}).json()
+          AT = tk["access_token"]
+          H = {"Authorization": f"Bearer {AT}"}
+
+          # Buscar en productos por color rosa
+          for q in ["JBL Go 4 Rosa chicle", "JBL Go 4 pink", "JBL Go 4 rosa"]:
+              print(f"\n=== query: {q} ===")
+              s = requests.get("https://api.mercadolibre.com/products/search",
+                  params={"site_id":"MLM","q":q,"limit":8}, headers=H).json()
+              for r in s.get('results',[])[:8]:
+                  print(f"  {r.get('id')} - {r.get('name','')[:90]}")
+
+          # Para cada product candidato, ver color
+          for pid in ["MLM36341303","MLM44232450","MLM40439493","MLM44731712","MLM44731940"]:
+              pr = requests.get(f"https://api.mercadolibre.com/products/{pid}", headers=H).json()
+              color = None
+              for a in pr.get('attributes',[]):
+                  if a.get('id') in ('COLOR','MAIN_COLOR'):
+                      color = a.get('value_name')
+                      break
+              print(f"  {pid}: color={color}  pictures={len(pr.get('pictures',[]))}  name={pr.get('name','')[:60]}")
+          PY
