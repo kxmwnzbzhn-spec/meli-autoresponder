@@ -1138,6 +1138,9 @@ def check_and_replenish_stock(token, state):
                 rbody = {"quantity": qty, "listing_type_id": ltype, "price": iprice,
                          "currency_id": it.get("currency_id","MXN"),
                          "condition": it.get("condition","used")}
+                # Si hay seo_title en el stock_config, usarlo en el nuevo listing
+                if meta.get("seo_title"):
+                    rbody["title"] = meta["seo_title"]
                 rcode, rresp = meli("POST", f"/items/{item_id}/relist", token, body=rbody)
                 if rcode >= 400:
                     _log(f"  {item_id}: relist err {rcode} {rresp}")
