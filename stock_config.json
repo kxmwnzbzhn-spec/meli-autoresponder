@@ -90,17 +90,6 @@
     "previous_ids": [],
     "seo_title": "Bocina Bluetooth JBL Grip Portatil Negra Original Usada"
   },
-  "MLM2874538531": {
-    "real_stock": 49,
-    "sku": "JBL-GO4-CAMO-001",
-    "label": "JBL Go 4 Camuflaje Usado - $299",
-    "auto_replenish": true,
-    "replenish_quantity": 1,
-    "previous_ids": [
-      "MLM5209619690"
-    ],
-    "seo_title": "Bocina Bluetooth JBL Go 4 Portatil Camuflaje Original Usada"
-  },
   "MLM2874600533": {
     "real_stock": 46,
     "sku": "JBL-GO4-NGR-001",
@@ -147,5 +136,17 @@
       "MLM5209620060"
     ],
     "seo_title": "Bocina Bluetooth JBL Flip 7 Portatil Negra Original Usada"
+  },
+  "MLM5212679188": {
+    "real_stock": 48,
+    "sku": "JBL-GO4-CAMO-001",
+    "label": "JBL Go 4 Camuflaje Usado - $299",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "previous_ids": [
+      "MLM5209619690",
+      "MLM2874538531"
+    ],
+    "seo_title": "Bocina Bluetooth JBL Go 4 Portatil Camuflaje Original Usada"
   }
 }
