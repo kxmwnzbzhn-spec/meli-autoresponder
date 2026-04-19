@@ -63,15 +63,6 @@
     "previous_ids": [],
     "seo_title": "Bocina Bluetooth JBL Charge 6 Portatil Azul Original Usada"
   },
-  "MLM5209619970": {
-    "real_stock": 50,
-    "sku": "JBL-CHG6-SQUAD-001",
-    "label": "JBL Charge 6 Camuflaje Usado - $499",
-    "auto_replenish": true,
-    "replenish_quantity": 1,
-    "previous_ids": [],
-    "seo_title": "Bocina BT JBL Charge 6 Portatil Camuflaje Original Usada"
-  },
   "MLM5209620060": {
     "real_stock": 50,
     "sku": "JBL-FLIP7-NGR-001",
@@ -141,5 +132,16 @@
       "MLM2874367731"
     ],
     "seo_title": "Bocina Bluetooth JBL Go 4 Portatil Negra Original Usada"
+  },
+  "MLM2875349051": {
+    "real_stock": 49,
+    "sku": "JBL-CHG6-SQUAD-001",
+    "label": "JBL Charge 6 Camuflaje Usado - $499",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "previous_ids": [
+      "MLM5209619970"
+    ],
+    "seo_title": "Bocina BT JBL Charge 6 Portatil Camuflaje Original Usada"
   }
 }
