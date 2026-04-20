@@ -1,0 +1,44 @@
+name: Fix Redmi price
+on: {workflow_dispatch: {}}
+permissions: {contents: write}
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+        run: |
+          python3 <<'PY'
+          import os, json, requests
+          r = requests.post("https://api.mercadolibre.com/oauth/token", data={
+              "grant_type":"refresh_token",
+              "client_id":os.environ["MELI_APP_ID"],
+              "client_secret":os.environ["MELI_APP_SECRET"],
+              "refresh_token":os.environ["MELI_REFRESH_TOKEN"]
+          }, timeout=20)
+          tok = r.json()["access_token"]; h = {"Authorization":f"Bearer {tok}", "Content-Type":"application/json"}
+          for iid in ("MLM2877711851","MLM2877535563"):
+              r = requests.put(f"https://api.mercadolibre.com/items/{iid}", headers=h, json={"price":149}, timeout=15)
+              print(f"{iid}: {r.status_code} {r.json().get('price','err')}")
+          # Fix catalog_listings.json
+          with open("catalog_listings.json") as f:
+              cfg = json.load(f)
+          for k, v in cfg.items():
+              if isinstance(v, dict):
+                  v["last_price"] = 149
+                  v["floor_alerted"] = False
+          with open("catalog_listings.json","w") as f:
+              json.dump(cfg, f, indent=2, ensure_ascii=False)
+          PY
+      - run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add catalog_listings.json
+          git diff --cached --quiet || git commit -m "[fix] restore Redmi to 149"
+          git push || echo "no push"
