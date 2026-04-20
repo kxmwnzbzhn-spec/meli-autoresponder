@@ -7,7 +7,10 @@
     "auto_replenish": true,
     "replenish_quantity": 1,
     "previous_ids": [],
-    "seo_title": "Bocina Bluetooth JBL Grip Portatil Negra Original Usada"
+    "seo_title": "Bocina Bluetooth JBL Grip Portatil Negra Original Usada",
+    "deleted": true,
+    "_deleted_at": 1776654102,
+    "_deleted_reason": "MELI marked as deleted - manual cleanup"
   },
   "MLM5212880744": {
     "real_stock": 22,
@@ -18,7 +21,10 @@
     "previous_ids": [
       "MLM5209619958"
     ],
-    "seo_title": "Bocina Bluetooth JBL Charge 6 Portatil Negra Original Usada"
+    "seo_title": "Bocina Bluetooth JBL Charge 6 Portatil Negra Original Usada",
+    "deleted": true,
+    "_deleted_at": 1776654102,
+    "_deleted_reason": "MELI marked as deleted - manual cleanup"
   },
   "MLM2876026311": {
     "real_stock": 49,
@@ -62,7 +68,10 @@
     "previous_ids": [
       "MLM2874608285"
     ],
-    "seo_title": "Bocina Bluetooth JBL Clip 5 Portatil Rosa Original Usada"
+    "seo_title": "Bocina Bluetooth JBL Clip 5 Portatil Rosa Original Usada",
+    "deleted": true,
+    "_deleted_at": 1776654102,
+    "_deleted_reason": "MELI marked as deleted - manual cleanup"
   },
   "MLM2876026327": {
     "real_stock": 49,
