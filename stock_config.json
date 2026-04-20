@@ -139,7 +139,10 @@
       "MLM2874596165",
       "MLM2875938837"
     ],
-    "seo_title": "Bocina Bluetooth JBL Charge 6 Portatil Roja Original Usada"
+    "seo_title": "Bocina Bluetooth JBL Charge 6 Portatil Roja Original Usada",
+    "deleted": true,
+    "_deleted_at": 1776661649,
+    "_deleted_reason": "It's not possible to relist an item that has been already deleted. [MLM2876026339 deleted]"
   },
   "MLM2876038561": {
     "real_stock": 48,
@@ -275,6 +278,16 @@
     "previous_ids": [
       "MLM5213158476"
     ],
+    "_auto_discovered": true
+  },
+  "MLM5213612190": {
+    "real_stock": 30,
+    "sku": "AUTO-612190",
+    "label": "Bocina Bluetooth Jbl Charge 6 Portatil Roja Original Usada - $499",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "seo_title": "Bocina Bluetooth Jbl Charge 6 Portatil Roja Original Usada",
+    "previous_ids": [],
     "_auto_discovered": true
   }
 }
