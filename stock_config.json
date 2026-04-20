@@ -99,19 +99,6 @@
     ],
     "seo_title": "Bocina Bluetooth JBL Go 4 Portatil Negra Original Usada"
   },
-  "MLM5213304088": {
-    "real_stock": 47,
-    "sku": "JBL-GO4-AZMAR-001",
-    "label": "JBL Go 4 Azul Marino Usado - $299",
-    "auto_replenish": true,
-    "replenish_quantity": 1,
-    "previous_ids": [
-      "MLM2874595277",
-      "MLM5212320712",
-      "MLM2875891653"
-    ],
-    "seo_title": "Bocina BT JBL Go 4 Portatil Azul Marino Original Usada"
-  },
   "MLM2876038557": {
     "real_stock": 46,
     "sku": "JBL-FLIP7-NGR-001",
@@ -306,5 +293,19 @@
       "MLM2876038561"
     ],
     "seo_title": "Bocina Bluetooth JBL Charge 6 Portatil Azul Original Usada"
+  },
+  "MLM2877475987": {
+    "real_stock": 46,
+    "sku": "JBL-GO4-AZMAR-001",
+    "label": "JBL Go 4 Azul Marino Usado - $299",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "previous_ids": [
+      "MLM2874595277",
+      "MLM5212320712",
+      "MLM2875891653",
+      "MLM5213304088"
+    ],
+    "seo_title": "Bocina BT JBL Go 4 Portatil Azul Marino Original Usada"
   }
 }
