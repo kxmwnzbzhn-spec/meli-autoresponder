@@ -1,5 +1,5 @@
 {
-  "_comment": "Casadas: catalog + tradicional. Bot sincroniza precio.",
+  "_comment": "Casadas en stock + precio. Bot vigila ambas como un pool. real_stock = inventario fisico compartido.",
   "MLM2014404762": {
     "catalog_item_id": "MLM2877711851",
     "traditional_item_id": "MLM2877535563",
@@ -7,6 +7,7 @@
     "floor": 120,
     "step": 10,
     "last_price": 149,
+    "real_stock": 50,
     "active": true,
     "floor_alerted": false,
     "sync_price_to_traditional": true,
