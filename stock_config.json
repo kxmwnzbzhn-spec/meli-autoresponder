@@ -249,16 +249,6 @@
     "previous_ids": [],
     "_auto_discovered": true
   },
-  "MLM2876273213": {
-    "real_stock": 30,
-    "sku": "AUTO-273213",
-    "label": "Bocina Bluetooth Jbl Grip Portatil Negra Original Usada - $399",
-    "auto_replenish": true,
-    "replenish_quantity": 1,
-    "seo_title": "Bocina Bluetooth Jbl Grip Portatil Negra Original Usada",
-    "previous_ids": [],
-    "_auto_discovered": true
-  },
   "MLM2876498753": {
     "real_stock": 47,
     "sku": "JBL-CLIP5-NGR-001",
@@ -332,5 +322,17 @@
     "previous_ids": [],
     "_auto_discovered": true,
     "_comment": "Managed by sync_linked_stock, not auto-replenish"
+  },
+  "MLM5217729566": {
+    "real_stock": 29,
+    "sku": "AUTO-273213",
+    "label": "Bocina Bluetooth Jbl Grip Portatil Negra Original Usada - $399",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "seo_title": "Bocina Bluetooth Jbl Grip Portatil Negra Original Usada",
+    "previous_ids": [
+      "MLM2876273213"
+    ],
+    "_auto_discovered": true
   }
 }
