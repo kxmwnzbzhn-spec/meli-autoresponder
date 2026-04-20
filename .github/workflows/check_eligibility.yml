@@ -1,0 +1,71 @@
+name: Check catalog eligibility
+on: {workflow_dispatch: {}}
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+        run: |
+          python3 <<'PY'
+          import os, json, requests
+          r = requests.post("https://api.mercadolibre.com/oauth/token", data={
+              "grant_type":"refresh_token",
+              "client_id":os.environ["MELI_APP_ID"],
+              "client_secret":os.environ["MELI_APP_SECRET"],
+              "refresh_token":os.environ["MELI_REFRESH_TOKEN"]
+          }, timeout=20)
+          tok = r.json()["access_token"]; h = {"Authorization":f"Bearer {tok}"}
+          
+          # Get user ID
+          r = requests.get("https://api.mercadolibre.com/users/me", headers=h, timeout=15)
+          me = r.json()
+          sid = me.get("id")
+          print(f"Seller: {me.get('nickname')} (id={sid})")
+          print(f"seller_reputation: {json.dumps(me.get('seller_reputation'), indent=2)[:500]}")
+          print(f"status: {json.dumps(me.get('status'), indent=2)[:500]}")
+          
+          # Check catalog eligibility for the product we want
+          prod = "MLM2014404762"
+          item = "MLM2874537869"
+          
+          # Attempt to get listing-exposure details
+          print("\n=== Catalog product matching check ===")
+          url = f"https://api.mercadolibre.com/users/{sid}/items/search?catalog_listing_eligible=true&limit=50"
+          r = requests.get(url, headers=h, timeout=15)
+          print(f"eligible items: {r.status_code} -> {r.json().get('paging',{}).get('total')}")
+          ids = r.json().get('results',[])[:5]
+          print(f"sample eligible ids: {ids}")
+          
+          # Get our item in detail
+          r = requests.get(f"https://api.mercadolibre.com/items/{item}", headers=h, timeout=15)
+          it = r.json()
+          print(f"\nOur item status: {it.get('status')}")
+          print(f"Our item condition: {it.get('condition')}")
+          print(f"catalog_listing: {it.get('catalog_listing')}")
+          print(f"catalog_product_id: {it.get('catalog_product_id')}")
+          print(f"listing_type_id: {it.get('listing_type_id')}")
+          print(f"shipping mode: {(it.get('shipping') or {}).get('mode')}")
+          print(f"shipping free: {(it.get('shipping') or {}).get('free_shipping')}")
+          
+          # Try POST /users/{id}/items/catalog_opt_in (some docs mention this)
+          # Or attempt to PATCH catalog_listing=true on existing item
+          print("\n=== Attempt PATCH existing item to catalog_listing=true ===")
+          r = requests.put(f"https://api.mercadolibre.com/items/{item}", headers={**h, "Content-Type":"application/json"},
+              json={"catalog_listing": True, "catalog_product_id": prod}, timeout=20)
+          print(f"PATCH status: {r.status_code}")
+          print(f"response: {json.dumps(r.json(), indent=2)[:1500]}")
+          
+          # Final: check account eligibility via status
+          if me.get('status'):
+              st = me['status']
+              print(f"\nList eligibility: {st.get('list', {})}")
+              print(f"buy eligibility: {st.get('buy', {})}")
+              print(f"mercadoenvios: {st.get('mercadoenvios', {})}")
+              print(f"required_actions: {st.get('required_actions',[])}")
+          PY
