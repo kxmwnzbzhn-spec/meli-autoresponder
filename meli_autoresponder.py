@@ -1190,16 +1190,16 @@ def check_and_replenish_stock(token, state):
                 changed = True
                 sold_before = sold
                 _log(f"  {item_id} → {new_id}: relist OK qty={qty}, real restante={new_meta['real_stock']}")
-                tg_send(
-                    f"🔁 *Reposicion automatica (relist)*\n\n"
-                    f"📦 {meta.get('label', item_id)}\n"
-                    f"Antiguo: `{item_id}` (vendido, cerrado)\n"
-                    f"Nuevo: `{new_id}`\n"
-                    f"Stock MELI: {qty}\n"
-                    f"Inventario real restante: {new_meta['real_stock']}\n"
-                    f"Ventas totales historicas: {sold_before}\n"
-                    f"🔗 {new_link}"
-                )
+                stats = state.setdefault("daily_stats", {})
+                stats["relists"] = stats.get("relists", 0) + 1
+                # Solo alertar cuando stock real cae <= 5 (inventario bajo)
+                if new_meta['real_stock'] <= 5:
+                    tg_send(
+                        f"⚠️ *Inventario bajo*\n\n"
+                        f"📦 {meta.get('label', item_id)}\n"
+                        f"Quedan *{new_meta['real_stock']}* unidades reales.\n"
+                        f"Considera reponer inventario fisico pronto."
+                    )
             else:
                 # Item closed sin ventas, o paused: intentar reactivar con PUT
                 body = {"available_quantity": qty, "status": "active"}
@@ -1348,12 +1348,9 @@ def handle_questions(token, state):
             if code_a == 200:
                 seen_q[qid] = {"answered": True, "template": matched["id"], "ts": int(time.time())}
                 _log(f"  Q&A auto-respondida [{qid}] template={matched['id']}")
-                tg_send(
-                    f"🤖 *Pregunta respondida auto*\n\n"
-                    f"Item: `{item_id}`\n"
-                    f"Q: _{qtext[:150]}_\n"
-                    f"Template: `{matched['id']}`"
-                )
+                # Contador para daily digest
+                stats = state.setdefault("daily_stats", {})
+                stats["auto_answered"] = stats.get("auto_answered", 0) + 1
             else:
                 _log(f"  Q&A answer err {code_a}: {resp}")
         else:
@@ -1550,9 +1547,16 @@ def send_daily_claims_digest(token, state):
         pending_q = len(q.get("questions", []) or []) if code == 200 else 0
 
         # Armar mensaje
+        # Resetear contadores diarios (y capturar los de AYER)
+        prev_stats = state.get("daily_stats", {}) or {}
+        relists_yday = prev_stats.get("relists", 0)
+        auto_ans_yday = prev_stats.get("auto_answered", 0)
+
         lines = [f"🌅 *Resumen diario {today_key}*", ""]
         lines.append(f"📦 *Ventas 24h*: {len(sales24)} ordenes · ${rev24:,.0f} MXN")
-        lines.append(f"❓ *Preguntas pendientes*: {pending_q}")
+        lines.append(f"🔁 *Relists automaticos 24h*: {relists_yday}")
+        lines.append(f"🤖 *Preguntas auto-respondidas 24h*: {auto_ans_yday}")
+        lines.append(f"❓ *Preguntas pendientes ahora*: {pending_q}")
         lines.append("")
         lines.append(f"🧾 *Reclamos*: {len(claims)} total")
         if by_stage:
@@ -1577,6 +1581,7 @@ def send_daily_claims_digest(token, state):
 
         tg_send("\n".join(lines))
         state["last_daily_digest_key"] = today_key
+        state["daily_stats"] = {"relists": 0, "auto_answered": 0}  # reset
         _log(f"Daily digest enviado para {today_key}")
     except Exception as e:
         _log(f"  daily digest err: {e}")
