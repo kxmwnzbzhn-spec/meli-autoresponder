@@ -1,0 +1,73 @@
+name: Check Redmi catalog
+on:
+  workflow_dispatch:
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          python3 <<'PY'
+          import os, json, requests
+          
+          # Refresh
+          r = requests.post("https://api.mercadolibre.com/oauth/token", data={
+              "grant_type":"refresh_token",
+              "client_id":os.environ["MELI_APP_ID"],
+              "client_secret":os.environ["MELI_APP_SECRET"],
+              "refresh_token":os.environ["MELI_REFRESH_TOKEN"]
+          }, timeout=20)
+          tok = r.json()["access_token"]
+          h = {"Authorization":f"Bearer {tok}"}
+          
+          # Get our Redmi item details
+          iid = "MLM2874537869"
+          r = requests.get(f"https://api.mercadolibre.com/items/{iid}", headers=h, timeout=20)
+          item = r.json()
+          print(f"Our item: {item.get('title')}")
+          print(f"  status: {item.get('status')}")
+          print(f"  price: ${item.get('price')}")
+          print(f"  category: {item.get('category_id')}")
+          print(f"  catalog_product_id: {item.get('catalog_product_id')}")
+          print(f"  catalog_listing: {item.get('catalog_listing')}")
+          print(f"  condition: {item.get('condition')}")
+          print(f"  listing_type_id: {item.get('listing_type_id')}")
+          print(f"  available_quantity: {item.get('available_quantity')}")
+          
+          cat_id = item.get('catalog_product_id')
+          if cat_id:
+              # Get catalog product info + competitors
+              r = requests.get(f"https://api.mercadolibre.com/products/{cat_id}", headers=h, timeout=20)
+              prod = r.json()
+              print(f"\n=== CATALOG PRODUCT {cat_id} ===")
+              print(f"  name: {prod.get('name')}")
+              print(f"  status: {prod.get('status')}")
+              # Buy box winner
+              bbw = prod.get('buy_box_winner') or {}
+              print(f"  buy_box_winner price: ${bbw.get('price')}")
+              print(f"  buy_box_winner item_id: {bbw.get('item_id')}")
+              print(f"  buy_box_winner seller_id: {bbw.get('seller_id')}")
+              
+              # Get listings to see competitors
+              r = requests.get(f"https://api.mercadolibre.com/products/{cat_id}/items?limit=10", headers=h, timeout=20)
+              listings = r.json()
+              print(f"\n=== COMPETING LISTINGS ===")
+              for it in listings.get('results', [])[:10]:
+                  print(f"  {it.get('item_id')} | seller={it.get('seller_id')} | ${it.get('price')} | cond={it.get('condition')} | {it.get('listing_type_id')}")
+          else:
+              # Search by GTIN or title for catalog match
+              gtin_attr = next((a for a in item.get('attributes',[]) if a.get('id')=='GTIN'), None)
+              print(f"\nNo catalog_product_id. GTIN: {gtin_attr}")
+              # Try domain products search
+              r = requests.get(f"https://api.mercadolibre.com/sites/MLM/search?q=Redmi+Buds+4+Lite&category={item.get('category_id')}&limit=5", headers=h, timeout=20)
+              print(f"Sample from search: {r.json().get('results',[{}])[0].get('catalog_product_id','n/a')}")
+          PY
