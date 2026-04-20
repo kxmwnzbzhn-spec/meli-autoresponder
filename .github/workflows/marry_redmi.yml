@@ -1,5 +1,7 @@
 name: Marry Redmi catalog + traditional
 on: {workflow_dispatch: {}}
+permissions:
+  contents: write
 jobs:
   go:
     runs-on: ubuntu-latest
@@ -29,29 +31,26 @@ jobs:
           CATALOG_ITEM = "MLM2877711851"
           PROD = "MLM2014404762"
           PRICE = 149
-          GTIN = "6941812721032"  # Xiaomi Redmi Buds 4 Lite Negro
+          GTIN = "6941812721032"
           
-          # 1) OLD is under_review — try delete via DELETE method; also try sub_status
+          # 1) OLD: try forceful removal
           print(f"=== STEP 1: Try removing {OLD} ===")
-          r = requests.delete(f"https://api.mercadolibre.com/items/{OLD}", headers=h, timeout=20)
-          print(f"DELETE: {r.status_code} {r.text[:200]}")
-          # If DELETE not supported, try setting deleted sub_status
-          r = requests.put(f"https://api.mercadolibre.com/items/{OLD}", headers=h,
-                          json={"deleted":"true"}, timeout=20)
-          print(f"PUT deleted=true: {r.status_code} {r.text[:200]}")
+          r = requests.get(f"https://api.mercadolibre.com/items/{OLD}", headers=h, timeout=15)
+          print(f"current status: {r.json().get('status')} sub_status: {r.json().get('sub_status')}")
           
-          # 2) Verify catalog OK
-          print(f"\n=== STEP 2: Catalog item {CATALOG_ITEM} ===")
+          # 2) Verify catalog
           r = requests.get(f"https://api.mercadolibre.com/items/{CATALOG_ITEM}", headers=h, timeout=20)
           ci = r.json()
-          print(f"  status={ci.get('status')} price=${ci.get('price')}")
+          print(f"Catalog {CATALOG_ITEM}: status={ci.get('status')} ${ci.get('price')}")
           
-          # 3) Create traditional - WITHOUT catalog_product_id, with GTIN, clean "new" title
-          print(f"\n=== STEP 3: Create traditional (clean, sin catalog) ===")
+          # 3) Create traditional with short title (<=60)
           pic_ids = [{"id": p.get('id')} for p in ci.get('pictures',[]) if p.get('id')][:8]
+          # Title: 57 chars
+          title = "Xiaomi Redmi Buds 4 Lite Audifonos Bluetooth Negro Nuevo"
+          assert len(title) <= 60, f"len={len(title)}"
           
           body = {
-              "title": "Audifonos Bluetooth Xiaomi Redmi Buds 4 Lite Negros Originales Nuevos",
+              "title": title,
               "category_id": "MLM5072",
               "price": PRICE,
               "currency_id": "MXN",
@@ -76,19 +75,25 @@ jobs:
           }
           r = requests.post("https://api.mercadolibre.com/items", headers=h, json=body, timeout=30)
           resp = r.json()
-          print(f"  POST: {r.status_code}")
+          print(f"\nPOST tradicional: {r.status_code}")
           new_id = None
           if r.status_code in (200,201):
               new_id = resp.get("id")
-              print(f"  ✓ TRADICIONAL: {new_id}")
+              print(f"✓ TRADICIONAL: {new_id}")
               print(f"  permalink: {resp.get('permalink')}")
+              # Add description
+              desc = "Audífonos bluetooth inalámbricos Xiaomi Redmi Buds 4 Lite Negro. Producto nuevo y original. Incluye caja, manual y cable de carga. Garantía del vendedor 30 días."
+              rd = requests.post(f"https://api.mercadolibre.com/items/{new_id}/description",
+                  headers=h, json={"plain_text":desc}, timeout=15)
+              print(f"  description: {rd.status_code}")
           else:
-              for c in resp.get("cause",[])[:8]:
-                  print(f"  err: {c.get('code')} | {c.get('message','')[:140]}")
+              for c in resp.get("cause",[])[:10]:
+                  t = c.get('type','?')
+                  print(f"  [{t}] {c.get('code')} | {c.get('message','')[:140]}")
           
-          # 4) Update catalog_listings.json
+          # 4) State
           state = {
-              "_comment": "Casadas: catalog + tradicional sincronizadas. Bot vigila precio del catalogo y replica al tradicional.",
+              "_comment": "Casadas: catalog + tradicional. Bot sincroniza precio.",
               PROD: {
                   "catalog_item_id": CATALOG_ITEM,
                   "traditional_item_id": new_id,
@@ -110,16 +115,16 @@ jobs:
               m = f"💍 *Redmi Buds 4 Lite — casadas*\n\n"
               m += f"🎯 Catálogo: `{CATALOG_ITEM}` ${PRICE}\n"
               if new_id:
-                  m += f"📦 Tradicional: `{new_id}` ${PRICE} (sin catalog_product_id, titulo limpio)\n"
+                  m += f"📦 Tradicional: `{new_id}` ${PRICE} (título limpio)\n"
               else:
-                  m += f"⚠️ Tradicional NO creada\n"
-              m += f"❌ Vieja `{OLD}`: en under_review (MELI revisando, no modificable)\n"
-              m += f"\nBot va a sincronizar precio entre las dos. Floor \\$120 | Step \\$10"
+                  m += f"⚠️ Tradicional no creada aún\n"
+              m += f"❌ Vieja `{OLD}`: under_review (MELI revisando)\n\nFloor \\$120 | Step \\$10"
               requests.post(f"https://api.telegram.org/bot{tt}/sendMessage", json={"chat_id":tc,"parse_mode":"Markdown","text":m})
           PY
-      - run: |
+      - name: Commit
+        run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
-          git add catalog_listings.json 2>/dev/null || true
-          git diff --cached --quiet || git commit -m "[catalog] marry Redmi"
-          git push || echo "nothing to push"
+          git add catalog_listings.json
+          git diff --cached --quiet || git commit -m "[catalog] marry Redmi tradicional"
+          git push || echo "nothing"
