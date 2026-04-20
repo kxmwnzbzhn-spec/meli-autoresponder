@@ -1397,6 +1397,73 @@ def send_review_summary_if_due(token, state):
         _log(f"  send_review err: {e}")
 
 
+
+
+def auto_discover_items(token, state):
+    """Escanea items del seller; si detecta uno con ventas que NO esta en stock_config, lo agrega."""
+    cfg = _load_stock_config()
+    if not cfg: return
+    # user id del seller
+    seller_id = state.get("seller_id")
+    if not seller_id:
+        code, me = meli("GET", "/users/me", token)
+        if code == 200: seller_id = me.get("id"); state["seller_id"] = seller_id
+    if not seller_id: return
+
+    # Set de IDs ya conocidos (actuales + previous_ids)
+    known = set()
+    for k, v in cfg.items():
+        if k.startswith("_"): continue
+        known.add(k)
+        for p in (v.get("previous_ids") or []):
+            known.add(p)
+
+    # Items activos + closed del seller
+    discovered = []
+    for st in ("active","closed"):
+        code, r = meli("GET", f"/users/{seller_id}/items/search?status={st}&limit=50", token)
+        if code != 200: continue
+        for iid in r.get("results", []):
+            if iid in known: continue
+            code2, it = meli("GET", f"/items/{iid}", token)
+            if code2 != 200: continue
+            # Solo items con venta O items activos recien creados que tengan seo_title
+            if it.get("sold_quantity",0) > 0 or it.get("status") == "active":
+                discovered.append(iid)
+
+    if not discovered: return
+
+    _log(f"Auto-discover: {len(discovered)} items sin tracking → agregando a stock_config")
+    changed = False
+    for iid in discovered:
+        code, it = meli("GET", f"/items/{iid}", token)
+        if code != 200: continue
+        # Adivinar label + SKU
+        title = it.get("title","")
+        price = it.get("price")
+        cfg[iid] = {
+            "real_stock": 30,  # conservador
+            "sku": f"AUTO-{iid[-6:]}",
+            "label": f"{title[:60]} - ${price}",
+            "auto_replenish": True,
+            "replenish_quantity": 1,
+            "seo_title": title,
+            "previous_ids": [],
+            "_auto_discovered": True,
+        }
+        changed = True
+        _log(f"  + {iid}: {title[:60]}")
+        tg_send(
+            f"🆕 *Auto-discover*\n\n"
+            f"Item `{iid}` agregado a stock_config (no estaba trackeado).\n"
+            f"Stock real default: 30 (ajusta manualmente si no es correcto).\n"
+            f"Label: {title[:80]}"
+        )
+    if changed:
+        _save_stock_config(cfg)
+        state["_stock_config_dirty"] = True
+
+
 # ============================================================
 # Main
 # ============================================================
