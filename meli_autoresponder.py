@@ -1153,6 +1153,19 @@ def check_and_replenish_stock(token, state):
                 if not new_id:
                     _log(f"  {item_id}: relist sin new_id: {rresp}")
                     continue
+                # Si es JBL, asegurar que la descripción tenga nota OEM
+                try:
+                    label = (meta.get("label") or "")
+                    if "JBL" in label or "jbl" in label.lower():
+                        code_d, desc_data = meli("GET", f"/items/{new_id}/description", token)
+                        cur_desc = (desc_data.get("plain_text") or "") if code_d == 200 else ""
+                        if "OEM" not in cur_desc and "Version OEM" not in cur_desc:
+                            oem_note = "\n\n* Version OEM fabricada bajo estandares originales de JBL; producto genuino sin afectar funcionalidad ni especificaciones tecnicas."
+                            meli("PUT", f"/items/{new_id}/description", token,
+                                 body={"plain_text": (cur_desc + oem_note)})
+                            _log(f"  {new_id}: OEM note appended to description")
+                except Exception as e:
+                    _log(f"  {new_id}: OEM note err: {e}")
                 # Migrar entrada en stock_config: borrar viejo, crear nuevo con real-qty
                 new_meta = dict(meta)
                 new_meta["real_stock"] = real - qty
