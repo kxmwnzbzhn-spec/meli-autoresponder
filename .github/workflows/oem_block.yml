@@ -1,0 +1,106 @@
+name: Add OEM + block buyer (one-shot)
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests
+      - uses: actions/cache@v4
+        with:
+          path: .seen_claims.json
+          key: seen-state
+          restore-keys: seen-state
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+        run: |
+          python3 <<'PY'
+          import os, json, time, requests
+          tk = requests.post("https://api.mercadolibre.com/oauth/token",
+              data={"grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],
+                    "client_secret":os.environ["MELI_APP_SECRET"],
+                    "refresh_token":os.environ["MELI_REFRESH_TOKEN"]}).json()
+          AT = tk["access_token"]
+          H = {"Authorization": f"Bearer {AT}", "Content-Type":"application/json"}
+
+          # === 1. Agregar OEM a descripciones de todas las bocinas JBL ===
+          OEM_NOTE = "\n\n* Version OEM fabricada bajo estandares originales de JBL; producto genuino sin afectar funcionalidad ni especificaciones tecnicas."
+
+          # Cargar stock_config para saber qué items manejamos
+          with open("stock_config.json") as f: cfg = json.load(f)
+
+          updated = 0
+          skipped = 0
+          for iid in cfg:
+              if iid.startswith("_"): continue
+              v = cfg[iid]
+              if not isinstance(v, dict): continue
+              label = v.get("label","")
+              # Solo aplicar a items JBL (no Redmi Buds, no Asva)
+              if "JBL" not in label and "jbl" not in label.lower():
+                  continue
+
+              # Traer descripción actual
+              it = requests.get(f"https://api.mercadolibre.com/items/{iid}", headers=H).json()
+              if it.get("status") not in ("active","paused","under_review"):
+                  print(f"  skip {iid} status={it.get('status')}")
+                  skipped += 1; continue
+
+              d = requests.get(f"https://api.mercadolibre.com/items/{iid}/description", headers=H).json()
+              cur = d.get("plain_text","") or ""
+
+              if "OEM" in cur or "Version OEM" in cur:
+                  print(f"  ok {iid}: ya tiene OEM")
+                  skipped += 1; continue
+
+              new_desc = cur + OEM_NOTE
+              r = requests.put(f"https://api.mercadolibre.com/items/{iid}/description",
+                  headers=H, json={"plain_text": new_desc})
+              if r.status_code < 400:
+                  print(f"  ✓ {iid}: OEM agregado")
+                  updated += 1
+              else:
+                  print(f"  ✗ {iid}: err {r.status_code}")
+
+          # === 2. Agregar buyer al blocklist local ===
+          STATE = ".seen_claims.json"
+          try:
+              with open(STATE) as f: state = json.load(f)
+          except:
+              state = {}
+          bl = state.setdefault("buyer_blocklist", {})
+          bid = "735376363"
+          entry = bl.setdefault(bid, {"events": [], "risk": "NONE"})
+          entry["events"].append({
+              "ts": int(time.time()),
+              "reason": "revendedor_masivo",
+              "source": "manual_user_instruction",
+              "note": "CORONAREGALADOANTONIO - compro 15 ordenes en un dia, 11 en carrito masivo de $3,688. Precio bajo aprovechado antes de ganar verde.",
+              "orders_count": 15,
+              "total_spent_mxn": 5585
+          })
+          entry["risk"] = "CRITICAL"
+          entry["nickname_hint"] = "CORONAREGALADOANTONIO"
+          with open(STATE,"w") as f:
+              json.dump(state, f, indent=2, ensure_ascii=False)
+          print(f"\nblocklist: buyer {bid} agregado con risk CRITICAL")
+
+          # === 3. Agregar al stock_config también para referencia en el bot ===
+          # (el bot ya lo detectará cuando procese orders futuras)
+
+          print(f"\n=== RESUMEN ===")
+          print(f"  Descripciones actualizadas: {updated}")
+          print(f"  Skip (ya tenían OEM o status no aplicable): {skipped}")
+          print(f"  Buyer bloqueado: {bid} ({entry.get('nickname_hint')})")
+          PY
+      - if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: .seen_claims.json
+          key: seen-state-${{ github.run_id }}
