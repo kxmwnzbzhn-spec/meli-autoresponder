@@ -1,0 +1,85 @@
+name: Create Redmi catalog listing
+on: {workflow_dispatch: {}}
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          python3 <<'PY'
+          import os, json, requests
+          r = requests.post("https://api.mercadolibre.com/oauth/token", data={
+              "grant_type":"refresh_token",
+              "client_id":os.environ["MELI_APP_ID"],
+              "client_secret":os.environ["MELI_APP_SECRET"],
+              "refresh_token":os.environ["MELI_REFRESH_TOKEN"]
+          }, timeout=20)
+          tok = r.json()["access_token"]; h = {"Authorization":f"Bearer {tok}", "Content-Type":"application/json"}
+          
+          CATALOG = "MLM2014404762"  # Redmi Buds 4 Lite Negro Excelente (Reacondicionado)
+          PRICE = 149
+          
+          # Get catalog product info
+          r = requests.get(f"https://api.mercadolibre.com/products/{CATALOG}", headers=h, timeout=20)
+          pd = r.json()
+          print(f"Catalog: {pd.get('name')}")
+          print(f"Domain: {pd.get('domain_id')}")
+          
+          # Build minimal catalog listing payload
+          body = {
+              "catalog_listing": True,
+              "catalog_product_id": CATALOG,
+              "condition": "refurbished_excellent",
+              "listing_type_id": "gold_pro",
+              "price": PRICE,
+              "currency_id": "MXN",
+              "available_quantity": 1,
+              "sale_terms": [
+                  {"id": "WARRANTY_TYPE", "value_name": "Garantía del vendedor"},
+                  {"id": "WARRANTY_TIME", "value_name": "30 días"}
+              ],
+              "shipping": {"mode": "me2", "free_shipping": True, "local_pick_up": False}
+          }
+          print(f"\nPOST body: {json.dumps(body, indent=2)}")
+          r = requests.post("https://api.mercadolibre.com/items", headers=h, json=body, timeout=30)
+          print(f"\nStatus: {r.status_code}")
+          resp = r.json()
+          print(f"Response: {json.dumps(resp, indent=2)[:2000]}")
+          
+          if r.status_code in (200, 201):
+              new_id = resp.get("id")
+              print(f"\n✓ CATALOG LISTING CREATED: {new_id}")
+              print(f"Permalink: {resp.get('permalink')}")
+              # Notify telegram
+              tt=os.environ.get("TELEGRAM_BOT_TOKEN"); tc=os.environ.get("TELEGRAM_CHAT_ID")
+              if tt and tc:
+                  requests.post(f"https://api.telegram.org/bot{tt}/sendMessage", json={
+                      "chat_id":tc, "parse_mode":"Markdown",
+                      "text":f"🎯 *Catalog listing creado*\n\n`{new_id}` Redmi Buds 4 Lite\nPrecio inicial: ${PRICE}\nCatalog: `{CATALOG}`\n\n[Ver listing]({resp.get('permalink','')})"
+                  })
+              # Save catalog_item_id to state
+              with open("catalog_listings.json","w") as f:
+                  json.dump({CATALOG: {"item_id": new_id, "floor": 120, "step": 10, "last_price": PRICE}}, f, indent=2)
+              print("saved catalog_listings.json")
+          else:
+              # Collect specific errors
+              cause = resp.get("cause") or []
+              for c in cause[:5]:
+                  print(f"  - {c}")
+          PY
+      - name: Commit state
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add catalog_listings.json || true
+          git diff --cached --quiet || git commit -m "add catalog_listings.json"
+          git push || echo "nothing to push"
