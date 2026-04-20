@@ -1694,10 +1694,10 @@ def catalog_price_war(token, state):
         label = meta.get("label", catalog_item)
         _log(f"  catalog {cat_id} [{label}]: ours=${our_price} ({our_status}) | BBW=${bbw_price} by {bbw_item}")
 
-        # Sync tradicional price to match catalog (always)
+        # Sync tradicional price to match catalog (always, unless under_review)
         if trad_item and meta.get("sync_price_to_traditional", True):
             code_t, tr_it = meli("GET", f"/items/{trad_item}", token)
-            if code_t == 200:
+            if code_t == 200 and tr_it.get("status") != "under_review":
                 trad_price = int(tr_it.get("price") or 0)
                 if trad_price != our_price:
                     meli("PUT", f"/items/{trad_item}", token, body={"price": our_price})
@@ -1784,6 +1784,10 @@ def sync_linked_stock(token, state):
 
         st_c = it_c.get("status")
         st_t = it_t.get("status")
+        # Si alguno esta under_review, MELI esta pidiendo docs → no tocar nada
+        if "under_review" in (st_c, st_t):
+            _log(f"  linked {label}: skip (under_review c={st_c} t={st_t})")
+            continue
         qty_c = int(it_c.get("available_quantity") or 0)
         qty_t = int(it_t.get("available_quantity") or 0)
         sold_c = int(it_c.get("sold_quantity") or 0)
