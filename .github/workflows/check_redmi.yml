@@ -21,36 +21,44 @@ jobs:
               "client_secret":os.environ["MELI_APP_SECRET"],
               "refresh_token":os.environ["MELI_REFRESH_TOKEN"]
           }, timeout=20)
-          tok = r.json()["access_token"]
-          h = {"Authorization":f"Bearer {tok}"}
+          tok = r.json()["access_token"]; h = {"Authorization":f"Bearer {tok}"}
           
-          # Search catalog products (NEW condition) for Redmi Buds 4 Lite
-          r = requests.get("https://api.mercadolibre.com/products/search?status=active&site_id=MLM&q=Redmi+Buds+4+Lite&limit=20", headers=h, timeout=20)
-          res = r.json()
-          print(f"Found {res.get('paging',{}).get('total')} catalog products:")
-          for p in res.get('results', [])[:15]:
-              name = p.get('name','')
-              cid = p.get('id')
-              # Quick condition probe
-              r2 = requests.get(f"https://api.mercadolibre.com/products/{cid}", headers=h, timeout=15)
-              pd = r2.json()
-              cond = next((a.get('value_name') for a in pd.get('attributes',[]) if a.get('id')=='ITEM_CONDITION'), '?')
-              bbw = pd.get('buy_box_winner') or {}
-              print(f"  {cid} | cond={cond:15} | winner=${bbw.get('price')} by {bbw.get('seller_id')} | {name[:70]}")
-          
-          # Now for the refurbished one (our current catalog_product_id), check listings endpoint
-          print("\n=== LISTINGS for MLM2014404762 (refurbished) ===")
-          r = requests.get("https://api.mercadolibre.com/products/MLM2014404762/items?limit=20", headers=h, timeout=20)
-          print(f"Status: {r.status_code}")
-          print(f"Body: {json.dumps(r.json(), indent=2)[:1500]}")
-          
-          # Test different item statuses for catalog competitor scan
-          print("\n=== Testing alternate: search product items ===")
+          # Search for NEW (not refurbished) Redmi Buds 4 Lite Negro catalog products
+          # Filter by category MLM5072 and family
+          print("=== Searching catalog with FAMILY_ID context ===")
+          # Get family of our catalog
           r = requests.get("https://api.mercadolibre.com/products/MLM2014404762", headers=h, timeout=20)
           pd = r.json()
-          print(f"Main pick item: {pd.get('main_features')}")
-          print(f"Pickers: {pd.get('pickers',[])[:2]}")
-          print(f"Status: {pd.get('status')}")
-          # Buy box winner full
-          print(f"Full buy_box_winner: {json.dumps(pd.get('buy_box_winner'), indent=2)}")
+          fid = pd.get('family_id')
+          dom = pd.get('domain_id')
+          print(f"our family_id: {fid}, domain: {dom}")
+          # Get all products in same family
+          if fid:
+              r = requests.get(f"https://api.mercadolibre.com/products/search?site_id=MLM&family_id={fid}&limit=20", headers=h, timeout=20)
+              res = r.json()
+              print(f"\nProducts in family {fid}: {res.get('paging',{}).get('total')}")
+              for p in res.get('results', [])[:20]:
+                  pid = p.get('id')
+                  # Get product condition
+                  r2 = requests.get(f"https://api.mercadolibre.com/products/{pid}", headers=h, timeout=10)
+                  pd2 = r2.json()
+                  cond = next((a.get('value_name') for a in pd2.get('attributes',[]) if a.get('id')=='ITEM_CONDITION'), None)
+                  grad = next((a.get('value_name') for a in pd2.get('attributes',[]) if a.get('id')=='GRADING'), None)
+                  bbw = pd2.get('buy_box_winner') or {}
+                  color = next((a.get('value_name') for a in pd2.get('attributes',[]) if a.get('id')=='COLOR'), None)
+                  print(f"  {pid} | {cond} / {grad} | color={color} | BBW: ${bbw.get('price')} ({bbw.get('item_id')}) | {p.get('name','')[:60]}")
+          
+          # Also check domain products by GTIN
+          gtin_attr = next((a for a in pd.get('attributes',[]) if a.get('id')=='GTIN'), None)
+          print(f"\nGTIN: {gtin_attr}")
+          
+          # Check our item's eligibility for catalog listing
+          iid = "MLM2874537869"
+          r = requests.get(f"https://api.mercadolibre.com/items/{iid}", headers=h, timeout=20)
+          item = r.json()
+          print(f"\nOur item condition={item.get('condition')}")
+          print(f"Our item catalog_listing_eligible: {item.get('catalog_listing')}")
+          # Item catalog info endpoint
+          r = requests.get(f"https://api.mercadolibre.com/users/{item['seller_id']}/items/search?catalog_listing=true", headers=h, timeout=15)
+          print(f"\nOur existing catalog listings: {r.json().get('results')}")
           PY
