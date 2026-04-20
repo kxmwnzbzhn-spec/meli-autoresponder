@@ -124,7 +124,10 @@
       "MLM5212803236",
       "MLM5212880764"
     ],
-    "seo_title": "Bocina Bluetooth JBL Flip 7 Portatil Negra Original Usada"
+    "seo_title": "Bocina Bluetooth JBL Flip 7 Portatil Negra Original Usada",
+    "deleted": true,
+    "_deleted_at": 1776655833,
+    "_deleted_reason": "It's not possible to relist an item that has been already deleted. [MLM2876038557 deleted]"
   },
   "MLM2876026339": {
     "real_stock": 48,
@@ -256,6 +259,16 @@
     "auto_replenish": true,
     "replenish_quantity": 1,
     "seo_title": "Audifonos Xiaomi Redmi Buds 4 Lite Bluetooth Negros",
+    "previous_ids": [],
+    "_auto_discovered": true
+  },
+  "MLM5213315364": {
+    "real_stock": 30,
+    "sku": "AUTO-315364",
+    "label": "Bocina Bluetooth Jbl Flip 7 Portatil Negra Original Usada - $399",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "seo_title": "Bocina Bluetooth Jbl Flip 7 Portatil Negra Original Usada",
     "previous_ids": [],
     "_auto_discovered": true
   }
