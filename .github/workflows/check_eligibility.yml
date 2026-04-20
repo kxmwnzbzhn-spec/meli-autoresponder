@@ -11,6 +11,8 @@ jobs:
           MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
           MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
           MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: |
           python3 <<'PY'
           import os, json, requests
@@ -20,22 +22,72 @@ jobs:
               "client_secret":os.environ["MELI_APP_SECRET"],
               "refresh_token":os.environ["MELI_REFRESH_TOKEN"]
           }, timeout=20)
-          tok = r.json()["access_token"]; h = {"Authorization":f"Bearer {tok}"}
-          r = requests.get("https://api.mercadolibre.com/users/me", headers=h, timeout=15)
-          sid = r.json()["id"]
+          tok = r.json()["access_token"]; h = {"Authorization":f"Bearer {tok}", "Content-Type":"application/json"}
           
-          # Get full eligible list
-          r = requests.get(f"https://api.mercadolibre.com/users/{sid}/items/search?catalog_listing_eligible=true&limit=50", headers=h, timeout=15)
-          eligible = r.json().get("results", [])
-          print(f"=== {len(eligible)} ELIGIBLE items ===")
-          # Detail each
-          for iid in eligible:
-              r = requests.get(f"https://api.mercadolibre.com/items/{iid}?attributes=id,title,price,catalog_product_id,catalog_listing,condition,category_id,status", headers=h, timeout=10)
-              it = r.json()
-              print(f"  {iid} | {it.get('status'):8} | {it.get('condition'):8} | {it.get('catalog_listing')!s:6} | cat_pid={it.get('catalog_product_id')} | cat={it.get('category_id')} | ${it.get('price')} | {it.get('title','')[:50]}")
+          PROD = "MLM2014404762"
           
-          # Also check the item the user wants
-          print("\n=== Our Redmi item ===")
-          r = requests.get("https://api.mercadolibre.com/items/MLM2874537869?attributes=id,title,price,catalog_product_id,catalog_listing,condition,category_id,status,sold_quantity,has_bids", headers=h, timeout=10)
-          print(json.dumps(r.json(), indent=2))
+          # Get full catalog product info to learn required title + category
+          r = requests.get(f"https://api.mercadolibre.com/products/{PROD}", headers=h, timeout=15)
+          pd = r.json()
+          print("=== Catalog product detail ===")
+          print(f"  name: {pd.get('name')}")
+          print(f"  domain_id: {pd.get('domain_id')}")
+          print(f"  status: {pd.get('status')}")
+          print(f"  catalog_product_id top fields:")
+          # Get categorization hint
+          for k in ['settings', 'main_features', 'short_description']:
+              v = pd.get(k)
+              if v:
+                  print(f"  {k}: {str(v)[:200]}")
+          # Try the recommended item endpoint
+          r = requests.get(f"https://api.mercadolibre.com/products/{PROD}/items?limit=5", headers=h, timeout=15)
+          print(f"\nItems endpoint: {r.status_code} - {str(r.json())[:200]}")
+          
+          # ATTEMPT: Use Mercado Renueva category (refurbished electronics)
+          # Try creating with a refurbished-friendly setup
+          attempts = [
+              # Use refurbished category (search for it)
+              {"label":"renueva-ref-excellent",
+               "body":{"title": pd.get('name'), "category_id": "MLM179996", "catalog_listing": True,
+                       "catalog_product_id": PROD, "condition": "refurbished_excellent",
+                       "listing_type_id": "gold_pro", "price": 149, "currency_id": "MXN",
+                       "available_quantity": 1, "buying_mode": "buy_it_now",
+                       "shipping": {"mode":"me2","local_pick_up":False,"free_shipping":False}}},
+              # Try with empty category — let MELI pick from catalog
+              {"label":"empty-category",
+               "body":{"title": pd.get('name'), "catalog_listing": True,
+                       "catalog_product_id": PROD, "condition": "refurbished_excellent",
+                       "listing_type_id": "gold_pro", "price": 149, "currency_id": "MXN",
+                       "available_quantity": 1, "buying_mode": "buy_it_now",
+                       "shipping": {"mode":"me2","local_pick_up":False,"free_shipping":False}}},
+              # Try with our category and refurbished condition
+              {"label":"MLM5072-refurb",
+               "body":{"title": pd.get('name'), "category_id": "MLM5072", "catalog_listing": True,
+                       "catalog_product_id": PROD, "condition": "refurbished",
+                       "listing_type_id": "gold_pro", "price": 149, "currency_id": "MXN",
+                       "available_quantity": 1, "buying_mode": "buy_it_now",
+                       "shipping": {"mode":"me2","local_pick_up":False,"free_shipping":False}}},
+          ]
+          
+          success = None
+          for att in attempts:
+              r = requests.post("https://api.mercadolibre.com/items", headers=h, json=att["body"], timeout=30)
+              resp = r.json()
+              print(f"\n=== {att['label']} → {r.status_code} ===")
+              if r.status_code in (200,201):
+                  success = resp.get("id")
+                  print(f"SUCCESS! {success} | {resp.get('permalink','')}")
+                  break
+              for c in resp.get("cause",[])[:5]:
+                  print(f"  {c.get('code')} | {c.get('message','')[:150]}")
+          
+          if success:
+              tt=os.environ.get("TELEGRAM_BOT_TOKEN"); tc=os.environ.get("TELEGRAM_CHAT_ID")
+              if tt and tc:
+                  requests.post(f"https://api.telegram.org/bot{tt}/sendMessage", json={
+                      "chat_id":tc, "parse_mode":"Markdown",
+                      "text":f"🎯 *Catalog listing creado*\n\n`{success}` Redmi Buds 4 Lite\nPrecio: \\$149"
+                  })
+          else:
+              print("\n=== No attempt succeeded ===")
           PY
