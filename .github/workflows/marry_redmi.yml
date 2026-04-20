@@ -1,0 +1,129 @@
+name: Marry Redmi catalog + traditional
+on: {workflow_dispatch: {}}
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          python3 <<'PY'
+          import os, json, requests
+          r = requests.post("https://api.mercadolibre.com/oauth/token", data={
+              "grant_type":"refresh_token",
+              "client_id":os.environ["MELI_APP_ID"],
+              "client_secret":os.environ["MELI_APP_SECRET"],
+              "refresh_token":os.environ["MELI_REFRESH_TOKEN"]
+          }, timeout=20)
+          tok = r.json()["access_token"]; h = {"Authorization":f"Bearer {tok}", "Content-Type":"application/json"}
+          
+          OLD = "MLM2874537869"   # delete
+          CATALOG_ITEM = "MLM2877711851"   # user-created, keep
+          PROD = "MLM2014404762"
+          PRICE = 149
+          
+          # 1) Pause + close OLD
+          print(f"=== STEP 1: Closing {OLD} ===")
+          r = requests.put(f"https://api.mercadolibre.com/items/{OLD}", headers=h, json={"status":"paused"}, timeout=20)
+          print(f"pause: {r.status_code}")
+          r = requests.put(f"https://api.mercadolibre.com/items/{OLD}", headers=h, json={"status":"closed"}, timeout=20)
+          print(f"close: {r.status_code}")
+          if r.status_code >= 400:
+              print(f"  err: {r.json()}")
+          
+          # 2) Verify catalog listing OK
+          print(f"\n=== STEP 2: Verify catalog item {CATALOG_ITEM} ===")
+          r = requests.get(f"https://api.mercadolibre.com/items/{CATALOG_ITEM}", headers=h, timeout=20)
+          ci = r.json()
+          print(f"  status={ci.get('status')} cond={ci.get('condition')} catalog={ci.get('catalog_listing')} price=${ci.get('price')}")
+          print(f"  permalink: {ci.get('permalink')}")
+          
+          # 3) Create traditional listing for same product
+          print(f"\n=== STEP 3: Create traditional listing ===")
+          # Pull pictures from catalog item
+          pics = ci.get('pictures',[])
+          pic_ids = [{"id": p.get('id')} for p in pics if p.get('id')][:8]
+          print(f"  reusing {len(pic_ids)} pictures from catalog item")
+          
+          body = {
+              "title": "Audifonos Xiaomi Redmi Buds 4 Lite Bluetooth Negros Originales",
+              "category_id": "MLM5072",
+              "price": PRICE,
+              "currency_id": "MXN",
+              "available_quantity": 1,
+              "buying_mode": "buy_it_now",
+              "condition": "new",
+              "listing_type_id": "gold_pro",
+              "catalog_product_id": PROD,
+              "pictures": pic_ids if pic_ids else [],
+              "attributes": [
+                  {"id":"BRAND","value_name":"Xiaomi"},
+                  {"id":"MODEL","value_name":"Redmi Buds 4 Lite"},
+                  {"id":"COLOR","value_name":"Negro"},
+              ],
+              "sale_terms": [
+                  {"id":"WARRANTY_TYPE","value_name":"Garantía del vendedor"},
+                  {"id":"WARRANTY_TIME","value_name":"30 días"}
+              ],
+              "shipping": {"mode":"me2","local_pick_up":False,"free_shipping":False}
+          }
+          r = requests.post("https://api.mercadolibre.com/items", headers=h, json=body, timeout=30)
+          print(f"  POST status: {r.status_code}")
+          resp = r.json()
+          new_id = None
+          if r.status_code in (200,201):
+              new_id = resp.get("id")
+              print(f"  ✓ TRADICIONAL: {new_id}")
+              print(f"  permalink: {resp.get('permalink')}")
+          else:
+              for c in resp.get("cause",[])[:5]:
+                  print(f"  err: {c.get('code')} | {c.get('message','')[:120]}")
+          
+          # 4) Update catalog_listings.json with BOTH
+          print(f"\n=== STEP 4: Update catalog_listings.json ===")
+          state = {
+              "_comment": "Casadas: catalog + tradicional sincronizadas. Bot vigila precio del catalogo y replica al tradicional.",
+              PROD: {
+                  "catalog_item_id": CATALOG_ITEM,
+                  "traditional_item_id": new_id,
+                  "label": "Redmi Buds 4 Lite Negro",
+                  "floor": 120,
+                  "step": 10,
+                  "last_price": PRICE,
+                  "active": True,
+                  "floor_alerted": False,
+                  "sync_stock": True
+              }
+          }
+          with open("catalog_listings.json","w") as f:
+              json.dump(state, f, indent=2, ensure_ascii=False)
+          print("saved catalog_listings.json")
+          
+          # Telegram notify
+          tt=os.environ.get("TELEGRAM_BOT_TOKEN"); tc=os.environ.get("TELEGRAM_CHAT_ID")
+          if tt and tc:
+              msg = f"💍 *Redmi Buds 4 Lite casadas*\n\n"
+              msg += f"❌ Borrada: `{OLD}`\n"
+              msg += f"🎯 Catálogo: `{CATALOG_ITEM}` ${PRICE}\n"
+              if new_id:
+                  msg += f"📦 Tradicional: `{new_id}` ${PRICE}\n"
+              else:
+                  msg += f"⚠️ Tradicional NO creada (revisar log)\n"
+              msg += f"\nFloor ${120} | Step ${10} | Bot vigila ambas"
+              requests.post(f"https://api.telegram.org/bot{tt}/sendMessage", json={"chat_id":tc,"parse_mode":"Markdown","text":msg})
+          PY
+      - name: Commit state
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add catalog_listings.json 2>/dev/null || true
+          git diff --cached --quiet || git commit -m "[catalog] marry Redmi catalog+tradicional"
+          git push || echo "nothing to push"
