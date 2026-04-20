@@ -1161,9 +1161,16 @@ def check_and_replenish_stock(token, state):
                         )
                         continue
                     _log(f"  {item_id}: relist err {rcode} {rresp}")
-                    tg_send(f"⚠️ *Auto-replenish falló*\n\n"
-                            f"Item `{item_id}` cerrado por venta pero no se pudo relistar.\n"
-                            f"Error: `{rresp.get('message','')}`")
+                    # Throttle: 1 alerta por item por dia
+                    import time as _t
+                    now = int(_t.time())
+                    if now - meta.get("_last_relist_alert", 0) > 86400:
+                        tg_send(f"⚠️ *Auto-replenish falló*\n\n"
+                                f"Item `{item_id}` cerrado por venta pero no se pudo relistar.\n"
+                                f"Error: `{rresp.get('message','')}`")
+                        meta["_last_relist_alert"] = now
+                        cfg[item_id] = meta
+                        changed = True
                     continue
                 new_id = rresp.get("id")
                 new_link = rresp.get("permalink")
@@ -1205,8 +1212,40 @@ def check_and_replenish_stock(token, state):
                 body = {"available_quantity": qty, "status": "active"}
                 pcode, presp = meli("PUT", f"/items/{item_id}", token, body=body)
                 if pcode >= 400:
-                    _log(f"  {item_id}: reactivate err {pcode} {presp}")
-                    tg_send(f"⚠️ Auto-replenish: no pude reactivar `{item_id}`: {presp.get('message','')}")
+                    err_msg = (presp.get("message") or "").lower()
+                    causes = presp.get("cause") or []
+                    cause_codes = [c.get("code","") for c in causes if isinstance(c, dict)]
+                    # Detectar items permanentemente bloqueados: MELI los borró/forbade
+                    perma_signals = ("status is not modifiable" in err_msg
+                                     or "forbidden" in err_msg
+                                     or "item.status.not_modifiable" in cause_codes
+                                     or "item.status.invalid" in cause_codes
+                                     or "field_not_updatable" in cause_codes)
+                    if perma_signals:
+                        meta["deleted"] = True
+                        meta["_deleted_at"] = int(time.time())
+                        meta["_deleted_reason"] = presp.get("message","not_modifiable")
+                        meta["auto_replenish"] = False
+                        cfg[item_id] = meta
+                        changed = True
+                        _log(f"  {item_id}: marcado deleted permanente tras reactivate fail")
+                        tg_send(
+                            f"⚠️ *Item no reactivable*\n\n"
+                            f"`{item_id}` ({meta.get('label','')}) quedó bloqueado por MELI.\n"
+                            f"Marcado como deleted, bot no intentará de nuevo."
+                        )
+                        continue
+                    # Otro error transitorio: solo loggear, NO spammear Telegram
+                    _log(f"  {item_id}: reactivate err {pcode} {presp.get('message','')}")
+                    # Alerta Telegram solo 1 vez por item por día
+                    alerted_today = meta.get("_last_reactivate_alert", 0)
+                    import time as _t
+                    now = int(_t.time())
+                    if now - alerted_today > 86400:
+                        tg_send(f"⚠️ Auto-replenish: no pude reactivar `{item_id}`: {presp.get('message','')}")
+                        meta["_last_reactivate_alert"] = now
+                        cfg[item_id] = meta
+                        changed = True
                     continue
                 meta["real_stock"] = real - qty
                 changed = True
