@@ -215,11 +215,14 @@
     "real_stock": 30,
     "sku": "AUTO-537869",
     "label": "Audifonos Xiaomi Redmi Buds 4 Lite Bluetooth Negros - $149",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "Audifonos Xiaomi Redmi Buds 4 Lite Bluetooth Negros",
     "previous_ids": [],
-    "_auto_discovered": true
+    "_auto_discovered": true,
+    "deleted": true,
+    "_deleted_at": 1745169600,
+    "_deleted_reason": "MELI: forbidden+deleted, not_modifiable"
   },
   "MLM5213315364": {
     "real_stock": 30,
@@ -327,20 +330,22 @@
     "real_stock": 30,
     "sku": "AUTO-711851",
     "label": "Auriculares Xiaomi Redmi Buds 4 Lite Bluetooth 5.3 In-ear Co - $149",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "Auriculares Xiaomi Redmi Buds 4 Lite Bluetooth 5.3 In-ear Color Negro - Excelente (Reacondicionado)",
     "previous_ids": [],
-    "_auto_discovered": true
+    "_auto_discovered": true,
+    "_comment": "Managed by sync_linked_stock, not auto-replenish"
   },
   "MLM2877535563": {
     "real_stock": 30,
     "sku": "AUTO-535563",
     "label": "Xiaomi Redmi Buds 4 Lite Audifonos Bluetooth Negro Nuevo - $149",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "Xiaomi Redmi Buds 4 Lite Audifonos Bluetooth Negro Nuevo",
     "previous_ids": [],
-    "_auto_discovered": true
+    "_auto_discovered": true,
+    "_comment": "Managed by sync_linked_stock, not auto-replenish"
   }
 }
