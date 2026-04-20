@@ -1,0 +1,110 @@
+name: Reactivate + price +50%
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          python3 <<'PY'
+          import os, json, requests
+          tk = requests.post("https://api.mercadolibre.com/oauth/token",
+              data={"grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],
+                    "client_secret":os.environ["MELI_APP_SECRET"],
+                    "refresh_token":os.environ["MELI_REFRESH_TOKEN"]}).json()
+          AT = tk["access_token"]
+          H = {"Authorization": f"Bearer {AT}", "Content-Type":"application/json"}
+          me = requests.get("https://api.mercadolibre.com/users/me", headers=H).json()
+          sid = me["id"]
+
+          # Items paused del seller
+          r = requests.get(f"https://api.mercadolibre.com/users/{sid}/items/search",
+              params={"status":"paused","limit":50}, headers=H).json()
+          paused_ids = r.get("results",[])
+          print(f"Items paused: {len(paused_ids)}")
+
+          def round_price(p):
+              # redondear a múltiplos de 50 ó 99
+              v = int(p * 1.5)
+              # Ajustar a terminación .99 o .50 para psicología de precio
+              if v % 100 < 50:
+                  v = (v // 50) * 50 - 1   # ej 449, 549, 649
+              else:
+                  v = ((v // 100) + 1) * 100 - 1  # ej 499, 599
+              return max(v, int(p*1.5))  # nunca menos que 50% exacto
+
+          results = []
+          for iid in paused_ids:
+              it = requests.get(f"https://api.mercadolibre.com/items/{iid}", headers=H).json()
+              cur_price = float(it.get("price") or 0)
+              if cur_price <= 0:
+                  print(f"  {iid}: sin precio, skip")
+                  continue
+              new_price = round_price(cur_price)
+              title = (it.get('title') or '')[:50]
+              # PUT precio + reactivar
+              r = requests.put(f"https://api.mercadolibre.com/items/{iid}",
+                  headers=H, json={"price": new_price, "status":"active"})
+              if r.status_code < 400:
+                  print(f"  ✓ {iid}: ${cur_price:.0f} → ${new_price} · {title}")
+                  results.append((iid, cur_price, new_price, title, True))
+              else:
+                  err = r.json().get("message","err")[:100] if r.headers.get("content-type","").startswith("application/json") else ""
+                  print(f"  ✗ {iid}: {r.status_code} {err}")
+                  results.append((iid, cur_price, new_price, title, False))
+
+          # Actualizar stock_config: quitar paused_by_user + restaurar auto_replenish
+          try:
+              with open("stock_config.json") as f: cfg = json.load(f)
+          except:
+              cfg = {}
+          for k in cfg:
+              if k.startswith("_"): continue
+              v = cfg[k]
+              if isinstance(v, dict):
+                  v.pop("paused_by_user", None)
+                  if not v.get("deleted"):
+                      v["auto_replenish"] = True
+
+          with open("stock_config.json","w") as f:
+              json.dump(cfg, f, indent=2, ensure_ascii=False)
+
+          print("\n=== RESUMEN ===")
+          ok = sum(1 for r in results if r[4])
+          fail = len(results) - ok
+          print(f"  OK: {ok}  Fallos: {fail}")
+
+          tt=os.environ.get("TELEGRAM_BOT_TOKEN"); tc=os.environ.get("TELEGRAM_CHAT_ID")
+          if tt and tc:
+              lines = [f"📈 *Precios +50% aplicados*", ""]
+              lines.append(f"Reactivados: {ok} items · Fallos: {fail}")
+              lines.append("")
+              lines.append("Nuevos precios:")
+              for iid, old, new, title, ok_ in results[:20]:
+                  if ok_:
+                      lines.append(f"• {title[:30]} ${old:.0f}→${new}")
+              requests.post(f"https://api.telegram.org/bot{tt}/sendMessage",
+                  json={"chat_id":tc,"parse_mode":"Markdown","text":"\n".join(lines)[:4000]})
+          PY
+      - name: Commit stock_config
+        if: always()
+        run: |
+          if ! git diff --quiet stock_config.json 2>/dev/null; then
+            git config user.name "meli-bot"
+            git config user.email "bot@sonixmx.local"
+            git add stock_config.json
+            git commit -m "Reactivate items + restore auto_replenish"
+            git push
+          fi
