@@ -1,0 +1,70 @@
+name: Boost +50 all active
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    steps:
+      - run: pip install requests
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          python3 <<'PY'
+          import os, json, requests
+          tk = requests.post("https://api.mercadolibre.com/oauth/token",
+              data={"grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],
+                    "client_secret":os.environ["MELI_APP_SECRET"],
+                    "refresh_token":os.environ["MELI_REFRESH_TOKEN"]}).json()
+          AT = tk["access_token"]
+          H = {"Authorization": f"Bearer {AT}", "Content-Type":"application/json"}
+          me = requests.get("https://api.mercadolibre.com/users/me", headers=H).json()
+          sid = me["id"]
+
+          r = requests.get(f"https://api.mercadolibre.com/users/{sid}/items/search",
+              params={"status":"active","limit":50}, headers=H).json()
+          ids = r.get("results",[])
+          print(f"Items activos: {len(ids)}")
+
+          def nice_price(p):
+              # +50% redondeado a terminación .99 o .50
+              v = p * 1.5
+              # Ajustar a múltiplos de 50 que terminen en 49 o 99
+              v = int(v)
+              if v % 100 >= 50:
+                  return (v // 100) * 100 + 99  # ej 449, 549, 649
+              else:
+                  return (v // 100) * 100 + 49
+          
+          results = []
+          for iid in ids:
+              it = requests.get(f"https://api.mercadolibre.com/items/{iid}", headers=H).json()
+              old = float(it.get("price") or 0)
+              if old <= 0: continue
+              new_p = nice_price(old)
+              title = (it.get('title') or '')[:45]
+              r = requests.put(f"https://api.mercadolibre.com/items/{iid}",
+                  headers=H, json={"price": new_p})
+              if r.status_code < 400:
+                  print(f"  ✓ {iid}: ${old:.0f} → ${new_p} · {title}")
+                  results.append((iid, old, new_p, title, True))
+              else:
+                  err = r.json().get("message","")[:100] if "json" in r.headers.get("content-type","") else ""
+                  print(f"  ✗ {iid}: {r.status_code} {err}")
+                  results.append((iid, old, new_p, title, False))
+
+          ok = sum(1 for x in results if x[4])
+          print(f"\n=== RESUMEN: {ok}/{len(results)} actualizados ===")
+
+          # Telegram
+          tt=os.environ.get("TELEGRAM_BOT_TOKEN"); tc=os.environ.get("TELEGRAM_CHAT_ID")
+          if tt and tc:
+              lines = [f"📈 *Precios +50% aplicados*", f"Actualizados: {ok}/{len(results)}", ""]
+              for iid, old, new, title, ok_ in sorted(results, key=lambda x: -x[2]):
+                  mark = "✅" if ok_ else "❌"
+                  lines.append(f"{mark} ${old:.0f}→${new} · {title}")
+              requests.post(f"https://api.telegram.org/bot{tt}/sendMessage",
+                  json={"chat_id":tc,"parse_mode":"Markdown","text":"\n".join(lines)[:4000]})
+          PY
