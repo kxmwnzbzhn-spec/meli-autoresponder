@@ -21,51 +21,21 @@ jobs:
               "refresh_token":os.environ["MELI_REFRESH_TOKEN"]
           }, timeout=20)
           tok = r.json()["access_token"]; h = {"Authorization":f"Bearer {tok}"}
-          
-          # Get user ID
           r = requests.get("https://api.mercadolibre.com/users/me", headers=h, timeout=15)
-          me = r.json()
-          sid = me.get("id")
-          print(f"Seller: {me.get('nickname')} (id={sid})")
-          print(f"seller_reputation: {json.dumps(me.get('seller_reputation'), indent=2)[:500]}")
-          print(f"status: {json.dumps(me.get('status'), indent=2)[:500]}")
+          sid = r.json()["id"]
           
-          # Check catalog eligibility for the product we want
-          prod = "MLM2014404762"
-          item = "MLM2874537869"
+          # Get full eligible list
+          r = requests.get(f"https://api.mercadolibre.com/users/{sid}/items/search?catalog_listing_eligible=true&limit=50", headers=h, timeout=15)
+          eligible = r.json().get("results", [])
+          print(f"=== {len(eligible)} ELIGIBLE items ===")
+          # Detail each
+          for iid in eligible:
+              r = requests.get(f"https://api.mercadolibre.com/items/{iid}?attributes=id,title,price,catalog_product_id,catalog_listing,condition,category_id,status", headers=h, timeout=10)
+              it = r.json()
+              print(f"  {iid} | {it.get('status'):8} | {it.get('condition'):8} | {it.get('catalog_listing')!s:6} | cat_pid={it.get('catalog_product_id')} | cat={it.get('category_id')} | ${it.get('price')} | {it.get('title','')[:50]}")
           
-          # Attempt to get listing-exposure details
-          print("\n=== Catalog product matching check ===")
-          url = f"https://api.mercadolibre.com/users/{sid}/items/search?catalog_listing_eligible=true&limit=50"
-          r = requests.get(url, headers=h, timeout=15)
-          print(f"eligible items: {r.status_code} -> {r.json().get('paging',{}).get('total')}")
-          ids = r.json().get('results',[])[:5]
-          print(f"sample eligible ids: {ids}")
-          
-          # Get our item in detail
-          r = requests.get(f"https://api.mercadolibre.com/items/{item}", headers=h, timeout=15)
-          it = r.json()
-          print(f"\nOur item status: {it.get('status')}")
-          print(f"Our item condition: {it.get('condition')}")
-          print(f"catalog_listing: {it.get('catalog_listing')}")
-          print(f"catalog_product_id: {it.get('catalog_product_id')}")
-          print(f"listing_type_id: {it.get('listing_type_id')}")
-          print(f"shipping mode: {(it.get('shipping') or {}).get('mode')}")
-          print(f"shipping free: {(it.get('shipping') or {}).get('free_shipping')}")
-          
-          # Try POST /users/{id}/items/catalog_opt_in (some docs mention this)
-          # Or attempt to PATCH catalog_listing=true on existing item
-          print("\n=== Attempt PATCH existing item to catalog_listing=true ===")
-          r = requests.put(f"https://api.mercadolibre.com/items/{item}", headers={**h, "Content-Type":"application/json"},
-              json={"catalog_listing": True, "catalog_product_id": prod}, timeout=20)
-          print(f"PATCH status: {r.status_code}")
-          print(f"response: {json.dumps(r.json(), indent=2)[:1500]}")
-          
-          # Final: check account eligibility via status
-          if me.get('status'):
-              st = me['status']
-              print(f"\nList eligibility: {st.get('list', {})}")
-              print(f"buy eligibility: {st.get('buy', {})}")
-              print(f"mercadoenvios: {st.get('mercadoenvios', {})}")
-              print(f"required_actions: {st.get('required_actions',[])}")
+          # Also check the item the user wants
+          print("\n=== Our Redmi item ===")
+          r = requests.get("https://api.mercadolibre.com/items/MLM2874537869?attributes=id,title,price,catalog_product_id,catalog_listing,condition,category_id,status,sold_quantity,has_bids", headers=h, timeout=10)
+          print(json.dumps(r.json(), indent=2))
           PY
