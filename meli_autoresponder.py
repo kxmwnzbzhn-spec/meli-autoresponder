@@ -1475,6 +1475,96 @@ def auto_discover_items(token, state):
         state["_stock_config_dirty"] = True
 
 
+
+
+def send_daily_claims_digest(token, state):
+    """Envia a Telegram cada dia a las 9am CDMX (15:00 UTC) un resumen de reclamos."""
+    import datetime as dt
+    now_utc = dt.datetime.now(dt.timezone.utc)
+    target_hour_utc = 15  # 9 am CDMX (UTC-6)
+
+    # Clave del dia actual en UTC (YYYY-MM-DD)
+    today_key = now_utc.strftime("%Y-%m-%d")
+    last_key = state.get("last_daily_digest_key")
+    if last_key == today_key:
+        return  # ya enviado hoy
+    # Solo si ya paso la hora objetivo hoy
+    if now_utc.hour < target_hour_utc:
+        return
+
+    try:
+        code, me = meli("GET", "/users/me", token)
+        if code != 200: return
+        sid = me.get("id")
+
+        # Claims del seller (todos los estados)
+        code, cr = meli("GET", f"/post-purchase/v1/claims/search?limit=50&offset=0", token)
+        claims = cr.get("data", []) if code == 200 else []
+
+        # Clasificar
+        by_stage = {}
+        by_reason = {}
+        critical = []  # deadline < 24h
+        now_ts = int(now_utc.timestamp())
+        for c in claims:
+            stage = c.get("stage","?")
+            by_stage[stage] = by_stage.get(stage, 0) + 1
+            rid = c.get("reason_id","?")
+            by_reason[rid] = by_reason.get(rid, 0) + 1
+            # deadline
+            last_upd = c.get("last_updated") or c.get("date_created","")
+            # claim tiene "stage.deadline" en unix ms si esta disponible
+            qrem = c.get("quantity_remaining_to_close")
+            if isinstance(qrem, int) and qrem > 0 and qrem < 24*3600:
+                critical.append(c)
+
+        # Devoluciones en state (return_states)
+        ret_states = state.get("return_states", {}) or {}
+        ret_active = [k for k,v in ret_states.items() if v.get("step") not in ("submitted","accepted","cancelled")]
+
+        # Ventas últimas 24h
+        since = (now_utc - dt.timedelta(hours=24)).strftime("%Y-%m-%dT%H:%M:%S.000Z")
+        code, o = meli("GET", f"/orders/search?seller={sid}&order.date_created.from={since}&sort=date_desc&limit=50", token)
+        sales24 = o.get("results", []) if code == 200 else []
+        rev24 = sum(float(x.get("total_amount",0)) for x in sales24)
+
+        # Preguntas pendientes
+        code, q = meli("GET", f"/questions/search?seller_id={sid}&status=UNANSWERED&limit=50", token)
+        pending_q = len(q.get("questions", []) or []) if code == 200 else 0
+
+        # Armar mensaje
+        lines = [f"🌅 *Resumen diario {today_key}*", ""]
+        lines.append(f"📦 *Ventas 24h*: {len(sales24)} ordenes · ${rev24:,.0f} MXN")
+        lines.append(f"❓ *Preguntas pendientes*: {pending_q}")
+        lines.append("")
+        lines.append(f"🧾 *Reclamos*: {len(claims)} total")
+        if by_stage:
+            lines.append("  Por stage:")
+            for st, n in sorted(by_stage.items(), key=lambda x:-x[1]):
+                lines.append(f"   · {st}: {n}")
+        if by_reason:
+            top = sorted(by_reason.items(), key=lambda x:-x[1])[:5]
+            lines.append("  Top razones:")
+            for rid, n in top:
+                lines.append(f"   · `{rid}`: {n}")
+        if critical:
+            lines.append("")
+            lines.append(f"🚨 *CRITICOS (<24h deadline)*: {len(critical)}")
+            for c in critical[:5]:
+                lines.append(f"   · claim `{c.get('id')}` reason={c.get('reason_id','')}")
+
+        lines.append("")
+        lines.append(f"📦 *Devoluciones activas*: {len(ret_active)}")
+        for cid in ret_active[:5]:
+            lines.append(f"   · `{cid}`")
+
+        tg_send("\n".join(lines))
+        state["last_daily_digest_key"] = today_key
+        _log(f"Daily digest enviado para {today_key}")
+    except Exception as e:
+        _log(f"  daily digest err: {e}")
+
+
 # ============================================================
 # Main
 # ============================================================
