@@ -1709,6 +1709,114 @@ def catalog_price_war(token, state):
     if changed:
         _save_catalog_config(cfg)
 
+def sync_linked_stock(token, state):
+    """Mantiene casadas (stock compartido) las publicaciones de catalog_listings.json.
+    Cada entrada con catalog_item_id + traditional_item_id comparte un pool `real_stock`.
+    - Si ambas estan activas: setea qty=1 en ambas (no más de 1 en venta al mismo tiempo por item).
+    - Si una se cierra (venta detectada): cierra la otra inmediatamente, decrementa real_stock,
+      y si queda stock, relista ambas con qty=1.
+    - Si ambas estan cerradas y hay real_stock > 0: relista ambas.
+    - Si real_stock = 0: deja ambas cerradas.
+    """
+    cfg = _load_catalog_config()
+    if not cfg:
+        return
+    changed = False
+    for cat_id, meta in list(cfg.items()):
+        if cat_id.startswith("_") or not isinstance(meta, dict) or not meta.get("active"):
+            continue
+        ci = meta.get("catalog_item_id")
+        ti = meta.get("traditional_item_id")
+        if not ci or not ti:
+            continue
+        real_stock = int(meta.get("real_stock", 0))
+        label = meta.get("label", ci)
+
+        # Read both
+        def _get(iid):
+            code, it = meli("GET", f"/items/{iid}?attributes=id,status,available_quantity,sold_quantity,price", token)
+            return (code, it)
+
+        code_c, it_c = _get(ci)
+        code_t, it_t = _get(ti)
+        if code_c != 200 or code_t != 200:
+            _log(f"  linked {label}: GET err c={code_c} t={code_t}")
+            continue
+
+        st_c = it_c.get("status")
+        st_t = it_t.get("status")
+        qty_c = int(it_c.get("available_quantity") or 0)
+        qty_t = int(it_t.get("available_quantity") or 0)
+        sold_c = int(it_c.get("sold_quantity") or 0)
+        sold_t = int(it_t.get("sold_quantity") or 0)
+
+        # Detectar venta: si sold_quantity aumentó vs baseline
+        baseline = meta.setdefault("_sold_baseline", {"c": sold_c, "t": sold_t})
+        sold_delta_c = max(0, sold_c - baseline.get("c", 0))
+        sold_delta_t = max(0, sold_t - baseline.get("t", 0))
+        total_new_sales = sold_delta_c + sold_delta_t
+        if total_new_sales > 0:
+            # Decrementar real_stock por ventas nuevas
+            real_stock = max(0, real_stock - total_new_sales)
+            meta["real_stock"] = real_stock
+            baseline["c"] = sold_c
+            baseline["t"] = sold_t
+            meta["_sold_baseline"] = baseline
+            changed = True
+            _log(f"  linked {label}: {total_new_sales} ventas nuevas → real_stock={real_stock}")
+
+        both_active = st_c == "active" and st_t == "active"
+        both_closed = st_c in ("closed","paused","inactive") and st_t in ("closed","paused","inactive")
+        one_closed = (st_c != "active") != (st_t != "active")
+
+        if one_closed and real_stock <= 0:
+            # Una se cerró por venta y no queda stock → cerrar la otra
+            other_id = ci if st_c == "active" else ti
+            other_st = st_c if st_c == "active" else st_t
+            if other_st == "active":
+                meli("PUT", f"/items/{other_id}", token, body={"status":"paused"})
+                meli("PUT", f"/items/{other_id}", token, body={"status":"closed"})
+                _log(f"  linked {label}: cerré espejo {other_id} (sin stock)")
+                changed = True
+            continue
+
+        if one_closed and real_stock > 0:
+            # Una se cerró → cerrar la otra temporalmente, luego relistar ambas
+            closed_id = ci if st_c != "active" else ti
+            active_id = ti if st_c != "active" else ci
+            # Pause y close la activa, para luego relistar ambas juntas
+            meli("PUT", f"/items/{active_id}", token, body={"status":"paused"})
+            _log(f"  linked {label}: pauso {active_id} para resync")
+            # Relistar ambas via /relist
+            for iid in (ci, ti):
+                code_r, rresp = meli("POST", f"/items/{iid}/relist", token, body={"quantity": 1})
+                if code_r >= 400:
+                    _log(f"  linked {label}: relist {iid} err {code_r} {rresp}")
+            changed = True
+            continue
+
+        if both_closed and real_stock > 0:
+            # Ambas cerradas y hay stock → relistar ambas
+            for iid in (ci, ti):
+                code_r, rresp = meli("POST", f"/items/{iid}/relist", token, body={"quantity": 1})
+                if code_r >= 400:
+                    _log(f"  linked {label}: relist {iid} err {code_r} {rresp}")
+                else:
+                    _log(f"  linked {label}: relist {iid} OK → {rresp.get('id')}")
+            changed = True
+            continue
+
+        if both_active:
+            # Asegurar qty=1 en ambas
+            for iid, qty in [(ci, qty_c), (ti, qty_t)]:
+                if qty != 1:
+                    meli("PUT", f"/items/{iid}", token, body={"available_quantity": 1})
+                    _log(f"  linked {label}: {iid} qty {qty} → 1")
+    if changed:
+        _save_catalog_config(cfg)
+
+
+
 def main():
     state = load_state()
     state.setdefault("claim_states", {})
@@ -1733,6 +1841,7 @@ def main():
         process_returns_bot(token, state)
         check_and_replenish_stock(token, state)
         catalog_price_war(token, state)
+        sync_linked_stock(token, state)
         auto_discover_items(token, state)
         track_status_changes(token, state)
         check_overdue_claims(state)
