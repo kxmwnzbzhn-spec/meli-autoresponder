@@ -1,0 +1,12 @@
+{
+  "_comment": "Catalog price war config: item_id y su catalog_product_id. floor=$120 (nunca bajar de ahi). step=10 (cuanto bajar cuando perdemos). El bot revisa cada iteracion.",
+  "MLM2014404762": {
+    "item_id": "MLM2874537869",
+    "label": "Redmi Buds 4 Lite Negro",
+    "floor": 120,
+    "step": 10,
+    "last_price": 149,
+    "active": true,
+    "floor_alerted": false
+  }
+}
