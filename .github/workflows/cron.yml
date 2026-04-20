@@ -7,11 +7,12 @@ on:
 
 permissions:
   contents: write
+  actions: write
 
 jobs:
   run:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -27,7 +28,7 @@ jobs:
           path: .seen_claims.json
           key: seen-state
           restore-keys: seen-state
-      - name: Run auto-responder loop (30s polling, 4 min)
+      - name: Run auto-responder loop (15s polling, 14 min)
         env:
           MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
           MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
@@ -37,20 +38,19 @@ jobs:
           TELEGRAM_RETURNS_BOT_TOKEN: ${{ secrets.TELEGRAM_RETURNS_BOT_TOKEN }}
           SHEETS_WEBHOOK_URL: ${{ secrets.SHEETS_WEBHOOK_URL }}
         run: |
-          END=$(( $(date +%s) + 240 ))
+          END=$(( $(date +%s) + 840 ))   # 14 min
           iter=0
           while [ $(date +%s) -lt $END ]; do
             iter=$((iter+1))
             echo "--- iter $iter $(date -u +%H:%M:%S) ---"
             python meli_autoresponder.py || echo "iter failed (non-fatal)"
-            # no dormir en la última iteración
-            if [ $(( $(date +%s) + 35 )) -lt $END ]; then
-              sleep 30
+            if [ $(( $(date +%s) + 18 )) -lt $END ]; then
+              sleep 15
             else
               break
             fi
           done
-          echo "total iteraciones: $iter"
+          echo "total iter: $iter"
       - name: Commit stock_config.json if changed
         if: always()
         run: |
@@ -60,9 +60,9 @@ jobs:
             git add stock_config.json
             git commit -m "[bot] auto-replenish: actualizar real_stock"
             git push
-            echo "stock_config.json committed"
+            echo "stock_config committed"
           else
-            echo "stock_config.json sin cambios"
+            echo "stock_config sin cambios"
           fi
       - if: always()
         uses: actions/cache/save@v4
@@ -74,3 +74,17 @@ jobs:
         with:
           path: .seen_claims.json
           key: seen-state-${{ github.run_id }}
+      - name: Auto-chain next run (no dependes del schedule de GH)
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GH_AUTO_CHAIN_TOKEN }}
+        run: |
+          if [ -z "$GH_TOKEN" ]; then
+            echo "GH_AUTO_CHAIN_TOKEN no configurado, skip auto-chain"
+            exit 0
+          fi
+          curl -s -o /dev/null -w "chain HTTP %{http_code}\n" -X POST \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${{ github.repository }}/actions/workflows/cron.yml/dispatches" \
+            -d '{"ref":"main"}'
