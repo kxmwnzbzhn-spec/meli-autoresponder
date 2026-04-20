@@ -144,18 +144,6 @@
     "_deleted_at": 1776661649,
     "_deleted_reason": "It's not possible to relist an item that has been already deleted. [MLM2876026339 deleted]"
   },
-  "MLM2876038561": {
-    "real_stock": 48,
-    "sku": "JBL-CHG6-AZMAR-001",
-    "label": "JBL Charge 6 Azul Marino Usado - $499",
-    "auto_replenish": true,
-    "replenish_quantity": 1,
-    "previous_ids": [
-      "MLM2874607951",
-      "MLM5212983192"
-    ],
-    "seo_title": "Bocina Bluetooth JBL Charge 6 Portatil Azul Original Usada"
-  },
   "MLM5213157164": {
     "real_stock": 47,
     "sku": "JBL-CHG6-SQUAD-001",
@@ -305,5 +293,18 @@
       "MLM2876043397"
     ],
     "_auto_discovered": true
+  },
+  "MLM5215976922": {
+    "real_stock": 47,
+    "sku": "JBL-CHG6-AZMAR-001",
+    "label": "JBL Charge 6 Azul Marino Usado - $499",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "previous_ids": [
+      "MLM2874607951",
+      "MLM5212983192",
+      "MLM2876038561"
+    ],
+    "seo_title": "Bocina Bluetooth JBL Charge 6 Portatil Azul Original Usada"
   }
 }
