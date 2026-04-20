@@ -1,0 +1,71 @@
+name: Fix q + templates (one-shot)
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+        run: |
+          python3 <<'PY'
+          import os, json, requests
+          tk = requests.post("https://api.mercadolibre.com/oauth/token",
+              data={"grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],
+                    "client_secret":os.environ["MELI_APP_SECRET"],
+                    "refresh_token":os.environ["MELI_REFRESH_TOKEN"]}).json()
+          AT = tk["access_token"]
+          H = {"Authorization": f"Bearer {AT}", "Content-Type":"application/json"}
+
+          # 1. Responder las 2 pendientes
+          sig = "\n\nQuedamos a sus ordenes. Saludos cordiales."
+          answers = {
+              13566329799: "Buenas tardes. SI, el producto es 100% original JBL. Tome en cuenta que este modelo no es compatible con la aplicacion JBL Portable ni con Auracast; su operacion es Bluetooth estandar." + sig,
+              13566416239: "Buenas tardes. El precio competitivo se debe a que es producto usado en excelente estado (version OEM), pero funcional al 100%, original JBL, con garantia del vendedor por 7 dias. Se entrega con caja y accesorios originales." + sig,
+          }
+          for qid, ans in answers.items():
+              r = requests.post("https://api.mercadolibre.com/answers",
+                  headers=H, json={"question_id": qid, "text": ans})
+              print(f"  {qid}: {r.status_code}")
+
+          # 2. Actualizar qa_templates con keywords más robustos
+          with open("qa_templates.json") as f: cfg = json.load(f)
+          
+          # Buscar template "original" y añadir keyword "original" simple + sus variantes con "jbl"
+          for t in cfg.get("templates",[]):
+              if t.get("id") == "original":
+                  match = set(t.get("match",[]))
+                  match.update(["original","es jbl original","es original jbl","jbl original","original jbl"])
+                  t["match"] = sorted(match)
+
+          # Template nuevo: precio bajo/barato
+          has_precio = any(t.get("id") == "precio_bajo" for t in cfg.get("templates",[]))
+          if not has_precio:
+              cfg["templates"].append({
+                  "id": "precio_bajo",
+                  "match": ["barato","porque tan barato","porque barato","precio bajo","por que barato","por qué barato","esta muy barato","muy barato"],
+                  "response": "Buenas tardes. El precio competitivo se debe a que es producto usado en excelente estado (version OEM), funcional al 100% y original JBL. Se entrega con caja y accesorios originales, con garantia del vendedor por 7 dias."
+              })
+
+          with open("qa_templates.json","w") as f:
+              json.dump(cfg, f, indent=2, ensure_ascii=False)
+          print("qa_templates.json actualizado")
+          PY
+      - name: Commit qa_templates
+        if: always()
+        run: |
+          if ! git diff --quiet qa_templates.json 2>/dev/null; then
+            git config user.name "meli-bot"
+            git config user.email "bot@sonixmx.local"
+            git add qa_templates.json
+            git commit -m "QA templates: +keyword 'original' simple, +template precio_bajo"
+            git push
+            echo "committed"
+          fi
