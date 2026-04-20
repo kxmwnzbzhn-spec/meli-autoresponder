@@ -27,68 +27,71 @@ jobs:
           
           CATALOG = "MLM2014404762"
           PRICE = 149
-          
-          # Get catalog product to copy title + category
-          r = requests.get(f"https://api.mercadolibre.com/products/{CATALOG}", headers=h, timeout=20)
-          pd = r.json()
-          print(f"Catalog name: {pd.get('name')}")
-          cat_id = pd.get('domain_id')
-          # domain_id is like MLM-HEADPHONES. We need the actual leaf category MLM id
-          # Use sites category search
-          name = pd.get('name')
-          # Use the domain + one of catalog's existing items to learn category_id
-          # Try fetching a listings search of this catalog
-          r2 = requests.get(f"https://api.mercadolibre.com/sites/MLM/search?q=Redmi+Buds+4+Lite+reacondicionado&limit=3", headers=h, timeout=15)
-          for it in r2.json().get('results', [])[:3]:
-              print(f"  sample cat: {it.get('category_id')} | {it.get('title','')[:60]}")
-          # Use our existing non-catalog listing's category (MLM5072)
           OUR_CAT = "MLM5072"
+          TITLE = "Auriculares Xiaomi Redmi Buds 4 Lite Bluetooth Negros"
           
-          body = {
-              "title": name,
-              "category_id": OUR_CAT,
-              "catalog_listing": True,
-              "catalog_product_id": CATALOG,
-              "condition": "refurbished_excellent",
-              "listing_type_id": "gold_pro",
-              "price": PRICE,
-              "currency_id": "MXN",
-              "available_quantity": 1,
-              "sale_terms": [
-                  {"id": "WARRANTY_TYPE", "value_name": "Garantía del vendedor"},
-                  {"id": "WARRANTY_TIME", "value_name": "30 días"}
-              ],
-              "shipping": {"mode": "me2", "free_shipping": True, "local_pick_up": False}
-          }
-          r = requests.post("https://api.mercadolibre.com/items", headers=h, json=body, timeout=30)
-          print(f"\nStatus: {r.status_code}")
-          resp = r.json()
-          print(f"Response: {json.dumps(resp, indent=2)[:2500]}")
+          # Try multiple combinations until one works
+          attempts = [
+              {"label":"used+me2","condition":"used", "shipping":{"mode":"me2","free_shipping":False,"local_pick_up":False}},
+              {"label":"used+me2+free","condition":"used", "shipping":{"mode":"me2","free_shipping":True,"local_pick_up":False}},
+              {"label":"new+me2","condition":"new", "shipping":{"mode":"me2","free_shipping":False,"local_pick_up":False}},
+              {"label":"new+me2+free","condition":"new", "shipping":{"mode":"me2","free_shipping":True,"local_pick_up":False}},
+          ]
           
-          if r.status_code in (200, 201):
-              new_id = resp.get("id")
-              print(f"\n✓ CATALOG LISTING: {new_id}")
-              tt=os.environ.get("TELEGRAM_BOT_TOKEN"); tc=os.environ.get("TELEGRAM_CHAT_ID")
-              if tt and tc:
-                  requests.post(f"https://api.telegram.org/bot{tt}/sendMessage", json={
-                      "chat_id":tc, "parse_mode":"Markdown",
-                      "text":f"🎯 *Catalog listing creado*\n\n`{new_id}` Redmi Buds 4 Lite\nPrecio: ${PRICE} | Floor: \\$120 | Step: \\$10\n\n[Ver]({resp.get('permalink','')})"
-                  })
+          success_id = None
+          for att in attempts:
+              body = {
+                  "title": TITLE,
+                  "category_id": OUR_CAT,
+                  "catalog_listing": True,
+                  "catalog_product_id": CATALOG,
+                  "condition": att["condition"],
+                  "listing_type_id": "gold_pro",
+                  "price": PRICE,
+                  "currency_id": "MXN",
+                  "available_quantity": 1,
+                  "sale_terms": [
+                      {"id": "WARRANTY_TYPE", "value_name": "Garantía del vendedor"},
+                      {"id": "WARRANTY_TIME", "value_name": "30 días"}
+                  ],
+                  "shipping": att["shipping"]
+              }
+              r = requests.post("https://api.mercadolibre.com/items", headers=h, json=body, timeout=30)
+              resp = r.json()
+              print(f"\n=== ATTEMPT {att['label']} → {r.status_code} ===")
+              if r.status_code in (200,201):
+                  success_id = resp.get("id")
+                  print(f"SUCCESS: {success_id} | {resp.get('permalink','')}")
+                  break
+              else:
+                  errs = resp.get("cause", [])
+                  for e in errs[:3]:
+                      print(f"  err: {e.get('code')} | {e.get('message','')[:100]}")
+          
+          if success_id:
+              # Save catalog state
               state_file = "catalog_listings.json"
               try:
                   with open(state_file) as f: st = json.load(f)
               except: st = {}
-              st[CATALOG] = {"item_id": new_id, "floor": 120, "step": 10, "last_price": PRICE,
+              st[CATALOG] = {"item_id": success_id, "floor": 120, "step": 10, "last_price": PRICE,
                              "last_check": None, "active": True,
-                             "label": "Redmi Buds 4 Lite Negro Refurb"}
+                             "label": "Redmi Buds 4 Lite Negro"}
               with open(state_file,"w") as f:
                   json.dump(st, f, indent=2)
-              print("saved catalog_listings.json")
+              tt=os.environ.get("TELEGRAM_BOT_TOKEN"); tc=os.environ.get("TELEGRAM_CHAT_ID")
+              if tt and tc:
+                  requests.post(f"https://api.telegram.org/bot{tt}/sendMessage", json={
+                      "chat_id":tc, "parse_mode":"Markdown",
+                      "text":f"🎯 *Catalog listing creado*\n\n`{success_id}` Redmi Buds 4 Lite\nPrecio: $149 | Floor: $120 | Step: $10"
+                  })
+          else:
+              print("\n✗ All attempts failed")
           PY
       - name: Commit state
         run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
           git add catalog_listings.json 2>/dev/null || true
-          git diff --cached --quiet || git commit -m "add catalog_listings.json"
+          git diff --cached --quiet || git commit -m "[auto] catalog_listings.json"
           git push || echo "nothing to push"
