@@ -1,0 +1,30 @@
+name: Q final check (one-shot)
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    steps:
+      - run: pip install requests
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+        run: |
+          python3 <<'PY'
+          import os, json, requests
+          tk = requests.post("https://api.mercadolibre.com/oauth/token",
+              data={"grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],
+                    "client_secret":os.environ["MELI_APP_SECRET"],
+                    "refresh_token":os.environ["MELI_REFRESH_TOKEN"]}).json()
+          AT = tk["access_token"]
+          H = {"Authorization": f"Bearer {AT}"}
+          me = requests.get("https://api.mercadolibre.com/users/me", headers=H).json()
+          q = requests.get(f"https://api.mercadolibre.com/questions/search",
+              params={"seller_id":me['id'],"status":"UNANSWERED","limit":30}, headers=H).json()
+          qs = q.get("questions",[]) or []
+          print(f"PENDIENTES ahora: {len(qs)}")
+          for qu in qs:
+              bid = (qu.get("from") or {}).get("id")
+              tag = " 🚫BLOCKED" if bid==735376363 else ""
+              print(f"  [{qu.get('id')}] {qu.get('date_created','')[:19]}{tag} Q: {qu.get('text','')[:100]}")
+          PY
