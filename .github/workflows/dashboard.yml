@@ -1,0 +1,71 @@
+name: Dashboard status (one-shot)
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    steps:
+      - run: pip install requests
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+        run: |
+          python3 <<'PY'
+          import os, json, requests
+          tk = requests.post("https://api.mercadolibre.com/oauth/token",
+              data={"grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],
+                    "client_secret":os.environ["MELI_APP_SECRET"],
+                    "refresh_token":os.environ["MELI_REFRESH_TOKEN"]}).json()
+          AT = tk["access_token"]
+          H = {"Authorization": f"Bearer {AT}"}
+
+          me = requests.get("https://api.mercadolibre.com/users/me", headers=H).json()
+          sid = me["id"]
+          nick = me.get("nickname")
+          rep = me.get("seller_reputation", {}) or {}
+          tx = rep.get("transactions", {}) or {}
+          print(f"=== SELLER {nick} ({sid}) ===")
+          print(f"  level: {rep.get('level_id')}")
+          print(f"  transactions: total={tx.get('total',0)} completed={tx.get('completed',0)} canceled={tx.get('canceled',0)}")
+
+          # Items activos
+          r = requests.get(f"https://api.mercadolibre.com/users/{sid}/items/search?status=active&limit=50", headers=H).json()
+          active_ids = r.get("results", [])
+          print(f"\n=== ITEMS ACTIVOS: {len(active_ids)} ===")
+
+          # Ventas 24h y desde inicio
+          from datetime import datetime, timedelta, timezone
+          orders = requests.get("https://api.mercadolibre.com/orders/search",
+              params={"seller":sid, "sort":"date_desc", "limit":50}, headers=H).json()
+          total_sales = orders.get('paging',{}).get('total',0)
+          revenue_all = sum(float(o.get('total_amount',0)) for o in orders.get('results',[]))
+          last24 = datetime.now(timezone.utc) - timedelta(hours=24)
+          sales24 = [o for o in orders.get('results',[])
+                     if datetime.fromisoformat(o['date_created'].replace('Z','+00:00')) >= last24]
+          rev24 = sum(float(o.get('total_amount',0)) for o in sales24)
+          print(f"\n=== VENTAS ===")
+          print(f"  Total: {total_sales} órdenes / ${revenue_all:,.0f} ingresos brutos")
+          print(f"  Últimas 24h: {len(sales24)} / ${rev24:,.0f}")
+
+          # Visitas por item (sumando 7d)
+          total_visits = 0
+          top5_visits = []
+          for iid in active_ids:
+              v = requests.get(f"https://api.mercadolibre.com/items/visits/time_window",
+                  params={"ids":iid, "last":7, "unit":"day"}, headers=H).json()
+              if isinstance(v, list) and v:
+                  tv = v[0].get("total_visits", 0)
+                  total_visits += tv
+                  top5_visits.append((iid, tv))
+          top5_visits.sort(key=lambda x: -x[1])
+          print(f"\n=== VISITAS 7d TOTAL: {total_visits} ===")
+          print(f"  Top 5 items:")
+          for iid, tv in top5_visits[:5]:
+              it = requests.get(f"https://api.mercadolibre.com/items/{iid}",
+                  headers=H, params={"attributes":"title,price,sold_quantity"}).json()
+              print(f"    {iid}  {tv}v · vend={it.get('sold_quantity',0)} · ${it.get('price')} · {(it.get('title') or '')[:55]}")
+
+          # Preguntas pendientes
+          q = requests.get(f"https://api.mercadolibre.com/questions/search?seller_id={sid}&status=UNANSWERED", headers=H).json()
+          print(f"\n=== PREGUNTAS PENDIENTES: {q.get('total',0)} ===")
+          PY
