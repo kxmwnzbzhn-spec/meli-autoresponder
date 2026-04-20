@@ -1606,15 +1606,18 @@ def main():
     _log(f"Auth: {me.get('nickname')} ({seller_id})")
 
     try:
+        # Orden importante: Q&A PRIMERO para no bloquear por reintentos de relist
+        handle_questions(token, state)
         handle_claims(token, state)
         process_telegram_callbacks(token, state)
         advance_pending_playbooks(token, state)
-        check_and_replenish_stock(token, state)
         check_returns(token, state)
         process_returns_bot(token, state)
+        check_and_replenish_stock(token, state)
+        auto_discover_items(token, state)
         track_status_changes(token, state)
         check_overdue_claims(state)
-        send_weekly_stats_if_monday(state)
+        send_daily_claims_digest(token, state)
     except Exception as e:
         tg_send(f"❌ *Auto-Responder error*\n\n`{e}`")
         _log(f"main err: {e}"); save_json(STATE_FILE, state); sys.exit(1)
