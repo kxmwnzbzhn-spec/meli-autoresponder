@@ -23,21 +23,31 @@ jobs:
           }, timeout=20)
           tok = r.json()["access_token"]; h = {"Authorization":f"Bearer {tok}"}
           
-          # Search specifically for NEW Redmi Buds 4 Lite Negro
-          # The domain is MLM-HEADPHONES, search by domain
-          r = requests.get("https://api.mercadolibre.com/products/search?site_id=MLM&domain_id=MLM-HEADPHONES&q=Redmi+Buds+4+Lite+Negro&limit=30", headers=h, timeout=20)
-          res = r.json()
-          print(f"Found {res.get('paging',{}).get('total')}")
-          print(f"keys: {list(res.keys())[:5]}")
-          for p in res.get('results', [])[:20]:
-              pid = p.get('id')
-              nm = p.get('name','')
-              if 'Redmi' not in nm: continue
-              r2 = requests.get(f"https://api.mercadolibre.com/products/{pid}", headers=h, timeout=10)
-              pd = r2.json()
-              cond = next((a.get('value_name') for a in pd.get('attributes',[]) if a.get('id')=='ITEM_CONDITION'), None)
-              grad = next((a.get('value_name') for a in pd.get('attributes',[]) if a.get('id')=='GRADING'), None)
-              color = next((a.get('value_name') for a in pd.get('attributes',[]) if a.get('id')=='COLOR'), None)
+          # Check candidates in detail
+          candidates = ["MLM36029619","MLM52171702","MLM38597601","MLM24791861","MLM61933361",
+                        "MLM25967407","MLM22448504","MLM29027135"]
+          for cid in candidates:
+              r = requests.get(f"https://api.mercadolibre.com/products/{cid}", headers=h, timeout=10)
+              if r.status_code != 200:
+                  print(f"{cid}: {r.status_code}"); continue
+              pd = r.json()
+              nm = pd.get('name','')
               bbw = pd.get('buy_box_winner') or {}
-              print(f"  {pid} | {cond}/{grad} | {color} | BBW: ${bbw.get('price')} | {nm[:65]}")
+              # try listings count
+              r2 = requests.get(f"https://api.mercadolibre.com/products/{cid}/items?limit=5", headers=h, timeout=10)
+              lst = r2.json()
+              n_items = len(lst.get('results',[]))
+              # get main_title (category)
+              print(f"\n{cid} | status={pd.get('status')}")
+              print(f"  name: {nm[:80]}")
+              print(f"  BBW: ${bbw.get('price')} by {bbw.get('seller_id')} item={bbw.get('item_id')}")
+              print(f"  listings_endpoint: {r2.status_code} n={n_items}")
+              # pickers show color variants
+              for pk in pd.get('pickers',[])[:2]:
+                  pn = pk.get('picker_name')
+                  opts = [p.get('picker_label') for p in pk.get('products',[])]
+                  print(f"  picker {pn}: {opts}")
+              print(f"  main_title: {pd.get('main_title')}")
+              attrs = {a['id']: a.get('value_name') for a in pd.get('attributes',[])[:10]}
+              print(f"  attrs sample: COLOR={attrs.get('COLOR')} COND={attrs.get('ITEM_CONDITION')} GRAD={attrs.get('GRADING')} MODEL={attrs.get('MODEL')}")
           PY
