@@ -322,5 +322,25 @@
     ],
     "seo_title": "Bocina BT JBL Go 4 Portatil Azul Marino Original Usada",
     "paused_by_user": true
+  },
+  "MLM2877711851": {
+    "real_stock": 30,
+    "sku": "AUTO-711851",
+    "label": "Auriculares Xiaomi Redmi Buds 4 Lite Bluetooth 5.3 In-ear Co - $149",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "seo_title": "Auriculares Xiaomi Redmi Buds 4 Lite Bluetooth 5.3 In-ear Color Negro - Excelente (Reacondicionado)",
+    "previous_ids": [],
+    "_auto_discovered": true
+  },
+  "MLM2877535563": {
+    "real_stock": 30,
+    "sku": "AUTO-535563",
+    "label": "Xiaomi Redmi Buds 4 Lite Audifonos Bluetooth Negro Nuevo - $149",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "seo_title": "Xiaomi Redmi Buds 4 Lite Audifonos Bluetooth Negro Nuevo",
+    "previous_ids": [],
+    "_auto_discovered": true
   }
 }
