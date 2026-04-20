@@ -1,0 +1,89 @@
+name: Pause all JBL except Go4 Negra
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          python3 <<'PY'
+          import os, json, requests
+          tk = requests.post("https://api.mercadolibre.com/oauth/token",
+              data={"grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],
+                    "client_secret":os.environ["MELI_APP_SECRET"],
+                    "refresh_token":os.environ["MELI_REFRESH_TOKEN"]}).json()
+          AT = tk["access_token"]
+          H = {"Authorization": f"Bearer {AT}", "Content-Type":"application/json"}
+          me = requests.get("https://api.mercadolibre.com/users/me", headers=H).json()
+          sid = me["id"]
+
+          r = requests.get(f"https://api.mercadolibre.com/users/{sid}/items/search",
+              params={"status":"active","limit":50}, headers=H).json()
+          ids = r.get("results",[])
+
+          paused, kept = [], []
+          for iid in ids:
+              it = requests.get(f"https://api.mercadolibre.com/items/{iid}", headers=H).json()
+              title = (it.get("title") or "").lower()
+              is_jbl = "jbl" in title
+              is_go4_negra = "go 4" in title and ("negra" in title or "negro" in title)
+              if is_jbl and not is_go4_negra:
+                  pr = requests.put(f"https://api.mercadolibre.com/items/{iid}",
+                      headers=H, json={"status":"paused"})
+                  ok = pr.status_code < 400
+                  print(f"  {'✓' if ok else '✗'} PAUSE {iid} · {it.get('title','')[:50]}")
+                  paused.append((iid, it.get('title',''), ok))
+              else:
+                  kept.append((iid, it.get('title','')))
+                  print(f"  ► ACTIVO {iid} · {it.get('title','')[:50]}")
+
+          # Stock config update
+          try:
+              with open("stock_config.json") as f: cfg = json.load(f)
+          except: cfg = {}
+          paused_ids = {x[0] for x in paused}
+          for k in cfg:
+              if k.startswith("_"): continue
+              v = cfg[k]
+              if isinstance(v, dict):
+                  if k in paused_ids:
+                      v["auto_replenish"] = False
+                      v["paused_by_user"] = True
+          with open("stock_config.json","w") as f:
+              json.dump(cfg, f, indent=2, ensure_ascii=False)
+
+          ok = sum(1 for x in paused if x[2])
+          print(f"\n=== RESUMEN ===")
+          print(f"  Pausados: {ok}/{len(paused)}")
+          print(f"  Activos: {len(kept)}")
+
+          tt=os.environ.get("TELEGRAM_BOT_TOKEN"); tc=os.environ.get("TELEGRAM_CHAT_ID")
+          if tt and tc:
+              msg = f"📴 *JBL pausado (excepto Go 4 Negra)*\n\n"
+              msg += f"Pausados: {ok} items JBL\nSigue activo:\n"
+              for iid, t in kept:
+                  msg += f"• `{iid}` {t[:50]}\n"
+              requests.post(f"https://api.telegram.org/bot{tt}/sendMessage",
+                  json={"chat_id":tc,"parse_mode":"Markdown","text":msg[:4000]})
+          PY
+      - name: Commit stock_config
+        if: always()
+        run: |
+          if ! git diff --quiet stock_config.json 2>/dev/null; then
+            git config user.name "meli-bot"
+            git config user.email "bot@sonixmx.local"
+            git add stock_config.json
+            git commit -m "Pause JBL except Go 4 Negra"
+            git push
+          fi
