@@ -1109,7 +1109,8 @@ def check_and_replenish_stock(token, state):
     cfg = _load_stock_config()
     if not cfg: return
     items = [(k, v) for k, v in cfg.items()
-             if not k.startswith("_") and isinstance(v, dict) and v.get("auto_replenish")]
+             if not k.startswith("_") and isinstance(v, dict)
+             and v.get("auto_replenish") and not v.get("deleted")]
     if not items: return
     _log(f"Auto-replenish: revisando {len(items)} items")
     changed = False
@@ -1143,6 +1144,22 @@ def check_and_replenish_stock(token, state):
                     rbody["title"] = meta["seo_title"]
                 rcode, rresp = meli("POST", f"/items/{item_id}/relist", token, body=rbody)
                 if rcode >= 400:
+                    err_msg = (rresp.get("message") or "").lower()
+                    if "deleted" in err_msg or rresp.get("error") == "item.status.invalid":
+                        # Marcar como deleted y dejar de intentar
+                        meta["deleted"] = True
+                        meta["_deleted_at"] = int(time.time())
+                        meta["_deleted_reason"] = rresp.get("message","")
+                        cfg[item_id] = meta
+                        changed = True
+                        _log(f"  {item_id}: marcado como deleted permanente, no se reintentara")
+                        tg_send(
+                            f"⚠️ *Item deleted en MELI*\n\n"
+                            f"`{item_id}` ({meta.get('label','')}) quedo eliminado permanentemente.\n"
+                            f"Stock real restante: {meta.get('real_stock',0)} (sin relist automatico).\n"
+                            f"Si queda inventario, publicar manualmente un nuevo item."
+                        )
+                        continue
                     _log(f"  {item_id}: relist err {rcode} {rresp}")
                     tg_send(f"⚠️ *Auto-replenish falló*\n\n"
                             f"Item `{item_id}` cerrado por venta pero no se pudo relistar.\n"
