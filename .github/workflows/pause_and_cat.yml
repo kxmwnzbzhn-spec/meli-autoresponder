@@ -1,0 +1,166 @@
+name: Pause all + publish Go4 catalog NEW $599
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          python3 <<'PY'
+          import os, json, time, requests
+          tk = requests.post("https://api.mercadolibre.com/oauth/token",
+              data={"grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],
+                    "client_secret":os.environ["MELI_APP_SECRET"],
+                    "refresh_token":os.environ["MELI_REFRESH_TOKEN"]}).json()
+          AT = tk["access_token"]
+          H = {"Authorization": f"Bearer {AT}", "Content-Type":"application/json"}
+          me = requests.get("https://api.mercadolibre.com/users/me", headers=H).json()
+          sid = me["id"]
+
+          # === 1. Pausar TODOS los items activos del seller ===
+          print("=== Pausando todos los items activos ===")
+          r = requests.get(f"https://api.mercadolibre.com/users/{sid}/items/search",
+              params={"status":"active","limit":50}, headers=H).json()
+          active_ids = r.get("results",[])
+          print(f"  Items activos: {len(active_ids)}")
+          paused = 0
+          for iid in active_ids:
+              pr = requests.put(f"https://api.mercadolibre.com/items/{iid}",
+                  headers=H, json={"status":"paused"})
+              if pr.status_code < 400:
+                  paused += 1
+              else:
+                  print(f"  err pausar {iid}: {pr.status_code} {pr.text[:150]}")
+          print(f"  Pausados: {paused}/{len(active_ids)}")
+
+          # === 2. Marcar en stock_config como paused para que bot no los relista ===
+          try:
+              with open("stock_config.json") as f: cfg = json.load(f)
+          except:
+              cfg = {}
+          for k in cfg:
+              if k.startswith("_"): continue
+              if isinstance(cfg[k], dict):
+                  cfg[k]["paused_by_user"] = True  # flag para que bot no toque
+                  cfg[k]["auto_replenish"] = False
+
+          # === 3. Publicar 5 catálogos Go 4 NUEVA $599 ===
+          # Buscar product catalog Go 4 Rojo primero
+          print("\n=== Buscando Go 4 Rojo catalog ===")
+          go4_rojo = None
+          s = requests.get("https://api.mercadolibre.com/products/search",
+              params={"site_id":"MLM","q":"JBL Go 4 Rojo","limit":15}, headers=H).json()
+          for result in s.get("results",[]):
+              pid = result.get("id")
+              pr = requests.get(f"https://api.mercadolibre.com/products/{pid}", headers=H).json()
+              col = None; mod = None
+              for a in pr.get("attributes",[]):
+                  if a.get("id") == "COLOR": col = a.get("value_name","")
+                  if a.get("id") == "MODEL": mod = a.get("value_name","")
+              if mod and "Go 4" in str(mod) and (col or "").lower() == "rojo":
+                  go4_rojo = pid
+                  print(f"  Go 4 Rojo: {pid}")
+                  break
+          if not go4_rojo:
+              print("  WARN: no se encontró Go 4 Rojo específico, usando fallback")
+
+          colors = [
+              ("Negro",       "MLM44731940"),
+              ("Azul Marino", "MLM44731712"),
+              ("Camuflaje",   "MLM37361021"),
+              ("Rosa Chicle", "MLM45530822"),
+          ]
+          if go4_rojo:
+              colors.insert(2, ("Rojo", go4_rojo))
+
+          results = []
+          for color, pid in colors:
+              print(f"\n>>> Go 4 {color} catalog ({pid}) ===")
+              # Verificar que el producto exista y traer category
+              pr = requests.get(f"https://api.mercadolibre.com/products/{pid}", headers=H).json()
+              cat = pr.get("category_id") or "MLM59800"
+              print(f"  category: {cat}")
+
+              item = {
+                  "catalog_listing": True,
+                  "catalog_product_id": pid,
+                  "price": 599,
+                  "currency_id": "MXN",
+                  "available_quantity": 1,
+                  "buying_mode": "buy_it_now",
+                  "listing_type_id": "gold_pro",
+                  "condition": "new",
+                  "sale_terms": [
+                      {"id":"WARRANTY_TYPE","value_name":"Garantía del vendedor"},
+                      {"id":"WARRANTY_TIME","value_name":"90 días"},
+                  ],
+                  "shipping": {"mode":"me2","local_pick_up":False,"free_shipping":True}
+              }
+              r = requests.post("https://api.mercadolibre.com/items", headers=H, json=item)
+              print(f"  POST status={r.status_code}")
+              resp = r.json()
+              if r.status_code >= 400:
+                  print(f"  ERR: {json.dumps(resp, ensure_ascii=False)[:1500]}")
+                  results.append((color, None, f"err_{r.status_code}"))
+                  continue
+              nid = resp["id"]
+              link = resp.get("permalink")
+              print(f"  OK id={nid} link={link}")
+              results.append((color, nid, link))
+
+              # Registrar en stock_config como catalog listing
+              cfg[nid] = {
+                  "real_stock": 50,
+                  "sku": f"JBL-GO4-{color[:3].upper()}-CAT-001",
+                  "label": f"JBL Go 4 {color} NUEVA catálogo - $599",
+                  "auto_replenish": True,
+                  "replenish_quantity": 1,
+                  "previous_ids": [],
+                  "seo_title": f"Bocina JBL Go 4 {color} Original Nueva Catálogo",
+                  "is_catalog": True,
+                  "catalog_product_id": pid,
+              }
+
+          # Guardar stock_config
+          with open("stock_config.json","w") as f:
+              json.dump(cfg, f, indent=2, ensure_ascii=False)
+
+          # Reporte Telegram
+          tt=os.environ.get("TELEGRAM_BOT_TOKEN"); tc=os.environ.get("TELEGRAM_CHAT_ID")
+          if tt and tc:
+              msg = "📴 *Catálogo actualizado*\n\n"
+              msg += f"• Pausados: {paused} items usados anteriores\n"
+              msg += f"• Nuevos catalog listings Go 4 NUEVA $599:\n"
+              for c, nid, link in results:
+                  status = f"`{nid}`" if nid else f"❌ {link}"
+                  msg += f"   - {c}: {status}\n"
+              requests.post(f"https://api.telegram.org/bot{tt}/sendMessage",
+                  json={"chat_id":tc,"parse_mode":"Markdown","text":msg})
+
+          print("\n=== RESUMEN ===")
+          for c, nid, link in results:
+              print(f"  {c}: {nid} {link}")
+          PY
+      - name: Commit stock_config
+        if: always()
+        run: |
+          if ! git diff --quiet stock_config.json 2>/dev/null; then
+            git config user.name "meli-bot"
+            git config user.email "bot@sonixmx.local"
+            git add stock_config.json
+            git commit -m "Pause all + add Go4 catalog listings NEW 599"
+            git push
+            echo "committed"
+          fi
