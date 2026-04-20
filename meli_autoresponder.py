@@ -1615,24 +1615,28 @@ def _save_catalog_config(cfg):
         return False
 
 def catalog_price_war(token, state):
-    """Monitorea catalog products y ajusta precio del item vinculado.
-    - Si hay buy_box_winner más barato o igual → bajamos $step (no debajo de $floor).
-    - Si estamos en floor y seguimos perdiendo → alerta Telegram una sola vez.
-    - Si BBW no existe o es más caro que nosotros → no tocamos precio (estamos bien).
+    """Monitorea catalog products y mantiene sincronizado el precio del
+    item en catálogo (catalog_item_id) + su espejo tradicional (traditional_item_id).
+    - Si hay buy_box_winner más barato o igual → bajamos $step en el catálogo.
+    - El tradicional siempre replica el mismo precio del catálogo.
+    - Floor → alerta Telegram una sola vez, no bajamos más.
     """
     cfg = _load_catalog_config()
     if not cfg:
         return
     changed = False
     for cat_id, meta in list(cfg.items()):
-        if not isinstance(meta, dict) or not meta.get("active"):
+        if cat_id.startswith("_") or not isinstance(meta, dict) or not meta.get("active"):
             continue
-        item_id = meta.get("item_id")
+        # Compat: schema viejo {item_id} y schema nuevo {catalog_item_id, traditional_item_id}
+        catalog_item = meta.get("catalog_item_id") or meta.get("item_id")
+        trad_item = meta.get("traditional_item_id")
         floor = int(meta.get("floor", 120))
         step = int(meta.get("step", 10))
-        if not item_id:
+        if not catalog_item:
             continue
-        # Get catalog buy_box_winner
+
+        # Get catalog BBW
         code, prod = meli("GET", f"/products/{cat_id}", token)
         if code != 200:
             _log(f"  catalog {cat_id}: GET err {code}")
@@ -1640,61 +1644,70 @@ def catalog_price_war(token, state):
         bbw = prod.get("buy_box_winner") or {}
         bbw_price = bbw.get("price")
         bbw_item = bbw.get("item_id")
-        # Get our item
-        code, it = meli("GET", f"/items/{item_id}", token)
+
+        # Get our catalog item
+        code, it = meli("GET", f"/items/{catalog_item}", token)
         if code != 200:
-            _log(f"  item {item_id}: GET err {code}")
+            _log(f"  item {catalog_item}: GET err {code}")
             continue
         our_price = int(it.get("price") or 0)
         our_status = it.get("status")
-        label = meta.get("label", item_id)
-        _log(f"  catalog {cat_id} [{label}]: ours=${our_price} ({our_status}) | BBW=${bbw_price} by item {bbw_item}")
-        # We're the winner → nothing to do
-        if bbw_item == item_id:
+        label = meta.get("label", catalog_item)
+        _log(f"  catalog {cat_id} [{label}]: ours=${our_price} ({our_status}) | BBW=${bbw_price} by {bbw_item}")
+
+        # Sync tradicional price to match catalog (always)
+        if trad_item and meta.get("sync_price_to_traditional", True):
+            code_t, tr_it = meli("GET", f"/items/{trad_item}", token)
+            if code_t == 200:
+                trad_price = int(tr_it.get("price") or 0)
+                if trad_price != our_price:
+                    meli("PUT", f"/items/{trad_item}", token, body={"price": our_price})
+                    _log(f"  {trad_item}: sync price ${trad_price} → ${our_price}")
+
+        # Check competition
+        if bbw_item == catalog_item:
+            # We're the winner
             continue
-        # No BBW at all → no competitors, hold price
         if bbw_price is None:
             continue
-        # BBW cheaper or equal → we're losing visibility
+        # BBW same or cheaper → we're losing visibility
         if bbw_price <= our_price:
             new_price = our_price - step
             if new_price < floor:
-                # At the floor → alert once, don't lower further
                 if not meta.get("floor_alerted"):
                     tg_send(
                         f"⚠️ *Catalog floor alcanzado*\n\n"
-                        f"`{item_id}` ({label})\n"
+                        f"`{catalog_item}` ({label})\n"
                         f"Competidor: ${bbw_price} | Nosotros: ${our_price}\n"
-                        f"Floor: ${floor} — no podemos bajar más.\n"
-                        f"Ya no somos competitivos en el catálogo."
+                        f"Floor: ${floor} — no bajamos más."
                     )
                     meta["floor_alerted"] = True
                     cfg[cat_id] = meta
                     changed = True
                 continue
-            # Apply new price
-            code, _r = meli("PUT", f"/items/{item_id}", token, body={"price": new_price})
-            if code >= 400:
-                _log(f"  {item_id}: PUT price err {code} {_r}")
+            # Lower catalog price
+            code_p, _r = meli("PUT", f"/items/{catalog_item}", token, body={"price": new_price})
+            if code_p >= 400:
+                _log(f"  {catalog_item}: PUT price err {code_p} {_r}")
                 continue
+            # Lower traditional price too (casadas)
+            if trad_item and meta.get("sync_price_to_traditional", True):
+                meli("PUT", f"/items/{trad_item}", token, body={"price": new_price})
+                _log(f"  {trad_item}: mirror price → ${new_price}")
             meta["last_price"] = new_price
             meta["last_lowered_at"] = int(time.time())
             meta["floor_alerted"] = False
             cfg[cat_id] = meta
             changed = True
-            _log(f"  {item_id}: precio bajado ${our_price} → ${new_price} (competidor ${bbw_price})")
-            # Tier notification only at floor or crossing key thresholds
+            _log(f"  {catalog_item}: precio bajado ${our_price} → ${new_price} (competidor ${bbw_price})")
             if new_price == floor:
                 tg_send(
-                    f"🎯 *Catalog: llegamos al floor*\n\n"
-                    f"`{item_id}` ({label}): ahora en ${new_price}\n"
+                    f"🎯 *Catalog floor*\n\n"
+                    f"`{catalog_item}` ({label}): ${new_price} (piso)\n"
                     f"Competidor: ${bbw_price}"
                 )
-        # BBW exists and is more expensive → we're winning already, hold
     if changed:
         _save_catalog_config(cfg)
-
-
 
 def main():
     state = load_state()
