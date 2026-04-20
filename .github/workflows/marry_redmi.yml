@@ -25,36 +25,33 @@ jobs:
           }, timeout=20)
           tok = r.json()["access_token"]; h = {"Authorization":f"Bearer {tok}", "Content-Type":"application/json"}
           
-          OLD = "MLM2874537869"   # delete
-          CATALOG_ITEM = "MLM2877711851"   # user-created, keep
+          OLD = "MLM2874537869"
+          CATALOG_ITEM = "MLM2877711851"
           PROD = "MLM2014404762"
           PRICE = 149
+          GTIN = "6941812721032"  # Xiaomi Redmi Buds 4 Lite Negro
           
-          # 1) Pause + close OLD
-          print(f"=== STEP 1: Closing {OLD} ===")
-          r = requests.put(f"https://api.mercadolibre.com/items/{OLD}", headers=h, json={"status":"paused"}, timeout=20)
-          print(f"pause: {r.status_code}")
-          r = requests.put(f"https://api.mercadolibre.com/items/{OLD}", headers=h, json={"status":"closed"}, timeout=20)
-          print(f"close: {r.status_code}")
-          if r.status_code >= 400:
-              print(f"  err: {r.json()}")
+          # 1) OLD is under_review — try delete via DELETE method; also try sub_status
+          print(f"=== STEP 1: Try removing {OLD} ===")
+          r = requests.delete(f"https://api.mercadolibre.com/items/{OLD}", headers=h, timeout=20)
+          print(f"DELETE: {r.status_code} {r.text[:200]}")
+          # If DELETE not supported, try setting deleted sub_status
+          r = requests.put(f"https://api.mercadolibre.com/items/{OLD}", headers=h,
+                          json={"deleted":"true"}, timeout=20)
+          print(f"PUT deleted=true: {r.status_code} {r.text[:200]}")
           
-          # 2) Verify catalog listing OK
-          print(f"\n=== STEP 2: Verify catalog item {CATALOG_ITEM} ===")
+          # 2) Verify catalog OK
+          print(f"\n=== STEP 2: Catalog item {CATALOG_ITEM} ===")
           r = requests.get(f"https://api.mercadolibre.com/items/{CATALOG_ITEM}", headers=h, timeout=20)
           ci = r.json()
-          print(f"  status={ci.get('status')} cond={ci.get('condition')} catalog={ci.get('catalog_listing')} price=${ci.get('price')}")
-          print(f"  permalink: {ci.get('permalink')}")
+          print(f"  status={ci.get('status')} price=${ci.get('price')}")
           
-          # 3) Create traditional listing for same product
-          print(f"\n=== STEP 3: Create traditional listing ===")
-          # Pull pictures from catalog item
-          pics = ci.get('pictures',[])
-          pic_ids = [{"id": p.get('id')} for p in pics if p.get('id')][:8]
-          print(f"  reusing {len(pic_ids)} pictures from catalog item")
+          # 3) Create traditional - WITHOUT catalog_product_id, with GTIN, clean "new" title
+          print(f"\n=== STEP 3: Create traditional (clean, sin catalog) ===")
+          pic_ids = [{"id": p.get('id')} for p in ci.get('pictures',[]) if p.get('id')][:8]
           
           body = {
-              "title": "Audifonos Xiaomi Redmi Buds 4 Lite Bluetooth Negros Originales",
+              "title": "Audifonos Bluetooth Xiaomi Redmi Buds 4 Lite Negros Originales Nuevos",
               "category_id": "MLM5072",
               "price": PRICE,
               "currency_id": "MXN",
@@ -62,12 +59,14 @@ jobs:
               "buying_mode": "buy_it_now",
               "condition": "new",
               "listing_type_id": "gold_pro",
-              "catalog_product_id": PROD,
-              "pictures": pic_ids if pic_ids else [],
+              "pictures": pic_ids,
               "attributes": [
                   {"id":"BRAND","value_name":"Xiaomi"},
+                  {"id":"LINE","value_name":"Redmi"},
                   {"id":"MODEL","value_name":"Redmi Buds 4 Lite"},
                   {"id":"COLOR","value_name":"Negro"},
+                  {"id":"GTIN","value_name":GTIN},
+                  {"id":"ITEM_CONDITION","value_name":"Nuevo"},
               ],
               "sale_terms": [
                   {"id":"WARRANTY_TYPE","value_name":"Garantía del vendedor"},
@@ -76,19 +75,18 @@ jobs:
               "shipping": {"mode":"me2","local_pick_up":False,"free_shipping":False}
           }
           r = requests.post("https://api.mercadolibre.com/items", headers=h, json=body, timeout=30)
-          print(f"  POST status: {r.status_code}")
           resp = r.json()
+          print(f"  POST: {r.status_code}")
           new_id = None
           if r.status_code in (200,201):
               new_id = resp.get("id")
               print(f"  ✓ TRADICIONAL: {new_id}")
               print(f"  permalink: {resp.get('permalink')}")
           else:
-              for c in resp.get("cause",[])[:5]:
-                  print(f"  err: {c.get('code')} | {c.get('message','')[:120]}")
+              for c in resp.get("cause",[])[:8]:
+                  print(f"  err: {c.get('code')} | {c.get('message','')[:140]}")
           
-          # 4) Update catalog_listings.json with BOTH
-          print(f"\n=== STEP 4: Update catalog_listings.json ===")
+          # 4) Update catalog_listings.json
           state = {
               "_comment": "Casadas: catalog + tradicional sincronizadas. Bot vigila precio del catalogo y replica al tradicional.",
               PROD: {
@@ -100,30 +98,28 @@ jobs:
                   "last_price": PRICE,
                   "active": True,
                   "floor_alerted": False,
+                  "sync_price_to_traditional": True,
                   "sync_stock": True
               }
           }
           with open("catalog_listings.json","w") as f:
               json.dump(state, f, indent=2, ensure_ascii=False)
-          print("saved catalog_listings.json")
           
-          # Telegram notify
           tt=os.environ.get("TELEGRAM_BOT_TOKEN"); tc=os.environ.get("TELEGRAM_CHAT_ID")
           if tt and tc:
-              msg = f"💍 *Redmi Buds 4 Lite casadas*\n\n"
-              msg += f"❌ Borrada: `{OLD}`\n"
-              msg += f"🎯 Catálogo: `{CATALOG_ITEM}` ${PRICE}\n"
+              m = f"💍 *Redmi Buds 4 Lite — casadas*\n\n"
+              m += f"🎯 Catálogo: `{CATALOG_ITEM}` ${PRICE}\n"
               if new_id:
-                  msg += f"📦 Tradicional: `{new_id}` ${PRICE}\n"
+                  m += f"📦 Tradicional: `{new_id}` ${PRICE} (sin catalog_product_id, titulo limpio)\n"
               else:
-                  msg += f"⚠️ Tradicional NO creada (revisar log)\n"
-              msg += f"\nFloor ${120} | Step ${10} | Bot vigila ambas"
-              requests.post(f"https://api.telegram.org/bot{tt}/sendMessage", json={"chat_id":tc,"parse_mode":"Markdown","text":msg})
+                  m += f"⚠️ Tradicional NO creada\n"
+              m += f"❌ Vieja `{OLD}`: en under_review (MELI revisando, no modificable)\n"
+              m += f"\nBot va a sincronizar precio entre las dos. Floor \\$120 | Step \\$10"
+              requests.post(f"https://api.telegram.org/bot{tt}/sendMessage", json={"chat_id":tc,"parse_mode":"Markdown","text":m})
           PY
-      - name: Commit state
-        run: |
+      - run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
           git add catalog_listings.json 2>/dev/null || true
-          git diff --cached --quiet || git commit -m "[catalog] marry Redmi catalog+tradicional"
+          git diff --cached --quiet || git commit -m "[catalog] marry Redmi"
           git push || echo "nothing to push"
