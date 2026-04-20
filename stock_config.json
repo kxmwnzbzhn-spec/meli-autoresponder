@@ -188,5 +188,75 @@
       "MLM2876038547"
     ],
     "seo_title": "Bocina Bluetooth JBL Go 4 Portatil Camuflaje Original Usada"
+  },
+  "MLM5213307934": {
+    "real_stock": 30,
+    "sku": "AUTO-307934",
+    "label": "Bocina Bluetooth Jbl Charge 6 Portatil Negra Original Usada - $499",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "seo_title": "Bocina Bluetooth Jbl Charge 6 Portatil Negra Original Usada",
+    "previous_ids": [],
+    "_auto_discovered": true
+  },
+  "MLM5213159650": {
+    "real_stock": 30,
+    "sku": "AUTO-159650",
+    "label": "Bocina Bluetooth Jbl Grip Portatil Negra Original Usada - $399",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "seo_title": "Bocina Bluetooth Jbl Grip Portatil Negra Original Usada",
+    "previous_ids": [],
+    "_auto_discovered": true
+  },
+  "MLM5213158476": {
+    "real_stock": 30,
+    "sku": "AUTO-158476",
+    "label": "Bocina Bluetooth Jbl Flip 7 Portatil Morada Original Usada - $399",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "seo_title": "Bocina Bluetooth Jbl Flip 7 Portatil Morada Original Usada",
+    "previous_ids": [],
+    "_auto_discovered": true
+  },
+  "MLM5213158472": {
+    "real_stock": 30,
+    "sku": "AUTO-158472",
+    "label": "Bocina Bluetooth Jbl Flip 7 Portatil Roja Original Usada - $399",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "seo_title": "Bocina Bluetooth Jbl Flip 7 Portatil Roja Original Usada",
+    "previous_ids": [],
+    "_auto_discovered": true
+  },
+  "MLM2876043397": {
+    "real_stock": 30,
+    "sku": "AUTO-043397",
+    "label": "Bocina Bluetooth Jbl Clip 5 Portatil Rosa Original Usada - $299",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "seo_title": "Bocina Bluetooth Jbl Clip 5 Portatil Rosa Original Usada",
+    "previous_ids": [],
+    "_auto_discovered": true
+  },
+  "MLM2874596985": {
+    "real_stock": 30,
+    "sku": "AUTO-596985",
+    "label": "Dashcam Camara Para Auto 3 Lentes Full Hd Pantalla Reversa - $299",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "seo_title": "Dashcam Camara Para Auto 3 Lentes Full Hd Pantalla Reversa",
+    "previous_ids": [],
+    "_auto_discovered": true
+  },
+  "MLM2874537869": {
+    "real_stock": 30,
+    "sku": "AUTO-537869",
+    "label": "Audifonos Xiaomi Redmi Buds 4 Lite Bluetooth Negros - $149",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "seo_title": "Audifonos Xiaomi Redmi Buds 4 Lite Bluetooth Negros",
+    "previous_ids": [],
+    "_auto_discovered": true
   }
 }
