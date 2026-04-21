@@ -1,0 +1,160 @@
+name: casar-v2
+on: {workflow_dispatch: {}}
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests -q
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+        run: |
+          python <<'PY'
+          import os, requests, json, time
+          def tok():
+              for _ in range(3):
+                  r=requests.post("https://api.mercadolibre.com/oauth/token",data={"grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],"client_secret":os.environ["MELI_APP_SECRET"],"refresh_token":os.environ["MELI_REFRESH_TOKEN"]},timeout=20).json()
+                  if "access_token" in r: return r["access_token"]
+                  time.sleep(3)
+          T=tok(); H={"Authorization":f"Bearer {T}","Content-Type":"application/json"}
+
+          TARGETS = [
+              {"id":"MLM2880493859","model":"Charge 6","color":"Azul","price":899,"cpid":"","q":"JBL Charge 6 Azul"},
+              {"id":"MLM2880426915","model":"Charge 6","color":"Roja","price":899,"cpid":"MLM46455780","q":"JBL Charge 6 Roja"},
+              {"id":"MLM2880493871","model":"Charge 6","color":"Camuflaje","price":899,"cpid":"","q":"JBL Charge 6 Camuflaje"},
+              {"id":"MLM2880493955","model":"Flip 7","color":"Negra","price":799,"cpid":"MLM47809248","q":"JBL Flip 7 Negro"},
+              {"id":"MLM2880493929","model":"Flip 7","color":"Roja","price":799,"cpid":"","q":"JBL Flip 7 Rojo"},
+              {"id":"MLM2880426893","model":"Flip 7","color":"Morada","price":799,"cpid":"","q":"JBL Flip 7 Morado"},
+              {"id":"MLM2880579539","model":"Clip 5","color":"Negra","price":699,"cpid":"MLM37110181","q":"JBL Clip 5 Negro"},
+              {"id":"MLM5222253486","model":"Clip 5","color":"Morada","price":699,"cpid":"","q":"JBL Clip 5 Morado"},
+              {"id":"MLM2880421369","model":"Clip 5","color":"Rosa","price":699,"cpid":"MLM35713227","q":"JBL Clip 5 Rosa"},
+              {"id":"MLM2880426867","model":"Clip 5","color":"Rosa","price":699,"cpid":"MLM35713227","q":"JBL Clip 5 Rosa"},
+              {"id":"MLM5222240940","model":"Grip","color":"Negra","price":599,"cpid":"","q":"JBL Grip Negro"},
+              {"id":"MLM5222715416","model":"Sony XB100","color":"Negra","price":549,"cpid":"","q":"Sony SRS-XB100 Negro"},
+              {"id":"MLM5222808250","model":"Go Essential 2","color":"Azul","price":449,"cpid":"MLM44711997","q":"JBL Go Essential 2 Azul"},
+              {"id":"MLM2880655647","model":"Go Essential 2","color":"Roja","price":449,"cpid":"","q":"JBL Go Essential 2 Roja"},
+              {"id":"MLM2880426775","model":"Go 4","color":"Negra","price":449,"cpid":"","q":"JBL Go 4 Negro"},
+              {"id":"MLM2880426789","model":"Go 4","color":"Roja","price":449,"cpid":"","q":"JBL Go 4 Rojo"},
+              {"id":"MLM2880493839","model":"Go 4","color":"Rosa","price":449,"cpid":"","q":"JBL Go 4 Rosa"},
+              {"id":"MLM5222253632","model":"Go 4","color":"Azul Marino","price":449,"cpid":"MLM44731712","q":"JBL Go 4 Azul Marino"},
+              {"id":"MLM2880493813","model":"Go 4","color":"Camuflaje","price":449,"cpid":"","q":"JBL Go 4 Camuflaje"},
+              {"id":"MLM2880426761","model":"Go 3","color":"Negra","price":449,"cpid":"MLM44709174","q":"JBL Go 3 Negro"},
+          ]
+
+          def search_catalog(q):
+              r=requests.get(f"https://api.mercadolibre.com/products/search?status=active&site_id=MLM&q={q}",headers=H,timeout=15)
+              if r.status_code!=200: return None
+              res=r.json().get("results",[])
+              return res[0].get("id") if res else None
+
+          def get_catalog_details(cpid):
+              r=requests.get(f"https://api.mercadolibre.com/products/{cpid}",headers=H,timeout=15)
+              return r.json() if r.status_code==200 else None
+
+          results=[]
+          for tgt in TARGETS:
+              iid=tgt["id"]; price=tgt["price"]; cpid=tgt["cpid"]
+              log={"id":iid,"model":tgt["model"],"color":tgt["color"]}
+
+              if not cpid:
+                  cpid=search_catalog(tgt["q"]) or ""
+              log["cpid"]=cpid
+
+              # Traer producto del catálogo para usar sus datos oficiales
+              prod=get_catalog_details(cpid) if cpid else None
+              cat_id_of_prod = prod.get("domain_id","").replace("MLM-","").upper() if prod else None
+              if prod:
+                  category_id = prod.get("catalog_listing_category") or prod.get("category_id") or prod.get("category_details",{}).get("id")
+              else:
+                  category_id = "MLM1055"
+              
+              # 1. Publicar CATÁLOGO (payload mínimo correcto)
+              if cpid:
+                  cat_body={
+                      "catalog_product_id":cpid,
+                      "catalog_listing":True,
+                      "price":price,
+                      "currency_id":"MXN",
+                      "available_quantity":1,
+                      "condition":"new",
+                      "listing_type_id":"gold_pro",
+                      "sale_terms":[
+                          {"id":"WARRANTY_TYPE","value_name":"Garantía del vendedor"},
+                          {"id":"WARRANTY_TIME","value_name":"30 días"}
+                      ]
+                  }
+                  r=requests.post("https://api.mercadolibre.com/items",headers=H,json=cat_body,timeout=30)
+                  if r.status_code in (200,201):
+                      log["cat_id"]=r.json().get("id")
+                  else:
+                      log["cat_err"]=str(r.json())[:400] if r.headers.get("content-type","").startswith("application") else r.text[:400]
+              time.sleep(1)
+
+              # 2. Publicar TRADICIONAL casada (con catalog_product_id pero catalog_listing=false)
+              #    Copiar attrs del catálogo oficial para cumplir required
+              attrs=[]
+              if prod:
+                  for a in prod.get("attributes",[]):
+                      if a.get("id") and (a.get("value_id") or a.get("value_name")):
+                          ent={"id":a["id"]}
+                          if a.get("value_id"): ent["value_id"]=a["value_id"]
+                          if a.get("value_name"): ent["value_name"]=a["value_name"]
+                          attrs.append(ent)
+              # fallback attrs
+              existing_ids={a["id"] for a in attrs}
+              if "BRAND" not in existing_ids:
+                  attrs.append({"id":"BRAND","value_name":"Sony" if "Sony" in tgt["model"] else "JBL"})
+              if "COLOR" not in existing_ids:
+                  attrs.append({"id":"COLOR","value_name":tgt["color"]})
+
+              # título desde catálogo si está
+              title = (prod.get("name") if prod else None) or f"Bocina Bluetooth JBL {tgt['model']} Portatil {tgt['color']}"
+              if len(title)>60: title=title[:60]
+
+              # fotos desde catálogo
+              pics = []
+              if prod:
+                  for p in (prod.get("pictures") or []):
+                      if p.get("url"): pics.append(p["url"])
+              if not pics:
+                  pics=["https://http2.mlstatic.com/D_NQ_NP_2X_610543-MLM75678832891_042024-F.webp"]
+              
+              trad_body={
+                  "site_id":"MLM",
+                  "title":title,
+                  "price":price+10,
+                  "currency_id":"MXN",
+                  "available_quantity":1,
+                  "buying_mode":"buy_it_now",
+                  "condition":"new",
+                  "listing_type_id":"gold_pro",
+                  "category_id":category_id,
+                  "catalog_product_id":cpid if cpid else None,
+                  "catalog_listing":False,
+                  "pictures":[{"source":u} for u in pics[:10]],
+                  "shipping":{"mode":"me2","local_pick_up":False,"free_shipping":True,"free_methods":[{"id":73328,"rule":{"default":False,"free_mode":"country","value":None}}]},
+                  "attributes":attrs
+              }
+              # remover None
+              if not trad_body["catalog_product_id"]: trad_body.pop("catalog_product_id")
+              
+              r=requests.post("https://api.mercadolibre.com/items",headers=H,json=trad_body,timeout=30)
+              if r.status_code in (200,201):
+                  nid=r.json().get("id")
+                  log["trad_id"]=nid
+                  desc=f"{title} nueva con factura. Garantía 30 días. Envío gratis."
+                  requests.post(f"https://api.mercadolibre.com/items/{nid}/description",headers=H,json={"plain_text":desc},timeout=15)
+              else:
+                  log["trad_err"]=str(r.json())[:400] if r.headers.get("content-type","").startswith("application") else r.text[:400]
+              results.append(log)
+              print(f"{iid} [{tgt['model']} {tgt['color']}] cat={log.get('cat_id','-')} trad={log.get('trad_id','-')} cat_err={log.get('cat_err','')[:120]} trad_err={log.get('trad_err','')[:120]}")
+              time.sleep(2)
+
+          print("\n=== JSON ===")
+          print(json.dumps(results,indent=1,ensure_ascii=False))
+          PY
