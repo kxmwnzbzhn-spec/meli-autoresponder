@@ -1,0 +1,81 @@
+name: Disable replenish old JBL usados
+on: {workflow_dispatch: {}}
+permissions: {contents: write}
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          python3 <<'PY'
+          import os, json, requests, time
+          def get_tok():
+              for _ in range(3):
+                  r = requests.post("https://api.mercadolibre.com/oauth/token", data={
+                      "grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],
+                      "client_secret":os.environ["MELI_APP_SECRET"],"refresh_token":os.environ["MELI_REFRESH_TOKEN"]
+                  }, timeout=20)
+                  b = r.json()
+                  if r.status_code == 200 and "access_token" in b: return b["access_token"]
+                  time.sleep(5)
+              raise Exception("auth")
+          tok = get_tok(); h = {"Authorization":f"Bearer {tok}"}
+          
+          with open("stock_config.json") as f:
+              stock = json.load(f)
+          
+          # Criterios: desactivar auto_replenish si el título/label contiene "Original Usada" o variantes del viejo JBL
+          # PERO mantener activos los que son Reacondicionado, los perfumes (nuevos), dashcam, redmi
+          disabled = []
+          kept = []
+          already_off = []
+          for iid, meta in stock.items():
+              if not isinstance(meta, dict): continue
+              label = (meta.get("label") or meta.get("seo_title") or "").lower()
+              is_old_jbl_usada = "jbl" in label and ("original usada" in label or "original usado" in label)
+              is_reacond = "reacondicionado" in label
+              
+              if is_old_jbl_usada and not is_reacond:
+                  if meta.get("auto_replenish"):
+                      meta["auto_replenish"] = False
+                      meta["deleted"] = True
+                      meta["_deleted_reason"] = "JBL usado deprecado - reemplazado por Reacondicionado"
+                      disabled.append((iid, label[:55]))
+                  else:
+                      already_off.append(iid)
+              else:
+                  if meta.get("auto_replenish"):
+                      kept.append((iid, label[:55]))
+          
+          print(f"=== Desactivados (JBL usado): {len(disabled)} ===")
+          for iid, lbl in disabled:
+              print(f"  ✗ {iid} | {lbl}")
+          print(f"\n=== Mantiene activo (Reacond + perfumes): {len(kept)} ===")
+          for iid, lbl in kept[:30]:
+              rec = "🔄" if "reacondicionado" in lbl else "🧴" if "perfume" in lbl or "parfum" in lbl or "eau de" in lbl else "📦"
+              print(f"  {rec} {iid} | {lbl}")
+          print(f"\nYa estaba off: {len(already_off)}")
+          
+          with open("stock_config.json","w") as f:
+              json.dump(stock, f, indent=2, ensure_ascii=False)
+          
+          tt=os.environ.get("TELEGRAM_BOT_TOKEN"); tc=os.environ.get("TELEGRAM_CHAT_ID")
+          if tt and tc:
+              requests.post(f"https://api.telegram.org/bot{tt}/sendMessage", json={"chat_id":tc,"parse_mode":"Markdown",
+                  "text":f"🛑 *Auto-replenish JBL usados*\n\nDesactivados: *{len(disabled)}*\nMantiene activo: {len(kept)}\n(Reacondicionado + perfumes siguen funcionando)"})
+          PY
+      - run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add stock_config.json
+          git diff --cached --quiet || git commit -m "disable replenish for old JBL usados"
+          git push || echo "no push"
