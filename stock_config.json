@@ -219,19 +219,6 @@
     ],
     "_auto_discovered": true
   },
-  "MLM2876498753": {
-    "real_stock": 47,
-    "sku": "JBL-CLIP5-NGR-001",
-    "label": "JBL Clip 5 Negro Usado - $299",
-    "auto_replenish": true,
-    "replenish_quantity": 1,
-    "previous_ids": [
-      "MLM2874537405",
-      "MLM2875926627",
-      "MLM5213157162"
-    ],
-    "seo_title": "Bocina Bluetooth JBL Clip 5 Portatil Negra Original Usada"
-  },
   "MLM5214751640": {
     "real_stock": 29,
     "sku": "AUTO-043397",
@@ -353,5 +340,19 @@
       "MLM5213612190"
     ],
     "_auto_discovered": true
+  },
+  "MLM5220679640": {
+    "real_stock": 46,
+    "sku": "JBL-CLIP5-NGR-001",
+    "label": "JBL Clip 5 Negro Usado - $299",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "previous_ids": [
+      "MLM2874537405",
+      "MLM2875926627",
+      "MLM5213157162",
+      "MLM2876498753"
+    ],
+    "seo_title": "Bocina Bluetooth JBL Clip 5 Portatil Negra Original Usada"
   }
 }
