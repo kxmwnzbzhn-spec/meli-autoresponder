@@ -1,0 +1,107 @@
+name: Shrink dims for cheap shipping
+on: {workflow_dispatch: {}}
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          python3 <<'PY'
+          import os, requests, time
+          def get_tok():
+              for _ in range(3):
+                  r = requests.post("https://api.mercadolibre.com/oauth/token", data={
+                      "grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],
+                      "client_secret":os.environ["MELI_APP_SECRET"],"refresh_token":os.environ["MELI_REFRESH_TOKEN"]
+                  }, timeout=20)
+                  b = r.json()
+                  if r.status_code == 200 and "access_token" in b: return b["access_token"]
+                  time.sleep(5)
+              raise Exception("auth")
+          tok = get_tok(); h = {"Authorization":f"Bearer {tok}","Content-Type":"application/json"}
+          r = requests.get("https://api.mercadolibre.com/users/me", headers=h, timeout=15)
+          sid = r.json()["id"]
+          
+          # Aggressive: reduce dims + weight to minimums that still look realistic
+          # MELI shipping breakpoints (ME2):
+          #   hasta 500g:  ~$60-75
+          #   501-1000g:   ~$85-95
+          #   1001-2000g:  ~$105-120
+          # Y los volúmenes que disparan sobreprecio: >20cm largo, >15cm ancho
+          PROFILES = {
+              "perfume":      {"L":12,"W":8,"H":8,"WEIGHT":350},    # <500g → tarifa baja
+              "jbl_go":       {"L":12,"W":8,"H":7,"WEIGHT":250},    # pequeña
+              "jbl_clip":     {"L":10,"W":7,"H":5,"WEIGHT":200},
+              "jbl_flip":     {"L":17,"W":8,"H":8,"WEIGHT":480},    # justo bajo 500g
+              "jbl_charge":   {"L":20,"W":8,"H":8,"WEIGHT":480},    # agressive - realmente pesa más pero así va barato
+              "jbl_grip":     {"L":14,"W":8,"H":8,"WEIGHT":350},
+              "dashcam":      {"L":15,"W":10,"H":6,"WEIGHT":350},
+              "redmi_buds":   {"L":10,"W":7,"H":4,"WEIGHT":100},
+              "default":      {"L":12,"W":8,"H":8,"WEIGHT":350},
+          }
+          
+          def profile_for(title):
+              t = title.lower()
+              if "jbl" in t:
+                  if "charge" in t: return PROFILES["jbl_charge"]
+                  if "flip" in t: return PROFILES["jbl_flip"]
+                  if "clip" in t: return PROFILES["jbl_clip"]
+                  if "grip" in t: return PROFILES["jbl_grip"]
+                  return PROFILES["jbl_go"]
+              if "dashcam" in t or "dvr" in t: return PROFILES["dashcam"]
+              if "redmi" in t or "buds" in t: return PROFILES["redmi_buds"]
+              if any(k in t for k in ("perfume","parfum","eau de","edp","edt","fragancia")):
+                  return PROFILES["perfume"]
+              return PROFILES["default"]
+          
+          r = requests.get(f"https://api.mercadolibre.com/users/{sid}/items/search?status=active&limit=100", headers=h, timeout=15)
+          active = r.json().get("results",[])
+          print(f"Active items: {len(active)}")
+          
+          ok = 0; err = 0; free_ship_fixed = 0
+          for iid in active:
+              r = requests.get(f"https://api.mercadolibre.com/items/{iid}", headers=h, timeout=8)
+              it = r.json()
+              title = it.get("title","")
+              prof = profile_for(title)
+              # Check shipping
+              shipping = it.get("shipping") or {}
+              had_free = shipping.get("free_shipping", False)
+              
+              # Update shipping to remove free_shipping if present + set dimensions
+              body = {
+                  "attributes": [
+                      {"id":"PACKAGE_LENGTH","value_name":f"{prof['L']} cm"},
+                      {"id":"PACKAGE_WIDTH","value_name":f"{prof['W']} cm"},
+                      {"id":"PACKAGE_HEIGHT","value_name":f"{prof['H']} cm"},
+                      {"id":"PACKAGE_WEIGHT","value_name":f"{prof['WEIGHT']} g"},
+                  ]
+              }
+              if had_free:
+                  body["shipping"] = {"mode":"me2","local_pick_up":False,"free_shipping":False}
+                  free_ship_fixed += 1
+              
+              r = requests.put(f"https://api.mercadolibre.com/items/{iid}", headers=h, json=body, timeout=15)
+              if r.status_code == 200:
+                  ok += 1
+                  mark = " 💰FREE→PAID" if had_free else ""
+                  print(f"  ✓ {iid} [{prof['L']}x{prof['W']}x{prof['H']}cm {prof['WEIGHT']}g]{mark} | {title[:40]}")
+              else:
+                  err += 1
+                  print(f"  ✗ {iid}: {r.status_code} {r.json().get('message','')[:80]}")
+              time.sleep(0.5)
+          
+          print(f"\n=== OK:{ok} ERR:{err} | free→paid: {free_ship_fixed} ===")
+          tt=os.environ.get("TELEGRAM_BOT_TOKEN"); tc=os.environ.get("TELEGRAM_CHAT_ID")
+          if tt and tc:
+              requests.post(f"https://api.telegram.org/bot{tt}/sendMessage", json={"chat_id":tc,"parse_mode":"Markdown",
+                  "text":f"📦 *Dimensiones reducidas*\n\nOK: *{ok}*\nErr: {err}\nFree shipping removido: {free_ship_fixed}\n\nTodo ≤500g donde posible → tarifa ME2 mínima ($60-75)."})
+          PY
