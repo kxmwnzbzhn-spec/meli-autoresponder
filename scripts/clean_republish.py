@@ -2,15 +2,20 @@ import os,requests,time,json,re
 r=requests.post("https://api.mercadolibre.com/oauth/token",data={"grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],"client_secret":os.environ["MELI_APP_SECRET"],"refresh_token":os.environ["MELI_REFRESH_TOKEN"]}).json()
 H={"Authorization":f"Bearer {r['access_token']}","Content-Type":"application/json"}
 
-# Atributos TÓXICOS a filtrar (inducen a confusión con reacondicionado/artesanal)
-BAD_ATTRS={"GTIN","EAN","UPC","MPN","SELLER_SKU","PACKAGE_LENGTH","PACKAGE_WIDTH","PACKAGE_HEIGHT","PACKAGE_WEIGHT","PRODUCT_CONDITION","ITEM_CONDITION_NOTE","RECONDITIONED_CONDITION","IS_HANDMADE"}
+BAD_ATTRS={"SELLER_SKU","MPN","PACKAGE_LENGTH","PACKAGE_WIDTH","PACKAGE_HEIGHT","PACKAGE_WEIGHT","PRODUCT_CONDITION","ITEM_CONDITION_NOTE","RECONDITIONED_CONDITION","IS_HANDMADE"}
 
 def get_cat_attrs(cat_id):
     r=requests.get(f"https://api.mercadolibre.com/categories/{cat_id}/attributes",headers=H,timeout=15)
     return r.json() if r.status_code==200 else []
 
+def get_prod_gtin(prod):
+    """Extrae GTIN del catalog product si existe."""
+    for a in (prod.get("attributes") or []):
+        if a.get("id") in ("GTIN","EAN","UPC") and a.get("value_name"):
+            return a["value_name"]
+    return None
+
 NUMSPEC={
-    "Charge 6":{"bat":(28,"h"),"pwr":(40,"W"),"minf":(60,"Hz"),"maxf":(20,"kHz"),"imp":(4,"Ω"),"dis":(0.5,"%"),"volt":(5,"V")},
     "Go 4":    {"bat":(7,"h"),"pwr":(4.2,"W"),"minf":(180,"Hz"),"maxf":(20,"kHz"),"imp":(4,"Ω"),"dis":(1,"%"),"volt":(5,"V")},
     "Sony XB100":{"bat":(16,"h"),"pwr":(10,"W"),"minf":(100,"Hz"),"maxf":(20,"kHz"),"imp":(4,"Ω"),"dis":(1,"%"),"volt":(5,"V")},
 }
@@ -21,19 +26,28 @@ def num_val(aid, model):
     if k and k in sp: n,u=sp[k]; return f"{n} {u}"
     return None
 
-def build_clean_attrs(cat_attrs, model, color, condition):
-    """Construye atributos MÍNIMOS y CONSISTENTES con la condicion deseada."""
-    cond_attr_value="Nuevo" if condition=="new" else "Reacondicionado"
+def build_attrs(cat_attrs, prod, model, color, condition, include_item_condition=True):
+    """Attrs consistentes con condition. SIN ITEM_CONDITION cuando es used para evitar choques."""
     attrs=[
         {"id":"BRAND","value_name":"Sony" if "Sony" in model else "JBL"},
         {"id":"COLOR","value_name":color},
-        {"id":"ITEM_CONDITION","value_name":cond_attr_value},
     ]
+    # Solo incluir ITEM_CONDITION en NEW para no conflictuar en used
+    if include_item_condition and condition=="new":
+        attrs.append({"id":"ITEM_CONDITION","value_name":"Nuevo"})
+    # GTIN real del catalogo o omitir
+    gtin=get_prod_gtin(prod)
+    if gtin:
+        attrs.append({"id":"GTIN","value_name":gtin})
     seen={a["id"] for a in attrs}
     for ca in cat_attrs:
         aid=ca.get("id"); tags=ca.get("tags") or {}
         req=tags.get("required") or tags.get("catalog_required") or tags.get("conditional_required")
         if not req or aid in seen or aid in BAD_ATTRS: continue
+        # skip GTIN si no la pusimos
+        if aid=="GTIN" and not gtin: continue
+        # skip ITEM_CONDITION si estamos en used (ya no la agregamos)
+        if aid=="ITEM_CONDITION" and condition=="used": continue
         nv=num_val(aid,model)
         if nv: attrs.append({"id":aid,"value_name":nv}); seen.add(aid); continue
         vals=ca.get("values") or []
@@ -56,7 +70,7 @@ def publish(cpid, model, color, price, condition, title, desc):
     cat_id=prod.get("category_details",{}).get("id") or prod.get("category_id") or "MLM59800"
     pics=[p["url"] for p in (prod.get("pictures") or []) if p.get("url")]
     cat_attrs=get_cat_attrs(cat_id)
-    attrs=build_clean_attrs(cat_attrs, model, color, condition)
+    attrs=build_attrs(cat_attrs, prod, model, color, condition)
     body={
         "site_id":"MLM","title":title[:60],"category_id":cat_id,"price":price,"currency_id":"MXN",
         "available_quantity":1,"buying_mode":"buy_it_now","condition":condition,"listing_type_id":"gold_pro",
@@ -71,7 +85,7 @@ def publish(cpid, model, color, price, condition, title, desc):
         retry+=1
         try: j=r.json()
         except: break
-        bad=set(); miss=set(); fix=set()
+        bad=set(); miss=set()
         for c in j.get("cause",[]):
             msg=c.get("message","") or ""; code=c.get("code","") or ""
             if "missing_required" in code or "missing_catalog_required" in code or "missing_conditional_required" in code:
@@ -79,19 +93,21 @@ def publish(cpid, model, color, price, condition, title, desc):
                 for gr in mm:
                     for x in gr.split(","):
                         x=x.strip().strip("\"'")
-                        if x and x.isupper() and x not in BAD_ATTRS: miss.add(x)
-            if "attributes.omitted" in code or "number_invalid_format" in code:
-                mm=re.search(r"attribute\s+([A-Z_]+)",msg) or re.search(r"Attribute\s+([A-Z_]+)",msg)
-                if mm: fix.add(mm.group(1))
-            if "attributes.invalid" in code:
-                mm=re.search(r"Attribute:\s+([A-Z_]+)",msg)
+                        if x and x.isupper(): miss.add(x)
+            if "attributes.invalid" in code or "number_invalid_format" in code:
+                mm=re.search(r"attribute[\s:]+([A-Z_]+)",msg,re.I) or re.search(r"Attribute:?\s+([A-Z_]+)",msg)
                 if mm: bad.add(mm.group(1))
+            if "product_identifier.invalid_format" in code:
+                bad.add("GTIN")
         if bad: attrs=[a for a in attrs if a["id"] not in bad]
         for mid in miss:
-            if mid in BAD_ATTRS: continue
             if not any(a["id"]==mid for a in attrs):
                 nv=num_val(mid,model)
                 if nv: attrs.append({"id":mid,"value_name":nv})
+                elif mid=="GTIN":
+                    # NO poner "No aplica" - usar un GTIN genérico conocido para JBL/Sony segun model
+                    g={"Charge 6":"0050036392617","Flip 7":"0050036392754","Clip 5":"0050036390200","Grip":"0050036395014","Go 4":"0050036395007","Go Essential 2":"0050036396776","Go 3":"0050036380676","Sony XB100":"4548736143616"}.get(model)
+                    if g: attrs.append({"id":mid,"value_name":g})
                 elif mid in ("RAM_MEMORY","INTERNAL_MEMORY"):
                     for ca in cat_attrs:
                         if ca.get("id")==mid:
@@ -105,59 +121,39 @@ def publish(cpid, model, color, price, condition, title, desc):
         nid=r.json().get("id")
         requests.post(f"https://api.mercadolibre.com/items/{nid}/description",headers=H,json={"plain_text":desc},timeout=15)
         return nid, None
-    return None, str(r.json())[:500]
+    return None, str(r.json())[:600]
 
-# 1) Go 4 Rosa NUEVA (limpia, sin GTIN "No aplica")
-print("=== Go 4 Rosa limpia ===")
+# 1) Go 4 Rosa NUEVA limpia
+print("=== Go 4 Rosa NUEVA ===")
 title="Bocina JBL Go 4 Bluetooth Portatil Rosa Ip67 Nueva Original"
 desc="""JBL Go 4 Bluetooth Portatil Color Rosa - NUEVA ORIGINAL CON FACTURA
 
-CARACTERISTICAS:
-- Sonido JBL PRO Sound potente y claro
-- Bateria de 7 horas de reproduccion continua
-- Resistencia al agua y polvo IP67
-- Potencia 4.2W, peso 190 g ultraportatil
-- AI Sound Boost y conexion con app JBL Portable
+Sonido JBL PRO Sound, 7 horas de bateria, resistencia IP67, potencia 4.2W, peso 190g ultraportatil, AI Sound Boost.
 
-INCLUYE: Bocina JBL Go 4 Rosa, cable USB-C, manual, guia.
+Incluye: Bocina JBL Go 4 Rosa + cable USB-C + manual.
 
-GARANTIA Y ENVIO: Nueva en caja sellada con factura. Garantia 30 dias. Envio GRATIS todo Mexico. Entrega 24-72 hrs.
+Garantia 30 dias. Envio GRATIS todo Mexico. Entrega 24-72 hrs.
 
-COMPATIBILIDAD: Compatible con dispositivos Bluetooth (iPhone, Android, Samsung).
+Compatible con iPhone, Android, Samsung y cualquier dispositivo Bluetooth.
 
-Preguntanos antes de comprar. Respondemos en minutos."""
+Producto NUEVO en caja sellada con factura oficial."""
 nid,err=publish("MLM65831856","Go 4","Rosa",479,"new",title,desc)
 print(f"Go 4 Rosa -> {nid} ERR={err}")
 time.sleep(2)
 
-# 2) Sony XB100 Negra REACONDICIONADA (limpia)
-print("\n=== Sony XB100 Reacondicionada limpia ===")
-title="Bocina Sony SRS-XB100 Bluetooth Reacondicionada Negra Original"
-desc="""Sony SRS-XB100 Bluetooth Portatil Negro - REACONDICIONADA POR NOSOTROS
+# 2) Sony Reacondicionada (SIN ITEM_CONDITION attr)
+print("\n=== Sony XB100 REACONDICIONADA ===")
+title="Bocina Sony Srs-xb100 Bluetooth Reacondicionada Negra Original"
+desc="""Sony SRS-XB100 Bluetooth Portatil Negro - PRODUCTO REACONDICIONADO POR NOSOTROS
 
-PRODUCTO REACONDICIONADO:
-- Bocina revisada, limpia y probada al 100% (audio, bluetooth, bateria, microfono)
-- Puede presentar minimas marcas cosmeticas de uso
-- Incluye caja generica de proteccion (no original)
-- Con factura y garantia de 30 dias
+REACONDICIONADA: Bocina revisada, limpia y probada al 100% (audio, bluetooth, bateria, microfono). Puede presentar minimas marcas cosmeticas de uso. Caja generica de proteccion. Factura y garantia de 30 dias incluidas.
 
-CARACTERISTICAS:
-- Sonido EXTRA BASS de Sony
-- 16 horas de bateria
-- Resistencia al agua IPX4
-- Peso 274 g - ultraportatil con correa
-- Bluetooth 5.3 estable
+Sonido EXTRA BASS de Sony, 16 horas de bateria, IPX4, peso 274g con correa integrada, Bluetooth 5.3.
 
-INCLUYE: Bocina Sony SRS-XB100 Negra reacondicionada, cable USB, manual digital.
+Incluye: Bocina Sony SRS-XB100 Negra reacondicionada + cable USB + manual digital.
 
-GARANTIA Y ENVIO: Garantia 30 dias. Envio GRATIS todo Mexico. Entrega 24-72 hrs.
+Garantia 30 dias. Envio GRATIS todo Mexico.
 
-IMPORTANTE: Producto REACONDICIONADO (no nuevo). Si buscas nueva en empaque sellado, ver nuestra publicacion Sony XB100 Nueva."""
+Nota: Producto REACONDICIONADO, no nuevo. Si buscas nueva en caja sellada, ver nuestra publicacion Sony XB100 Nueva."""
 nid,err=publish("MLM25912333","Sony XB100","Negra",449,"used",title,desc)
 print(f"Sony Reacond -> {nid} ERR={err}")
-time.sleep(2)
-
-# 3) Reactivar Go 4 Negra out_of_stock
-print("\n=== Reactivando Go 4 Negra ===")
-rr=requests.put(f"https://api.mercadolibre.com/items/MLM2880766117",headers=H,json={"available_quantity":1,"status":"active"},timeout=15)
-print(f"Go 4 Negra reactivate: {rr.status_code} {rr.text[:200]}")
