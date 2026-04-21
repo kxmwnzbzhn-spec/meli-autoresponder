@@ -1,0 +1,59 @@
+name: Rep check
+on: {workflow_dispatch: {}}
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+        run: |
+          python3 <<'PY'
+          import os, json, requests
+          from datetime import datetime, timedelta, timezone
+          r = requests.post("https://api.mercadolibre.com/oauth/token", data={
+              "grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],
+              "client_secret":os.environ["MELI_APP_SECRET"],
+              "refresh_token":os.environ["MELI_REFRESH_TOKEN"]
+          }, timeout=20)
+          tok = r.json()["access_token"]; h = {"Authorization":f"Bearer {tok}"}
+          r = requests.get("https://api.mercadolibre.com/users/me", headers=h, timeout=15)
+          me = r.json(); sid = me["id"]
+          
+          print("=== SELLER REPUTATION ===")
+          rep = me.get("seller_reputation") or {}
+          print(f"Level: {rep.get('level_id')}")
+          print(f"Power seller status: {rep.get('power_seller_status')}")
+          tx = rep.get("transactions") or {}
+          print(f"Total transactions: {tx.get('total')}")
+          print(f"Completed 60d: {tx.get('completed')}")
+          print(f"Canceled 60d: {tx.get('canceled')}")
+          ratings = tx.get("ratings") or {}
+          print(f"Ratings: pos={ratings.get('positive')} neu={ratings.get('neutral')} neg={ratings.get('negative')}")
+          metrics = rep.get("metrics") or {}
+          print(f"\nMetrics:")
+          for k in ["claims","cancellations","delayed_handling_time","sales"]:
+              v = metrics.get(k)
+              print(f"  {k}: {v}")
+          
+          # Ordenes canceladas últimas 48h
+          from_48h = (datetime.now(timezone.utc) - timedelta(hours=48)).strftime("%Y-%m-%dT%H:%M:%S.000Z")
+          r = requests.get(f"https://api.mercadolibre.com/orders/search?seller={sid}&order.status=cancelled&order.date_created.from={from_48h}&limit=50", headers=h, timeout=15)
+          cancelled = r.json().get("results",[])
+          print(f"\n=== CANCELADAS 48h: {len(cancelled)} ===")
+          for o in cancelled[:15]:
+              dc = o.get("date_created","")[:19]
+              amt = o.get("total_amount",0)
+              items = ",".join(oi.get("item",{}).get("title","?")[:35] for oi in o.get("order_items",[]))
+              buyer = (o.get("buyer") or {}).get("nickname","?")
+              # Cancellation detail
+              cd = o.get("cancel_detail") or {}
+              reason = cd.get("code") or cd.get("description","")
+              group = cd.get("group","?")
+              print(f"  [{dc}] ${amt:.0f} | {buyer} | {items}")
+              print(f"    motivo: {reason} (group={group})")
+          PY
