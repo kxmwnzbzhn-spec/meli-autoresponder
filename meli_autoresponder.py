@@ -1332,10 +1332,21 @@ def _load_qa_templates():
         return {"templates": [], "signature": ""}
 
 def _match_template(question_text, templates_cfg):
-    qn = _normalize(question_text)
+    import re as _re
+    qn = _normalize(question_text).strip()
     for t in templates_cfg.get("templates", []):
-        for kw in t.get("match", []):
-            if _normalize(kw) in qn:
+        # admite "keywords" (JSON actual) o "match" (legacy)
+        for kw in (t.get("keywords") or t.get("match") or []):
+            kw_n = _normalize(kw)
+            # patron regex (empieza con ^ o termina con $)
+            if kw_n.startswith("^") or kw_n.endswith("$"):
+                try:
+                    if _re.search(kw_n, qn):
+                        return t
+                except _re.error:
+                    pass
+                continue
+            if kw_n in qn:
                 return t
     return None
 
