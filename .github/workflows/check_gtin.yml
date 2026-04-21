@@ -1,0 +1,29 @@
+name: Check GTIN values MLM1271
+on: {workflow_dispatch: {}}
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+        run: |
+          python3 <<'PY'
+          import os, json, requests
+          r = requests.post("https://api.mercadolibre.com/oauth/token", data={
+              "grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],
+              "client_secret":os.environ["MELI_APP_SECRET"],"refresh_token":os.environ["MELI_REFRESH_TOKEN"]
+          }, timeout=20)
+          tok = r.json()["access_token"]; h = {"Authorization":f"Bearer {tok}"}
+          
+          r = requests.get("https://api.mercadolibre.com/categories/MLM1271/attributes", headers=h, timeout=15)
+          for a in r.json():
+              if a.get("id") == "GTIN":
+                  print(f"GTIN full definition:")
+                  print(json.dumps(a, indent=2)[:2000])
+                  break
+          PY
