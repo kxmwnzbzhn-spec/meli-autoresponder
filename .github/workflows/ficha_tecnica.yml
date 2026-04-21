@@ -1,0 +1,110 @@
+name: Update ficha técnica bocinas
+on: {workflow_dispatch: {}}
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          python3 <<'PY'
+          import os, json, requests, time
+          def get_tok():
+              for _ in range(3):
+                  r = requests.post("https://api.mercadolibre.com/oauth/token", data={
+                      "grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],
+                      "client_secret":os.environ["MELI_APP_SECRET"],"refresh_token":os.environ["MELI_REFRESH_TOKEN"]
+                  }, timeout=20)
+                  b = r.json()
+                  if r.status_code == 200 and "access_token" in b: return b["access_token"]
+                  time.sleep(5)
+              raise Exception("auth")
+          tok = get_tok(); h = {"Authorization":f"Bearer {tok}","Content-Type":"application/json"}
+          r = requests.get("https://api.mercadolibre.com/users/me", headers=h, timeout=15)
+          sid = r.json()["id"]
+          
+          # Especificaciones OFICIALES del fabricante (producto sin caja) + paquete retail
+          # [L, W, H, producto_g, PL, PW, PH, paquete_g]
+          SPECS = {
+              "go 3":           {"LENGTH":"8.75 cm","WIDTH":"7.5 cm","HEIGHT":"4.1 cm","WEIGHT":"209 g",
+                                 "P_L":"13 cm","P_W":"10 cm","P_H":"6 cm","P_WT":"285 g"},
+              "go 4":           {"LENGTH":"9.5 cm","WIDTH":"7.5 cm","HEIGHT":"4.1 cm","WEIGHT":"190 g",
+                                 "P_L":"13 cm","P_W":"10 cm","P_H":"6 cm","P_WT":"260 g"},
+              "go essential":   {"LENGTH":"8.5 cm","WIDTH":"7.5 cm","HEIGHT":"4 cm","WEIGHT":"200 g",
+                                 "P_L":"13 cm","P_W":"10 cm","P_H":"6 cm","P_WT":"275 g"},
+              "clip 5":         {"LENGTH":"8.6 cm","WIDTH":"13.4 cm","HEIGHT":"4.6 cm","WEIGHT":"285 g",
+                                 "P_L":"14 cm","P_W":"16 cm","P_H":"7 cm","P_WT":"340 g"},
+              "flip 7":         {"LENGTH":"18.2 cm","WIDTH":"6.9 cm","HEIGHT":"7.2 cm","WEIGHT":"560 g",
+                                 "P_L":"21 cm","P_W":"9 cm","P_H":"9 cm","P_WT":"650 g"},
+              "grip":           {"LENGTH":"15 cm","WIDTH":"8 cm","HEIGHT":"8 cm","WEIGHT":"400 g",
+                                 "P_L":"17 cm","P_W":"10 cm","P_H":"10 cm","P_WT":"460 g"},
+              "charge 6":       {"LENGTH":"22.8 cm","WIDTH":"9.5 cm","HEIGHT":"9.7 cm","WEIGHT":"970 g",
+                                 "P_L":"26 cm","P_W":"12 cm","P_H":"12 cm","P_WT":"1100 g"},
+              "srs-xb100":      {"LENGTH":"7.6 cm","WIDTH":"9.5 cm","HEIGHT":"7.6 cm","WEIGHT":"274 g",
+                                 "P_L":"11 cm","P_W":"13 cm","P_H":"10 cm","P_WT":"340 g"},
+          }
+          
+          def model_of(title):
+              t = title.lower()
+              for m in ["charge 6","flip 7","clip 5","go essential","go 4","go 3","grip","srs-xb100"]:
+                  if m in t: return m
+              return None
+          
+          # Find all speakers
+          items = []
+          r = requests.get(f"https://api.mercadolibre.com/users/{sid}/items/search?status=active&limit=100", headers=h, timeout=15)
+          for iid in r.json().get("results",[]):
+              r2 = requests.get(f"https://api.mercadolibre.com/items/{iid}?attributes=id,title", headers=h, timeout=6)
+              it = r2.json()
+              title = it.get("title","")
+              low = title.lower()
+              if ("jbl" in low) or ("sony" in low and "srs" in low):
+                  items.append((iid, title))
+          print(f"Bocinas: {len(items)}")
+          
+          ok = 0; err = 0; no_spec = 0
+          for iid, title in items:
+              m = model_of(title)
+              if not m or m not in SPECS:
+                  print(f"  ? {iid} | {title[:45]} (no match)")
+                  no_spec += 1; continue
+              s = SPECS[m]
+              attrs = [
+                  # Ficha técnica producto (sin prefix PACKAGE)
+                  {"id":"LENGTH","value_name":s["LENGTH"]},
+                  {"id":"WIDTH","value_name":s["WIDTH"]},
+                  {"id":"HEIGHT","value_name":s["HEIGHT"]},
+                  {"id":"WEIGHT","value_name":s["WEIGHT"]},
+                  # Paquete
+                  {"id":"PACKAGE_LENGTH","value_name":s["P_L"]},
+                  {"id":"PACKAGE_WIDTH","value_name":s["P_W"]},
+                  {"id":"PACKAGE_HEIGHT","value_name":s["P_H"]},
+                  {"id":"PACKAGE_WEIGHT","value_name":s["P_WT"]},
+              ]
+              r = requests.put(f"https://api.mercadolibre.com/items/{iid}", headers=h, json={"attributes":attrs}, timeout=15)
+              if r.status_code == 200:
+                  print(f"  ✓ {iid} [{m}] prod={s['LENGTH']}x{s['WIDTH']}x{s['HEIGHT']}/{s['WEIGHT']} | caja={s['P_L']}x{s['P_W']}x{s['P_H']}/{s['P_WT']} | {title[:35]}")
+                  ok += 1
+              else:
+                  resp = r.json()
+                  errs = [c for c in (resp.get("cause") or []) if isinstance(c,dict)]
+                  print(f"  ✗ {iid}: {r.status_code}")
+                  for c in errs[:2]:
+                      print(f"    {c.get('code')}: {c.get('message','')[:130]}")
+                  err += 1
+              time.sleep(0.4)
+          
+          print(f"\n=== OK:{ok}/{len(items)} ERR:{err} NO_SPEC:{no_spec} ===")
+          tt=os.environ.get("TELEGRAM_BOT_TOKEN"); tc=os.environ.get("TELEGRAM_CHAT_ID")
+          if tt and tc:
+              requests.post(f"https://api.telegram.org/bot{tt}/sendMessage", json={"chat_id":tc,"parse_mode":"Markdown",
+                  "text":f"📐 *Ficha tecnica actualizada*\n\nOK: *{ok}/{len(items)}*\nErr: {err}\n\nDimensiones producto + paquete con specs oficiales JBL/Sony."})
+          PY
