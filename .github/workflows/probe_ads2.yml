@@ -1,0 +1,68 @@
+name: Probe ads alt methods
+on: {workflow_dispatch: {}}
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+        run: |
+          python3 <<'PY'
+          import os, requests, time, json
+          def get_tok():
+              for _ in range(3):
+                  r = requests.post("https://api.mercadolibre.com/oauth/token", data={
+                      "grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],
+                      "client_secret":os.environ["MELI_APP_SECRET"],"refresh_token":os.environ["MELI_REFRESH_TOKEN"]
+                  }, timeout=20)
+                  b = r.json()
+                  if r.status_code == 200 and "access_token" in b: return b["access_token"]
+                  time.sleep(5)
+              raise Exception("auth")
+          tok = get_tok(); h = {"Authorization":f"Bearer {tok}"}
+          
+          # Check alternative promotion endpoints + seller status for ads
+          endpoints = [
+              "/users/me/promotions",
+              "/promotions",
+              "/marketplace/offers",
+              "/items/MLM2880426761/promotions",
+              "/advertising/product_ads/acls",
+              "/advertising/advertiser/acls",
+              # New Mercado Ads Manager API
+              "/advertising/mps",
+              "/advertising/mps/campaigns",
+              "/advertisers/me/campaigns",
+              # OAuth scopes check
+              "/sites/MLM/promotions",
+          ]
+          for p in endpoints:
+              try:
+                  r = requests.get(f"https://api.mercadolibre.com{p}", headers=h, timeout=8)
+                  if r.status_code != 404:
+                      print(f"  [{r.status_code}] {p}")
+                      print(f"    {r.text[:200]}")
+              except: pass
+          
+          # Also try PUT/DELETE on /advertising/product_ads/campaigns to figure out allowed
+          for method in ("PUT","DELETE","PATCH","OPTIONS","HEAD"):
+              r = requests.request(method, "https://api.mercadolibre.com/advertising/product_ads/campaigns", headers=h, timeout=5)
+              print(f"  [{r.status_code}] {method} /advertising/product_ads/campaigns")
+              if r.headers.get("Allow"):
+                  print(f"    Allow: {r.headers.get('Allow')}")
+          
+          # Check Promotions API (alternative to Ads)
+          print("\n=== Promotions ===")
+          r = requests.get("https://api.mercadolibre.com/users/me", headers=h, timeout=10)
+          sid = r.json()["id"]
+          for p in [f"/seller-promotions/users/{sid}",f"/users/{sid}/promotions",
+                    f"/seller-promotions/promotions?seller_id={sid}"]:
+              r = requests.get(f"https://api.mercadolibre.com{p}", headers=h, timeout=8)
+              if r.status_code != 404:
+                  print(f"  [{r.status_code}] {p}: {r.text[:200]}")
+          PY
