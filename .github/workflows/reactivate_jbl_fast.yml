@@ -1,0 +1,80 @@
+name: Reactivate paused JBL fast
+on: {workflow_dispatch: {}}
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          python3 <<'PY'
+          import os, requests, time
+          def get_tok():
+              for _ in range(3):
+                  r = requests.post("https://api.mercadolibre.com/oauth/token", data={
+                      "grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],
+                      "client_secret":os.environ["MELI_APP_SECRET"],"refresh_token":os.environ["MELI_REFRESH_TOKEN"]
+                  }, timeout=20)
+                  b = r.json()
+                  if r.status_code == 200 and "access_token" in b: return b["access_token"]
+                  time.sleep(5)
+              raise Exception("auth")
+          tok = get_tok(); h = {"Authorization":f"Bearer {tok}","Content-Type":"application/json"}
+          r = requests.get("https://api.mercadolibre.com/users/me", headers=h, timeout=15)
+          sid = r.json()["id"]
+          
+          # Scan ALL paused + closed items, filter JBL
+          jbl_paused = []
+          for st in ("paused","closed"):
+              r = requests.get(f"https://api.mercadolibre.com/users/{sid}/items/search?status={st}&limit=100", headers=h, timeout=15)
+              for iid in r.json().get("results",[]):
+                  r2 = requests.get(f"https://api.mercadolibre.com/items/{iid}?attributes=id,title,status,sub_status,sold_quantity", headers=h, timeout=8)
+                  it = r2.json()
+                  if "jbl" in (it.get("title","") or "").lower():
+                      jbl_paused.append((iid, it.get("title",""), it.get("status",""), it.get("sub_status") or [], it.get("sold_quantity",0)))
+          
+          print(f"=== {len(jbl_paused)} JBL pausados/cerrados ===")
+          ok = 0; err = 0; skipped = 0
+          for iid, title, status, ss, sold in jbl_paused:
+              # Skip deleted/forbidden
+              if any(s in ("deleted","forbidden") for s in ss):
+                  skipped += 1
+                  print(f"  SKIP {iid} ss={ss}")
+                  continue
+              try:
+                  if status == "closed":
+                      # Needs relist
+                      r = requests.post(f"https://api.mercadolibre.com/items/{iid}/relist", headers=h, json={"quantity":1}, timeout=20)
+                      if r.status_code in (200,201):
+                          new_id = r.json().get("id")
+                          print(f"  ✓ RELIST {iid} → {new_id} | {title[:45]}")
+                          ok += 1
+                      else:
+                          print(f"  ✗ RELIST {iid}: {r.status_code} {r.json().get('message','')[:80]}")
+                          err += 1
+                  else:
+                      # Just set active
+                      r = requests.put(f"https://api.mercadolibre.com/items/{iid}", headers=h, json={"status":"active"}, timeout=15)
+                      if r.status_code == 200:
+                          print(f"  ✓ ACTIVATE {iid} | {title[:45]}")
+                          ok += 1
+                      else:
+                          print(f"  ✗ ACTIVATE {iid}: {r.status_code} {r.json().get('message','')[:80]}")
+                          err += 1
+              except Exception as e:
+                  print(f"  ✗ ERR {iid}: {e}")
+                  err += 1
+          
+          print(f"\n=== RESUMEN === OK:{ok} ERR:{err} SKIP:{skipped}")
+          tt=os.environ.get("TELEGRAM_BOT_TOKEN"); tc=os.environ.get("TELEGRAM_CHAT_ID")
+          if tt and tc:
+              requests.post(f"https://api.telegram.org/bot{tt}/sendMessage", json={"chat_id":tc,"parse_mode":"Markdown",
+                  "text":f"🟢 *JBL reactivados (rápido)*\n\nOK: *{ok}*\nErr: {err}\nSkip (deleted): {skipped}"})
+          PY
