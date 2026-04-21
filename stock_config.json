@@ -1235,5 +1235,35 @@
     "seo_title": "Bocina Bluetooth Jbl Clip 5 Portatil Negra Reacondicionado",
     "previous_ids": [],
     "_auto_discovered": true
+  },
+  "MLM5222808250": {
+    "real_stock": 10,
+    "sku": "JBL-GE2-azul",
+    "label": "Bocina Bluetooth Jbl Go Essential 2 Azul Reacondic",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "seo_title": "Bocina Bluetooth Jbl Go Essential 2 Azul Reacondicionado",
+    "previous_ids": [],
+    "_new_bocina": true
+  },
+  "MLM2880655647": {
+    "real_stock": 10,
+    "sku": "JBL-GE2-rojo",
+    "label": "Bocina Bluetooth Jbl Go Essential 2 Roja Reacondic",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "seo_title": "Bocina Bluetooth Jbl Go Essential 2 Roja Reacondicionado",
+    "previous_ids": [],
+    "_new_bocina": true
+  },
+  "MLM5222715416": {
+    "real_stock": 10,
+    "sku": "SONY-XB100-NEG",
+    "label": "Bocina Bluetooth Sony Srs-xb100 Portatil Negra Rea",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "seo_title": "Bocina Bluetooth Sony Srs-xb100 Portatil Negra Reacondiciona",
+    "previous_ids": [],
+    "_new_bocina": true
   }
 }
