@@ -1,0 +1,220 @@
+name: tradic-seo
+on: {workflow_dispatch: {}}
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests -q
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+        run: |
+          python <<'PY'
+          import os,requests,time,json
+          r=requests.post("https://api.mercadolibre.com/oauth/token",data={"grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],"client_secret":os.environ["MELI_APP_SECRET"],"refresh_token":os.environ["MELI_REFRESH_TOKEN"]}).json()
+          H={"Authorization":f"Bearer {r['access_token']}","Content-Type":"application/json"}
+
+          # IDs catálogo -> (modelo, color, precio tradicional)
+          # precio tradicional = catalogo + $20 para que el catálogo gane la puja de precio
+          SRC=[
+              ("MLM2880754323","Go 3","Negra",469),
+              ("MLM2880758735","Charge 6","Roja",919),
+              ("MLM2880758747","Clip 5","Morada",719),
+              ("MLM2880758751","Grip","Negra",619),
+              ("MLM2880766021","Flip 7","Roja",819),
+              ("MLM5222936976","Charge 6","Azul",919),
+              ("MLM5222983008","Charge 6","Camuflaje",919),
+              ("MLM5222983106","Go Essential 2","Azul",469),
+              ("MLM5222983110","Go Essential 2","Roja",469),
+              ("MLM5222983148","Go 4","Camuflaje",469),
+              ("MLM5222987710","Go 4","Roja",469),
+              ("MLM5222987718","Go 4","Azul Marino",469),
+              ("MLM5222987720","Go 4","Rosa",469),
+          ]
+
+          # Títulos SEO por modelo (<60 chars) — keywords: modelo, marca, bluetooth, portátil, color, waterproof/ip67
+          def seo_title(modelo, color):
+              c=color
+              m=modelo
+              tmpl={
+                  "Charge 6": f"Bocina Jbl Charge 6 Bluetooth Portatil {c} Ip68 Nueva",
+                  "Flip 7":   f"Bocina Jbl Flip 7 Bluetooth Portatil {c} Ip68 Nueva",
+                  "Clip 5":   f"Bocina Jbl Clip 5 Bluetooth Portatil {c} Ip67 Nueva",
+                  "Grip":     f"Bocina Jbl Grip Bluetooth Portatil {c} Luz Led Nueva",
+                  "Go 4":     f"Bocina Jbl Go 4 Bluetooth Portatil {c} Ip67 Nueva",
+                  "Go Essential 2": f"Jbl Go Essential 2 Bluetooth Portatil {c} Ip67",
+                  "Go 3":     f"Bocina Jbl Go 3 Bluetooth Portatil {c} Ip67 Nueva",
+              }
+              t=tmpl.get(m,f"Bocina Jbl {m} Bluetooth Portatil {c} Nueva")
+              return t[:60]
+
+          # Descripciones SEO por modelo
+          SPEC={
+              "Charge 6": {"bat":"28 horas","power":"40W","ip":"IP68","weight":"970 g","extras":"Powerbank integrada. AURACAST multi-bocina. Conexión con app JBL Portable."},
+              "Flip 7":   {"bat":"16 horas","power":"35W","ip":"IP68","weight":"560 g","extras":"AI Sound Boost. AURACAST. Conexión con app JBL Portable."},
+              "Clip 5":   {"bat":"12 horas","power":"7W","ip":"IP67","weight":"285 g","extras":"Mosquetón integrado para llevar donde sea. AURACAST. Conexión con app JBL Portable."},
+              "Grip":     {"bat":"12 horas","power":"8W","ip":"IP68","weight":"400 g","extras":"Iluminación LED dinámica. Forma pensada para agarrar con una mano. Conexión con app JBL Portable."},
+              "Go 4":     {"bat":"7 horas","power":"4.2W","ip":"IP67","weight":"190 g","extras":"Tamaño bolsillo. AI Sound Boost. Conexión con app JBL Portable."},
+              "Go Essential 2": {"bat":"7 horas","power":"3.1W","ip":"IPX7","weight":"200 g","extras":"Edición esencial. Bluetooth 5.1. Clip integrado."},
+              "Go 3":     {"bat":"5 horas","power":"4.2W","ip":"IP67","weight":"209 g","extras":"Diseño icónico JBL. Cuerda integrada para colgar."},
+          }
+
+          def seo_desc(modelo,color,precio):
+              s=SPEC.get(modelo,{"bat":"","power":"","ip":"","weight":"","extras":""})
+              d=f"""JBL {modelo} Bluetooth Portátil — Color {color} — NUEVA 100% ORIGINAL
+
+🔊 Sonido JBL PRO Sound potente y claro
+🔋 Batería de {s['bat']} de reproducción continua
+💧 Resistencia al agua y polvo {s['ip']}
+🎵 Potencia {s['power']}
+⚖️ Peso {s['weight']} — ultraportátil
+📱 {s['extras']}
+
+✅ Producto NUEVO en caja sellada con factura
+✅ Garantía de 30 días con nosotros
+✅ Envío GRATIS a todo México
+✅ Envío el mismo día si compras antes de las 2 PM
+✅ Entrega en 24-72 hrs vía Mercado Envíos
+
+CONTENIDO DE LA CAJA:
+• 1x Bocina JBL {modelo} color {color}
+• 1x Cable de carga USB-C
+• 1x Manual de usuario
+• 1x Guía de inicio rápido
+
+COMPATIBILIDAD:
+Compatible con cualquier dispositivo con Bluetooth: iPhone, Android, Samsung, Xiaomi, Motorola, iPad, tablets, laptops Windows/Mac.
+
+IMPORTANTE:
+Esta bocina JBL {modelo} es 100% original, adquirida por medio de comercializadora autorizada con factura. No es reacondicionada, no es réplica.
+
+PREGÚNTANOS LO QUE QUIERAS antes de comprar. Respondemos en menos de 1 hora.
+
+Palabras clave: bocina jbl, altavoz bluetooth, parlante portátil, jbl {modelo.lower()}, bocina {color.lower()}, bluetooth portátil, bocina waterproof, bocina impermeable, bocina inalámbrica, bocina jbl original, jbl {modelo.lower()} {color.lower()}, regalo bocina, bocina pequeña, bocina fiesta, bocina exterior."""
+              return d
+
+          created=[]
+          closed=[]
+          for iid,model,color,price in SRC:
+              # 1. Leer item catálogo
+              item=requests.get(f"https://api.mercadolibre.com/items/{iid}",headers=H,timeout=15).json()
+              cpid=item.get("catalog_product_id")
+              cat_id=item.get("category_id") or "MLM1055"
+              pics=[p["url"] for p in item.get("pictures",[]) if p.get("url")]
+              
+              # 2. Leer producto catálogo para obtener atributos completos
+              prod=requests.get(f"https://api.mercadolibre.com/products/{cpid}",headers=H,timeout=15).json() if cpid else {}
+              
+              # 3. Construir attrs filtrando valores inválidos
+              attrs=[]
+              for a in (prod.get("attributes") or []):
+                  aid=a.get("id")
+                  vid=a.get("value_id")
+                  vn=a.get("value_name")
+                  if not aid: continue
+                  if not vid and not vn: continue
+                  # saltar los que dan error típicamente
+                  if aid in ("SELLER_SKU","GTIN","EAN","UPC","MPN"): continue
+                  e={"id":aid}
+                  if vid: e["value_id"]=vid
+                  if vn:
+                      # saltar valores con problemas numéricos
+                      if isinstance(vn,str) and (vn.lower().endswith(" nan") or vn.strip()==""):
+                          continue
+                      e["value_name"]=vn
+                  attrs.append(e)
+              # garantizar BRAND + COLOR + ITEM_CONDITION
+              seen={a["id"] for a in attrs}
+              if "BRAND" not in seen: attrs.append({"id":"BRAND","value_name":"JBL"})
+              if "COLOR" not in seen: attrs.append({"id":"COLOR","value_name":color})
+              if "ITEM_CONDITION" not in seen: attrs.append({"id":"ITEM_CONDITION","value_name":"Nuevo"})
+
+              # 4. Publicar tradicional
+              title=seo_title(model,color)
+              body={
+                  "site_id":"MLM",
+                  "title":title,
+                  "category_id":cat_id,
+                  "price":price,
+                  "currency_id":"MXN",
+                  "available_quantity":1,
+                  "buying_mode":"buy_it_now",
+                  "condition":"new",
+                  "listing_type_id":"gold_pro",
+                  "catalog_listing":False,
+                  "pictures":[{"source":u} for u in pics[:10]] if pics else None,
+                  "shipping":{"mode":"me2","local_pick_up":False,"free_shipping":True,"free_methods":[{"id":73328,"rule":{"default":False,"free_mode":"country","value":None}}]},
+                  "attributes":attrs,
+                  "sale_terms":[
+                      {"id":"WARRANTY_TYPE","value_name":"Garantía del vendedor"},
+                      {"id":"WARRANTY_TIME","value_name":"30 días"}
+                  ]
+              }
+              if cpid: body["catalog_product_id"]=cpid
+              if body["pictures"] is None: del body["pictures"]
+              
+              r=requests.post("https://api.mercadolibre.com/items",headers=H,json=body,timeout=30)
+              if r.status_code not in (200,201):
+                  # retry sin attributes opcionales problemáticos
+                  err=str(r.json())[:300] if r.headers.get("content-type","").startswith("application") else r.text[:300]
+                  # detectar attr problemático y reintentar
+                  retry_ok=False
+                  for _ in range(4):
+                      try:
+                          j=r.json()
+                          bad_attrs=set()
+                          for c in j.get("cause",[]):
+                              msg=(c.get("message") or "").lower()
+                              # extraer attr ID de mensajes tipo "Value name of attribute XXX"
+                              import re
+                              mm=re.search(r"attribute\s+([A-Z_]+)",msg)
+                              if mm: bad_attrs.add(mm.group(1))
+                              mm2=re.search(r"\[([A-Z_, ]+)\]",msg)
+                              if mm2:
+                                  for x in mm2.group(1).split(","):
+                                      x=x.strip()
+                                      if x and x.isupper(): bad_attrs.add(x)
+                          if not bad_attrs: break
+                          # remover atributos malos y agregarles un stub para los missing required
+                          attrs=[a for a in attrs if a["id"] not in bad_attrs]
+                          body["attributes"]=attrs
+                          r=requests.post("https://api.mercadolibre.com/items",headers=H,json=body,timeout=30)
+                          if r.status_code in (200,201):
+                              retry_ok=True; break
+                      except: break
+                  if not retry_ok:
+                      print(f"ERR {iid} [{model} {color}]: {err}")
+                      created.append({"src":iid,"model":model,"color":color,"err":err[:200]})
+                      time.sleep(2); continue
+              
+              resp=r.json()
+              new_id=resp.get("id")
+              # set description
+              requests.post(f"https://api.mercadolibre.com/items/{new_id}/description",headers=H,json={"plain_text":seo_desc(model,color,price)},timeout=15)
+              print(f"OK {iid} -> {new_id} [{model} {color}]")
+              created.append({"src":iid,"new":new_id,"model":model,"color":color,"price":price})
+              time.sleep(2)
+          
+          # 5. Cerrar las 13 catálogo originales SÓLO si se creó tradicional
+          print("\n=== CERRANDO ORIGINALES ===")
+          for c in created:
+              if c.get("new"):
+                  rr=requests.put(f"https://api.mercadolibre.com/items/{c['src']}",headers=H,json={"status":"closed"},timeout=15)
+                  print(f"close {c['src']}: {rr.status_code}")
+                  closed.append(c['src'])
+                  time.sleep(0.5)
+          
+          print("\n=== SUMMARY ===")
+          print(f"Tradicionales creadas: {sum(1 for c in created if c.get('new'))}/{len(SRC)}")
+          print(f"Catálogos cerrados: {len(closed)}")
+          print("\n=== MAPPING ===")
+          for c in created:
+              if c.get("new"):
+                  print(f"  {c['src']} -> {c['new']} [{c['model']} {c['color']}] ${c['price']}")
+              else:
+                  print(f"  {c['src']} FAILED: {c.get('err')}")
+          PY
