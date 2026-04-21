@@ -802,5 +802,16 @@
     "seo_title": "Perfume Original Marshmallow Blush Edp 100ml Mujer Importado",
     "previous_ids": [],
     "_auto_discovered": true
+  },
+  "MLM5221767078": {
+    "real_stock": 10,
+    "sku": "PERF-035",
+    "label": "PACO RABANNE MILLION GOLD FOR HER EDP PARA MUJER 9",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "seo_title": "PACO RABANNE MILLION GOLD FOR HER EDP PARA MUJER 90 ML",
+    "previous_ids": [],
+    "_perfume": true,
+    "_idx": 35
   }
 }
