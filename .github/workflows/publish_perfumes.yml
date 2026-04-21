@@ -30,7 +30,7 @@ jobs:
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: |
           python3 <<'PY'
-          import os, json, requests, time
+          import os, json, requests
           START = int(os.environ.get("START","0"))
           COUNT = int(os.environ.get("COUNT","5"))
           
@@ -42,22 +42,21 @@ jobs:
           
           with open("perfumes.json") as f:
               all_perfumes = json.load(f)
-          
           batch = all_perfumes[START:START+COUNT]
-          print(f"=== BATCH {START} .. {START+len(batch)} ({len(batch)} items) ===\n")
+          print(f"=== BATCH {START}..{START+len(batch)} ({len(batch)} items) ===")
           
-          def find_catalog_pics(search_q):
-              """Busca producto en catálogo y devuelve las mejores fotos."""
+          def find_catalog(search_q):
+              """Devuelve (catalog_id, pics, gtin). Catalog_id only if product type."""
               r = requests.get(f"https://api.mercadolibre.com/products/search?site_id=MLM&q={search_q}&limit=10", headers=h, timeout=20)
-              candidates = r.json().get("results",[])
-              for p in candidates:
+              for p in r.json().get("results",[]):
                   pid = p.get("id")
                   r2 = requests.get(f"https://api.mercadolibre.com/products/{pid}", headers=h, timeout=10)
                   pd = r2.json()
                   pics = [{"source": pic.get("url") or pic.get("secure_url")} for pic in pd.get("pictures",[]) if pic.get("url") or pic.get("secure_url")]
-                  if pics:
-                      return pics[:8], pid
-              # Fallback: search items directly
+                  if not pics: continue
+                  gtin = next((a.get("value_name") for a in pd.get("attributes",[]) if a.get("id")=="GTIN"), None)
+                  return pid, pics[:8], gtin
+              # Fallback: item search
               r = requests.get(f"https://api.mercadolibre.com/sites/MLM/search?q={search_q}&limit=5&category=MLM1271", headers=h, timeout=15)
               for it in r.json().get("results",[])[:3]:
                   iid = it.get("id")
@@ -65,8 +64,8 @@ jobs:
                   it_full = r2.json()
                   pics = [{"source": pic.get("url") or pic.get("secure_url")} for pic in it_full.get("pictures",[]) if pic.get("url") or pic.get("secure_url")]
                   if pics:
-                      return pics[:8], iid
-              return [], None
+                      return None, pics[:8], None
+              return None, [], None
           
           try:
               with open("stock_config.json") as f:
@@ -80,15 +79,13 @@ jobs:
               title = p["title"]
               price = p["price"]
               search = p["search"].replace(" ","+")
-              brand = p["brand"]
-              vol = p["vol"]
-              gender = p["gender"]
-              print(f"\n[{idx}] {title} ($${price})")
+              brand = p["brand"]; vol = p["vol"]; gender = p["gender"]
+              print(f"\n[{idx}] {title} (${price})")
               
-              pics, src_id = find_catalog_pics(search)
-              print(f"  pics: {len(pics)} (from {src_id})")
+              cat_pid, pics, gtin = find_catalog(search)
+              print(f"  catalog={cat_pid} pics={len(pics)} gtin={gtin}")
               if not pics:
-                  print(f"  ✗ sin fotos disponibles, skip")
+                  print(f"  ✗ sin fotos, skip")
                   results.append({"idx":idx,"title":title,"status":"no_pics"})
                   continue
               
@@ -97,10 +94,12 @@ jobs:
                   {"id":"GENDER","value_name":gender},
                   {"id":"UNIT_VOLUME","value_name":vol},
                   {"id":"NET_VOLUME","value_name":vol},
-                  {"id":"FRAGRANCE_TYPE","value_name":"Eau de parfum" if "EDP" in title.upper() or "PARFUM" in title.upper() else "Eau de toilette"},
-                  {"id":"PERFUME_NAME","value_name":title.split(" ")[0].capitalize()},
+                  {"id":"FRAGRANCE_TYPE","value_name":"Eau de parfum" if ("EDP" in title.upper() or "PARFUM" in title.upper() and "TOILETTE" not in title.upper() and "EDT" not in title.upper()) else "Eau de toilette"},
+                  {"id":"PERFUME_NAME","value_name":title.split()[0].capitalize()},
                   {"id":"ITEM_CONDITION","value_name":"Nuevo"},
               ]
+              if gtin:
+                  attrs.append({"id":"GTIN","value_name":gtin})
               
               body = {
                   "title": title,
@@ -119,39 +118,36 @@ jobs:
                   ],
                   "shipping":{"mode":"me2","local_pick_up":False,"free_shipping":False}
               }
+              # Associate with catalog (not as catalog_listing, just reference)
+              if cat_pid:
+                  body["catalog_product_id"] = cat_pid
               
               r = requests.post("https://api.mercadolibre.com/items", headers=h, json=body, timeout=30)
               resp = r.json()
+              
+              # Retry without catalog_product_id if failed
+              if r.status_code not in (200,201) and cat_pid:
+                  body.pop("catalog_product_id", None)
+                  # Add "No aplica" GTIN
+                  if not any(a.get("id")=="GTIN" for a in attrs):
+                      body["attributes"].append({"id":"GTIN","value_id":"-1","value_name":"No aplica"})
+                  r = requests.post("https://api.mercadolibre.com/items", headers=h, json=body, timeout=30)
+                  resp = r.json()
+              
               if r.status_code in (200,201):
                   new_id = resp.get("id")
-                  print(f"  ✓ {new_id} | {resp.get('permalink','')}")
-                  # Add description
-                  desc = (f"{title}\n\n"
-                          f"Perfume original 100% autentico.\n\n"
-                          f"CARACTERISTICAS:\n"
-                          f"- Marca: {brand}\n"
-                          f"- Volumen: {vol}\n"
-                          f"- Genero: {gender}\n"
-                          f"- Condicion: Nuevo, sellado de fabrica\n\n"
-                          f"GARANTIAS:\n"
-                          f"- Producto NUEVO y 100% Original\n"
-                          f"- 30 dias de garantia del vendedor\n"
-                          f"- Factura disponible al solicitar\n"
-                          f"- Envio el mismo dia antes de 3pm\n\n"
-                          f"- Sonix Mx")
+                  print(f"  ✓ {new_id}")
+                  desc = (f"{title}\n\nPerfume original 100% autentico.\n\n"
+                          f"CARACTERISTICAS:\n- Marca: {brand}\n- Volumen: {vol}\n"
+                          f"- Genero: {gender}\n- Condicion: Nuevo, sellado de fabrica\n\n"
+                          f"GARANTIAS:\n- NUEVO y 100% Original\n- 30 dias de garantia\n"
+                          f"- Factura disponible al solicitar\n- Envio el mismo dia antes de 3pm\n\n- Sonix Mx")
                   requests.post(f"https://api.mercadolibre.com/items/{new_id}/description", headers=h, json={"plain_text":desc}, timeout=15)
-                  
-                  # Save to stock_config
                   stock[new_id] = {
-                      "real_stock": 10,
-                      "sku": f"PERF-{idx:03d}",
-                      "label": title[:50],
-                      "auto_replenish": True,
-                      "replenish_quantity": 1,
-                      "seo_title": title,
-                      "previous_ids": [],
-                      "_perfume": True,
-                      "_idx": idx
+                      "real_stock": 10, "sku": f"PERF-{idx:03d}",
+                      "label": title[:50], "auto_replenish": True,
+                      "replenish_quantity": 1, "seo_title": title,
+                      "previous_ids": [], "_perfume": True, "_idx": idx
                   }
                   results.append({"idx":idx,"title":title,"id":new_id,"price":price,"status":"ok"})
               else:
@@ -159,27 +155,23 @@ jobs:
                   err_codes = [c.get("code","?") for c in errs[:3]]
                   print(f"  ✗ {r.status_code} | {err_codes}")
                   for c in errs[:3]:
-                      print(f"    {c.get('code')}: {c.get('message','')[:120]}")
+                      print(f"    {c.get('code')}: {c.get('message','')[:140]}")
                   results.append({"idx":idx,"title":title,"status":"err","code":r.status_code,"errs":err_codes})
           
-          # Save stock_config
           with open("stock_config.json","w") as f:
               json.dump(stock, f, indent=2, ensure_ascii=False)
           
-          # Summary
           ok = [r for r in results if r.get("status")=="ok"]
           errs = [r for r in results if r.get("status")!="ok"]
-          print(f"\n=== RESUMEN BATCH {START} ===")
-          print(f"OK: {len(ok)} | ERR: {len(errs)}")
+          print(f"\n=== RESUMEN BATCH {START} === OK:{len(ok)} ERR:{len(errs)}")
           
           tt=os.environ.get("TELEGRAM_BOT_TOKEN"); tc=os.environ.get("TELEGRAM_CHAT_ID")
           if tt and tc:
-              m = f"💐 *Perfumes batch {START}-{START+len(batch)-1}*\n\n"
-              m += f"OK: *{len(ok)}* | Err: *{len(errs)}*\n\n"
+              m = f"💐 *Perfumes batch {START}-{START+len(batch)-1}*\n\nOK: *{len(ok)}* | Err: *{len(errs)}*\n\n"
               for r in ok:
                   m += f"✓ `{r['id']}` ${r['price']} {r['title'][:40]}\n"
               for r in errs:
-                  m += f"✗ {r['title'][:40]}: {r.get('code','?')}\n"
+                  m += f"✗ {r['title'][:40]}: {r.get('errs',r.get('status','?'))}\n"
               requests.post(f"https://api.telegram.org/bot{tt}/sendMessage",
                   json={"chat_id":tc,"parse_mode":"Markdown","text":m[:4000]})
           PY
