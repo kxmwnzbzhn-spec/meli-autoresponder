@@ -261,19 +261,6 @@
     ],
     "_auto_discovered": true
   },
-  "MLM5215976922": {
-    "real_stock": 47,
-    "sku": "JBL-CHG6-AZMAR-001",
-    "label": "JBL Charge 6 Azul Marino Usado - $499",
-    "auto_replenish": true,
-    "replenish_quantity": 1,
-    "previous_ids": [
-      "MLM2874607951",
-      "MLM5212983192",
-      "MLM2876038561"
-    ],
-    "seo_title": "Bocina Bluetooth JBL Charge 6 Portatil Azul Original Usada"
-  },
   "MLM2877475987": {
     "real_stock": 46,
     "sku": "JBL-GO4-AZMAR-001",
@@ -335,5 +322,19 @@
       "MLM5213157164"
     ],
     "seo_title": "Bocina BT JBL Charge 6 Portatil Camuflaje Original Usada"
+  },
+  "MLM5218152722": {
+    "real_stock": 46,
+    "sku": "JBL-CHG6-AZMAR-001",
+    "label": "JBL Charge 6 Azul Marino Usado - $499",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "previous_ids": [
+      "MLM2874607951",
+      "MLM5212983192",
+      "MLM2876038561",
+      "MLM5215976922"
+    ],
+    "seo_title": "Bocina Bluetooth JBL Charge 6 Portatil Azul Original Usada"
   }
 }
