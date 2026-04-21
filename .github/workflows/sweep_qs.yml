@@ -1,0 +1,162 @@
+name: Sweep pending Qs
+on: {workflow_dispatch: {}}
+permissions: {contents: write}
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          python3 <<'PY'
+          import os, json, requests, unicodedata, re
+          r = requests.post("https://api.mercadolibre.com/oauth/token", data={
+              "grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],
+              "client_secret":os.environ["MELI_APP_SECRET"],
+              "refresh_token":os.environ["MELI_REFRESH_TOKEN"]
+          }, timeout=20)
+          tok = r.json()["access_token"]; h = {"Authorization":f"Bearer {tok}","Content-Type":"application/json"}
+          r = requests.get("https://api.mercadolibre.com/users/me", headers=h, timeout=15)
+          sid = r.json()["id"]
+          
+          def norm(s):
+              s = (s or "").lower()
+              s = unicodedata.normalize("NFD", s)
+              return "".join(c for c in s if unicodedata.category(c) != "Mn")
+          
+          # Templates expandidos - ORDENADOS por especificidad
+          templates = [
+              # Saludo simple / "hola" solo
+              (["^hola$", "^buenas$", "^buen dia$", "^saludos$", "^hey$", "^info$", "^informes$", "^informacion$"],
+               "Hola! Claro, con gusto te ayudo. ¿Qué duda tienes sobre el producto?"),
+              # Disponibilidad
+              (["disponible", "sigue disponible", "tienes stock", "hay stock", "cuantas hay", "aun tienes"],
+               "Hola! Sí, está disponible con envío inmediato. Saludos!"),
+              # Envío tiempos
+              (["cuanto tarda", "tiempo de envio", "cuando llega", "llegaria", "envio rapido", "tarda mucho"],
+               "Hola! Enviamos el mismo día si la compra es antes de las 3pm. Tiempo estimado: 1-3 días hábiles según tu zona. Saludos!"),
+              # Envío costo / gratis
+              (["envio gratis", "tiene envio", "cuanto cuesta el envio", "costo de envio", "envio a domicilio"],
+               "Hola! El envío lo calcula MercadoLibre según tu código postal. Checa en el botón 'Calcular costo de envío'. Saludos!"),
+              # Caja
+              (["caja", "empaque", "con caja"],
+               "Hola! Sí, viene con su caja original. Todos los accesorios incluidos: cable de carga y manual. Saludos!"),
+              # Fotos
+              (["fotos", "foto", "mas foto", "otra foto", "imagen"],
+               "Hola! Las fotos del anuncio son reales del producto exacto que recibirás. Si necesitas una específica, dime y te la tomo. Saludos!"),
+              # Original
+              (["es original", "original", "autentico", "autentica", "pirata", "clon", "copia"],
+               "Hola! Sí es 100% original, producto auténtico. Saludos!"),
+              # Garantia
+              (["garantia", "garantiza", "si se descompone", "devolucion si falla"],
+               "Hola! Tiene 30 días de garantía del vendedor. Si algo falla lo resolvemos sin problema. Saludos!"),
+              # Nuevo o usado
+              (["es nuevo", "nueva", "esta nuevo", "viene nuevo", "usado", "seminuevo"],
+               "Hola! La condición del producto está indicada en el anuncio (nuevo o usado). Todo se prueba antes de enviar. Saludos!"),
+              # Precio / descuento / oferta
+              (["mas barato", "descuento", "rebaja", "oferta", "precio especial", "bajas el precio", "ultimo precio"],
+               "Hola! El precio que ves ya es nuestro mejor precio. Saludos!"),
+              # Factura
+              (["factura", "facturar", "tiene factura", "dan factura"],
+               "Hola! Sí, facturamos. Al confirmar la compra envíanos tus datos fiscales por mensaje. Saludos!"),
+              # Color
+              (["color", "que color", "que tonos", "colores disponibles"],
+               "Hola! El color disponible es el que aparece en el título y las fotos del anuncio. Saludos!"),
+              # Modelo / version
+              (["que modelo", "modelo exacto", "que version"],
+               "Hola! El modelo exacto aparece en el título del anuncio. Todas las especificaciones están en la descripción. Saludos!"),
+              # Bateria (para bocinas/audifonos)
+              (["bateria", "cuanto dura", "duracion bateria", "horas de reproduccion"],
+               "Hola! La duración de batería depende del volumen y uso. Consulta las especificaciones oficiales del fabricante en la descripción. Saludos!"),
+              # Resistencia al agua (JBL)
+              (["resistente al agua", "agua", "sumergible", "ipx"],
+               "Hola! Según el fabricante tiene resistencia al agua IP67. Consulta las especificaciones oficiales para detalles. Saludos!"),
+              # Bluetooth / conexion
+              (["bluetooth", "se conecta", "compatible con", "funciona con", "iphone", "android"],
+               "Hola! Funciona con cualquier dispositivo Bluetooth (iPhone, Android, PC, etc.). Saludos!"),
+              # Recoger en persona
+              (["recoger", "paso por el", "ir por el", "entrega en mano"],
+               "Hola! Solo manejamos envío por MercadoEnvíos, no hay recolección en persona. Saludos!"),
+              # Pago
+              (["efectivo", "oxxo", "contraentrega", "pago contra"],
+               "Hola! Los pagos se procesan por MercadoPago (tarjeta, OXXO, SPEI). No manejamos pago contra entrega. Saludos!"),
+          ]
+          
+          # Get all pending
+          r = requests.get(f"https://api.mercadolibre.com/questions/search?seller_id={sid}&status=UNANSWERED&limit=50&sort_fields=date_created&sort_types=ASC", headers=h, timeout=15)
+          pending = r.json().get("questions",[]) or []
+          print(f"=== Pendientes: {len(pending)} ===")
+          
+          SIG = "\n\n— Sonix Mx"
+          answered = []
+          unmatched = []
+          
+          for q in pending:
+              qid = q.get("id")
+              qt = q.get("text","")
+              qn = norm(qt).strip()
+              matched = None
+              for keys, resp in templates:
+                  for k in keys:
+                      if k.startswith("^") and k.endswith("$"):
+                          if re.match(k, qn):
+                              matched = resp; break
+                      elif k in qn:
+                          matched = resp; break
+                  if matched: break
+              if not matched:
+                  unmatched.append((qid, qt))
+                  continue
+              r_a = requests.post("https://api.mercadolibre.com/answers", headers=h,
+                  json={"question_id": int(qid), "text": matched + SIG}, timeout=15)
+              if r_a.status_code == 200:
+                  answered.append((qid, qt[:45]))
+                  print(f"  ✓ {qid} | Q: {qt[:50]}")
+              else:
+                  print(f"  ✗ {qid}: {r_a.status_code} {r_a.text[:150]}")
+                  unmatched.append((qid, qt))
+          
+          print(f"\n=== RESUMEN ===")
+          print(f"  Respondidas: {len(answered)}")
+          print(f"  Sin template: {len(unmatched)}")
+          for qid, qt in unmatched[:20]:
+              print(f"    · {qid}: {qt[:80]}")
+          
+          # Update qa_templates.json with the expanded list
+          cfg_new = {"signature": SIG, "templates": []}
+          for i, (keys, resp) in enumerate(templates):
+              cfg_new["templates"].append({
+                  "id": f"auto_{i:02d}",
+                  "keywords": keys,
+                  "response": resp
+              })
+          with open("qa_templates.json","w") as f:
+              json.dump(cfg_new, f, indent=2, ensure_ascii=False)
+          print(f"\nqa_templates.json actualizado: {len(cfg_new['templates'])} templates")
+          
+          tt=os.environ.get("TELEGRAM_BOT_TOKEN"); tc=os.environ.get("TELEGRAM_CHAT_ID")
+          if tt and tc:
+              m = f"💬 *Sweep Q&A*\n\n"
+              m += f"Respondidas: *{len(answered)}*\n"
+              m += f"Sin template: *{len(unmatched)}*\n"
+              m += f"Templates activos: *{len(templates)}*\n"
+              if unmatched:
+                  m += "\nPendientes (sin template):\n"
+                  for qid, qt in unmatched[:5]:
+                      m += f"• {qt[:70]}\n"
+              requests.post(f"https://api.telegram.org/bot{tt}/sendMessage", json={"chat_id":tc,"parse_mode":"Markdown","text":m[:4000]})
+          PY
+      - run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add qa_templates.json
+          git diff --cached --quiet || git commit -m "[qa] expand templates to 18"
+          git push || echo "no push"
