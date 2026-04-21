@@ -320,18 +320,6 @@
     "previous_ids": [],
     "_auto_discovered": true
   },
-  "MLM2878381981": {
-    "real_stock": 29,
-    "sku": "AUTO-315364",
-    "label": "Bocina Bluetooth Jbl Flip 7 Portatil Negra Original Usada - $399",
-    "auto_replenish": true,
-    "replenish_quantity": 1,
-    "seo_title": "Bocina Bluetooth Jbl Flip 7 Portatil Negra Original Usada",
-    "previous_ids": [
-      "MLM5213315364"
-    ],
-    "_auto_discovered": true
-  },
   "MLM5218321152": {
     "real_stock": 29,
     "sku": "AUTO-612190",
@@ -390,12 +378,15 @@
     "real_stock": 10,
     "sku": "PERF-001",
     "label": "RABANNE 1 MILLION GOLD INTENSE EDP HOMBRE 100ML OR",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "RABANNE 1 MILLION GOLD INTENSE EDP HOMBRE 100ML ORIGINAL",
     "previous_ids": [],
     "_perfume": true,
-    "_idx": 1
+    "_idx": 1,
+    "deleted": true,
+    "_deleted_at": 1776779627,
+    "_deleted_reason": "Cannot update item MLM2879386811 [status:under_review, has_bids:false]"
   },
   "MLM5220681982": {
     "real_stock": 10,
@@ -470,12 +461,15 @@
     "real_stock": 10,
     "sku": "PERF-009",
     "label": "ODYSSEY MANDARIN SKY ARMAF PERFUME HOMBRE PARFUM 1",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "ODYSSEY MANDARIN SKY ARMAF PERFUME HOMBRE PARFUM 100ML",
     "previous_ids": [],
     "_perfume": true,
-    "_idx": 9
+    "_idx": 9,
+    "deleted": true,
+    "_deleted_at": 1776779692,
+    "_deleted_reason": "Cannot update item MLM2879718161 [status:under_review, has_bids:false]"
   },
   "MLM2879717237": {
     "real_stock": 30,
@@ -505,6 +499,19 @@
     "replenish_quantity": 1,
     "seo_title": "Bocina Bluetooth Jbl Charge 6 Portatil Roja Original Usada",
     "previous_ids": [],
+    "_auto_discovered": true
+  },
+  "MLM2879719963": {
+    "real_stock": 28,
+    "sku": "AUTO-315364",
+    "label": "Bocina Bluetooth Jbl Flip 7 Portatil Negra Original Usada - $399",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "seo_title": "Bocina Bluetooth Jbl Flip 7 Portatil Negra Original Usada",
+    "previous_ids": [
+      "MLM5213315364",
+      "MLM2878381981"
+    ],
     "_auto_discovered": true
   }
 }
