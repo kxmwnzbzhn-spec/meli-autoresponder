@@ -16,13 +16,4 @@ jobs:
           MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-        run: |
-          python -c "
-          import os,sys
-          sys.path.insert(0,'.')
-          from meli_autoresponder import handle_questions, get_access_token
-          tok=get_access_token()
-          print('Running handle_questions...')
-          handle_questions(tok)
-          print('Done')
-          "
+        run: python scripts/answer_qs.py
