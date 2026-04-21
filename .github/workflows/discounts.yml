@@ -1,0 +1,95 @@
+name: Descuentos JBL + perfumes
+on: {workflow_dispatch: {}}
+permissions: {contents: write}
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          python3 <<'PY'
+          import os, json, requests, time
+          from datetime import datetime, timedelta
+          
+          def get_tok():
+              for _ in range(3):
+                  r = requests.post("https://api.mercadolibre.com/oauth/token", data={
+                      "grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],
+                      "client_secret":os.environ["MELI_APP_SECRET"],"refresh_token":os.environ["MELI_REFRESH_TOKEN"]
+                  }, timeout=20)
+                  b = r.json()
+                  if r.status_code == 200 and "access_token" in b: return b["access_token"]
+                  time.sleep(5)
+              raise Exception("auth")
+          tok = get_tok(); h = {"Authorization":f"Bearer {tok}","Content-Type":"application/json"}
+          r = requests.get("https://api.mercadolibre.com/users/me", headers=h, timeout=15)
+          sid = r.json()["id"]
+          
+          # ===== PART 1: JBL PRICE -5% =====
+          print("=== JBL -5% direct price ===")
+          jbl = []; perf = []
+          r = requests.get(f"https://api.mercadolibre.com/users/{sid}/items/search?status=active&limit=100", headers=h, timeout=15)
+          for iid in r.json().get("results",[]):
+              r2 = requests.get(f"https://api.mercadolibre.com/items/{iid}?attributes=id,title,price,condition", headers=h, timeout=6)
+              it = r2.json()
+              t = (it.get("title") or "").lower()
+              if "jbl" in t and "reacondicionado" in t:
+                  jbl.append((iid, it.get("title",""), it.get("price")))
+              elif it.get("condition") == "new":
+                  # perfumes
+                  if "dashcam" in t or "redmi" in t or "buds" in t: continue
+                  perf.append((iid, it.get("title",""), it.get("price")))
+          
+          print(f"JBL: {len(jbl)} | Perfumes: {len(perf)}")
+          
+          # Apply -5% JBL
+          jbl_ok = 0; jbl_err = 0
+          for iid, title, price in jbl:
+              new_price = round(price * 0.95)
+              r = requests.put(f"https://api.mercadolibre.com/items/{iid}", headers=h, json={"price":new_price}, timeout=15)
+              if r.status_code == 200:
+                  print(f"  ✓ {iid} ${price}→${new_price} | {title[:40]}")
+                  jbl_ok += 1
+              else:
+                  print(f"  ✗ {iid}: {r.status_code}")
+                  jbl_err += 1
+              time.sleep(0.3)
+          
+          # ===== PART 2: PERFUMES 15% PROMO =====
+          print(f"\n=== PERFUMES 15% promo ===")
+          # Local format: Mexico City -06:00 or -05:00
+          start = "2026-04-21T18:30:00.000-06:00"
+          finish = "2026-05-21T23:59:59.000-06:00"
+          
+          perf_ok = 0; perf_err = 0
+          for iid, title, price in perf:
+              deal_price = round(price * 0.85)  # 15% off
+              body = {"type":"PRICE_DISCOUNT","deal_price":deal_price,
+                      "start_date":start,"finish_date":finish}
+              r = requests.post(f"https://api.mercadolibre.com/seller-promotions/items/{iid}?app_version=v2",
+                  headers=h, json=body, timeout=15)
+              if r.status_code in (200,201):
+                  print(f"  ✓ {iid} ${price}→${deal_price} | {title[:40]}")
+                  perf_ok += 1
+              else:
+                  msg = r.json().get("message","")[:100] if r.text.startswith("{") else r.text[:100]
+                  print(f"  ✗ {iid}: {r.status_code} {msg} | {title[:40]}")
+                  perf_err += 1
+              time.sleep(0.5)
+          
+          print(f"\n=== JBL: {jbl_ok}/{len(jbl)} | Perfumes: {perf_ok}/{len(perf)} ===")
+          tt=os.environ.get("TELEGRAM_BOT_TOKEN"); tc=os.environ.get("TELEGRAM_CHAT_ID")
+          if tt and tc:
+              requests.post(f"https://api.telegram.org/bot{tt}/sendMessage", json={"chat_id":tc,"parse_mode":"Markdown",
+                  "text":f"🎯 *Descuentos aplicados*\n\n🔊 JBL -5%: *{jbl_ok}/{len(jbl)}*\n🧴 Perfumes -15% promo: *{perf_ok}/{len(perf)}*\n\nErr: JBL {jbl_err} · Perf {perf_err}"})
+          PY
