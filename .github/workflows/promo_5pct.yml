@@ -1,0 +1,83 @@
+name: Promociones 5% JBL
+on: {workflow_dispatch: {}}
+permissions: {contents: write}
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          python3 <<'PY'
+          import os, json, requests, time
+          def get_tok():
+              for _ in range(3):
+                  r = requests.post("https://api.mercadolibre.com/oauth/token", data={
+                      "grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],
+                      "client_secret":os.environ["MELI_APP_SECRET"],"refresh_token":os.environ["MELI_REFRESH_TOKEN"]
+                  }, timeout=20)
+                  b = r.json()
+                  if r.status_code == 200 and "access_token" in b: return b["access_token"]
+                  time.sleep(5)
+              raise Exception("auth")
+          tok = get_tok(); h = {"Authorization":f"Bearer {tok}","Content-Type":"application/json"}
+          r = requests.get("https://api.mercadolibre.com/users/me", headers=h, timeout=15)
+          sid = r.json()["id"]
+          
+          # Find all JBL Reacondicionado activos
+          jbl = []
+          for st in ("active",):
+              r = requests.get(f"https://api.mercadolibre.com/users/{sid}/items/search?status={st}&limit=100", headers=h, timeout=15)
+              for iid in r.json().get("results",[]):
+                  r2 = requests.get(f"https://api.mercadolibre.com/items/{iid}?attributes=id,title,price", headers=h, timeout=6)
+                  it = r2.json()
+                  t = (it.get("title") or "").lower()
+                  if "jbl" in t and "reacondicionado" in t:
+                      jbl.append((iid, it.get("title",""), it.get("price")))
+          print(f"JBL Reacondicionado: {len(jbl)}")
+          
+          # Try multiple API patterns for seller promotions
+          # Pattern 1: /seller-promotions/promotions/{promotion_id}/items (if pre-existing promotion)
+          # Pattern 2: POST /seller-promotions/promotions with items embedded
+          # Pattern 3: PRICE_DISCOUNT promotion type
+          
+          # Probar con 1 item para descubrir estructura
+          test_iid, test_title, test_price = jbl[0]
+          new_price = int(test_price * 0.95)
+          print(f"\n=== Probe promo structure with {test_iid} ===")
+          # Try candidates endpoint first
+          r = requests.get(f"https://api.mercadolibre.com/seller-promotions/users/{sid}/candidates", headers=h, timeout=10)
+          print(f"Candidates: {r.status_code} {r.text[:300]}")
+          
+          # Try seller-promotions/promotions list
+          r = requests.get(f"https://api.mercadolibre.com/seller-promotions/users/{sid}/promotions", headers=h, timeout=10)
+          print(f"Promotions list: {r.status_code} {r.text[:300]}")
+          
+          # Try item-level promo
+          r = requests.get(f"https://api.mercadolibre.com/seller-promotions/items/{test_iid}", headers=h, timeout=10)
+          print(f"Item promo info: {r.status_code} {r.text[:300]}")
+          
+          # Try POST a PRICE_DISCOUNT promotion on single item
+          body_variants = [
+              # v1: legacy
+              {"type":"PRICE_DISCOUNT","item_id":test_iid,"deal_price":new_price},
+              # v2: app_version
+              {"type":"PRICE_DISCOUNT","item_id":test_iid,"deal_price":new_price,"app_version":"vpp"},
+              # with dates
+              {"type":"PRICE_DISCOUNT","item_id":test_iid,"deal_price":new_price,
+               "start_date":"2026-04-21T00:00:00.000-06:00","finish_date":"2026-05-21T23:59:59.000-06:00"},
+          ]
+          for b in body_variants:
+              r = requests.post(f"https://api.mercadolibre.com/seller-promotions/items/{test_iid}", headers=h, json=b, timeout=15)
+              print(f"\nPOST /items/{test_iid} body={json.dumps(b)[:100]}")
+              print(f"  [{r.status_code}] {r.text[:400]}")
+              if r.status_code in (200,201): break
+          PY
