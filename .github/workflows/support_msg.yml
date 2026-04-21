@@ -1,0 +1,87 @@
+name: Support msg builder
+on: {workflow_dispatch: {}}
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+        run: |
+          python3 <<'PY'
+          import os, requests, time
+          def get_tok():
+              for _ in range(3):
+                  r = requests.post("https://api.mercadolibre.com/oauth/token", data={
+                      "grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],
+                      "client_secret":os.environ["MELI_APP_SECRET"],"refresh_token":os.environ["MELI_REFRESH_TOKEN"]
+                  }, timeout=20)
+                  b = r.json()
+                  if r.status_code == 200 and "access_token" in b: return b["access_token"]
+                  time.sleep(5)
+              raise Exception("auth")
+          tok = get_tok(); h = {"Authorization":f"Bearer {tok}"}
+          r = requests.get("https://api.mercadolibre.com/users/me", headers=h, timeout=15)
+          sid = r.json()["id"]
+          
+          items = []
+          r = requests.get(f"https://api.mercadolibre.com/users/{sid}/items/search?status=active&limit=100", headers=h, timeout=15)
+          for iid in r.json().get("results",[]):
+              r2 = requests.get(f"https://api.mercadolibre.com/items/{iid}?attributes=id,title", headers=h, timeout=6)
+              it = r2.json()
+              title = it.get("title","")
+              low = title.lower()
+              is_bocina = ("jbl" in low) or ("sony" in low and ("srs" in low or "bocina" in low))
+              if not is_bocina: continue
+              items.append((iid, title))
+          
+          # Group by model
+          MODELS = {
+              "Go 3":   {"dims":"11 × 10 × 6 cm","weight":"270 g","ids":[]},
+              "Go 4":   {"dims":"12 × 10 × 6 cm","weight":"250 g","ids":[]},
+              "Go Essential 2": {"dims":"11 × 10 × 6 cm","weight":"260 g","ids":[]},
+              "Clip 5": {"dims":"11 × 16 × 7 cm","weight":"340 g","ids":[]},
+              "Flip 7": {"dims":"21 × 9 × 9 cm","weight":"650 g","ids":[]},
+              "Grip":   {"dims":"17 × 10 × 10 cm","weight":"460 g","ids":[]},
+              "Charge 6":{"dims":"26 × 12 × 12 cm","weight":"1,100 g","ids":[]},
+              "Sony SRS-XB100":{"dims":"10 × 12 × 10 cm","weight":"340 g","ids":[]},
+          }
+          for iid, title in items:
+              t = title.lower()
+              if "charge 6" in t: MODELS["Charge 6"]["ids"].append((iid, title))
+              elif "flip 7" in t: MODELS["Flip 7"]["ids"].append((iid, title))
+              elif "grip" in t: MODELS["Grip"]["ids"].append((iid, title))
+              elif "clip 5" in t: MODELS["Clip 5"]["ids"].append((iid, title))
+              elif "go essential" in t: MODELS["Go Essential 2"]["ids"].append((iid, title))
+              elif "go 4" in t: MODELS["Go 4"]["ids"].append((iid, title))
+              elif "go 3" in t: MODELS["Go 3"]["ids"].append((iid, title))
+              elif "srs" in t or ("sony" in t and "bocina" in t): MODELS["Sony SRS-XB100"]["ids"].append((iid, title))
+          
+          print("\n=========== MENSAJE PARA SOPORTE MELI ===========\n")
+          print("Estimado equipo de Mercado Envios:\n")
+          print("Solicito actualizar las dimensiones y peso de paquete de mis publicaciones de bocinas bluetooth.")
+          print("Los valores actuales estan sobreestimados, lo que infla el costo de envio para el comprador.\n")
+          print("Dimensiones reales de empaque y numeros de publicacion:\n")
+          
+          for model, data in MODELS.items():
+              if not data["ids"]: continue
+              print(f"• {model}")
+              print(f"  Medidas caja: {data['dims']}")
+              print(f"  Peso con empaque: {data['weight']}")
+              print(f"  Publicaciones ({len(data['ids'])}):")
+              for iid, title in data["ids"]:
+                  color = ""
+                  t = title.lower()
+                  for c in ["negra","roja","rojo","azul marino","azul","rosa","morada","camuflaje","morado"]:
+                      if c in t: color = c.capitalize().replace("Rojo","Roja").replace("Morado","Morada"); break
+                  print(f"    - {iid}  ({color})")
+              print()
+          
+          print("\nCon estas medidas corregidas, el costo de envio debe caer al rango $60-75 MXN en ME2 estandar.")
+          print("Agradezco su revision y ajuste en la tarifa.")
+          print("\nSaludos,\nJuan Roberto Pedraza")
+          PY
