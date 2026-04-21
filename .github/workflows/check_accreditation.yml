@@ -1,0 +1,82 @@
+name: Check accreditation tasks
+on: {workflow_dispatch: {}}
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+        run: |
+          python3 <<'PY'
+          import os, json, requests, time
+          def get_tok():
+              for _ in range(3):
+                  r = requests.post("https://api.mercadolibre.com/oauth/token", data={
+                      "grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],
+                      "client_secret":os.environ["MELI_APP_SECRET"],"refresh_token":os.environ["MELI_REFRESH_TOKEN"]
+                  }, timeout=20)
+                  b = r.json()
+                  if r.status_code == 200 and "access_token" in b: return b["access_token"]
+                  time.sleep(5)
+              raise Exception("auth")
+          tok = get_tok(); h = {"Authorization":f"Bearer {tok}"}
+          r = requests.get("https://api.mercadolibre.com/users/me", headers=h, timeout=15)
+          sid = r.json()["id"]
+          print(f"Seller: {sid}")
+          
+          # Try items search WITH the filter MELI uses in their panel URL
+          endpoints_to_try = [
+              f"/users/{sid}/items/search?tags=under_review_accreditation_required",
+              f"/users/{sid}/items/search?sub_status=under_review",
+              f"/users/{sid}/items/search?logistic_type=fulfillment",
+              f"/users/{sid}/items/moderations",
+              f"/users/{sid}/moderations",
+              f"/myaccount/mercadolibre/v1/tasks",
+              f"/users/{sid}/seller-tasks",
+              f"/users/{sid}/tasks",
+              f"/users/{sid}/items/search?filters=UNDER_REVIEW_ACCREDITATION_REQUIRED",
+              f"/seller_items?user_id={sid}&filter=UNDER_REVIEW_ACCREDITATION_REQUIRED",
+              f"/users/{sid}/items?status=active&sub_status=under_review",
+              f"/my/received_questions/search",
+              f"/moderations/items",
+          ]
+          for path in endpoints_to_try:
+              try:
+                  r = requests.get(f"https://api.mercadolibre.com{path}", headers=h, timeout=10)
+                  status = r.status_code
+                  if status == 200:
+                      body = r.json()
+                      if isinstance(body, dict):
+                          total = body.get("paging",{}).get("total") or body.get("total") or len(body.get("results",[])) or len(body.get("data",[])) or "?"
+                          print(f"\n  ✓ {path} → {status} | total={total}")
+                          print(f"    keys: {list(body.keys())[:8]}")
+                          # If has results, show first few
+                          if "results" in body and body["results"]:
+                              print(f"    first result: {body['results'][0] if isinstance(body['results'], list) else 'dict'}")
+                  elif status != 404:
+                      print(f"  ? {path} → {status}")
+              except Exception as e:
+                  pass
+          
+          # Also try scan ALL items with "under_review" sub_status via different attribute
+          print("\n=== Scanning all items with sub_status including under_review ===")
+          for st in ("active","paused","under_review"):
+              r = requests.get(f"https://api.mercadolibre.com/users/{sid}/items/search?status={st}&limit=100", headers=h, timeout=15)
+              for iid in r.json().get("results",[]):
+                  r2 = requests.get(f"https://api.mercadolibre.com/items/{iid}", headers=h, timeout=5)
+                  it = r2.json()
+                  ss = it.get("sub_status") or []
+                  tags = it.get("tags") or []
+                  # Look for any accreditation flag
+                  all_flags = list(ss) + list(tags)
+                  for f in all_flags:
+                      fs = str(f).lower()
+                      if "accreditation" in fs or "pending" in fs or "review" in fs or "waiting" in fs or "moderat" in fs or "patch" in fs or "document" in fs:
+                          print(f"  {iid} status={it.get('status')} ss={ss} tags={tags} title={it.get('title','')[:50]}")
+                          break
+          PY
