@@ -200,6 +200,28 @@
         "muy barato"
       ],
       "response": "Buenas tardes. El precio competitivo se debe a que es producto usado en excelente estado (version OEM), funcional al 100% y original JBL. Se entrega con caja y accesorios originales, con garantia del vendedor por 7 dias."
+    },
+    {
+      "id": "caja_incluida",
+      "keywords": [
+        "caja",
+        "empaque",
+        "caja original"
+      ],
+      "response": "Hola! Sí, viene con su caja original. Todos los accesorios incluidos: cable de carga y manual."
+    },
+    {
+      "id": "mas_fotos",
+      "keywords": [
+        "fotos",
+        "foto",
+        "mas foto",
+        "más foto",
+        "imagen",
+        "imagenes",
+        "imágenes"
+      ],
+      "response": "Hola! Las fotos del anuncio son reales del producto exacto que recibirás. Si necesitas una específica, dime y te la tomo."
     }
   ]
 }
