@@ -1,0 +1,108 @@
+name: Promo 15% perfumes
+on: {workflow_dispatch: {}}
+permissions: {contents: write}
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          python3 <<'PY'
+          import os, json, requests, time
+          def get_tok():
+              for _ in range(3):
+                  r = requests.post("https://api.mercadolibre.com/oauth/token", data={
+                      "grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],
+                      "client_secret":os.environ["MELI_APP_SECRET"],"refresh_token":os.environ["MELI_REFRESH_TOKEN"]
+                  }, timeout=20)
+                  b = r.json()
+                  if r.status_code == 200 and "access_token" in b: return b["access_token"]
+                  time.sleep(5)
+              raise Exception("auth")
+          tok = get_tok(); h = {"Authorization":f"Bearer {tok}","Content-Type":"application/json"}
+          r = requests.get("https://api.mercadolibre.com/users/me", headers=h, timeout=15)
+          sid = r.json()["id"]
+          
+          # Find all perfumes (active, condition=new, not JBL/dashcam/redmi)
+          perfumes = []
+          r = requests.get(f"https://api.mercadolibre.com/users/{sid}/items/search?status=active&limit=100", headers=h, timeout=15)
+          for iid in r.json().get("results",[]):
+              r2 = requests.get(f"https://api.mercadolibre.com/items/{iid}?attributes=id,title,price,condition", headers=h, timeout=6)
+              it = r2.json()
+              t = (it.get("title") or "").lower()
+              if it.get("condition") != "new": continue
+              if any(k in t for k in ["jbl","dashcam","redmi","buds","xiaomi","sony","bocina"]): continue
+              perfumes.append((iid, it.get("title",""), it.get("price")))
+          print(f"Perfumes: {len(perfumes)}")
+          
+          # For each perfume: get candidates, then PUT to accept with 15% deal_price
+          from datetime import datetime, timedelta, timezone
+          # Dates in Mexico City local format
+          start = datetime.now(timezone(timedelta(hours=-6))).replace(microsecond=0)
+          finish = start + timedelta(days=20)
+          start_s = start.strftime("%Y-%m-%dT%H:%M:%S.000-06:00")
+          finish_s = finish.strftime("%Y-%m-%dT%H:%M:%S.000-06:00")
+          print(f"Window: {start_s} → {finish_s}")
+          
+          ok = 0; err = 0
+          for iid, title, price in perfumes:
+              deal_price = round(price * 0.85)
+              
+              # GET candidates to confirm PRICE_DISCOUNT is available
+              r = requests.get(f"https://api.mercadolibre.com/seller-promotions/items/{iid}?app_version=v2", headers=h, timeout=10)
+              if r.status_code != 200:
+                  err += 1; print(f"  ✗ {iid} GET candidates: {r.status_code}"); continue
+              cands = r.json() if isinstance(r.json(), list) else []
+              pd_cand = next((c for c in cands if c.get("type")=="PRICE_DISCOUNT"), None)
+              if not pd_cand:
+                  # Try other types available
+                  avail = [c.get("type") for c in cands]
+                  print(f"  ⚠ {iid} no PRICE_DISCOUNT | disponibles: {avail}")
+                  err += 1; continue
+              
+              # Deal price must be within range
+              mn = pd_cand.get("min_discounted_price") or 0
+              mx = pd_cand.get("max_discounted_price") or deal_price
+              if deal_price < mn: deal_price = round(mn) + 1
+              if deal_price > mx: deal_price = round(mx) - 1
+              
+              # PUT to accept the candidate with deal_price + dates
+              body = {
+                  "deal_price": deal_price,
+                  "start_date": start_s,
+                  "finish_date": finish_s,
+              }
+              r = requests.put(f"https://api.mercadolibre.com/seller-promotions/items/{iid}?app_version=v2", headers=h, json=body, timeout=15)
+              if r.status_code in (200,201):
+                  print(f"  ✓ {iid} ${price}→${deal_price} | {title[:40]}")
+                  ok += 1
+              else:
+                  # Fallback: try POST with type
+                  body2 = {"type":"PRICE_DISCOUNT","deal_price":deal_price,"start_date":start_s,"finish_date":finish_s}
+                  r2 = requests.post(f"https://api.mercadolibre.com/seller-promotions/items/{iid}?app_version=v2", headers=h, json=body2, timeout=15)
+                  if r2.status_code in (200,201):
+                      print(f"  ✓ POST {iid} ${price}→${deal_price}")
+                      ok += 1
+                  else:
+                      msg = r.json().get("message","") if r.text.startswith("{") else ""
+                      msg2 = r2.json().get("message","") if r2.text.startswith("{") else ""
+                      print(f"  ✗ {iid}: PUT={r.status_code} {msg[:80]} | POST={r2.status_code} {msg2[:80]}")
+                      err += 1
+              time.sleep(0.8)
+          
+          print(f"\n=== OK:{ok}/{len(perfumes)} ERR:{err} ===")
+          tt=os.environ.get("TELEGRAM_BOT_TOKEN"); tc=os.environ.get("TELEGRAM_CHAT_ID")
+          if tt and tc:
+              requests.post(f"https://api.telegram.org/bot{tt}/sendMessage", json={"chat_id":tc,"parse_mode":"Markdown",
+                  "text":f"🎁 *Promo 15% perfumes*\n\nAplicadas: *{ok}/{len(perfumes)}*\nErr: {err}\nVigencia: 20 días"})
+          PY
