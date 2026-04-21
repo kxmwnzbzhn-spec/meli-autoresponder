@@ -1,0 +1,183 @@
+name: Generate perfumes catalog xlsx
+on: {workflow_dispatch: {}}
+permissions: {contents: write}
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests openpyxl
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+        run: |
+          python3 <<'PY'
+          import os, json, requests
+          from openpyxl import Workbook
+          from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+          from openpyxl.utils import get_column_letter
+          
+          r = requests.post("https://api.mercadolibre.com/oauth/token", data={
+              "grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],
+              "client_secret":os.environ["MELI_APP_SECRET"],"refresh_token":os.environ["MELI_REFRESH_TOKEN"]
+          }, timeout=20)
+          tok = r.json()["access_token"]; h = {"Authorization":f"Bearer {tok}"}
+          r = requests.get("https://api.mercadolibre.com/users/me", headers=h, timeout=15)
+          sid = r.json()["id"]
+          
+          # Load the reference perfumes list
+          with open("perfumes.json") as f:
+              ref = json.load(f)
+          # Add the Billie Eilish already uploaded
+          ref_titles = [p["title"] for p in ref]
+          billie = {"title":"BILLIE EILISH EILISH EAU DE PARFUM 100ML MUJER ORIGINAL","price":999,"search":"Billie Eilish Eilish 100ml","brand":"Billie Eilish","vol":"100 mL","gender":"Mujer"}
+          all_ref = [billie] + ref
+          
+          # Fetch all active perfumes
+          r = requests.get(f"https://api.mercadolibre.com/users/{sid}/items/search?limit=100", headers=h, timeout=20)
+          all_ids = r.json().get("results", [])
+          
+          items_data = {}
+          for iid in all_ids:
+              r = requests.get(f"https://api.mercadolibre.com/items/{iid}", headers=h, timeout=10)
+              it = r.json()
+              title = it.get("title","")
+              # Match only perfume-looking titles
+              t_up = title.upper()
+              if not any(kw in t_up for kw in ["PERFUME","EAU DE","PARFUM","EDP","EDT","FRAGANCIA","EILISH","BACCARAT","GUERLAIN","DIOR","ARMAF","LATTAFA","TOM FORD","BYREDO","ARMANI","CARTIER","MUGLER","MARC JACOBS","JEAN PAUL","PACO RABANNE","AL HARAMAIN","KURKY","DUMONT","SHAIK","GAME OF SPADES","MARSHMALLOW"]):
+                  continue
+              pics = [p.get("url") or p.get("secure_url") for p in it.get("pictures",[])]
+              items_data[title] = {
+                  "id": iid,
+                  "title": title,
+                  "price": it.get("price"),
+                  "qty": it.get("available_quantity"),
+                  "status": it.get("status"),
+                  "sub_status": it.get("sub_status"),
+                  "permalink": it.get("permalink"),
+                  "pictures": pics,
+                  "category_id": it.get("category_id"),
+              }
+          
+          # Build workbook
+          wb = Workbook()
+          ws = wb.active
+          ws.title = "Perfumes"
+          
+          headers = ["#","Título (factura)","Precio","Item MLM","Status","qty MELI","Stock real","Permalink",
+                     "Foto 1","Foto 2","Foto 3","Foto 4","Foto 5","Foto 6","Foto 7","Foto 8",
+                     "¿Fotos OK?","Notas/Acción","Link reemplazo fotos"]
+          
+          for col, hh in enumerate(headers, start=1):
+              c = ws.cell(row=1, column=col, value=hh)
+              c.font = Font(bold=True, color="FFFFFF", name="Arial", size=11)
+              c.fill = PatternFill("solid", start_color="1F4E78")
+              c.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+          ws.row_dimensions[1].height = 40
+          
+          # Column widths
+          widths = {1:4, 2:55, 3:10, 4:17, 5:12, 6:9, 7:11, 8:40}
+          for i in range(9, 17): widths[i] = 45  # photo URL columns
+          widths[17] = 12; widths[18] = 30; widths[19] = 30
+          for col, w in widths.items():
+              ws.column_dimensions[get_column_letter(col)].width = w
+          
+          thin = Side(border_style="thin", color="CCCCCC")
+          border = Border(left=thin, right=thin, top=thin, bottom=thin)
+          
+          row = 2
+          for idx, p in enumerate(all_ref):
+              title = p["title"]
+              it = items_data.get(title, {})
+              status = it.get("status") or "NO_PUBLICADO"
+              ws.cell(row=row, column=1, value=idx+1)
+              ws.cell(row=row, column=2, value=title)
+              ws.cell(row=row, column=3, value=p["price"])
+              ws.cell(row=row, column=4, value=it.get("id",""))
+              ws.cell(row=row, column=5, value=status)
+              ws.cell(row=row, column=6, value=it.get("qty",""))
+              ws.cell(row=row, column=7, value=10 if it.get("id") else "")  # real_stock default
+              if it.get("permalink"):
+                  c = ws.cell(row=row, column=8, value=it.get("permalink"))
+                  c.hyperlink = it.get("permalink")
+                  c.font = Font(color="0563C1", underline="single", name="Arial", size=10)
+              pics = it.get("pictures",[])[:8]
+              for i, url in enumerate(pics):
+                  c = ws.cell(row=row, column=9+i, value=url)
+                  c.hyperlink = url
+                  c.font = Font(color="0563C1", underline="single", name="Arial", size=9)
+              ws.cell(row=row, column=17, value="")  # ¿Fotos OK?
+              ws.cell(row=row, column=18, value="")  # Notas
+              ws.cell(row=row, column=19, value="")  # Link reemplazo
+              
+              # Status cell coloring
+              sc = ws.cell(row=row, column=5)
+              if status == "active":
+                  sc.fill = PatternFill("solid", start_color="C6EFCE")
+                  sc.font = Font(color="006100", name="Arial", size=10)
+              elif status in ("paused","under_review"):
+                  sc.fill = PatternFill("solid", start_color="FFEB9C")
+                  sc.font = Font(color="9C5700", name="Arial", size=10)
+              elif status == "NO_PUBLICADO":
+                  sc.fill = PatternFill("solid", start_color="FFC7CE")
+                  sc.font = Font(color="9C0006", name="Arial", size=10)
+              
+              # Apply border + default font to all cells
+              for col in range(1,20):
+                  cell = ws.cell(row=row, column=col)
+                  cell.border = border
+                  if not cell.font.underline:
+                      cell.font = Font(name="Arial", size=10)
+                  cell.alignment = Alignment(wrap_text=True, vertical="top")
+              ws.row_dimensions[row].height = 60
+              row += 1
+          
+          ws.freeze_panes = "C2"
+          ws.auto_filter.ref = f"A1:S{row-1}"
+          
+          # Second sheet: instructions
+          ws2 = wb.create_sheet("Instrucciones")
+          ws2['A1'] = "Cómo usar este archivo"
+          ws2['A1'].font = Font(bold=True, size=14, name="Arial")
+          instructions = [
+              "",
+              "Este archivo contiene todos los perfumes de la factura:",
+              "  • Hoja 'Perfumes' con el listado completo (titulo, precio, item MELI, fotos, status)",
+              "",
+              "CÓMO ACTUALIZAR FOTOS:",
+              "  1. Sube las fotos nuevas a Google Drive o Dropbox (link público)",
+              "  2. En la columna 'Link reemplazo fotos' pega el link de la carpeta/foto",
+              "  3. En 'Notas/Acción' escribe 'REEMPLAZAR FOTOS'",
+              "  4. Avísame y proceso los cambios via API",
+              "",
+              "COLUMNAS:",
+              "  • Título (factura): EXACTO como aparece en la factura (crítico para apelación)",
+              "  • Precio: tier definido (ultra-lujo/lujo=$1999, premium=$999, medio=$499)",
+              "  • Item MLM: ID de MercadoLibre asignado al publicar",
+              "  • Status: active | paused | under_review | NO_PUBLICADO",
+              "  • qty MELI: unidades visibles en MercadoLibre (siempre 1)",
+              "  • Stock real: inventario físico en bodega (10 por producto)",
+              "  • Foto 1-8: URLs de las fotos actuales del producto",
+              "  • ¿Fotos OK?: marca 'SI' / 'NO' para ayudarme a saber cuáles actualizar",
+              "",
+              "COLORES:",
+              "  🟢 Verde: publicado y activo",
+              "  🟡 Amarillo: pausado o en revisión MELI",
+              "  🔴 Rojo: no publicado aún (pendiente)",
+          ]
+          for i, line in enumerate(instructions, start=2):
+              ws2.cell(row=i, column=1, value=line)
+          ws2.column_dimensions['A'].width = 80
+          
+          wb.save("perfumes_catalog.xlsx")
+          print(f"Saved perfumes_catalog.xlsx with {row-2} rows")
+          PY
+      - run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add perfumes_catalog.xlsx
+          git diff --cached --quiet || git commit -m "[perfumes] catalog xlsx"
+          git push || echo "no push"
