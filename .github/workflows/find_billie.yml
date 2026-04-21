@@ -20,31 +20,38 @@ jobs:
           }, timeout=20)
           tok = r.json()["access_token"]; h = {"Authorization":f"Bearer {tok}"}
           
-          # Search catalog for Billie Eilish Eilish parfum 100ml
-          r = requests.get("https://api.mercadolibre.com/products/search?site_id=MLM&q=Billie+Eilish+Eilish+100ml&limit=20", headers=h, timeout=20)
-          res = r.json()
-          print(f"Total: {res.get('paging',{}).get('total',0)}")
-          for p in res.get('results',[])[:10]:
-              pid = p.get('id')
-              r2 = requests.get(f"https://api.mercadolibre.com/products/{pid}", headers=h, timeout=10)
-              pd = r2.json()
-              attrs = {a.get('id'): a.get('value_name') for a in pd.get('attributes',[])[:20]}
-              nm = pd.get('name','')
-              bbw = pd.get('buy_box_winner') or {}
-              print(f"\n{pid} | status={pd.get('status')} | {nm[:80]}")
-              print(f"  BBW: ${bbw.get('price')}")
-              print(f"  BRAND={attrs.get('BRAND')} VOL={attrs.get('VOLUME_CAPACITY')} SEX={attrs.get('GENDER')}")
-              print(f"  pics: {len(pd.get('pictures',[]))}")
-              # First 3 pic URLs
-              for pic in pd.get('pictures',[])[:3]:
-                  print(f"    {pic.get('url') or pic.get('secure_url')}")
+          queries = [
+              "Billie+Eilish+perfume",
+              "Eilish+Eau+de+Parfum",
+              "perfume+Billie+Eilish+mujer",
+              "Billie+Eilish+100ml",
+          ]
+          seen = set()
+          for q in queries:
+              print(f"\n=== Query: {q} ===")
+              r = requests.get(f"https://api.mercadolibre.com/sites/MLM/search?q={q}&limit=10&category=MLM4088", headers=h, timeout=15)
+              # MLM4088 = Belleza y Cuidado Personal, probably broader perfume category
+              for it in r.json().get('results',[])[:10]:
+                  iid = it.get('id')
+                  if iid in seen: continue
+                  seen.add(iid)
+                  t = it.get('title','').lower()
+                  if 'perfume' in t or 'parfum' in t or 'fragancia' in t or 'edp' in t:
+                      print(f"  {iid} | ${it.get('price')} | {it.get('category_id')} | {it.get('title','')[:75]}")
+                      print(f"    thumb: {it.get('thumbnail','')}")
+                      print(f"    cat_pid: {it.get('catalog_product_id')}")
           
-          # Also search listings to find a "winner" item we can copy pics from
-          print("\n=== Listings directos (items) ===")
-          r = requests.get("https://api.mercadolibre.com/sites/MLM/search?q=Billie+Eilish+Eilish+100ml+parfum&limit=5", headers=h, timeout=15)
-          for it in r.json().get('results',[])[:5]:
-              iid = it.get('id')
-              print(f"  {iid} | ${it.get('price')} | cat={it.get('category_id')} | {it.get('title','')[:70]}")
-              thumb = it.get('thumbnail','')
-              print(f"    thumb: {thumb}")
+          # Also try direct product search with exact name
+          print("\n\n=== Direct product search ===")
+          r = requests.get("https://api.mercadolibre.com/products/search?site_id=MLM&q=Eilish+Eau+de+Parfum&limit=10", headers=h, timeout=15)
+          for p in r.json().get('results',[])[:10]:
+              pid = p.get('id')
+              nm = p.get('name','')
+              if 'perfume' in nm.lower() or 'parfum' in nm.lower() or 'fragancia' in nm.lower():
+                  print(f"  {pid} | {nm[:80]}")
+                  r2 = requests.get(f"https://api.mercadolibre.com/products/{pid}", headers=h, timeout=10)
+                  pd = r2.json()
+                  print(f"    status={pd.get('status')} domain={pd.get('domain_id')}")
+                  for pic in pd.get('pictures',[])[:2]:
+                      print(f"    pic: {pic.get('url') or pic.get('secure_url')}")
           PY
