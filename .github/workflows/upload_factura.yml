@@ -1,0 +1,86 @@
+name: Upload factura to items
+on: {workflow_dispatch: {}}
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          python3 <<'PY'
+          import os, json, requests, base64, time
+          def get_tok():
+              for _ in range(3):
+                  r = requests.post("https://api.mercadolibre.com/oauth/token", data={
+                      "grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],
+                      "client_secret":os.environ["MELI_APP_SECRET"],"refresh_token":os.environ["MELI_REFRESH_TOKEN"]
+                  }, timeout=20)
+                  b = r.json()
+                  if r.status_code == 200 and "access_token" in b: return b["access_token"]
+                  time.sleep(5)
+              raise Exception("auth")
+          tok = get_tok()
+          h_auth = {"Authorization":f"Bearer {tok}"}
+          
+          ITEM_IDS = [
+              "MLM2879724209","MLM2880142439","MLM2880142457","MLM2880142523","MLM2880142605",
+              "MLM5220681982","MLM5220682462","MLM5220682468","MLM5221330650","MLM5221330712",
+              "MLM5221330720","MLM5221355572","MLM5221356396","MLM5221767078","MLM5221767386",
+              "MLM5221767428","MLM5221767442"
+          ]
+          print(f"Items to document: {len(ITEM_IDS)}")
+          
+          # Read PDF
+          with open("factura_jrp.pdf","rb") as f:
+              pdf_bytes = f.read()
+          print(f"PDF size: {len(pdf_bytes)} bytes")
+          
+          # First try to POST PDF to /items/{id}/documentations (or /items/{id}/picture/bill)
+          # MELI endpoint: POST /items/{item_id}/pictures with multipart for invoices
+          # Official: POST /items/{item_id}/documentations multipart
+          ok = 0; err = 0
+          for iid in ITEM_IDS:
+              try:
+                  # Try /items/{id}/documentations
+                  files = {"file": ("factura.pdf", pdf_bytes, "application/pdf")}
+                  r = requests.post(f"https://api.mercadolibre.com/items/{iid}/documentations",
+                      headers=h_auth, files=files, timeout=30)
+                  print(f"\n{iid}:")
+                  print(f"  /documentations: {r.status_code}")
+                  if r.status_code in (200,201):
+                      print(f"  ✓ OK | {r.text[:200]}")
+                      ok += 1
+                      continue
+                  else:
+                      print(f"  resp: {r.text[:200]}")
+                  # Try /items/{id}/pictures for bill type
+                  r = requests.post(f"https://api.mercadolibre.com/items/{iid}/documents",
+                      headers=h_auth, files=files, timeout=30)
+                  print(f"  /documents: {r.status_code} {r.text[:200]}")
+                  if r.status_code in (200,201):
+                      ok += 1; continue
+                  # Try generic upload
+                  r = requests.post(f"https://api.mercadolibre.com/items/{iid}/documentation",
+                      headers=h_auth, files=files, timeout=30)
+                  print(f"  /documentation: {r.status_code} {r.text[:200]}")
+                  if r.status_code in (200,201):
+                      ok += 1; continue
+                  err += 1
+              except Exception as e:
+                  print(f"  err: {e}")
+                  err += 1
+          
+          print(f"\n=== RESUMEN === OK:{ok} ERR:{err}")
+          tt=os.environ.get("TELEGRAM_BOT_TOKEN"); tc=os.environ.get("TELEGRAM_CHAT_ID")
+          if tt and tc:
+              requests.post(f"https://api.telegram.org/bot{tt}/sendMessage", json={"chat_id":tc,"parse_mode":"Markdown",
+                  "text":f"📄 *Factura upload*\n\nOK: *{ok}/{len(ITEM_IDS)}*\nErr: *{err}*"})
+          PY
