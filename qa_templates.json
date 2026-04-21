@@ -1,227 +1,203 @@
 {
-  "_comment": "Auto-respuestas FAQ. Primer match gana. Reglas principales: NO Auracast, NO app compatible, SI es original.",
-  "_mode": "auto",
-  "signature": "\n\nQuedamos a sus ordenes. Saludos cordiales.",
+  "signature": "\n\n— Sonix Mx",
   "templates": [
     {
-      "id": "auracast",
-      "match": [
-        "auracast",
-        "autocast",
-        "aura cast",
-        "conecta con otra bocina",
-        "conectar dos bocinas",
-        "bocinas en pareja",
-        "varias bocinas",
-        "party boost",
-        "partyboost"
+      "id": "auto_00",
+      "keywords": [
+        "^hola$",
+        "^buenas$",
+        "^buen dia$",
+        "^saludos$",
+        "^hey$",
+        "^info$",
+        "^informes$",
+        "^informacion$"
       ],
-      "response": "Buenas tardes. Este modelo NO es compatible con la tecnologia Auracast; no permite vincularse con otras bocinas para reproduccion simultanea. Su operacion es Bluetooth estandar, un dispositivo a la vez."
+      "response": "Hola! Claro, con gusto te ayudo. ¿Qué duda tienes sobre el producto?"
     },
     {
-      "id": "app_jbl",
-      "match": [
-        "jbl portable",
-        "aplicacion jbl",
-        "aplicación jbl",
-        "app jbl",
-        "con la app",
-        "la aplicacion",
-        "la aplicación",
-        "compatible con app",
-        "compatible con la app"
-      ],
-      "response": "Buenas tardes. Este modelo NO es compatible con la aplicacion JBL Portable ni con ninguna app de JBL. Su operacion es directa por Bluetooth sin requerir configuracion adicional."
-    },
-    {
-      "id": "original",
-      "match": [
-        "auténtica",
-        "clon",
-        "es autentica",
-        "es jbl original",
-        "es original",
-        "es original jbl",
-        "genuina",
-        "imitacion",
-        "imitación",
-        "jbl original",
-        "no es replica",
-        "no es réplica",
-        "nueva o usada",
-        "oficial",
-        "original",
-        "original jbl",
-        "son originales"
-      ],
-      "response": "Buenas tardes. SI, el producto es 100% original JBL. Tome en cuenta que este modelo no es compatible con la aplicacion JBL Portable ni con Auracast; su operacion es Bluetooth estandar."
-    },
-    {
-      "id": "garantia",
-      "match": [
-        "garantia",
-        "garantía",
-        "garantiza",
-        "cuanto garantia",
-        "cuánto garantía"
-      ],
-      "response": "Buenas tardes. Ofrecemos garantia del vendedor por 7 dias contra defectos de fabrica. En caso de presentar falla, gestionamos cambio o reembolso segun politicas de Mercado Libre."
-    },
-    {
-      "id": "bateria",
-      "match": [
-        "bateria",
-        "batería",
-        "cuanto dura",
-        "duracion",
-        "duración",
-        "horas de reproduc",
-        "horas dura"
-      ],
-      "response": "Buenas tardes. La JBL Go 4 ofrece hasta 7 horas de reproduccion continua segun especificaciones de fabrica, dependiendo del volumen de uso."
-    },
-    {
-      "id": "resistente_agua",
-      "match": [
-        "resistente al agua",
-        "sumergible",
-        "ip67",
-        "a prueba de agua",
-        "se moja",
-        "alberca",
-        "piscina",
-        "lluvia"
-      ],
-      "response": "Buenas tardes. Si, cuenta con clasificacion IP67, resistente al polvo y a inmersion en agua hasta 1 metro por 30 minutos."
-    },
-    {
-      "id": "incluye_cable",
-      "match": [
-        "incluye cable",
-        "trae cable",
-        "cargador",
-        "usb",
-        "cargar",
-        "tipo c",
-        "type c"
-      ],
-      "response": "Buenas tardes. Se entrega con su cable USB-C original de carga. No incluye adaptador de corriente."
-    },
-    {
-      "id": "envio",
-      "match": [
-        "envio",
-        "envío",
-        "cuando llega",
-        "cuándo llega",
-        "tiempo de entrega",
-        "me llega",
-        "dhl",
-        "fedex"
-      ],
-      "response": "Buenas tardes. Enviamos a traves de Mercado Envios. El tiempo estimado de entrega se muestra en la misma publicacion al ingresar su codigo postal."
-    },
-    {
-      "id": "factura",
-      "match": [
-        "factura",
-        "facturan",
-        "comprobante fiscal",
-        "cfdi",
-        "constancia"
-      ],
-      "response": "Buenas tardes. Si, emitimos factura electronica (CFDI) a solicitud. Posterior a la compra nos envia su RFC, razon social, regimen fiscal, CP y uso de CFDI."
-    },
-    {
-      "id": "estado_usado",
-      "match": [
-        "estado",
-        "cuantas veces usada",
-        "cuánto uso",
-        "como nueva",
-        "como nuevo",
-        "detalle",
-        "rasgon",
-        "golpe"
-      ],
-      "response": "Buenas tardes. La bocina se encuentra en excelente estado, practicamente sin uso (solo se abrio y se uso una vez). Se entrega con caja original y accesorios."
-    },
-    {
-      "id": "precio_negociable",
-      "match": [
-        "ultimo precio",
-        "último precio",
-        "rebaja",
-        "descuento",
-        "menos",
-        "precio firme",
-        "negociable",
-        "mejor precio"
-      ],
-      "response": "Buenas tardes. El precio publicado es firme. Agradecemos su interes."
-    },
-    {
-      "id": "pago",
-      "match": [
-        "como pago",
-        "cómo pago",
-        "formas de pago",
-        "oxxo",
-        "efectivo",
-        "tarjeta",
-        "meses sin intereses",
-        "msi"
-      ],
-      "response": "Buenas tardes. Aceptamos los metodos de pago disponibles en Mercado Libre: tarjetas, efectivo en tiendas de conveniencia y Mercado Pago. Los pagos se procesan directamente en la plataforma."
-    },
-    {
-      "id": "disponibilidad",
-      "match": [
+      "id": "auto_01",
+      "keywords": [
         "disponible",
-        "hay existencia",
-        "en stock",
-        "cuantas tienen",
-        "cuántas tienen",
-        "tienen más",
-        "tienen mas"
+        "sigue disponible",
+        "tienes stock",
+        "hay stock",
+        "cuantas hay",
+        "aun tienes"
       ],
-      "response": "Buenas tardes. Si, contamos con disponibilidad inmediata. Al concretar su compra enviamos el mismo dia o al siguiente habil."
+      "response": "Hola! Sí, está disponible con envío inmediato. Saludos!"
     },
     {
-      "id": "precio_bajo",
-      "match": [
-        "barato",
-        "porque tan barato",
-        "porque barato",
-        "precio bajo",
-        "por que barato",
-        "por qué barato",
-        "esta muy barato",
-        "muy barato"
+      "id": "auto_02",
+      "keywords": [
+        "cuanto tarda",
+        "tiempo de envio",
+        "cuando llega",
+        "llegaria",
+        "envio rapido",
+        "tarda mucho"
       ],
-      "response": "Buenas tardes. El precio competitivo se debe a que es producto usado en excelente estado (version OEM), funcional al 100% y original JBL. Se entrega con caja y accesorios originales, con garantia del vendedor por 7 dias."
+      "response": "Hola! Enviamos el mismo día si la compra es antes de las 3pm. Tiempo estimado: 1-3 días hábiles según tu zona. Saludos!"
     },
     {
-      "id": "caja_incluida",
+      "id": "auto_03",
+      "keywords": [
+        "envio gratis",
+        "tiene envio",
+        "cuanto cuesta el envio",
+        "costo de envio",
+        "envio a domicilio"
+      ],
+      "response": "Hola! El envío lo calcula MercadoLibre según tu código postal. Checa en el botón 'Calcular costo de envío'. Saludos!"
+    },
+    {
+      "id": "auto_04",
       "keywords": [
         "caja",
         "empaque",
-        "caja original"
+        "con caja"
       ],
-      "response": "Hola! Sí, viene con su caja original. Todos los accesorios incluidos: cable de carga y manual."
+      "response": "Hola! Sí, viene con su caja original. Todos los accesorios incluidos: cable de carga y manual. Saludos!"
     },
     {
-      "id": "mas_fotos",
+      "id": "auto_05",
       "keywords": [
         "fotos",
         "foto",
         "mas foto",
-        "más foto",
-        "imagen",
-        "imagenes",
-        "imágenes"
+        "otra foto",
+        "imagen"
       ],
-      "response": "Hola! Las fotos del anuncio son reales del producto exacto que recibirás. Si necesitas una específica, dime y te la tomo."
+      "response": "Hola! Las fotos del anuncio son reales del producto exacto que recibirás. Si necesitas una específica, dime y te la tomo. Saludos!"
+    },
+    {
+      "id": "auto_06",
+      "keywords": [
+        "es original",
+        "original",
+        "autentico",
+        "autentica",
+        "pirata",
+        "clon",
+        "copia"
+      ],
+      "response": "Hola! Sí es 100% original, producto auténtico. Saludos!"
+    },
+    {
+      "id": "auto_07",
+      "keywords": [
+        "garantia",
+        "garantiza",
+        "si se descompone",
+        "devolucion si falla"
+      ],
+      "response": "Hola! Tiene 30 días de garantía del vendedor. Si algo falla lo resolvemos sin problema. Saludos!"
+    },
+    {
+      "id": "auto_08",
+      "keywords": [
+        "es nuevo",
+        "nueva",
+        "esta nuevo",
+        "viene nuevo",
+        "usado",
+        "seminuevo"
+      ],
+      "response": "Hola! La condición del producto está indicada en el anuncio (nuevo o usado). Todo se prueba antes de enviar. Saludos!"
+    },
+    {
+      "id": "auto_09",
+      "keywords": [
+        "mas barato",
+        "descuento",
+        "rebaja",
+        "oferta",
+        "precio especial",
+        "bajas el precio",
+        "ultimo precio"
+      ],
+      "response": "Hola! El precio que ves ya es nuestro mejor precio. Saludos!"
+    },
+    {
+      "id": "auto_10",
+      "keywords": [
+        "factura",
+        "facturar",
+        "tiene factura",
+        "dan factura"
+      ],
+      "response": "Hola! Sí, facturamos. Al confirmar la compra envíanos tus datos fiscales por mensaje. Saludos!"
+    },
+    {
+      "id": "auto_11",
+      "keywords": [
+        "color",
+        "que color",
+        "que tonos",
+        "colores disponibles"
+      ],
+      "response": "Hola! El color disponible es el que aparece en el título y las fotos del anuncio. Saludos!"
+    },
+    {
+      "id": "auto_12",
+      "keywords": [
+        "que modelo",
+        "modelo exacto",
+        "que version"
+      ],
+      "response": "Hola! El modelo exacto aparece en el título del anuncio. Todas las especificaciones están en la descripción. Saludos!"
+    },
+    {
+      "id": "auto_13",
+      "keywords": [
+        "bateria",
+        "cuanto dura",
+        "duracion bateria",
+        "horas de reproduccion"
+      ],
+      "response": "Hola! La duración de batería depende del volumen y uso. Consulta las especificaciones oficiales del fabricante en la descripción. Saludos!"
+    },
+    {
+      "id": "auto_14",
+      "keywords": [
+        "resistente al agua",
+        "agua",
+        "sumergible",
+        "ipx"
+      ],
+      "response": "Hola! Según el fabricante tiene resistencia al agua IP67. Consulta las especificaciones oficiales para detalles. Saludos!"
+    },
+    {
+      "id": "auto_15",
+      "keywords": [
+        "bluetooth",
+        "se conecta",
+        "compatible con",
+        "funciona con",
+        "iphone",
+        "android"
+      ],
+      "response": "Hola! Funciona con cualquier dispositivo Bluetooth (iPhone, Android, PC, etc.). Saludos!"
+    },
+    {
+      "id": "auto_16",
+      "keywords": [
+        "recoger",
+        "paso por el",
+        "ir por el",
+        "entrega en mano"
+      ],
+      "response": "Hola! Solo manejamos envío por MercadoEnvíos, no hay recolección en persona. Saludos!"
+    },
+    {
+      "id": "auto_17",
+      "keywords": [
+        "efectivo",
+        "oxxo",
+        "contraentrega",
+        "pago contra"
+      ],
+      "response": "Hola! Los pagos se procesan por MercadoPago (tarjeta, OXXO, SPEI). No manejamos pago contra entrega. Saludos!"
     }
   ]
 }
