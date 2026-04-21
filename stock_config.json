@@ -1029,145 +1029,181 @@
     "real_stock": 29,
     "sku": "JBL-421369",
     "label": "Bocina Bluetooth Jbl Clip 5 Portatil Rosa Reacondi",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "Bocina Bluetooth Jbl Clip 5 Portatil Rosa Reacondicionado",
     "previous_ids": [
       "MLM5214751640"
     ],
-    "_jbl_remanufacturado": true
+    "_jbl_remanufacturado": true,
+    "deleted": true,
+    "_deleted_at": 1776806820,
+    "_deleted_reason": "Cannot update item MLM2880421369 [status:closed, has_bids:false]"
   },
   "MLM2880426761": {
     "real_stock": 49,
     "sku": "JBL-426761",
     "label": "Bocina Bluetooth Jbl Go 3 Portatil Negra Reacondic",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "Bocina Bluetooth Jbl Go 3 Portatil Negra Reacondicionado",
     "previous_ids": [
       "MLM2876038533"
     ],
-    "_jbl_remanufacturado": true
+    "_jbl_remanufacturado": true,
+    "deleted": true,
+    "_deleted_at": 1776806821,
+    "_deleted_reason": "Cannot update item MLM2880426761 [status:closed, has_bids:false]"
   },
   "MLM2880493813": {
     "real_stock": 46,
     "sku": "JBL-493813",
     "label": "Bocina Bluetooth Jbl Go 4 Portatil Camuflaje Reaco",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "Bocina Bluetooth Jbl Go 4 Portatil Camuflaje Reacondicionado",
     "previous_ids": [
       "MLM2876033189"
     ],
-    "_jbl_remanufacturado": true
+    "_jbl_remanufacturado": true,
+    "deleted": true,
+    "_deleted_at": 1776806821,
+    "_deleted_reason": "Cannot update item MLM2880493813 [status:closed, has_bids:false]"
   },
   "MLM2880426775": {
     "real_stock": 45,
     "sku": "JBL-426775",
     "label": "Bocina Bluetooth Jbl Go 4 Portatil Negra Reacondic",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "Bocina Bluetooth Jbl Go 4 Portatil Negra Reacondicionado",
     "previous_ids": [
       "MLM2876026329"
     ],
-    "_jbl_remanufacturado": true
+    "_jbl_remanufacturado": true,
+    "deleted": true,
+    "_deleted_at": 1776806822,
+    "_deleted_reason": "Cannot update item MLM2880426775 [status:closed, has_bids:false]"
   },
   "MLM5222253486": {
     "real_stock": 49,
     "sku": "JBL-253486",
     "label": "Bocina Bluetooth Jbl Clip 5 Portatil Morada Reacon",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "Bocina Bluetooth Jbl Clip 5 Portatil Morada Reacondicionado",
     "previous_ids": [
       "MLM2876026327"
     ],
-    "_jbl_remanufacturado": true
+    "_jbl_remanufacturado": true,
+    "deleted": true,
+    "_deleted_at": 1776806823,
+    "_deleted_reason": "Cannot update item MLM5222253486 [status:closed, has_bids:false]"
   },
   "MLM2880493839": {
     "real_stock": 49,
     "sku": "JBL-493839",
     "label": "Bocina Bluetooth Jbl Go 4 Portatil Rosa Reacondici",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "Bocina Bluetooth Jbl Go 4 Portatil Rosa Reacondicionado",
     "previous_ids": [
       "MLM2876026315"
     ],
-    "_jbl_remanufacturado": true
+    "_jbl_remanufacturado": true,
+    "deleted": true,
+    "_deleted_at": 1776806823,
+    "_deleted_reason": "Cannot update item MLM2880493839 [status:closed, has_bids:false]"
   },
   "MLM2880426789": {
     "real_stock": 49,
     "sku": "JBL-426789",
     "label": "Bocina Bluetooth Jbl Go 4 Portatil Roja Reacondici",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "Bocina Bluetooth Jbl Go 4 Portatil Roja Reacondicionado",
     "previous_ids": [
       "MLM2876026311"
     ],
-    "_jbl_remanufacturado": true
+    "_jbl_remanufacturado": true,
+    "deleted": true,
+    "_deleted_at": 1776806824,
+    "_deleted_reason": "Cannot update item MLM2880426789 [status:closed, has_bids:false]"
   },
   "MLM2880493859": {
     "real_stock": 46,
     "sku": "JBL-493859",
     "label": "Bocina Bluetooth Jbl Charge 6 Portatil Azul Reacon",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "Bocina Bluetooth Jbl Charge 6 Portatil Azul Reacondicionado",
     "previous_ids": [
       "MLM5218152722"
     ],
-    "_jbl_remanufacturado": true
+    "_jbl_remanufacturado": true,
+    "deleted": true,
+    "_deleted_at": 1776806825,
+    "_deleted_reason": "Cannot update item MLM2880493859 [status:closed, has_bids:false]"
   },
   "MLM2880493871": {
     "real_stock": 46,
     "sku": "JBL-493871",
     "label": "Jbl Charge 6 Bluetooth Camuflaje Reacondicionado",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "Jbl Charge 6 Bluetooth Camuflaje Reacondicionado",
     "previous_ids": [
       "MLM5218019478"
     ],
-    "_jbl_remanufacturado": true
+    "_jbl_remanufacturado": true,
+    "deleted": true,
+    "_deleted_at": 1776806825,
+    "_deleted_reason": "Cannot update item MLM2880493871 [status:closed, has_bids:false]"
   },
   "MLM5222240940": {
     "real_stock": 29,
     "sku": "JBL-240940",
     "label": "Bocina Bluetooth Jbl Grip Portatil Negra Reacondic",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "Bocina Bluetooth Jbl Grip Portatil Negra Reacondicionado",
     "previous_ids": [
       "MLM5217729566"
     ],
-    "_jbl_remanufacturado": true
+    "_jbl_remanufacturado": true,
+    "deleted": true,
+    "_deleted_at": 1776806826,
+    "_deleted_reason": "Cannot update item MLM5222240940 [status:closed, has_bids:false]"
   },
   "MLM2880426867": {
     "real_stock": 29,
     "sku": "JBL-426867",
     "label": "Bocina Bluetooth Jbl Clip 5 Portatil Rosa Reacondi",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "Bocina Bluetooth Jbl Clip 5 Portatil Rosa Reacondicionado",
     "previous_ids": [
       "MLM5214751640"
     ],
-    "_jbl_remanufacturado": true
+    "_jbl_remanufacturado": true,
+    "deleted": true,
+    "_deleted_at": 1776806827,
+    "_deleted_reason": "Cannot update item MLM2880426867 [status:closed, has_bids:false]"
   },
   "MLM2880493929": {
     "real_stock": 30,
     "sku": "JBL-493929",
     "label": "Bocina Bluetooth Jbl Flip 7 Portatil Roja Reacondi",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "Bocina Bluetooth Jbl Flip 7 Portatil Roja Reacondicionado",
     "previous_ids": [
       "MLM2878305423"
     ],
-    "_jbl_remanufacturado": true
+    "_jbl_remanufacturado": true,
+    "deleted": true,
+    "_deleted_at": 1776806827,
+    "_deleted_reason": "Cannot update item MLM2880493929 [status:closed, has_bids:false]"
   },
   "MLM2880493937": {
     "real_stock": 46,
@@ -1188,49 +1224,61 @@
     "real_stock": 30,
     "sku": "JBL-426893",
     "label": "Bocina Bluetooth Jbl Flip 7 Portatil Morada Reacon",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "Bocina Bluetooth Jbl Flip 7 Portatil Morada Reacondicionado",
     "previous_ids": [
       "MLM2880144795"
     ],
-    "_jbl_remanufacturado": true
+    "_jbl_remanufacturado": true,
+    "deleted": true,
+    "_deleted_at": 1776806828,
+    "_deleted_reason": "Cannot update item MLM2880426893 [status:closed, has_bids:false]"
   },
   "MLM2880493955": {
     "real_stock": 28,
     "sku": "JBL-493955",
     "label": "Bocina Bluetooth Jbl Flip 7 Portatil Negra Reacond",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "Bocina Bluetooth Jbl Flip 7 Portatil Negra Reacondicionado",
     "previous_ids": [
       "MLM2879719963"
     ],
-    "_jbl_remanufacturado": true
+    "_jbl_remanufacturado": true,
+    "deleted": true,
+    "_deleted_at": 1776806829,
+    "_deleted_reason": "Cannot update item MLM2880493955 [status:closed, has_bids:false]"
   },
   "MLM5222253632": {
     "real_stock": 30,
     "sku": "JBL-253632",
     "label": "Jbl Go 4 Bluetooth Azul Marino Reacondicionado",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "Jbl Go 4 Bluetooth Azul Marino Reacondicionado",
     "previous_ids": [
       "MLM2879717237"
     ],
-    "_jbl_remanufacturado": true
+    "_jbl_remanufacturado": true,
+    "deleted": true,
+    "_deleted_at": 1776806830,
+    "_deleted_reason": "Cannot update item MLM5222253632 [status:closed, has_bids:false]"
   },
   "MLM2880426915": {
     "real_stock": 30,
     "sku": "JBL-426915",
     "label": "Bocina Bluetooth Jbl Charge 6 Portatil Roja Reacon",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "Bocina Bluetooth Jbl Charge 6 Portatil Roja Reacondicionado",
     "previous_ids": [
       "MLM2879385901"
     ],
-    "_jbl_remanufacturado": true
+    "_jbl_remanufacturado": true,
+    "deleted": true,
+    "_deleted_at": 1776806830,
+    "_deleted_reason": "Cannot update item MLM2880426915 [status:closed, has_bids:false]"
   },
   "MLM2880579539": {
     "real_stock": 30,
@@ -1240,36 +1288,256 @@
     "replenish_quantity": 1,
     "seo_title": "Bocina Bluetooth Jbl Clip 5 Portatil Negra Reacondicionado",
     "previous_ids": [],
-    "_auto_discovered": true
+    "_auto_discovered": true,
+    "deleted": true,
+    "_deleted_at": 1776806831,
+    "_deleted_reason": "It's not possible to relist an item that has been already deleted. [MLM2880579539 deleted]"
   },
   "MLM5222808250": {
     "real_stock": 10,
     "sku": "JBL-GE2-azul",
     "label": "Bocina Bluetooth Jbl Go Essential 2 Azul Reacondic",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "Bocina Bluetooth Jbl Go Essential 2 Azul Reacondicionado",
     "previous_ids": [],
-    "_new_bocina": true
+    "_new_bocina": true,
+    "deleted": true,
+    "_deleted_at": 1776806832,
+    "_deleted_reason": "Cannot update item MLM5222808250 [status:closed, has_bids:false]"
   },
   "MLM2880655647": {
     "real_stock": 10,
     "sku": "JBL-GE2-rojo",
     "label": "Bocina Bluetooth Jbl Go Essential 2 Roja Reacondic",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "Bocina Bluetooth Jbl Go Essential 2 Roja Reacondicionado",
     "previous_ids": [],
-    "_new_bocina": true
+    "_new_bocina": true,
+    "deleted": true,
+    "_deleted_at": 1776806832,
+    "_deleted_reason": "Cannot update item MLM2880655647 [status:closed, has_bids:false]"
   },
   "MLM5222715416": {
     "real_stock": 10,
     "sku": "SONY-XB100-NEG",
     "label": "Bocina Bluetooth Sony Srs-xb100 Portatil Negra Rea",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "Bocina Bluetooth Sony Srs-xb100 Portatil Negra Reacondiciona",
     "previous_ids": [],
-    "_new_bocina": true
+    "_new_bocina": true,
+    "deleted": true,
+    "_deleted_at": 1776806833,
+    "_deleted_reason": "Cannot update item MLM5222715416 [status:closed, has_bids:false]"
+  },
+  "MLM5222983148": {
+    "real_stock": 30,
+    "sku": "AUTO-983148",
+    "label": "Bocina Portátil Jbl Go 4 Bluetooth, Camuflaje. Color Camufla - $449",
+    "auto_replenish": false,
+    "replenish_quantity": 1,
+    "seo_title": "Bocina Portátil Jbl Go 4 Bluetooth, Camuflaje. Color Camuflaje",
+    "previous_ids": [],
+    "_auto_discovered": true,
+    "deleted": true,
+    "_deleted_at": 1776807195,
+    "_deleted_reason": "Cannot update item MLM5222983148 [status:under_review, has_bids:false]"
+  },
+  "MLM5222983110": {
+    "real_stock": 30,
+    "sku": "AUTO-983110",
+    "label": "Bocina Jbl Jbl Go Essential Go Essential Jbl-goesblk Portáti - $449",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "seo_title": "Bocina Jbl Jbl Go Essential Go Essential Jbl-goesblk Portátil Con Bluetooth Waterproof Roja Rojo",
+    "previous_ids": [],
+    "_auto_discovered": true
+  },
+  "MLM5222983106": {
+    "real_stock": 30,
+    "sku": "AUTO-983106",
+    "label": "Bocina Jbl Jbl Go Essential Go Essential Jbl-goesblk Portáti - $449",
+    "auto_replenish": false,
+    "replenish_quantity": 1,
+    "seo_title": "Bocina Jbl Jbl Go Essential Go Essential Jbl-goesblk Portátil Con Bluetooth Waterproof Azul",
+    "previous_ids": [],
+    "_auto_discovered": true,
+    "deleted": true,
+    "_deleted_at": 1776806863,
+    "_deleted_reason": "Cannot update item MLM5222983106 [status:under_review, has_bids:false]"
+  },
+  "MLM5222983050": {
+    "real_stock": 30,
+    "sku": "AUTO-983050",
+    "label": "Bocina Jbl Jbl Clip 5 Jbl Clip 5 Portátil Con Bluetooth Wate - $699",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "seo_title": "Bocina Jbl Jbl Clip 5 Jbl Clip 5 Portátil Con Bluetooth Waterproof Altavoz Jbl Clip 5 Negra",
+    "previous_ids": [],
+    "_auto_discovered": true
+  },
+  "MLM5222983008": {
+    "real_stock": 30,
+    "sku": "AUTO-983008",
+    "label": "Altavoz Bluetooth Camuflado Jbl Charge 6 Camuflaje - $899",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "seo_title": "Altavoz Bluetooth Camuflado Jbl Charge 6 Camuflaje",
+    "previous_ids": [],
+    "_auto_discovered": true
+  },
+  "MLM5222936976": {
+    "real_stock": 30,
+    "sku": "AUTO-936976",
+    "label": "Altavoz Jbl Charge 6 - Azul - $899",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "seo_title": "Altavoz Jbl Charge 6 - Azul",
+    "previous_ids": [],
+    "_auto_discovered": true
+  },
+  "MLM2880766137": {
+    "real_stock": 30,
+    "sku": "AUTO-766137",
+    "label": "Bocina Jbl Go Jbl Go 4 Go4 Portátil Con Bluetooth Waterproof - $449",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "seo_title": "Bocina Jbl Go Jbl Go 4 Go4 Portátil Con Bluetooth Waterproof Jbl Go4 Azul",
+    "previous_ids": [],
+    "_auto_discovered": true
+  },
+  "MLM2880766117": {
+    "real_stock": 30,
+    "sku": "AUTO-766117",
+    "label": "Parlante Jbl Go Jbl Go 4 Go4 Portátil Con Bluetooth Waterpro - $449",
+    "auto_replenish": false,
+    "replenish_quantity": 1,
+    "seo_title": "Parlante Jbl Go Jbl Go 4 Go4 Portátil Con Bluetooth Waterproof Negro",
+    "previous_ids": [],
+    "_auto_discovered": true,
+    "deleted": true,
+    "_deleted_at": 1776806975,
+    "_deleted_reason": "Cannot update item MLM2880766117 [status:under_review, has_bids:false]"
+  },
+  "MLM2880766097": {
+    "real_stock": 30,
+    "sku": "AUTO-766097",
+    "label": "Funda Para Sony Srs-xb100 Xb13 Silicona Líquida Color Sony S - $549",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "seo_title": "Funda Para Sony Srs-xb100 Xb13 Silicona Líquida Color Sony Srs-xb100 Xb13-blue",
+    "previous_ids": [],
+    "_auto_discovered": true
+  },
+  "MLM2880766083": {
+    "real_stock": 30,
+    "sku": "AUTO-766083",
+    "label": "Jbl Grip Rojo - $599",
+    "auto_replenish": false,
+    "replenish_quantity": 1,
+    "seo_title": "Jbl Grip Rojo",
+    "previous_ids": [],
+    "_auto_discovered": true,
+    "deleted": true,
+    "_deleted_at": 1776806864,
+    "_deleted_reason": "Cannot update item MLM2880766083 [status:under_review, has_bids:false]"
+  },
+  "MLM2880766045": {
+    "real_stock": 30,
+    "sku": "AUTO-766045",
+    "label": "Bocina Portátil Jbl Clip 5 Bluetooth Negro - $699",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "seo_title": "Bocina Portátil Jbl Clip 5 Bluetooth Negro",
+    "previous_ids": [],
+    "_auto_discovered": true
+  },
+  "MLM2880766021": {
+    "real_stock": 30,
+    "sku": "AUTO-766021",
+    "label": "Parlante Portatil Jbl Flip 7 Rojo - $799",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "seo_title": "Parlante Portatil Jbl Flip 7 Rojo",
+    "previous_ids": [],
+    "_auto_discovered": true
+  },
+  "MLM2880754323": {
+    "real_stock": 30,
+    "sku": "AUTO-754323",
+    "label": "Bocina Jbl Go 3 Jblgo3 Portátil Con Bluetooth Waterproof Neg - $449",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "seo_title": "Bocina Jbl Go 3 Jblgo3 Portátil Con Bluetooth Waterproof Negra Negro",
+    "previous_ids": [],
+    "_auto_discovered": true
+  },
+  "MLM2880754295": {
+    "real_stock": 30,
+    "sku": "AUTO-754295",
+    "label": "Bocina Jbl Go Jbl Go 4 Go4 Portátil Con Bluetooth Waterproof - $449",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "seo_title": "Bocina Jbl Go Jbl Go 4 Go4 Portátil Con Bluetooth Waterproof Jbl Go4 Azul",
+    "previous_ids": [],
+    "_auto_discovered": true
+  },
+  "MLM2880754279": {
+    "real_stock": 30,
+    "sku": "AUTO-754279",
+    "label": "Bocina Jbl Go Jbl Go 4 Go4 Portátil Con Bluetooth Waterproof - $449",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "seo_title": "Bocina Jbl Go Jbl Go 4 Go4 Portátil Con Bluetooth Waterproof Jbl Go4 Azul",
+    "previous_ids": [],
+    "_auto_discovered": true
+  },
+  "MLM2880754229": {
+    "real_stock": 30,
+    "sku": "AUTO-754229",
+    "label": "Bocina Portátil Bluetooth Jbl Clip 5 - $699",
+    "auto_replenish": false,
+    "replenish_quantity": 1,
+    "seo_title": "Bocina Portátil Bluetooth Jbl Clip 5",
+    "previous_ids": [],
+    "_auto_discovered": true,
+    "deleted": true,
+    "_deleted_at": 1776806886,
+    "_deleted_reason": "Cannot update item MLM2880754229 [status:under_review, has_bids:false]"
+  },
+  "MLM2880754209": {
+    "real_stock": 30,
+    "sku": "AUTO-754209",
+    "label": "Parlante Portátil Jbl Flip 7 Blanco - $799",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "seo_title": "Parlante Portátil Jbl Flip 7 Blanco",
+    "previous_ids": [],
+    "_auto_discovered": true
+  },
+  "MLM2880753399": {
+    "real_stock": 30,
+    "sku": "AUTO-753399",
+    "label": "Bocina Bluetooth Jbl Clip 5 Portatil Negra Reacondicionado - $759",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "seo_title": "Bocina Bluetooth Jbl Clip 5 Portatil Negra Reacondicionado",
+    "previous_ids": [],
+    "_auto_discovered": true
+  },
+  "MLM2880722719": {
+    "real_stock": 30,
+    "sku": "AUTO-722719",
+    "label": "Bocina Portátil Bluetooth Jbl Clip 5 - $699",
+    "auto_replenish": false,
+    "replenish_quantity": 1,
+    "seo_title": "Bocina Portátil Bluetooth Jbl Clip 5",
+    "previous_ids": [],
+    "_auto_discovered": true,
+    "deleted": true,
+    "_deleted_at": 1776807174,
+    "_deleted_reason": "Cannot update item MLM2880722719 [status:under_review, has_bids:false]"
   }
 }
