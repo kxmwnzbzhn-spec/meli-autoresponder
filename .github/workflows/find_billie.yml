@@ -1,0 +1,50 @@
+name: Find Billie Eilish catalog
+on: {workflow_dispatch: {}}
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+        run: |
+          python3 <<'PY'
+          import os, json, requests
+          r = requests.post("https://api.mercadolibre.com/oauth/token", data={
+              "grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],
+              "client_secret":os.environ["MELI_APP_SECRET"],"refresh_token":os.environ["MELI_REFRESH_TOKEN"]
+          }, timeout=20)
+          tok = r.json()["access_token"]; h = {"Authorization":f"Bearer {tok}"}
+          
+          # Search catalog for Billie Eilish Eilish parfum 100ml
+          r = requests.get("https://api.mercadolibre.com/products/search?site_id=MLM&q=Billie+Eilish+Eilish+100ml&limit=20", headers=h, timeout=20)
+          res = r.json()
+          print(f"Total: {res.get('paging',{}).get('total',0)}")
+          for p in res.get('results',[])[:10]:
+              pid = p.get('id')
+              r2 = requests.get(f"https://api.mercadolibre.com/products/{pid}", headers=h, timeout=10)
+              pd = r2.json()
+              attrs = {a.get('id'): a.get('value_name') for a in pd.get('attributes',[])[:20]}
+              nm = pd.get('name','')
+              bbw = pd.get('buy_box_winner') or {}
+              print(f"\n{pid} | status={pd.get('status')} | {nm[:80]}")
+              print(f"  BBW: ${bbw.get('price')}")
+              print(f"  BRAND={attrs.get('BRAND')} VOL={attrs.get('VOLUME_CAPACITY')} SEX={attrs.get('GENDER')}")
+              print(f"  pics: {len(pd.get('pictures',[]))}")
+              # First 3 pic URLs
+              for pic in pd.get('pictures',[])[:3]:
+                  print(f"    {pic.get('url') or pic.get('secure_url')}")
+          
+          # Also search listings to find a "winner" item we can copy pics from
+          print("\n=== Listings directos (items) ===")
+          r = requests.get("https://api.mercadolibre.com/sites/MLM/search?q=Billie+Eilish+Eilish+100ml+parfum&limit=5", headers=h, timeout=15)
+          for it in r.json().get('results',[])[:5]:
+              iid = it.get('id')
+              print(f"  {iid} | ${it.get('price')} | cat={it.get('category_id')} | {it.get('title','')[:70]}")
+              thumb = it.get('thumbnail','')
+              print(f"    thumb: {thumb}")
+          PY
