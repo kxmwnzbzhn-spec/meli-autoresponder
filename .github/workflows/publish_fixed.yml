@@ -1,0 +1,58 @@
+name: publish-fixed
+on: {workflow_dispatch: {}}
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests -q
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+        run: |
+          python <<'PY'
+          import os,requests,time,json
+          r=requests.post("https://api.mercadolibre.com/oauth/token",data={"grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],"client_secret":os.environ["MELI_APP_SECRET"],"refresh_token":os.environ["MELI_REFRESH_TOKEN"]}).json()
+          H={"Authorization":f"Bearer {r['access_token']}","Content-Type":"application/json"}
+          
+          FIXES=[
+              {"label":"Charge 6 Roja","cpid":"MLM58806550","price":899},
+              {"label":"Flip 7 Morada","cpid":"MLM49443139","price":799},
+              {"label":"Clip 5 Morada","cpid":"MLM45586155","price":699},
+              {"label":"Grip Negra","cpid":"MLM59802579","price":599},
+              {"label":"Sony XB100 Negra","cpid":"MLM25912333","price":549},
+              {"label":"Go 4 Roja","cpid":"MLM64389753","price":449},
+              {"label":"Go 4 Azul Marino","cpid":"MLM44731712","price":449},
+              {"label":"Go 4 Rosa","cpid":"MLM65831856","price":449},
+          ]
+          
+          for f in FIXES:
+              prod=requests.get(f"https://api.mercadolibre.com/products/{f['cpid']}",headers=H,timeout=15).json()
+              cat=prod.get("category_details",{}).get("id") or prod.get("category_id") or "MLM1055"
+              nm=prod.get("name") or f["label"]
+              body={
+                  "catalog_product_id":f["cpid"],
+                  "catalog_listing":True,
+                  "title":nm[:60],
+                  "category_id":cat,
+                  "price":f["price"],
+                  "currency_id":"MXN",
+                  "available_quantity":1,
+                  "condition":"new",
+                  "listing_type_id":"gold_pro",
+                  "sale_terms":[
+                      {"id":"WARRANTY_TYPE","value_name":"Garantía del vendedor"},
+                      {"id":"WARRANTY_TIME","value_name":"30 días"}
+                  ]
+              }
+              r=requests.post("https://api.mercadolibre.com/items",headers=H,json=body,timeout=30)
+              if r.status_code in (200,201):
+                  nid=r.json().get("id")
+                  print(f"OK {f['label']} -> {nid} ({nm[:50]})")
+              else:
+                  print(f"ERR {f['label']}: {str(r.json())[:200]}")
+              time.sleep(1)
+          PY
