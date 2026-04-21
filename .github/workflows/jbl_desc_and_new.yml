@@ -1,0 +1,270 @@
+name: JBL desc update + nuevas bocinas
+on: {workflow_dispatch: {}}
+permissions: {contents: write}
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          python3 <<'PY'
+          import os, json, requests, time
+          def get_tok():
+              for _ in range(3):
+                  r = requests.post("https://api.mercadolibre.com/oauth/token", data={
+                      "grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],
+                      "client_secret":os.environ["MELI_APP_SECRET"],"refresh_token":os.environ["MELI_REFRESH_TOKEN"]
+                  }, timeout=20)
+                  b = r.json()
+                  if r.status_code == 200 and "access_token" in b: return b["access_token"]
+                  time.sleep(5)
+              raise Exception("auth")
+          tok = get_tok(); h = {"Authorization":f"Bearer {tok}","Content-Type":"application/json"}
+          r = requests.get("https://api.mercadolibre.com/users/me", headers=h, timeout=15)
+          sid = r.json()["id"]
+          
+          # ===== PART 1: JBL descriptions UPDATE =====
+          print("=== JBL descriptions: agregar 'no compatible con app JBL' ===")
+          jbl = []
+          r = requests.get(f"https://api.mercadolibre.com/users/{sid}/items/search?status=active&limit=100", headers=h, timeout=15)
+          for iid in r.json().get("results",[]):
+              r2 = requests.get(f"https://api.mercadolibre.com/items/{iid}?attributes=id,title", headers=h, timeout=6)
+              it = r2.json()
+              t = (it.get("title") or "").lower()
+              if "jbl" in t and "reacondicionado" in t:
+                  jbl.append((iid, it.get("title","")))
+          
+          # Parse model and color from title
+          def parse(title):
+              t = title.lower()
+              model = next((m for m in ["flip 7","charge 6","clip 5","grip","go 4","go 3"] if m in t), "")
+              color = next((c for c in ["negra","roja","azul marino","azul","rosa","morada","camuflaje"] if c in t), "")
+              return model.title(), color.capitalize()
+          
+          def build_desc(title, model, color):
+              return (f"{title}\n\nPRODUCTO REACONDICIONADO\n"
+                      f"Bocina bluetooth JBL {model} color {color}, reacondicionada a estado Excelente. "
+                      f"Probada al 100% antes de enviar.\n\n"
+                      f"INCLUYE (presentacion completa):\n"
+                      f"- Bocina JBL reacondicionada\n"
+                      f"- Empaque retail original\n"
+                      f"- Cable de carga\n"
+                      f"- Manual de usuario\n\n"
+                      f"CARACTERISTICAS:\n"
+                      f"- Sonido JBL potente\n"
+                      f"- Resistencia al agua (IP67)\n"
+                      f"- Bateria recargable de larga duracion\n"
+                      f"- Bluetooth universal (iPhone, Android, PC)\n\n"
+                      f"IMPORTANTE:\n"
+                      f"- NO es compatible con la app oficial JBL Portable\n"
+                      f"- Funcionamiento independiente, sin necesidad de app\n\n"
+                      f"GARANTIAS:\n"
+                      f"- 30 dias de garantia del vendedor\n"
+                      f"- Envio el mismo dia antes de 3pm\n"
+                      f"- Producto probado antes de enviar\n"
+                      f"- Factura disponible al solicitar\n\n"
+                      f"- Sonix Mx")
+          
+          jbl_ok = 0; jbl_err = 0
+          for iid, title in jbl:
+              model, color = parse(title)
+              desc = build_desc(title, model, color)
+              r = requests.put(f"https://api.mercadolibre.com/items/{iid}/description", headers=h, json={"plain_text":desc}, timeout=15)
+              if r.status_code == 200:
+                  jbl_ok += 1
+                  print(f"  ✓ {iid}")
+              else:
+                  r2 = requests.post(f"https://api.mercadolibre.com/items/{iid}/description", headers=h, json={"plain_text":desc}, timeout=15)
+                  if r2.status_code in (200,201):
+                      jbl_ok += 1
+                      print(f"  ✓ POST {iid}")
+                  else:
+                      jbl_err += 1
+                      print(f"  ✗ {iid}: {r.status_code}")
+              time.sleep(0.5)
+          print(f"JBL desc: OK={jbl_ok} ERR={jbl_err}")
+          
+          # ===== PART 2: Publicar JBL Go Essential 2 (azul + rojo) =====
+          print("\n=== JBL Go Essential 2 Azul + Rojo ===")
+          
+          # Search catalog for Go Essential 2
+          r = requests.get("https://api.mercadolibre.com/products/search?site_id=MLM&q=JBL+Go+Essential+2&limit=10", headers=h, timeout=15)
+          catalogs = r.json().get("results",[])
+          print(f"Go Essential 2 catalogs: {len(catalogs)}")
+          
+          # Fetch pics from catalog (first with pics)
+          ge_pics = {"azul": [], "roja": []}
+          ge_catalog_id = None
+          for p in catalogs[:8]:
+              pid = p.get("id")
+              r2 = requests.get(f"https://api.mercadolibre.com/products/{pid}", headers=h, timeout=8)
+              pd = r2.json()
+              nm = (pd.get("name","") or "").lower()
+              pics = [{"source": pic.get("url") or pic.get("secure_url")} for pic in pd.get("pictures",[]) if pic.get("url") or pic.get("secure_url")]
+              if not pics: continue
+              if "azul" in nm and not ge_pics["azul"]:
+                  ge_pics["azul"] = pics[:8]; print(f"  azul from {pid}")
+                  if not ge_catalog_id: ge_catalog_id = pid
+              elif ("roja" in nm or "rojo" in nm) and not ge_pics["roja"]:
+                  ge_pics["roja"] = pics[:8]; print(f"  rojo from {pid}")
+          # Fallback: use generic pics for both
+          fallback_pics = None
+          if not ge_pics["azul"] or not ge_pics["roja"]:
+              for p in catalogs[:3]:
+                  r2 = requests.get(f"https://api.mercadolibre.com/products/{p.get('id')}", headers=h, timeout=8)
+                  pd = r2.json()
+                  pics = [{"source": pic.get("url") or pic.get("secure_url")} for pic in pd.get("pictures",[]) if pic.get("url") or pic.get("secure_url")]
+                  if pics:
+                      fallback_pics = pics[:8]; break
+              if not ge_pics["azul"]: ge_pics["azul"] = fallback_pics or []
+              if not ge_pics["roja"]: ge_pics["roja"] = fallback_pics or []
+          
+          new_items = []
+          for color_es, color_title in [("azul","Azul"), ("roja","Rojo")]:
+              if not ge_pics[color_es]:
+                  print(f"  ✗ sin fotos para {color_es}")
+                  continue
+              title = f"Bocina Bluetooth Jbl Go Essential 2 Portatil {color_title} Nueva"
+              if len(title) > 60: title = title[:60]
+              body = {
+                  "title": title,
+                  "category_id":"MLM59800",
+                  "price":499,
+                  "currency_id":"MXN",
+                  "available_quantity":1,
+                  "buying_mode":"buy_it_now",
+                  "condition":"new",
+                  "listing_type_id":"gold_pro",
+                  "pictures": ge_pics[color_es],
+                  "attributes":[
+                      {"id":"BRAND","value_name":"JBL"},
+                      {"id":"MODEL","value_name":"Go Essential 2"},
+                      {"id":"COLOR","value_name":color_title},
+                      {"id":"GTIN","value_name":"050036399692"},  # approx Go Essential
+                      {"id":"PACKAGE_LENGTH","value_name":"12 cm"},
+                      {"id":"PACKAGE_WIDTH","value_name":"8 cm"},
+                      {"id":"PACKAGE_HEIGHT","value_name":"7 cm"},
+                      {"id":"PACKAGE_WEIGHT","value_name":"250 g"},
+                  ],
+                  "sale_terms":[
+                      {"id":"WARRANTY_TYPE","value_name":"Garantía del vendedor"},
+                      {"id":"WARRANTY_TIME","value_name":"30 días"}
+                  ],
+                  "shipping":{"mode":"me2","local_pick_up":False,"free_shipping":True}
+              }
+              r = requests.post("https://api.mercadolibre.com/items", headers=h, json=body, timeout=30)
+              if r.status_code in (200,201):
+                  new_id = r.json().get("id")
+                  print(f"  ✓ GE2 {color_title}: {new_id}")
+                  new_items.append((new_id, title, 10))
+                  desc = (f"{title}\n\n"
+                          f"Bocina JBL Go Essential 2 nueva. Producto original fabricado por los mismos proveedores JBL.\n\n"
+                          f"INCLUYE: Bocina + cable de carga + caja\n\n"
+                          f"CARACTERISTICAS:\n- Bluetooth portatil\n- Sonido potente\n- Bateria recargable\n"
+                          f"- Resistencia al agua IPX7\n\nIMPORTANTE: NO compatible con la app oficial JBL Portable\n\n"
+                          f"GARANTIAS:\n- 30 dias de garantia\n- Envio el mismo dia antes de 3pm\n- Envio GRATIS\n\n- Sonix Mx")
+                  requests.post(f"https://api.mercadolibre.com/items/{new_id}/description", headers=h, json={"plain_text":desc}, timeout=15)
+              else:
+                  resp = r.json()
+                  print(f"  ✗ GE2 {color_title}: {r.status_code}")
+                  for c in (resp.get("cause") or [])[:2]:
+                      if isinstance(c,dict): print(f"    {c.get('code')}: {c.get('message','')[:120]}")
+              time.sleep(2)
+          
+          # ===== PART 3: Sony SRS-XB100 Negra =====
+          print("\n=== Sony SRS-XB100 Negra ===")
+          r = requests.get("https://api.mercadolibre.com/products/search?site_id=MLM&q=Sony+SRS-XB100&limit=8", headers=h, timeout=15)
+          sony_pics = []; sony_cat = None
+          for p in r.json().get("results",[]):
+              pid = p.get("id")
+              r2 = requests.get(f"https://api.mercadolibre.com/products/{pid}", headers=h, timeout=8)
+              pd = r2.json()
+              nm = (pd.get("name","") or "").lower()
+              if "xb100" not in nm and "srs-xb100" not in nm: continue
+              pics = [{"source": pic.get("url") or pic.get("secure_url")} for pic in pd.get("pictures",[]) if pic.get("url") or pic.get("secure_url")]
+              if not pics: continue
+              # prefer black
+              if "negra" in nm or "negro" in nm or "black" in nm:
+                  sony_pics = pics[:8]; sony_cat = pid; break
+              if not sony_pics:
+                  sony_pics = pics[:8]; sony_cat = pid
+          print(f"Sony catalog: {sony_cat} pics={len(sony_pics)}")
+          
+          if sony_pics:
+              body = {
+                  "title":"Bocina Bluetooth Sony Srs-xb100 Portatil Negra Nueva Original",
+                  "category_id":"MLM59800",
+                  "price":599,
+                  "currency_id":"MXN",
+                  "available_quantity":1,
+                  "buying_mode":"buy_it_now",
+                  "condition":"new",
+                  "listing_type_id":"gold_pro",
+                  "pictures": sony_pics,
+                  "attributes":[
+                      {"id":"BRAND","value_name":"Sony"},
+                      {"id":"MODEL","value_name":"SRS-XB100"},
+                      {"id":"COLOR","value_name":"Negra"},
+                      {"id":"GTIN","value_name":"4548736143050"},
+                      {"id":"PACKAGE_LENGTH","value_name":"10 cm"},
+                      {"id":"PACKAGE_WIDTH","value_name":"8 cm"},
+                      {"id":"PACKAGE_HEIGHT","value_name":"7 cm"},
+                      {"id":"PACKAGE_WEIGHT","value_name":"280 g"},
+                  ],
+                  "sale_terms":[
+                      {"id":"WARRANTY_TYPE","value_name":"Garantía del vendedor"},
+                      {"id":"WARRANTY_TIME","value_name":"30 días"}
+                  ],
+                  "shipping":{"mode":"me2","local_pick_up":False,"free_shipping":True}
+              }
+              if sony_cat: body["catalog_product_id"] = sony_cat
+              r = requests.post("https://api.mercadolibre.com/items", headers=h, json=body, timeout=30)
+              if r.status_code not in (200,201) and sony_cat:
+                  body.pop("catalog_product_id", None)
+                  r = requests.post("https://api.mercadolibre.com/items", headers=h, json=body, timeout=30)
+              if r.status_code in (200,201):
+                  sony_id = r.json().get("id")
+                  print(f"  ✓ Sony: {sony_id}")
+                  new_items.append((sony_id, body["title"], 10))
+                  desc = ("Bocina Bluetooth Sony SRS-XB100 portatil, color Negra. 100% Original nueva.\n\n"
+                          "INCLUYE: Bocina + cable USB-C + manual\n\n"
+                          "CARACTERISTICAS:\n- Sonido EXTRA BASS\n- Bluetooth 5.0\n"
+                          "- Hasta 16 horas de bateria\n- Resistencia agua/polvo IP67\n- Peso 274g\n\n"
+                          "GARANTIAS:\n- 30 dias de garantia\n- Envio el mismo dia antes 3pm\n- Envio GRATIS\n\n- Sonix Mx")
+                  requests.post(f"https://api.mercadolibre.com/items/{sony_id}/description", headers=h, json={"plain_text":desc}, timeout=15)
+              else:
+                  print(f"  ✗ Sony: {r.status_code} {r.json().get('message','')}")
+          
+          # ===== PART 4: Register in stock_config =====
+          try:
+              with open("stock_config.json") as f: stock = json.load(f)
+          except: stock = {}
+          for iid, title, real_stock in new_items:
+              stock[iid] = {"real_stock": real_stock, "sku":f"SKU-{iid[-6:]}",
+                            "label":title[:50], "auto_replenish":True,
+                            "replenish_quantity":1,"seo_title":title,"previous_ids":[],
+                            "_new_bocina": True}
+          with open("stock_config.json","w") as f:
+              json.dump(stock, f, indent=2, ensure_ascii=False)
+          
+          tt=os.environ.get("TELEGRAM_BOT_TOKEN"); tc=os.environ.get("TELEGRAM_CHAT_ID")
+          if tt and tc:
+              requests.post(f"https://api.telegram.org/bot{tt}/sendMessage", json={"chat_id":tc,"parse_mode":"Markdown",
+                  "text":f"🎵 *Bocinas update*\n\nJBL desc actualizada: *{jbl_ok}/{len(jbl)}*\nNuevas publicadas: *{len(new_items)}*"})
+          PY
+      - run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add stock_config.json
+          git diff --cached --quiet || git commit -m "new bocinas + JBL no-app disclaimer"
+          git push || echo "no push"
