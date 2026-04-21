@@ -1,0 +1,150 @@
+name: casar-bocinas
+on: {workflow_dispatch: {}}
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests -q
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+        run: |
+          python <<'PY'
+          import os, requests, json, time, copy
+          def tok():
+              for _ in range(3):
+                  r=requests.post("https://api.mercadolibre.com/oauth/token",data={"grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],"client_secret":os.environ["MELI_APP_SECRET"],"refresh_token":os.environ["MELI_REFRESH_TOKEN"]},timeout=20).json()
+                  if "access_token" in r: return r["access_token"]
+                  time.sleep(3)
+          T=tok(); H={"Authorization":f"Bearer {T}","Content-Type":"application/json"}
+          sid=requests.get("https://api.mercadolibre.com/users/me",headers=H).json()["id"]
+
+          # Bocinas objetivo: id actual -> target config
+          # cpid: catalog_product_id conocido; query: búsqueda en catálogo si falta cpid
+          TARGETS = [
+              # Charge 6
+              {"id":"MLM2880493859","model":"Charge 6","color":"Azul","price":899,"cpid":"","q":"JBL Charge 6 Azul"},
+              {"id":"MLM2880426915","model":"Charge 6","color":"Roja","price":899,"cpid":"MLM46455780","q":"JBL Charge 6 Roja"},
+              {"id":"MLM2880493871","model":"Charge 6","color":"Camuflaje","price":899,"cpid":"","q":"JBL Charge 6 Camuflaje"},
+              # Flip 7
+              {"id":"MLM2880493955","model":"Flip 7","color":"Negra","price":799,"cpid":"MLM47809248","q":"JBL Flip 7 Negro"},
+              {"id":"MLM2880493929","model":"Flip 7","color":"Roja","price":799,"cpid":"","q":"JBL Flip 7 Rojo"},
+              {"id":"MLM2880426893","model":"Flip 7","color":"Morada","price":799,"cpid":"","q":"JBL Flip 7 Morado"},
+              # Clip 5
+              {"id":"MLM2880579539","model":"Clip 5","color":"Negra","price":699,"cpid":"MLM37110181","q":"JBL Clip 5 Negro"},
+              {"id":"MLM5222253486","model":"Clip 5","color":"Morada","price":699,"cpid":"","q":"JBL Clip 5 Morado"},
+              {"id":"MLM2880421369","model":"Clip 5","color":"Rosa","price":699,"cpid":"MLM35713227","q":"JBL Clip 5 Rosa"},
+              {"id":"MLM2880426867","model":"Clip 5","color":"Rosa","price":699,"cpid":"MLM35713227","q":"JBL Clip 5 Rosa"},
+              # Grip
+              {"id":"MLM5222240940","model":"Grip","color":"Negra","price":599,"cpid":"","q":"JBL Grip Negro"},
+              # Sony
+              {"id":"MLM5222715416","model":"Sony XB100","color":"Negra","price":549,"cpid":"","q":"Sony SRS-XB100 Negro"},
+              # Go Essential 2
+              {"id":"MLM5222808250","model":"Go Essential 2","color":"Azul","price":449,"cpid":"MLM44711997","q":"JBL Go Essential 2 Azul"},
+              {"id":"MLM2880655647","model":"Go Essential 2","color":"Roja","price":449,"cpid":"","q":"JBL Go Essential 2 Roja"},
+              # Go 4
+              {"id":"MLM2880426775","model":"Go 4","color":"Negra","price":449,"cpid":"","q":"JBL Go 4 Negro"},
+              {"id":"MLM2880426789","model":"Go 4","color":"Roja","price":449,"cpid":"","q":"JBL Go 4 Rojo"},
+              {"id":"MLM2880493839","model":"Go 4","color":"Rosa","price":449,"cpid":"","q":"JBL Go 4 Rosa"},
+              {"id":"MLM5222253632","model":"Go 4","color":"Azul Marino","price":449,"cpid":"MLM44731712","q":"JBL Go 4 Azul Marino"},
+              {"id":"MLM2880493813","model":"Go 4","color":"Camuflaje","price":449,"cpid":"","q":"JBL Go 4 Camuflaje"},
+              # Go 3
+              {"id":"MLM2880426761","model":"Go 3","color":"Negra","price":449,"cpid":"MLM44709174","q":"JBL Go 3 Negro"},
+          ]
+
+          def search_catalog(q):
+              r=requests.get(f"https://api.mercadolibre.com/products/search?status=active&site_id=MLM&q={q}",headers=H,timeout=15)
+              if r.status_code!=200: return None
+              res=r.json().get("results",[])
+              return res[0].get("id") if res else None
+
+          def close_item(iid):
+              r=requests.put(f"https://api.mercadolibre.com/items/{iid}",headers=H,json={"status":"closed"},timeout=15)
+              return r.status_code, r.text[:200]
+
+          def get_item(iid):
+              r=requests.get(f"https://api.mercadolibre.com/items/{iid}",headers=H,timeout=15)
+              return r.json() if r.status_code==200 else None
+
+          def post_catalog(cpid, price, stock=1):
+              body={"catalog_product_id":cpid,"catalog_listing":True,"price":price,"currency_id":"MXN",
+                    "available_quantity":stock,"buying_mode":"buy_it_now","condition":"new",
+                    "listing_type_id":"gold_pro","shipping":{"mode":"me2","local_pick_up":False,"free_shipping":True,"free_methods":[{"id":73328,"rule":{"free_mode":"country","value":None}}]}}
+              r=requests.post("https://api.mercadolibre.com/items",headers=H,json=body,timeout=30)
+              return r.status_code, r.json() if r.headers.get("content-type","").startswith("application/json") else r.text[:400]
+
+          def post_trad(cpid, title, price, pics, desc, stock=1, attrs=None):
+              body={"site_id":"MLM","title":title,"price":price,"currency_id":"MXN",
+                    "available_quantity":stock,"buying_mode":"buy_it_now","condition":"new",
+                    "listing_type_id":"gold_pro","category_id":"MLM1055",
+                    "family_name":None,"catalog_product_id":cpid,"catalog_listing":False,
+                    "pictures":[{"source":p} for p in pics[:10]],
+                    "shipping":{"mode":"me2","local_pick_up":False,"free_shipping":True,"free_methods":[{"id":73328,"rule":{"free_mode":"country","value":None}}]},
+                    "attributes":attrs or []}
+              r=requests.post("https://api.mercadolibre.com/items",headers=H,json=body,timeout=30)
+              if r.status_code in (200,201):
+                  nid=r.json().get("id")
+                  # set description
+                  requests.post(f"https://api.mercadolibre.com/items/{nid}/description",headers=H,json={"plain_text":desc},timeout=15)
+                  return 201, r.json()
+              return r.status_code, r.json() if r.headers.get("content-type","").startswith("application/json") else r.text[:400]
+
+          results=[]
+          for tgt in TARGETS:
+              iid=tgt["id"]
+              model=tgt["model"]; color=tgt["color"]; price=tgt["price"]; cpid=tgt["cpid"]
+              log={"id":iid,"model":model,"color":color}
+              
+              # 1. Si no hay cpid, buscar
+              if not cpid:
+                  found=search_catalog(tgt["q"])
+                  if found: cpid=found; log["cpid_found"]=found
+                  else: log["cpid_found"]="NONE"
+              log["cpid"]=cpid
+              
+              # 2. Cargar item actual para copiar fotos/desc/attrs
+              old=get_item(iid)
+              if not old:
+                  log["err"]="cannot load"
+                  results.append(log); continue
+              pics=[p["url"] for p in old.get("pictures",[]) if p.get("url")]
+              old_desc_r=requests.get(f"https://api.mercadolibre.com/items/{iid}/description",headers=H,timeout=10)
+              desc=old_desc_r.json().get("plain_text","") if old_desc_r.status_code==200 else f"JBL {model} {color} nueva con factura."
+              # Reemplazar "reacondicionado" de la descripción por "nueva"
+              desc=desc.replace("remanufacturado","nuevo").replace("Remanufacturado","Nuevo").replace("reacondicionado","nuevo").replace("Reacondicionado","Nuevo")
+              
+              # 3. Cerrar el viejo
+              sc,bd=close_item(iid)
+              log["close"]=sc
+              
+              # 4. Publicar catálogo si tenemos cpid
+              if cpid:
+                  time.sleep(1)
+                  sc,bd=post_catalog(cpid,price)
+                  if sc in (200,201):
+                      log["cat_id"]=bd.get("id")
+                  else:
+                      log["cat_err"]=str(bd)[:300]
+              
+              # 5. Publicar tradicional casada
+              time.sleep(1)
+              title=f"Bocina Bluetooth {('JBL '+model) if not model.startswith('Sony') else 'Sony SRS-XB100'} Portatil {color} Nueva"[:60]
+              attrs=[{"id":"BRAND","value_name":"Sony" if "Sony" in model else "JBL"},{"id":"COLOR","value_name":color}]
+              tp=price+10  # trad un poquito arriba para que catálogo gane
+              sc,bd=post_trad(cpid if cpid else "",title,tp,pics,desc,attrs=attrs if not cpid else None)
+              if sc==201:
+                  log["trad_id"]=bd.get("id")
+              else:
+                  log["trad_err"]=str(bd)[:300]
+              
+              results.append(log)
+              print(f"{iid} -> cat={log.get('cat_id','-')} trad={log.get('trad_id','-')} close={log.get('close')}")
+          
+          print("\n=== SUMMARY ===")
+          print(json.dumps(results,indent=1,ensure_ascii=False))
+          PY
