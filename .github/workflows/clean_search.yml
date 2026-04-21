@@ -1,0 +1,64 @@
+name: clean-search
+on: {workflow_dispatch: {}}
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests -q
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+        run: |
+          python <<'PY'
+          import os, requests, json, time
+          def tok():
+              r=requests.post("https://api.mercadolibre.com/oauth/token",data={"grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],"client_secret":os.environ["MELI_APP_SECRET"],"refresh_token":os.environ["MELI_REFRESH_TOKEN"]},timeout=20).json()
+              return r["access_token"]
+          T=tok(); H={"Authorization":f"Bearer {T}","Content-Type":"application/json"}
+          
+          # 1) Borrar listings malos
+          BADS=["MLM2880766097","MLM5222982996","MLM2880754209","MLM5222983050","MLM2880766083","MLM2880722719","MLM2880754279"]
+          for iid in BADS:
+              r=requests.put(f"https://api.mercadolibre.com/items/{iid}",headers=H,json={"status":"closed"},timeout=15)
+              print(f"close {iid}: {r.status_code}")
+              time.sleep(0.5)
+              r2=requests.put(f"https://api.mercadolibre.com/items/{iid}",headers=H,json={"deleted":"true"},timeout=15)
+              print(f"delete {iid}: {r2.status_code}")
+              time.sleep(0.5)
+          
+          # 2) Buscar cpids correctos
+          SEARCHES=[
+              ("Charge 6 Roja", "JBL Charge 6 Red", ["charge 6","rojo","red","roja"], ["charge 5","bose","anker"]),
+              ("Flip 7 Morada", "JBL Flip 7 Morado", ["flip 7","morado","morada","purple"], ["flip 6","flip 5","blanco"]),
+              ("Clip 5 Morada", "JBL Clip 5 Morado", ["clip 5","morado","morada","purple"], ["clip 4","negra","negro"]),
+              ("Grip Negra",    "JBL Grip Negro",  ["grip","negro","negra","black"], ["rojo","blanco","red","azul"]),
+              ("Sony XB100 Negra","Sony SRS-XB100 Bluetooth Negro",["xb100","srs-xb100","bluetooth"],["funda","case","silicona","xb13"]),
+              ("Go 4 Roja",     "JBL Go 4 Rojo", ["go 4","rojo","roja","red"], ["go 3","go 2","azul","blanco","negro"]),
+              ("Go 4 Azul Marino","JBL Go 4 Blue", ["go 4","azul","blue"], ["go 3","rojo","rosa"]),
+              ("Go 4 Rosa",     "JBL Go 4 Rosa", ["go 4","rosa","pink"], ["go 3","azul","rojo","negro"]),
+          ]
+          
+          def search_best(q, must_have, must_not_have):
+              r=requests.get(f"https://api.mercadolibre.com/products/search?status=active&site_id=MLM&q={q}",headers=H,timeout=15).json()
+              for item in r.get("results",[])[:10]:
+                  name=(item.get("name") or "").lower()
+                  if any(bad in name for bad in must_not_have): continue
+                  if all(good in name for good in must_have[:2]):  # al menos los 2 primeros
+                      return item.get("id"), item.get("name")
+              # segunda pasada más laxa
+              for item in r.get("results",[])[:10]:
+                  name=(item.get("name") or "").lower()
+                  if any(bad in name for bad in must_not_have): continue
+                  if must_have[0] in name:
+                      return item.get("id"), item.get("name")
+              return None, None
+          
+          for label,q,good,bad in SEARCHES:
+              cpid,nm=search_best(q,good,bad)
+              print(f"{label}: {cpid} -> {nm}")
+              time.sleep(0.3)
+          PY
