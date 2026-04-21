@@ -226,13 +226,14 @@
     "real_stock": 29,
     "sku": "AUTO-043397",
     "label": "Bocina Bluetooth Jbl Clip 5 Portatil Rosa Original Usada - $299",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "Bocina Bluetooth Jbl Clip 5 Portatil Rosa Original Usada",
     "previous_ids": [
       "MLM2876043397"
     ],
-    "_auto_discovered": true
+    "_auto_discovered": true,
+    "_superseded_by": "MLM2880421369"
   },
   "MLM2877475987": {
     "real_stock": 46,
@@ -965,5 +966,17 @@
     "seo_title": "Bocina Bluetooth Jbl Flip 7 Portatil Morada Original Usada",
     "previous_ids": [],
     "_auto_discovered": true
+  },
+  "MLM2880421369": {
+    "real_stock": 29,
+    "sku": "JBL-421369",
+    "label": "Bocina Bluetooth Jbl Clip 5 Portatil Rosa Reacondi",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "seo_title": "Bocina Bluetooth Jbl Clip 5 Portatil Rosa Reacondicionado",
+    "previous_ids": [
+      "MLM5214751640"
+    ],
+    "_jbl_remanufacturado": true
   }
 }
