@@ -391,7 +391,7 @@
     "_deleted_reason": "Cannot update item MLM2879334963 [status:closed, has_bids:false]"
   },
   "MLM2879717657": {
-    "real_stock": 10,
+    "real_stock": 0,
     "sku": "PERF-000",
     "label": "KURKY MAISON FRANCIS 70 ML EAU DE PARFUM ORIGINAL",
     "auto_replenish": true,
@@ -621,12 +621,15 @@
     "real_stock": 10,
     "sku": "PERF-011",
     "label": "ARMAF ODYSSEY MEGA MAN LIMITED EDITION EDP 100 ML",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "ARMAF ODYSSEY MEGA MAN LIMITED EDITION EDP 100 ML",
     "previous_ids": [],
     "_perfume": true,
-    "_idx": 11
+    "_idx": 11,
+    "deleted": true,
+    "_deleted_at": 1776798464,
+    "_deleted_reason": "Cannot update item MLM5221330632 [status:under_review, has_bids:false]"
   },
   "MLM2880142457": {
     "real_stock": 10,
@@ -660,23 +663,29 @@
     "real_stock": 10,
     "sku": "PERF-014",
     "label": "PERFUME ORIGINAL ARMAF DELIGHT ISLAND BLISS EDP 10",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "PERFUME ORIGINAL ARMAF DELIGHT ISLAND BLISS EDP 100ML MUJER",
     "previous_ids": [],
     "_perfume": true,
-    "_idx": 14
+    "_idx": 14,
+    "deleted": true,
+    "_deleted_at": 1776798651,
+    "_deleted_reason": "Cannot update item MLM5221356352 [status:under_review, has_bids:false]"
   },
   "MLM5221356358": {
     "real_stock": 10,
     "sku": "PERF-016",
     "label": "JADORE DIOR EAU DE PARFUM 100 ML MUJER ORIGINAL",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "JADORE DIOR EAU DE PARFUM 100 ML MUJER ORIGINAL",
     "previous_ids": [],
     "_perfume": true,
-    "_idx": 16
+    "_idx": 16,
+    "deleted": true,
+    "_deleted_at": 1776798652,
+    "_deleted_reason": "Cannot update item MLM5221356358 [status:under_review, has_bids:false]"
   },
   "MLM5221330656": {
     "real_stock": 10,
@@ -718,12 +727,15 @@
     "real_stock": 10,
     "sku": "PERF-023",
     "label": "CLUB DE NUIT MALEKA EDP ARMAF 105ML ORIGINAL MUJER",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "CLUB DE NUIT MALEKA EDP ARMAF 105ML ORIGINAL MUJER LUJO",
     "previous_ids": [],
     "_perfume": true,
-    "_idx": 23
+    "_idx": 23,
+    "deleted": true,
+    "_deleted_at": 1776798354,
+    "_deleted_reason": "Cannot update item MLM5221356390 [status:under_review, has_bids:false]"
   },
   "MLM5221356396": {
     "real_stock": 10,
@@ -897,23 +909,29 @@
     "real_stock": 10,
     "sku": "PERF-027",
     "label": "PERFUME ORIGINAL DIOR SAUVAGE EAU DE PARFUM 100ML ",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "PERFUME ORIGINAL DIOR SAUVAGE EAU DE PARFUM 100ML HOMBRE",
     "previous_ids": [],
     "_perfume": true,
-    "_idx": 27
+    "_idx": 27,
+    "deleted": true,
+    "_deleted_at": 1776798356,
+    "_deleted_reason": "Cannot update item MLM5221358592 [status:under_review, has_bids:false]"
   },
   "MLM5221332874": {
     "real_stock": 10,
     "sku": "PERF-030",
     "label": "PERFUME SAUVAGE EAU FORTE 100 MI HOMBRE CíTRICO AM",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "PERFUME SAUVAGE EAU FORTE 100 MI HOMBRE CíTRICO AMADERADO",
     "previous_ids": [],
     "_perfume": true,
-    "_idx": 30
+    "_idx": 30,
+    "deleted": true,
+    "_deleted_at": 1776798693,
+    "_deleted_reason": "Cannot update item MLM5221332874 [status:under_review, has_bids:false]"
   },
   "MLM5221358608": {
     "real_stock": 10,
@@ -980,11 +998,14 @@
     "real_stock": 30,
     "sku": "AUTO-687404",
     "label": "Paco Rabanne Million Gold For Her Edp Para Mujer 90 Ml - $999",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "Paco Rabanne Million Gold For Her Edp Para Mujer 90 Ml",
     "previous_ids": [],
-    "_auto_discovered": true
+    "_auto_discovered": true,
+    "deleted": true,
+    "_deleted_at": 1776798422,
+    "_deleted_reason": "Cannot update item MLM5220687404 [status:under_review, has_bids:false]"
   },
   "MLM2880144795": {
     "real_stock": 30,
@@ -1152,7 +1173,10 @@
     "previous_ids": [
       "MLM5220679640"
     ],
-    "_jbl_remanufacturado": true
+    "_jbl_remanufacturado": true,
+    "deleted": true,
+    "_deleted_at": 1776798358,
+    "_deleted_reason": "It's not possible to relist an item that has been already deleted. [MLM2880493937 deleted]"
   },
   "MLM2880426893": {
     "real_stock": 30,
@@ -1201,5 +1225,15 @@
       "MLM2879385901"
     ],
     "_jbl_remanufacturado": true
+  },
+  "MLM2880579539": {
+    "real_stock": 30,
+    "sku": "AUTO-579539",
+    "label": "Bocina Bluetooth Jbl Clip 5 Portatil Negra Reacondicionado - $759",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "seo_title": "Bocina Bluetooth Jbl Clip 5 Portatil Negra Reacondicionado",
+    "previous_ids": [],
+    "_auto_discovered": true
   }
 }
