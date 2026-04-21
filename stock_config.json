@@ -131,19 +131,6 @@
     "_deleted_at": 1776661649,
     "_deleted_reason": "It's not possible to relist an item that has been already deleted. [MLM2876026339 deleted]"
   },
-  "MLM5213157164": {
-    "real_stock": 47,
-    "sku": "JBL-CHG6-SQUAD-001",
-    "label": "JBL Charge 6 Camuflaje Usado - $499",
-    "auto_replenish": true,
-    "replenish_quantity": 1,
-    "previous_ids": [
-      "MLM5209619970",
-      "MLM2875349051",
-      "MLM2875956195"
-    ],
-    "seo_title": "Bocina BT JBL Charge 6 Portatil Camuflaje Original Usada"
-  },
   "MLM2876033189": {
     "real_stock": 46,
     "sku": "JBL-GO4-CAMO-001",
@@ -334,5 +321,19 @@
       "MLM2876273213"
     ],
     "_auto_discovered": true
+  },
+  "MLM5218019478": {
+    "real_stock": 46,
+    "sku": "JBL-CHG6-SQUAD-001",
+    "label": "JBL Charge 6 Camuflaje Usado - $499",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "previous_ids": [
+      "MLM5209619970",
+      "MLM2875349051",
+      "MLM2875956195",
+      "MLM5213157164"
+    ],
+    "seo_title": "Bocina BT JBL Charge 6 Portatil Camuflaje Original Usada"
   }
 }
