@@ -243,7 +243,10 @@
       "MLM2875891653",
       "MLM5213304088"
     ],
-    "seo_title": "Bocina BT JBL Go 4 Portatil Azul Marino Original Usada"
+    "seo_title": "Bocina BT JBL Go 4 Portatil Azul Marino Original Usada",
+    "deleted": true,
+    "_deleted_at": 1776778039,
+    "_deleted_reason": "It's not possible to relist an item that has been already deleted. [MLM2877475987 deleted]"
   },
   "MLM2877711851": {
     "real_stock": 30,
@@ -339,7 +342,10 @@
     "previous_ids": [
       "MLM5213612190"
     ],
-    "_auto_discovered": true
+    "_auto_discovered": true,
+    "deleted": true,
+    "_deleted_at": 1776778041,
+    "_deleted_reason": "It's not possible to relist an item that has been already deleted. [MLM5218321152 deleted]"
   },
   "MLM5220679640": {
     "real_stock": 46,
@@ -359,12 +365,15 @@
     "real_stock": 10,
     "sku": "PERF-001",
     "label": "RABANNE 1 MILLION GOLD INTENSE EDP HOMBRE 100ML OR",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "RABANNE 1 MILLION GOLD INTENSE EDP HOMBRE 100ML ORIGINAL",
     "previous_ids": [],
     "_perfume": true,
-    "_idx": 1
+    "_idx": 1,
+    "deleted": true,
+    "_deleted_at": 1776778042,
+    "_deleted_reason": "Cannot update item MLM2879334963 [status:closed, has_bids:false]"
   },
   "MLM2879717657": {
     "real_stock": 10,
@@ -414,12 +423,15 @@
     "real_stock": 10,
     "sku": "PERF-005",
     "label": "ROSE AMIRA GUERLAIN EAU DE PARFUM 125 ML ORIGINAL",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "ROSE AMIRA GUERLAIN EAU DE PARFUM 125 ML ORIGINAL",
     "previous_ids": [],
     "_perfume": true,
-    "_idx": 5
+    "_idx": 5,
+    "deleted": true,
+    "_deleted_at": 1776778170,
+    "_deleted_reason": "Cannot update item MLM2879387291 [status:under_review, has_bids:false]"
   },
   "MLM2879335659": {
     "real_stock": 10,
@@ -464,5 +476,35 @@
     "previous_ids": [],
     "_perfume": true,
     "_idx": 9
+  },
+  "MLM2879717237": {
+    "real_stock": 30,
+    "sku": "AUTO-717237",
+    "label": "Bocina Bt Jbl Go 4 Portatil Azul Marino Original Usada - $299",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "seo_title": "Bocina Bt Jbl Go 4 Portatil Azul Marino Original Usada",
+    "previous_ids": [],
+    "_auto_discovered": true
+  },
+  "MLM2879716551": {
+    "real_stock": 30,
+    "sku": "AUTO-716551",
+    "label": "Perfume Billie Eilish Eilish Eau Parfum 100ml Mujer Original - $999",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "seo_title": "Perfume Billie Eilish Eilish Eau Parfum 100ml Mujer Original",
+    "previous_ids": [],
+    "_auto_discovered": true
+  },
+  "MLM2879385901": {
+    "real_stock": 30,
+    "sku": "AUTO-385901",
+    "label": "Bocina Bluetooth Jbl Charge 6 Portatil Roja Original Usada - $499",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "seo_title": "Bocina Bluetooth Jbl Charge 6 Portatil Roja Original Usada",
+    "previous_ids": [],
+    "_auto_discovered": true
   }
 }
