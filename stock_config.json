@@ -217,7 +217,10 @@
     "previous_ids": [
       "MLM5213158476"
     ],
-    "_auto_discovered": true
+    "_auto_discovered": true,
+    "deleted": true,
+    "_deleted_at": 1776785673,
+    "_deleted_reason": "It's not possible to relist an item that has been already deleted. [MLM5213557568 deleted]"
   },
   "MLM5214751640": {
     "real_stock": 29,
@@ -392,12 +395,15 @@
     "real_stock": 10,
     "sku": "PERF-002",
     "label": "PERFUME ORIGINAL BABY DIOR BONNE ÉTOILE EDP 100ML ",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "PERFUME ORIGINAL BABY DIOR BONNE ÉTOILE EDP 100ML PREMIUM",
     "previous_ids": [],
     "_perfume": true,
-    "_idx": 2
+    "_idx": 2,
+    "deleted": true,
+    "_deleted_at": 1776785675,
+    "_deleted_reason": "Cannot update item MLM5220681982 [status:under_review, has_bids:false]"
   },
   "MLM2879717667": {
     "real_stock": 10,
@@ -807,34 +813,43 @@
     "real_stock": 10,
     "sku": "PERF-035",
     "label": "PACO RABANNE MILLION GOLD FOR HER EDP PARA MUJER 9",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "PACO RABANNE MILLION GOLD FOR HER EDP PARA MUJER 90 ML",
     "previous_ids": [],
     "_perfume": true,
-    "_idx": 35
+    "_idx": 35,
+    "deleted": true,
+    "_deleted_at": 1776785680,
+    "_deleted_reason": "Cannot update item MLM5221767078 [status:under_review, has_bids:false]"
   },
   "MLM5221767374": {
     "real_stock": 10,
     "sku": "PERF-019",
     "label": "ARMAF CLUB DE NUIT ICONIC EAU DE PARFUM",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "ARMAF CLUB DE NUIT ICONIC EAU DE PARFUM",
     "previous_ids": [],
     "_perfume": true,
-    "_idx": 19
+    "_idx": 19,
+    "deleted": true,
+    "_deleted_at": 1776785681,
+    "_deleted_reason": "Cannot update item MLM5221767374 [status:under_review, has_bids:false]"
   },
   "MLM5221767386": {
     "real_stock": 10,
     "sku": "PERF-022",
     "label": "ARMAF THE LIONS CLUB RUGIR EDP 100ML HOMBRE ORIGIN",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "ARMAF THE LIONS CLUB RUGIR EDP 100ML HOMBRE ORIGINAL",
     "previous_ids": [],
     "_perfume": true,
-    "_idx": 22
+    "_idx": 22,
+    "deleted": true,
+    "_deleted_at": 1776785682,
+    "_deleted_reason": "Cannot update item MLM5221767386 [status:under_review, has_bids:false]"
   },
   "MLM5221358592": {
     "real_stock": 10,
@@ -895,15 +910,18 @@
     "real_stock": 10,
     "sku": "PERF-037",
     "label": "JEAN PAUL GAULTIER LE BEAU EDT HOMBRE 125 ML",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "JEAN PAUL GAULTIER LE BEAU EDT HOMBRE 125 ML",
     "previous_ids": [],
     "_perfume": true,
-    "_idx": 37
+    "_idx": 37,
+    "deleted": true,
+    "_deleted_at": 1776785714,
+    "_deleted_reason": "Cannot update item MLM5221767442 [status:under_review, has_bids:false]"
   },
   "MLM2880144815": {
-    "real_stock": 10,
+    "real_stock": 0,
     "sku": "PERF-039",
     "label": "PERFUME ORIGINAL CARTIER LA PANTHERE EDP 100ML MUJ",
     "auto_replenish": true,
@@ -912,5 +930,25 @@
     "previous_ids": [],
     "_perfume": true,
     "_idx": 39
+  },
+  "MLM5220687404": {
+    "real_stock": 30,
+    "sku": "AUTO-687404",
+    "label": "Paco Rabanne Million Gold For Her Edp Para Mujer 90 Ml - $999",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "seo_title": "Paco Rabanne Million Gold For Her Edp Para Mujer 90 Ml",
+    "previous_ids": [],
+    "_auto_discovered": true
+  },
+  "MLM2880144795": {
+    "real_stock": 30,
+    "sku": "AUTO-144795",
+    "label": "Bocina Bluetooth Jbl Flip 7 Portatil Morada Original Usada - $399",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "seo_title": "Bocina Bluetooth Jbl Flip 7 Portatil Morada Original Usada",
+    "previous_ids": [],
+    "_auto_discovered": true
   }
 }
