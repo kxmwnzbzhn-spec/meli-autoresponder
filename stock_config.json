@@ -207,16 +207,6 @@
     "_deleted_at": 1745169600,
     "_deleted_reason": "MELI: forbidden+deleted, not_modifiable"
   },
-  "MLM5213315364": {
-    "real_stock": 30,
-    "sku": "AUTO-315364",
-    "label": "Bocina Bluetooth Jbl Flip 7 Portatil Negra Original Usada - $399",
-    "auto_replenish": true,
-    "replenish_quantity": 1,
-    "seo_title": "Bocina Bluetooth Jbl Flip 7 Portatil Negra Original Usada",
-    "previous_ids": [],
-    "_auto_discovered": true
-  },
   "MLM5213557568": {
     "real_stock": 29,
     "sku": "AUTO-158476",
@@ -348,6 +338,18 @@
     "replenish_quantity": 1,
     "seo_title": "Bocina Bluetooth Jbl Flip 7 Portatil Roja Original Usada",
     "previous_ids": [],
+    "_auto_discovered": true
+  },
+  "MLM2878381981": {
+    "real_stock": 29,
+    "sku": "AUTO-315364",
+    "label": "Bocina Bluetooth Jbl Flip 7 Portatil Negra Original Usada - $399",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "seo_title": "Bocina Bluetooth Jbl Flip 7 Portatil Negra Original Usada",
+    "previous_ids": [
+      "MLM5213315364"
+    ],
     "_auto_discovered": true
   }
 }
