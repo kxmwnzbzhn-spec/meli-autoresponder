@@ -439,23 +439,29 @@
     "real_stock": 10,
     "sku": "PERF-007",
     "label": "ARMAF ODYSSEY CANDEE EDP SPRAY MUJER 100ML",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "ARMAF ODYSSEY CANDEE EDP SPRAY MUJER 100ML",
     "previous_ids": [],
     "_perfume": true,
-    "_idx": 7
+    "_idx": 7,
+    "deleted": true,
+    "_deleted_at": 1776783138,
+    "_deleted_reason": "Cannot update item MLM5220682462 [status:under_review, has_bids:false]"
   },
   "MLM5220682468": {
     "real_stock": 10,
     "sku": "PERF-008",
     "label": "ARMAF ODYSSEY HOMME WHITE EDITION EDP 100 ML HOMBR",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "ARMAF ODYSSEY HOMME WHITE EDITION EDP 100 ML HOMBRE",
     "previous_ids": [],
     "_perfume": true,
-    "_idx": 8
+    "_idx": 8,
+    "deleted": true,
+    "_deleted_at": 1776783139,
+    "_deleted_reason": "Cannot update item MLM5220682468 [status:under_review, has_bids:false]"
   },
   "MLM2879718161": {
     "real_stock": 10,
@@ -518,12 +524,15 @@
     "real_stock": 10,
     "sku": "PERF-001",
     "label": "RABANNE 1 MILLION GOLD INTENSE EDP HOMBRE 100ML OR",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "RABANNE 1 MILLION GOLD INTENSE EDP HOMBRE 100ML ORIGINAL",
     "previous_ids": [],
     "_perfume": true,
-    "_idx": 1
+    "_idx": 1,
+    "deleted": true,
+    "_deleted_at": 1776783140,
+    "_deleted_reason": "Cannot update item MLM5221355572 [status:under_review, has_bids:false]"
   },
   "MLM2879724127": {
     "real_stock": 10,
@@ -537,7 +546,7 @@
     "_idx": 3
   },
   "MLM5221356312": {
-    "real_stock": 10,
+    "real_stock": 0,
     "sku": "PERF-005",
     "label": "ROSE AMIRA GUERLAIN EAU DE PARFUM 125 ML ORIGINAL",
     "auto_replenish": true,
@@ -562,12 +571,15 @@
     "real_stock": 10,
     "sku": "PERF-010",
     "label": "PERFUME ORIGINAL ARMAF ODYSSEY AQUA MEN EDP 100ML ",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "PERFUME ORIGINAL ARMAF ODYSSEY AQUA MEN EDP 100ML IMPORTADO",
     "previous_ids": [],
     "_perfume": true,
-    "_idx": 10
+    "_idx": 10,
+    "deleted": true,
+    "_deleted_at": 1776783389,
+    "_deleted_reason": "Cannot update item MLM2880142439 [status:under_review, has_bids:false]"
   },
   "MLM5221330632": {
     "real_stock": 10,
@@ -639,12 +651,15 @@
     "real_stock": 10,
     "sku": "PERF-018",
     "label": "MISS DIOR BLOOMING BOUQUET 100 ML EAU DE TOILETTE",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "MISS DIOR BLOOMING BOUQUET 100 ML EAU DE TOILETTE",
     "previous_ids": [],
     "_perfume": true,
-    "_idx": 18
+    "_idx": 18,
+    "deleted": true,
+    "_deleted_at": 1776783348,
+    "_deleted_reason": "Cannot update item MLM2879724209 [status:under_review, has_bids:false]"
   },
   "MLM5221330674": {
     "real_stock": 10,
@@ -683,23 +698,29 @@
     "real_stock": 10,
     "sku": "PERF-025",
     "label": "OPULENT SHAIK SAPPHIRE EAU DE PARFUM",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "OPULENT SHAIK SAPPHIRE EAU DE PARFUM",
     "previous_ids": [],
     "_perfume": true,
-    "_idx": 25
+    "_idx": 25,
+    "deleted": true,
+    "_deleted_at": 1776783369,
+    "_deleted_reason": "Cannot update item MLM2880142515 [status:under_review, has_bids:false]"
   },
   "MLM2880142523": {
     "real_stock": 10,
     "sku": "PERF-026",
     "label": "PERFUME ORIGINAL ANGEL NOVA FRUITTé MUGLER EDP 100",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "PERFUME ORIGINAL ANGEL NOVA FRUITTé MUGLER EDP 100ML MUJER",
     "previous_ids": [],
     "_perfume": true,
-    "_idx": 26
+    "_idx": 26,
+    "deleted": true,
+    "_deleted_at": 1776783411,
+    "_deleted_reason": "Cannot update item MLM2880142523 [status:under_review, has_bids:false]"
   },
   "MLM5221356410": {
     "real_stock": 10,
@@ -716,23 +737,29 @@
     "real_stock": 10,
     "sku": "PERF-029",
     "label": "ARMAF ODYSSEY DUBAI CHOCOLAT EAU DE PARFUM 100 ML ",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "ARMAF ODYSSEY DUBAI CHOCOLAT EAU DE PARFUM 100 ML ORIGINAL",
     "previous_ids": [],
     "_perfume": true,
-    "_idx": 29
+    "_idx": 29,
+    "deleted": true,
+    "_deleted_at": 1776783390,
+    "_deleted_reason": "Cannot update item MLM5221330712 [status:under_review, has_bids:false]"
   },
   "MLM5221330720": {
     "real_stock": 10,
     "sku": "PERF-031",
     "label": "PERFUME ARMAF ODYSSEY SPECTRA HOMBRE 100ML EAU DE ",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "PERFUME ARMAF ODYSSEY SPECTRA HOMBRE 100ML EAU DE PARFUM",
     "previous_ids": [],
     "_perfume": true,
-    "_idx": 31
+    "_idx": 31,
+    "deleted": true,
+    "_deleted_at": 1776783411,
+    "_deleted_reason": "Cannot update item MLM5221330720 [status:under_review, has_bids:false]"
   },
   "MLM5221330734": {
     "real_stock": 10,
@@ -755,5 +782,25 @@
     "previous_ids": [],
     "_perfume": true,
     "_idx": 38
+  },
+  "MLM5221355096": {
+    "real_stock": 30,
+    "sku": "AUTO-355096",
+    "label": "Perfume Game Of Spades Wildcard Parfum 100ml - $499",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "seo_title": "Perfume Game Of Spades Wildcard Parfum 100ml",
+    "previous_ids": [],
+    "_auto_discovered": true
+  },
+  "MLM5221328952": {
+    "real_stock": 30,
+    "sku": "AUTO-328952",
+    "label": "Perfume Original Marshmallow Blush Edp 100ml Mujer Importado - $499",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "seo_title": "Perfume Original Marshmallow Blush Edp 100ml Mujer Importado",
+    "previous_ids": [],
+    "_auto_discovered": true
   }
 }
