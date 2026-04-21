@@ -409,5 +409,60 @@
     "previous_ids": [],
     "_perfume": true,
     "_idx": 4
+  },
+  "MLM2879387291": {
+    "real_stock": 10,
+    "sku": "PERF-005",
+    "label": "ROSE AMIRA GUERLAIN EAU DE PARFUM 125 ML ORIGINAL",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "seo_title": "ROSE AMIRA GUERLAIN EAU DE PARFUM 125 ML ORIGINAL",
+    "previous_ids": [],
+    "_perfume": true,
+    "_idx": 5
+  },
+  "MLM2879335659": {
+    "real_stock": 10,
+    "sku": "PERF-006",
+    "label": "BACCARAT ROUGE 540 EXTRAIT 70ML MAISON FRANCIS KUR",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "seo_title": "BACCARAT ROUGE 540 EXTRAIT 70ML MAISON FRANCIS KURKDJIAN",
+    "previous_ids": [],
+    "_perfume": true,
+    "_idx": 6
+  },
+  "MLM5220682462": {
+    "real_stock": 10,
+    "sku": "PERF-007",
+    "label": "ARMAF ODYSSEY CANDEE EDP SPRAY MUJER 100ML",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "seo_title": "ARMAF ODYSSEY CANDEE EDP SPRAY MUJER 100ML",
+    "previous_ids": [],
+    "_perfume": true,
+    "_idx": 7
+  },
+  "MLM5220682468": {
+    "real_stock": 10,
+    "sku": "PERF-008",
+    "label": "ARMAF ODYSSEY HOMME WHITE EDITION EDP 100 ML HOMBR",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "seo_title": "ARMAF ODYSSEY HOMME WHITE EDITION EDP 100 ML HOMBRE",
+    "previous_ids": [],
+    "_perfume": true,
+    "_idx": 8
+  },
+  "MLM2879718161": {
+    "real_stock": 10,
+    "sku": "PERF-009",
+    "label": "ODYSSEY MANDARIN SKY ARMAF PERFUME HOMBRE PARFUM 1",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "seo_title": "ODYSSEY MANDARIN SKY ARMAF PERFUME HOMBRE PARFUM 100ML",
+    "previous_ids": [],
+    "_perfume": true,
+    "_idx": 9
   }
 }
