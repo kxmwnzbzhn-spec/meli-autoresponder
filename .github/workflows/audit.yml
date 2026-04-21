@@ -1,0 +1,27 @@
+name: audit-nuevas
+on: {workflow_dispatch: {}}
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests -q
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+        run: |
+          python <<'PY'
+          import os, requests, json, time
+          def tok():
+              r=requests.post("https://api.mercadolibre.com/oauth/token",data={"grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],"client_secret":os.environ["MELI_APP_SECRET"],"refresh_token":os.environ["MELI_REFRESH_TOKEN"]},timeout=20).json()
+              return r["access_token"]
+          T=tok(); H={"Authorization":f"Bearer {T}"}
+          IDS=["MLM5222936976","MLM5222982996","MLM5222983008","MLM2880754185","MLM2880766021","MLM2880754209","MLM2880766045","MLM5222983050","MLM2880754229","MLM2880722719","MLM2880766083","MLM2880766097","MLM5222983106","MLM5222983110","MLM2880766117","MLM2880754279","MLM2880766137","MLM2880754295","MLM5222983148","MLM2880754323"]
+          res=requests.get(f"https://api.mercadolibre.com/items?ids={','.join(IDS)}&attributes=id,title,status,sub_status,catalog_product_id,price",headers=H,timeout=20).json()
+          for x in res:
+              b=x.get("body",{})
+              print(f"{b.get('id')} | {b.get('status')}/{b.get('sub_status')} | cpid={b.get('catalog_product_id')} | ${b.get('price')} | {b.get('title')}")
+          PY
