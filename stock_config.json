@@ -365,5 +365,49 @@
     "previous_ids": [],
     "_perfume": true,
     "_idx": 1
+  },
+  "MLM2879717657": {
+    "real_stock": 10,
+    "sku": "PERF-000",
+    "label": "KURKY MAISON FRANCIS 70 ML EAU DE PARFUM ORIGINAL",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "seo_title": "KURKY MAISON FRANCIS 70 ML EAU DE PARFUM ORIGINAL",
+    "previous_ids": [],
+    "_perfume": true,
+    "_idx": 0
+  },
+  "MLM2879386811": {
+    "real_stock": 10,
+    "sku": "PERF-001",
+    "label": "RABANNE 1 MILLION GOLD INTENSE EDP HOMBRE 100ML OR",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "seo_title": "RABANNE 1 MILLION GOLD INTENSE EDP HOMBRE 100ML ORIGINAL",
+    "previous_ids": [],
+    "_perfume": true,
+    "_idx": 1
+  },
+  "MLM5220681982": {
+    "real_stock": 10,
+    "sku": "PERF-002",
+    "label": "PERFUME ORIGINAL BABY DIOR BONNE ÉTOILE EDP 100ML ",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "seo_title": "PERFUME ORIGINAL BABY DIOR BONNE ÉTOILE EDP 100ML PREMIUM",
+    "previous_ids": [],
+    "_perfume": true,
+    "_idx": 2
+  },
+  "MLM2879717667": {
+    "real_stock": 10,
+    "sku": "PERF-004",
+    "label": "GUERLAIN CUIR INTENSE EAU DE PARFUM 125 ML ORIGINA",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "seo_title": "GUERLAIN CUIR INTENSE EAU DE PARFUM 125 ML ORIGINAL",
+    "previous_ids": [],
+    "_perfume": true,
+    "_idx": 4
   }
 }
