@@ -1,0 +1,88 @@
+name: Update JBL descriptions with OEM
+on: {workflow_dispatch: {}}
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          python3 <<'PY'
+          import os, json, requests, time
+          def get_tok():
+              for _ in range(3):
+                  r = requests.post("https://api.mercadolibre.com/oauth/token", data={
+                      "grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],
+                      "client_secret":os.environ["MELI_APP_SECRET"],"refresh_token":os.environ["MELI_REFRESH_TOKEN"]
+                  }, timeout=20)
+                  b = r.json()
+                  if r.status_code == 200 and "access_token" in b: return b["access_token"]
+                  time.sleep(5)
+              raise Exception("auth")
+          tok = get_tok(); h = {"Authorization":f"Bearer {tok}","Content-Type":"application/json"}
+          r = requests.get("https://api.mercadolibre.com/users/me", headers=h, timeout=15)
+          sid = r.json()["id"]
+          
+          # Find all JBL items (active, paused, review)
+          jbl_items = []
+          for st in ("active","paused","under_review"):
+              r = requests.get(f"https://api.mercadolibre.com/users/{sid}/items/search?status={st}&limit=100", headers=h, timeout=15)
+              for iid in r.json().get("results",[]):
+                  r2 = requests.get(f"https://api.mercadolibre.com/items/{iid}?attributes=id,title,status", headers=h, timeout=8)
+                  it = r2.json()
+                  if "jbl" in (it.get("title","")).lower():
+                      jbl_items.append((iid, it.get("title",""), it.get("status","")))
+          print(f"JBL items: {len(jbl_items)}")
+          
+          ok = 0; err = 0
+          for iid, title, status in jbl_items:
+              # Build new description with OEM disclosure
+              desc = (
+                  f"{title}\n\n"
+                  f"IMPORTANTE: Producto OEM (Original Equipment Manufacturer)\n"
+                  f"Fabricado por los mismos proveedores de JBL, presentacion genericos sin empaque retail.\n\n"
+                  f"CARACTERISTICAS:\n"
+                  f"- Bocina bluetooth portatil\n"
+                  f"- Sonido potente y calidad similar al original\n"
+                  f"- Resistente al agua\n"
+                  f"- Bateria recargable de larga duracion\n"
+                  f"- Conectividad bluetooth con cualquier dispositivo\n\n"
+                  f"INCLUYE:\n"
+                  f"- Bocina OEM\n"
+                  f"- Cable de carga USB\n\n"
+                  f"GARANTIAS:\n"
+                  f"- 30 dias de garantia del vendedor\n"
+                  f"- Envio el mismo dia antes de 3pm\n"
+                  f"- Producto probado antes de enviar\n\n"
+                  f"NOTA: Este producto es OEM, no es el producto de retail oficial de JBL. "
+                  f"Funcionalidad y calidad 100% verificadas. Se vende como tal.\n\n"
+                  f"- Sonix Mx"
+              )
+              try:
+                  # Try PUT first (updates existing)
+                  r = requests.put(f"https://api.mercadolibre.com/items/{iid}/description", headers=h,
+                      json={"plain_text": desc}, timeout=15)
+                  if r.status_code == 200:
+                      print(f"  ✓ {iid} | {title[:50]}")
+                      ok += 1
+                  else:
+                      print(f"  ✗ {iid}: {r.status_code} {r.text[:120]}")
+                      err += 1
+              except Exception as e:
+                  print(f"  ✗ {iid}: {e}")
+                  err += 1
+              time.sleep(1)
+          
+          print(f"\n=== RESUMEN === OK:{ok} ERR:{err}")
+          tt=os.environ.get("TELEGRAM_BOT_TOKEN"); tc=os.environ.get("TELEGRAM_CHAT_ID")
+          if tt and tc:
+              requests.post(f"https://api.telegram.org/bot{tt}/sendMessage", json={"chat_id":tc,"parse_mode":"Markdown",
+                  "text":f"🔄 *JBL OEM update*\n\nActualizadas: *{ok}/{len(jbl_items)}*\nErr: {err}\n\nDescripción marca producto como OEM."})
+          PY
