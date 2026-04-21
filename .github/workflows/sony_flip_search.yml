@@ -1,0 +1,26 @@
+name: sony-flip-search
+on: {workflow_dispatch: {}}
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests -q
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+        run: |
+          python <<'PY'
+          import os,requests,time
+          r=requests.post("https://api.mercadolibre.com/oauth/token",data={"grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],"client_secret":os.environ["MELI_APP_SECRET"],"refresh_token":os.environ["MELI_REFRESH_TOKEN"]}).json()
+          H={"Authorization":f"Bearer {r['access_token']}"}
+          for q in ["Sony SRS-XB100 negro","Sony SRS-XB100 black","Sony SRS XB100 B","SRS-XB100 black bluetooth","Sony SRS-XB100","JBL Flip 7 Purple","JBL Flip 7 Violet","JBL Flip 7 Lila","JBL Flip 7 Pink","JBL Flip 7 Sand"]:
+              rs=requests.get(f"https://api.mercadolibre.com/products/search?status=active&site_id=MLM&q={q}",headers=H,timeout=15).json()
+              print(f"\n=== {q} ===")
+              for it in rs.get("results",[])[:8]:
+                  print(f"  {it.get('id')} | {it.get('name')}")
+              time.sleep(0.3)
+          PY
