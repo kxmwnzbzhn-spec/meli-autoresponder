@@ -1,0 +1,52 @@
+name: Sales quick check
+on: {workflow_dispatch: {}}
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+        run: |
+          python3 <<'PY'
+          import os, json, requests
+          from datetime import datetime, timedelta, timezone
+          r = requests.post("https://api.mercadolibre.com/oauth/token", data={
+              "grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],
+              "client_secret":os.environ["MELI_APP_SECRET"],
+              "refresh_token":os.environ["MELI_REFRESH_TOKEN"]
+          }, timeout=20)
+          tok = r.json()["access_token"]; h = {"Authorization":f"Bearer {tok}"}
+          r = requests.get("https://api.mercadolibre.com/users/me", headers=h, timeout=15)
+          sid = r.json()["id"]
+          
+          # Orders last 3h
+          from_3h = (datetime.now(timezone.utc) - timedelta(hours=3)).strftime("%Y-%m-%dT%H:%M:%S.000Z")
+          r = requests.get(f"https://api.mercadolibre.com/orders/search?seller={sid}&order.date_created.from={from_3h}&sort=date_desc&limit=50", headers=h, timeout=15)
+          orders = r.json().get("results", [])
+          print(f"Ventas ultimas 3h: {len(orders)} | ${sum(float(x.get('total_amount',0)) for x in orders):,.0f}")
+          for o in orders:
+              dc = o.get("date_created","")[:19]
+              amt = o.get("total_amount",0)
+              buyer = (o.get("buyer") or {}).get("nickname","?")
+              items = ",".join(f"{oi.get('item',{}).get('title','?')[:40]}" for oi in o.get("order_items",[]))
+              print(f"  [{dc}] ${amt:.0f} | {buyer} | {items}")
+          
+          # Comparar: hoy total vs esta misma hora ayer
+          now = datetime.now(timezone.utc)
+          today_start = now.replace(hour=0,minute=0,second=0)
+          yesterday_start = today_start - timedelta(days=1)
+          yesterday_now = now - timedelta(days=1)
+          
+          r = requests.get(f"https://api.mercadolibre.com/orders/search?seller={sid}&order.date_created.from={today_start.strftime('%Y-%m-%dT%H:%M:%S.000Z')}&limit=50", headers=h, timeout=15)
+          today_orders = r.json().get("results",[])
+          r = requests.get(f"https://api.mercadolibre.com/orders/search?seller={sid}&order.date_created.from={yesterday_start.strftime('%Y-%m-%dT%H:%M:%S.000Z')}&order.date_created.to={yesterday_now.strftime('%Y-%m-%dT%H:%M:%S.000Z')}&limit=50", headers=h, timeout=15)
+          yest_orders = r.json().get("results",[])
+          
+          print(f"\nHoy (0h-ahora): {len(today_orders)} ords | ${sum(float(x.get('total_amount',0)) for x in today_orders):,.0f}")
+          print(f"Ayer misma ventana: {len(yest_orders)} ords | ${sum(float(x.get('total_amount',0)) for x in yest_orders):,.0f}")
+          PY
