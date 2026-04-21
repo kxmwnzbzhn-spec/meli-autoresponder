@@ -1,0 +1,70 @@
+name: Probe Ads POST
+on: {workflow_dispatch: {}}
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+        run: |
+          python3 <<'PY'
+          import os, requests, time, json
+          def get_tok():
+              for _ in range(3):
+                  r = requests.post("https://api.mercadolibre.com/oauth/token", data={
+                      "grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],
+                      "client_secret":os.environ["MELI_APP_SECRET"],"refresh_token":os.environ["MELI_REFRESH_TOKEN"]
+                  }, timeout=20)
+                  b = r.json()
+                  if r.status_code == 200 and "access_token" in b: return b["access_token"]
+                  time.sleep(5)
+              raise Exception("auth")
+          tok = get_tok(); h = {"Authorization":f"Bearer {tok}","Content-Type":"application/json"}
+          
+          # Discover advertiser_id via GET
+          paths_to_try = [
+              "/advertising/advertisers/me",
+              "/advertising/product_ads/advertisers",
+              "/advertising/product_ads/users/me",
+              "/advertising/product_ads/v2/advertisers",
+              "/advertising/product_ads/catalog/2681696373",
+              "/advertising/advertiser_settings",
+              "/advertising/campaigns",
+              "/advertising/product_ads/campaigns/status/active",
+              "/marketplace/advertisers/2681696373",
+          ]
+          print("=== DISCOVER ===")
+          for p in paths_to_try:
+              r = requests.get(f"https://api.mercadolibre.com{p}", headers=h, timeout=10)
+              if r.status_code not in (404,):
+                  print(f"  [{r.status_code}] {p}")
+                  print(f"    {r.text[:250]}")
+          
+          # Try POST with minimal body to discover required fields
+          print("\n=== POST probe (no body) ===")
+          r = requests.post("https://api.mercadolibre.com/advertising/product_ads/campaigns", headers=h, json={}, timeout=15)
+          print(f"[{r.status_code}] {r.text[:400]}")
+          
+          print("\n=== POST with basic campaign ===")
+          bodies = [
+              {"name":"Test","status":"active","budget":40000,"advertiser_id":"2681696373"},
+              {"name":"Test","status":"active","daily_budget":{"amount":400.0,"currency":"MXN"},"advertiser_id":2681696373},
+              {"name":"Test JBL","budget":40000,"advertiser_id":2681696373,"channel":"marketplace","status":"active","objective":"CONVERSION"},
+          ]
+          for b in bodies:
+              r = requests.post("https://api.mercadolibre.com/advertising/product_ads/campaigns", headers=h, json=b, timeout=15)
+              print(f"\n[{r.status_code}] body={json.dumps(b)[:100]}")
+              print(f"  resp: {r.text[:400]}")
+          
+          # Try newer v2 endpoint (Mercado Ads self-service)
+          print("\n=== v2/v3 probe ===")
+          for p in ["/advertising/product_ads/v2/campaigns","/advertising/product_ads/v3/campaigns","/marketplace/advertising/campaigns"]:
+              r = requests.post(f"https://api.mercadolibre.com{p}", headers=h, json={"name":"test"}, timeout=10)
+              print(f"  [{r.status_code}] {p}")
+              print(f"    {r.text[:250]}")
+          PY
