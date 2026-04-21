@@ -179,7 +179,10 @@
     "replenish_quantity": 1,
     "seo_title": "Bocina Bluetooth Jbl Flip 7 Portatil Roja Original Usada",
     "previous_ids": [],
-    "_auto_discovered": true
+    "_auto_discovered": true,
+    "deleted": true,
+    "_deleted_at": 1776740063,
+    "_deleted_reason": "It's not possible to relist an item that has been already deleted. [MLM5213158472 deleted]"
   },
   "MLM2874596985": {
     "real_stock": 30,
@@ -336,5 +339,15 @@
       "MLM5215976922"
     ],
     "seo_title": "Bocina Bluetooth JBL Charge 6 Portatil Azul Original Usada"
+  },
+  "MLM2878305423": {
+    "real_stock": 30,
+    "sku": "AUTO-305423",
+    "label": "Bocina Bluetooth Jbl Flip 7 Portatil Roja Original Usada - $399",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "seo_title": "Bocina Bluetooth Jbl Flip 7 Portatil Roja Original Usada",
+    "previous_ids": [],
+    "_auto_discovered": true
   }
 }
