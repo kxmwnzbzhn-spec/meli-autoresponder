@@ -1,0 +1,67 @@
+name: Promo types probe
+on: {workflow_dispatch: {}}
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+        run: |
+          python3 <<'PY'
+          import os, requests, time, json
+          def get_tok():
+              for _ in range(3):
+                  r = requests.post("https://api.mercadolibre.com/oauth/token", data={
+                      "grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],
+                      "client_secret":os.environ["MELI_APP_SECRET"],"refresh_token":os.environ["MELI_REFRESH_TOKEN"]
+                  }, timeout=20)
+                  b = r.json()
+                  if r.status_code == 200 and "access_token" in b: return b["access_token"]
+                  time.sleep(5)
+              raise Exception("auth")
+          tok = get_tok(); h = {"Authorization":f"Bearer {tok}","Content-Type":"application/json"}
+          
+          test_iid = "MLM2879716551"  # Billie Eilish
+          start = "2026-04-21T15:00:00.000-06:00"
+          finish = "2026-05-11T15:00:00.000-06:00"
+          deal_price = 849
+          
+          # Try POST /seller-promotions/promotions (top level) with different type names
+          print("=== POST /seller-promotions/promotions ===")
+          for ptype in ["DEAL","SMART","MARKETPLACE_CAMPAIGN","PRE_NEGOTIATED","VOLUME","PRICE_DISCOUNT","MP_DEAL","MANUAL_DEAL"]:
+              body = {"type":ptype,"item_id":test_iid,"deal_price":deal_price,
+                      "start_date":start,"finish_date":finish,"name":"test"}
+              r = requests.post(f"https://api.mercadolibre.com/seller-promotions/promotions?app_version=v2", headers=h, json=body, timeout=10)
+              if "Invalid promotion type" not in r.text:
+                  print(f"  [{r.status_code}] type={ptype} → {r.text[:250]}")
+          
+          # Try different payload shapes on /items/{iid}
+          print("\n=== PUT /items/{iid} variants ===")
+          variants = [
+              {"deal_price":deal_price,"status":"started"},
+              {"offer_price":deal_price,"status":"started"},
+              {"deal_price":deal_price,"status":"started","start_date":start,"finish_date":finish},
+              {"price":deal_price,"start_date":start,"finish_date":finish},
+              {"deal_price":deal_price,"start_date":start,"finish_date":finish,"discount_percentage":15},
+              {"discount_percentage":15,"start_date":start,"finish_date":finish},
+          ]
+          for v in variants:
+              r = requests.put(f"https://api.mercadolibre.com/seller-promotions/items/{test_iid}?app_version=v2", headers=h, json=v, timeout=10)
+              if r.status_code not in (400,) or "Invalid promotion type" not in r.text:
+                  print(f"\n  [{r.status_code}] body={json.dumps(v)[:80]}")
+                  print(f"     {r.text[:250]}")
+          
+          # Explore more
+          print("\n=== explore other endpoints ===")
+          for p in [f"/seller-promotions/items/{test_iid}/offers?app_version=v2",
+                    f"/seller-promotions/items/{test_iid}/candidates?app_version=v2",
+                    f"/seller-promotions/promotions/PRICE_DISCOUNT/items/{test_iid}?app_version=v2"]:
+              r = requests.get(f"https://api.mercadolibre.com{p}", headers=h, timeout=8)
+              if r.status_code not in (404,):
+                  print(f"  GET [{r.status_code}] {p}: {r.text[:200]}")
+          PY
