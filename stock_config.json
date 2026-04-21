@@ -937,12 +937,15 @@
     "real_stock": 10,
     "sku": "PERF-032",
     "label": "AL HARAMAIN AMBER OUD GOLD EDP SPRAY 60 ML",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "AL HARAMAIN AMBER OUD GOLD EDP SPRAY 60 ML",
     "previous_ids": [],
     "_perfume": true,
-    "_idx": 32
+    "_idx": 32,
+    "deleted": true,
+    "_deleted_at": 1776801554,
+    "_deleted_reason": "Cannot update item MLM5221358608 [status:under_review, has_bids:false]"
   },
   "MLM5221767428": {
     "real_stock": 10,
