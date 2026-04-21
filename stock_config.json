@@ -602,23 +602,29 @@
     "real_stock": 10,
     "sku": "PERF-012",
     "label": "CHRISTIAN DIOR DUNE EDT 100ML ORIGINAL MUJER PERFU",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "CHRISTIAN DIOR DUNE EDT 100ML ORIGINAL MUJER PERFUME",
     "previous_ids": [],
     "_perfume": true,
-    "_idx": 12
+    "_idx": 12,
+    "deleted": true,
+    "_deleted_at": 1776789883,
+    "_deleted_reason": "Cannot update item MLM2880142457 [status:under_review, has_bids:false]"
   },
   "MLM5221330650": {
     "real_stock": 10,
     "sku": "PERF-013",
     "label": "PERFUME LATTAFA HIS CONFESSION HOMBRE 100 ML EDP",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "PERFUME LATTAFA HIS CONFESSION HOMBRE 100 ML EDP",
     "previous_ids": [],
     "_perfume": true,
-    "_idx": 13
+    "_idx": 13,
+    "deleted": true,
+    "_deleted_at": 1776789883,
+    "_deleted_reason": "Cannot update item MLM5221330650 [status:under_review, has_bids:false]"
   },
   "MLM5221356352": {
     "real_stock": 10,
@@ -693,12 +699,15 @@
     "real_stock": 10,
     "sku": "PERF-024",
     "label": "PERFUME ORIGINAL MARC JACOBS PERFECT ELIXIR EDP 10",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "PERFUME ORIGINAL MARC JACOBS PERFECT ELIXIR EDP 100ML MUJER",
     "previous_ids": [],
     "_perfume": true,
-    "_idx": 24
+    "_idx": 24,
+    "deleted": true,
+    "_deleted_at": 1776789884,
+    "_deleted_reason": "Cannot update item MLM5221356396 [status:under_review, has_bids:false]"
   },
   "MLM2880142515": {
     "real_stock": 10,
@@ -782,12 +791,15 @@
     "real_stock": 10,
     "sku": "PERF-038",
     "label": "JEAN PAUL GAULTIER LE MALE ELIXIR PARFUM 125ML HOM",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "JEAN PAUL GAULTIER LE MALE ELIXIR PARFUM 125ML HOMBRE",
     "previous_ids": [],
     "_perfume": true,
-    "_idx": 38
+    "_idx": 38,
+    "deleted": true,
+    "_deleted_at": 1776789885,
+    "_deleted_reason": "Cannot update item MLM2880142605 [status:under_review, has_bids:false]"
   },
   "MLM5221355096": {
     "real_stock": 30,
@@ -888,12 +900,15 @@
     "real_stock": 10,
     "sku": "PERF-034",
     "label": "OUD ROYAL ARMANI PRIVé 100 ML EAU DE PARFUM ORIGIN",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "OUD ROYAL ARMANI PRIVé 100 ML EAU DE PARFUM ORIGINAL",
     "previous_ids": [],
     "_perfume": true,
-    "_idx": 34
+    "_idx": 34,
+    "deleted": true,
+    "_deleted_at": 1776789886,
+    "_deleted_reason": "Cannot update item MLM5221767428 [status:under_review, has_bids:false]"
   },
   "MLM5221358624": {
     "real_stock": 10,
