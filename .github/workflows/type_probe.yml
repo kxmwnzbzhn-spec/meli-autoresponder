@@ -1,0 +1,49 @@
+name: Type probe with valid dates
+on: {workflow_dispatch: {}}
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+        run: |
+          python3 <<'PY'
+          import os, requests, time, json
+          def get_tok():
+              for _ in range(3):
+                  r = requests.post("https://api.mercadolibre.com/oauth/token", data={
+                      "grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],
+                      "client_secret":os.environ["MELI_APP_SECRET"],"refresh_token":os.environ["MELI_REFRESH_TOKEN"]
+                  }, timeout=20)
+                  b = r.json()
+                  if r.status_code == 200 and "access_token" in b: return b["access_token"]
+                  time.sleep(5)
+              raise Exception("auth")
+          tok = get_tok(); h = {"Authorization":f"Bearer {tok}","Content-Type":"application/json"}
+          
+          start = "2026-04-21T15:30:00"  # local format no TZ
+          finish = "2026-05-11T23:59:59"
+          
+          # Try every type name
+          types = ["DEAL","SMART","MARKETPLACE_CAMPAIGN","PRE_NEGOTIATED","VOLUME","SELLER_CAMPAIGN",
+                   "PRICE_DISCOUNT","MP_DEAL","MANUAL_DEAL","BILLED","LIGHTNING","FLASH","SCHEDULED"]
+          for ptype in types:
+              body = {"type":ptype,"start_date":start,"finish_date":finish}
+              r = requests.post("https://api.mercadolibre.com/seller-promotions/promotions?app_version=v2", headers=h, json=body, timeout=10)
+              # Only print if different than common errors
+              if "Invalid promotion type" not in r.text:
+                  print(f"\n[{r.status_code}] type={ptype} → {r.text[:400]}")
+              else:
+                  print(f"[{r.status_code}] {ptype}: invalid type")
+          
+          # Try with no type field
+          print("\n=== without 'type' field ===")
+          r = requests.post("https://api.mercadolibre.com/seller-promotions/promotions?app_version=v2",
+                            headers=h, json={"start_date":start,"finish_date":finish}, timeout=10)
+          print(f"  [{r.status_code}] {r.text[:400]}")
+          PY
