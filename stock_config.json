@@ -786,12 +786,15 @@
     "real_stock": 10,
     "sku": "PERF-028",
     "label": "MISS DIOR EAU DE PARFUM MUJER",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "MISS DIOR EAU DE PARFUM MUJER",
     "previous_ids": [],
     "_perfume": true,
-    "_idx": 28
+    "_idx": 28,
+    "deleted": true,
+    "_deleted_at": 1776811914,
+    "_deleted_reason": "Cannot update item MLM5221356410 [status:under_review, has_bids:false]"
   },
   "MLM5221330712": {
     "real_stock": 10,
@@ -1349,11 +1352,14 @@
     "real_stock": 30,
     "sku": "AUTO-983110",
     "label": "Bocina Jbl Jbl Go Essential Go Essential Jbl-goesblk Portáti - $449",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "Bocina Jbl Jbl Go Essential Go Essential Jbl-goesblk Portátil Con Bluetooth Waterproof Roja Rojo",
     "previous_ids": [],
-    "_auto_discovered": true
+    "_auto_discovered": true,
+    "deleted": true,
+    "_deleted_at": 1776811916,
+    "_deleted_reason": "Cannot update item MLM5222983110 [status:closed, has_bids:false]"
   },
   "MLM5222983106": {
     "real_stock": 30,
@@ -1372,31 +1378,40 @@
     "real_stock": 30,
     "sku": "AUTO-983050",
     "label": "Bocina Jbl Jbl Clip 5 Jbl Clip 5 Portátil Con Bluetooth Wate - $699",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "Bocina Jbl Jbl Clip 5 Jbl Clip 5 Portátil Con Bluetooth Waterproof Altavoz Jbl Clip 5 Negra",
     "previous_ids": [],
-    "_auto_discovered": true
+    "_auto_discovered": true,
+    "deleted": true,
+    "_deleted_at": 1776811917,
+    "_deleted_reason": "Cannot update item MLM5222983050 [status:closed, has_bids:false]"
   },
   "MLM5222983008": {
     "real_stock": 30,
     "sku": "AUTO-983008",
     "label": "Altavoz Bluetooth Camuflado Jbl Charge 6 Camuflaje - $899",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "Altavoz Bluetooth Camuflado Jbl Charge 6 Camuflaje",
     "previous_ids": [],
-    "_auto_discovered": true
+    "_auto_discovered": true,
+    "deleted": true,
+    "_deleted_at": 1776811918,
+    "_deleted_reason": "Cannot update item MLM5222983008 [status:closed, has_bids:false]"
   },
   "MLM5222936976": {
     "real_stock": 30,
     "sku": "AUTO-936976",
     "label": "Altavoz Jbl Charge 6 - Azul - $899",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "Altavoz Jbl Charge 6 - Azul",
     "previous_ids": [],
-    "_auto_discovered": true
+    "_auto_discovered": true,
+    "deleted": true,
+    "_deleted_at": 1776811918,
+    "_deleted_reason": "Cannot update item MLM5222936976 [status:closed, has_bids:false]"
   },
   "MLM2880766137": {
     "real_stock": 30,
@@ -1428,11 +1443,14 @@
     "real_stock": 30,
     "sku": "AUTO-766097",
     "label": "Funda Para Sony Srs-xb100 Xb13 Silicona Líquida Color Sony S - $549",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "Funda Para Sony Srs-xb100 Xb13 Silicona Líquida Color Sony Srs-xb100 Xb13-blue",
     "previous_ids": [],
-    "_auto_discovered": true
+    "_auto_discovered": true,
+    "deleted": true,
+    "_deleted_at": 1776811919,
+    "_deleted_reason": "Cannot update item MLM2880766097 [status:closed, has_bids:false]"
   },
   "MLM2880766083": {
     "real_stock": 30,
@@ -1451,31 +1469,40 @@
     "real_stock": 30,
     "sku": "AUTO-766045",
     "label": "Bocina Portátil Jbl Clip 5 Bluetooth Negro - $699",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "Bocina Portátil Jbl Clip 5 Bluetooth Negro",
     "previous_ids": [],
-    "_auto_discovered": true
+    "_auto_discovered": true,
+    "deleted": true,
+    "_deleted_at": 1776811920,
+    "_deleted_reason": "Cannot update item MLM2880766045 [status:under_review, has_bids:true]"
   },
   "MLM2880766021": {
     "real_stock": 30,
     "sku": "AUTO-766021",
     "label": "Parlante Portatil Jbl Flip 7 Rojo - $799",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "Parlante Portatil Jbl Flip 7 Rojo",
     "previous_ids": [],
-    "_auto_discovered": true
+    "_auto_discovered": true,
+    "deleted": true,
+    "_deleted_at": 1776811921,
+    "_deleted_reason": "Cannot update item MLM2880766021 [status:closed, has_bids:false]"
   },
   "MLM2880754323": {
     "real_stock": 30,
     "sku": "AUTO-754323",
     "label": "Bocina Jbl Go 3 Jblgo3 Portátil Con Bluetooth Waterproof Neg - $449",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "Bocina Jbl Go 3 Jblgo3 Portátil Con Bluetooth Waterproof Negra Negro",
     "previous_ids": [],
-    "_auto_discovered": true
+    "_auto_discovered": true,
+    "deleted": true,
+    "_deleted_at": 1776811922,
+    "_deleted_reason": "Cannot update item MLM2880754323 [status:closed, has_bids:false]"
   },
   "MLM2880754295": {
     "real_stock": 30,
@@ -1494,11 +1521,14 @@
     "real_stock": 30,
     "sku": "AUTO-754279",
     "label": "Bocina Jbl Go Jbl Go 4 Go4 Portátil Con Bluetooth Waterproof - $449",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "Bocina Jbl Go Jbl Go 4 Go4 Portátil Con Bluetooth Waterproof Jbl Go4 Azul",
     "previous_ids": [],
-    "_auto_discovered": true
+    "_auto_discovered": true,
+    "deleted": true,
+    "_deleted_at": 1776811923,
+    "_deleted_reason": "Cannot update item MLM2880754279 [status:closed, has_bids:false]"
   },
   "MLM2880754229": {
     "real_stock": 30,
@@ -1521,7 +1551,10 @@
     "replenish_quantity": 1,
     "seo_title": "Parlante Portátil Jbl Flip 7 Blanco",
     "previous_ids": [],
-    "_auto_discovered": true
+    "_auto_discovered": true,
+    "deleted": true,
+    "_deleted_at": 1776811924,
+    "_deleted_reason": "It's not possible to relist an item that has been already deleted. [MLM2880754209 deleted]"
   },
   "MLM2880753399": {
     "real_stock": 30,
@@ -1531,7 +1564,10 @@
     "replenish_quantity": 1,
     "seo_title": "Bocina Bluetooth Jbl Clip 5 Portatil Negra Reacondicionado",
     "previous_ids": [],
-    "_auto_discovered": true
+    "_auto_discovered": true,
+    "deleted": true,
+    "_deleted_at": 1776811925,
+    "_deleted_reason": "It's not possible to relist an item that has been already deleted. [MLM2880753399 deleted]"
   },
   "MLM2880722719": {
     "real_stock": 30,
@@ -1545,5 +1581,125 @@
     "deleted": true,
     "_deleted_at": 1776807174,
     "_deleted_reason": "Cannot update item MLM2880722719 [status:under_review, has_bids:false]"
+  },
+  "MLM5223214318": {
+    "real_stock": 30,
+    "sku": "AUTO-214318",
+    "label": "Bocina Jbl Flip 7 Bluetooth Portatil Roja Ip68 Nueva - $819",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "seo_title": "Bocina Jbl Flip 7 Bluetooth Portatil Roja Ip68 Nueva",
+    "previous_ids": [],
+    "_auto_discovered": true
+  },
+  "MLM5223210438": {
+    "real_stock": 29,
+    "sku": "AUTO-210438",
+    "label": "Sony Srs-xb100 Altavoz De Viaje Inalámbrico Bluetooth Port C - $549",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "seo_title": "Sony Srs-xb100 Altavoz De Viaje Inalámbrico Bluetooth Port Color Negro",
+    "previous_ids": [],
+    "_auto_discovered": true
+  },
+  "MLM2880794089": {
+    "real_stock": 30,
+    "sku": "AUTO-794089",
+    "label": "Bocina Jbl Grip Bluetooth Portatil Negra Luz Led Nueva - $619",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "seo_title": "Bocina Jbl Grip Bluetooth Portatil Negra Luz Led Nueva",
+    "previous_ids": [],
+    "_auto_discovered": true
+  },
+  "MLM2880774951": {
+    "real_stock": 30,
+    "sku": "AUTO-774951",
+    "label": "Bocina Jbl Charge 6 Bluetooth Portatil Roja Ip68 Nueva - $919",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "seo_title": "Bocina Jbl Charge 6 Bluetooth Portatil Roja Ip68 Nueva",
+    "previous_ids": [],
+    "_auto_discovered": true
+  },
+  "MLM2880763001": {
+    "real_stock": 30,
+    "sku": "AUTO-763001",
+    "label": "Bocina Jbl Charge 6 Bluetooth Portatil Azul Ip68 Nueva - $919",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "seo_title": "Bocina Jbl Charge 6 Bluetooth Portatil Azul Ip68 Nueva",
+    "previous_ids": [],
+    "_auto_discovered": true
+  },
+  "MLM2880762579": {
+    "real_stock": 30,
+    "sku": "AUTO-762579",
+    "label": "Bocina Jbl Charge 6 Bluetooth Portatil Camuflaje Ip68 Nueva - $919",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "seo_title": "Bocina Jbl Charge 6 Bluetooth Portatil Camuflaje Ip68 Nueva",
+    "previous_ids": [],
+    "_auto_discovered": true
+  },
+  "MLM2880762535": {
+    "real_stock": 30,
+    "sku": "AUTO-762535",
+    "label": "Bocina Jbl Clip 5 Bluetooth Portatil Morada Ip67 Nueva - $719",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "seo_title": "Bocina Jbl Clip 5 Bluetooth Portatil Morada Ip67 Nueva",
+    "previous_ids": [],
+    "_auto_discovered": true
+  },
+  "MLM5223214798": {
+    "real_stock": 30,
+    "sku": "AUTO-214798",
+    "label": "Bocina Jbl Go 4 Bluetooth Portatil Azul Marino Ip67 Nueva - $469",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "seo_title": "Bocina Jbl Go 4 Bluetooth Portatil Azul Marino Ip67 Nueva",
+    "previous_ids": [],
+    "_auto_discovered": true
+  },
+  "MLM2880775007": {
+    "real_stock": 30,
+    "sku": "AUTO-775007",
+    "label": "Jbl Go Essential 2 Bluetooth Portatil Roja Ip67 - $469",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "seo_title": "Jbl Go Essential 2 Bluetooth Portatil Roja Ip67",
+    "previous_ids": [],
+    "_auto_discovered": true
+  },
+  "MLM2880774949": {
+    "real_stock": 30,
+    "sku": "AUTO-774949",
+    "label": "Bocina Jbl Go 3 Bluetooth Portatil Negra Ip67 Nueva - $469",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "seo_title": "Bocina Jbl Go 3 Bluetooth Portatil Negra Ip67 Nueva",
+    "previous_ids": [],
+    "_auto_discovered": true
+  },
+  "MLM2880763019": {
+    "real_stock": 30,
+    "sku": "AUTO-763019",
+    "label": "Bocina Jbl Go 4 Bluetooth Portatil Roja Ip67 Nueva - $469",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "seo_title": "Bocina Jbl Go 4 Bluetooth Portatil Roja Ip67 Nueva",
+    "previous_ids": [],
+    "_auto_discovered": true
+  },
+  "MLM2880762595": {
+    "real_stock": 30,
+    "sku": "AUTO-762595",
+    "label": "Jbl Go Essential 2 Bluetooth Portatil Azul Ip67 - $469",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "seo_title": "Jbl Go Essential 2 Bluetooth Portatil Azul Ip67",
+    "previous_ids": [],
+    "_auto_discovered": true
   }
 }
