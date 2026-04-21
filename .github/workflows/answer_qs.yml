@@ -1,0 +1,113 @@
+name: Answer pending Qs + templates
+on: {workflow_dispatch: {}}
+permissions: {contents: write}
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          python3 <<'PY'
+          import os, json, requests
+          r = requests.post("https://api.mercadolibre.com/oauth/token", data={
+              "grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],
+              "client_secret":os.environ["MELI_APP_SECRET"],
+              "refresh_token":os.environ["MELI_REFRESH_TOKEN"]
+          }, timeout=20)
+          tok = r.json()["access_token"]; h = {"Authorization":f"Bearer {tok}","Content-Type":"application/json"}
+          r = requests.get("https://api.mercadolibre.com/users/me", headers=h, timeout=15)
+          sid = r.json()["id"]
+          
+          # 1) Contestar las pendientes
+          r = requests.get(f"https://api.mercadolibre.com/questions/search?seller_id={sid}&status=UNANSWERED&limit=20", headers=h, timeout=15)
+          pending = r.json().get("questions",[]) or []
+          print(f"Pendientes: {len(pending)}")
+          
+          SIG = "\n\n— Sonix Mx"
+          
+          # Respuestas mapeadas por keywords
+          def answer_for(qtext):
+              q = qtext.lower()
+              # caja
+              if any(k in q for k in ["caja", "empaque", "caja original"]):
+                  return ("caja", "Hola! Sí, viene con su caja original. Todos los accesorios incluidos: cable de carga y manual. Saludos!")
+              # fotos
+              if any(k in q for k in ["fotos", "foto", "mas foto", "más foto", "imagen"]):
+                  return ("fotos", "Hola! Las fotos del anuncio son reales del producto exacto que recibirás. Si necesitas una foto específica (algún lado, el cable, etc.), dime y te la tomo. Saludos!")
+              return None
+          
+          answered = []
+          for q in pending:
+              qid = q.get("id")
+              qt = q.get("text","")
+              res = answer_for(qt)
+              if not res:
+                  print(f"  {qid}: sin template | Q: {qt[:60]}")
+                  continue
+              tmpl_id, ans = res
+              r_a = requests.post("https://api.mercadolibre.com/answers", headers=h,
+                  json={"question_id": int(qid), "text": ans + SIG}, timeout=15)
+              if r_a.status_code == 200:
+                  answered.append((qid, tmpl_id, qt[:60]))
+                  print(f"  ✓ {qid} [{tmpl_id}]: {qt[:60]}")
+              else:
+                  print(f"  ✗ {qid}: {r_a.status_code} {r_a.text[:200]}")
+          
+          print(f"\nRespondidas: {len(answered)}")
+          
+          # 2) Agregar templates caja + fotos a qa_templates.json
+          try:
+              with open("qa_templates.json") as f:
+                  cfg = json.load(f)
+          except FileNotFoundError:
+              cfg = {"signature": SIG, "templates": []}
+          
+          # Ensure no duplicates
+          existing_ids = {t.get("id") for t in cfg.get("templates",[])}
+          new_templates = [
+              {
+                  "id": "caja_incluida",
+                  "keywords": ["caja", "empaque", "caja original"],
+                  "response": "Hola! Sí, viene con su caja original. Todos los accesorios incluidos: cable de carga y manual."
+              },
+              {
+                  "id": "mas_fotos",
+                  "keywords": ["fotos", "foto", "mas foto", "más foto", "imagen", "imagenes", "imágenes"],
+                  "response": "Hola! Las fotos del anuncio son reales del producto exacto que recibirás. Si necesitas una específica, dime y te la tomo."
+              }
+          ]
+          added = 0
+          for tmpl in new_templates:
+              if tmpl["id"] not in existing_ids:
+                  cfg.setdefault("templates",[]).append(tmpl)
+                  added += 1
+          if "signature" not in cfg:
+              cfg["signature"] = SIG
+          
+          with open("qa_templates.json","w") as f:
+              json.dump(cfg, f, indent=2, ensure_ascii=False)
+          print(f"qa_templates.json: {added} templates nuevos ({len(cfg.get('templates',[]))} total)")
+          
+          tt=os.environ.get("TELEGRAM_BOT_TOKEN"); tc=os.environ.get("TELEGRAM_CHAT_ID")
+          if tt and tc:
+              m = f"💬 *Q&A accionadas*\n\n"
+              m += f"Respondidas: *{len(answered)}*\n"
+              m += f"Templates agregados: *{added}* (caja, fotos)\n"
+              m += f"\nEl bot ya puede auto-responder estos topics."
+              requests.post(f"https://api.telegram.org/bot{tt}/sendMessage", json={"chat_id":tc,"parse_mode":"Markdown","text":m})
+          PY
+      - run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add qa_templates.json
+          git diff --cached --quiet || git commit -m "[qa] add caja + fotos templates"
+          git push || echo "no push"
