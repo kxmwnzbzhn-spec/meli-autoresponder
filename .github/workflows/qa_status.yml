@@ -1,0 +1,60 @@
+name: QA status
+on: {workflow_dispatch: {}}
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+        run: |
+          python3 <<'PY'
+          import os, json, requests
+          from datetime import datetime, timedelta, timezone
+          r = requests.post("https://api.mercadolibre.com/oauth/token", data={
+              "grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],
+              "client_secret":os.environ["MELI_APP_SECRET"],
+              "refresh_token":os.environ["MELI_REFRESH_TOKEN"]
+          }, timeout=20)
+          tok = r.json()["access_token"]; h = {"Authorization":f"Bearer {tok}"}
+          r = requests.get("https://api.mercadolibre.com/users/me", headers=h, timeout=15)
+          sid = r.json()["id"]
+          
+          # Pendientes (UNANSWERED)
+          r = requests.get(f"https://api.mercadolibre.com/questions/search?seller_id={sid}&status=UNANSWERED&limit=50&sort_fields=date_created&sort_types=DESC", headers=h, timeout=15)
+          pending = r.json().get("questions", []) or []
+          print(f"=== PENDIENTES: {len(pending)} ===")
+          for q in pending[:20]:
+              tsc = q.get("date_created","")[:19]
+              qt = q.get("text","")[:100].replace("\n"," ")
+              iid = q.get("item_id","?")
+              buyer = q.get("from",{}).get("id","?")
+              print(f"  [{tsc}] item={iid} buyer={buyer}")
+              print(f"    Q: {qt}")
+          
+          # Respondidas hoy
+          from_today = (datetime.now(timezone.utc).replace(hour=0,minute=0,second=0)).strftime("%Y-%m-%dT%H:%M:%S.000Z")
+          r = requests.get(f"https://api.mercadolibre.com/questions/search?seller_id={sid}&status=ANSWERED&limit=50&sort_fields=date_created&sort_types=DESC&api_version=4", headers=h, timeout=15)
+          answered = [q for q in (r.json().get("questions",[]) or []) if q.get("date_created","") >= from_today]
+          print(f"\n=== RESPONDIDAS HOY: {len(answered)} ===")
+          # Tally by template
+          tmpl_count = {}
+          for q in answered[:50]:
+              ans = (q.get("answer") or {}).get("text","")[:60].replace("\n"," ")
+              tmpl_count[ans[:40]] = tmpl_count.get(ans[:40], 0) + 1
+          for tmpl, n in sorted(tmpl_count.items(), key=lambda x: -x[1])[:10]:
+              print(f"  {n}x: {tmpl}")
+          
+          # Ver si hay alguna muestra
+          if answered:
+              print("\nMuestra de 3 más recientes respondidas:")
+              for q in answered[:3]:
+                  qt = q.get("text","")[:80].replace("\n"," ")
+                  at = (q.get("answer") or {}).get("text","")[:100].replace("\n"," ")
+                  print(f"  Q: {qt}")
+                  print(f"  A: {at}\n")
+          PY
