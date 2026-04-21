@@ -1,0 +1,77 @@
+name: JBL dimensions listing
+on: {workflow_dispatch: {}}
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+        run: |
+          python3 <<'PY'
+          import os, requests, time
+          def get_tok():
+              for _ in range(3):
+                  r = requests.post("https://api.mercadolibre.com/oauth/token", data={
+                      "grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],
+                      "client_secret":os.environ["MELI_APP_SECRET"],"refresh_token":os.environ["MELI_REFRESH_TOKEN"]
+                  }, timeout=20)
+                  b = r.json()
+                  if r.status_code == 200 and "access_token" in b: return b["access_token"]
+                  time.sleep(5)
+              raise Exception("auth")
+          tok = get_tok(); h = {"Authorization":f"Bearer {tok}"}
+          r = requests.get("https://api.mercadolibre.com/users/me", headers=h, timeout=15)
+          sid = r.json()["id"]
+          
+          # Fetch all active JBL + Go Essential + Sony (all bocinas category)
+          items = []
+          r = requests.get(f"https://api.mercadolibre.com/users/{sid}/items/search?status=active&limit=100", headers=h, timeout=15)
+          for iid in r.json().get("results",[]):
+              r2 = requests.get(f"https://api.mercadolibre.com/items/{iid}", headers=h, timeout=6)
+              it = r2.json()
+              title = it.get("title","")
+              low = title.lower()
+              is_bocina = ("jbl" in low) or ("sony" in low and "srs" in low)
+              if not is_bocina: continue
+              attrs = {a.get("id"): a.get("value_name") for a in it.get("attributes",[])}
+              items.append({
+                  "id": iid, "title": title, "price": it.get("price"),
+                  "L": attrs.get("PACKAGE_LENGTH","?"),
+                  "W": attrs.get("PACKAGE_WIDTH","?"),
+                  "H": attrs.get("PACKAGE_HEIGHT","?"),
+                  "WEIGHT": attrs.get("PACKAGE_WEIGHT","?"),
+              })
+          # Sort by model
+          def sort_key(it):
+              t = it["title"].lower()
+              order = ["charge 6","flip 7","grip","clip 5","go essential","go 4","go 3","srs"]
+              for i, m in enumerate(order):
+                  if m in t: return (i, t)
+              return (99, t)
+          items.sort(key=sort_key)
+          
+          print(f"\n=== {len(items)} bocinas ===\n")
+          print(f"{'ID':<17} {'Modelo':<28} {'L':<8} {'W':<8} {'H':<8} {'Peso':<10} ${'Precio'}")
+          print("-"*110)
+          for it in items:
+              model = "?"
+              t = it["title"].lower()
+              if "charge 6" in t: model = "Charge 6"
+              elif "flip 7" in t: model = "Flip 7"
+              elif "grip" in t: model = "Grip"
+              elif "clip 5" in t: model = "Clip 5"
+              elif "go essential" in t: model = "Go Essential 2"
+              elif "go 4" in t: model = "Go 4"
+              elif "go 3" in t: model = "Go 3"
+              elif "srs-xb100" in t or "srs" in t: model = "Sony SRS-XB100"
+              color = ""
+              for c in ["negra","roja","azul marino","azul","rosa","morada","camuflaje","rojo"]:
+                  if c in t: color = c.capitalize(); break
+              full_model = f"{model} {color}"
+              print(f"{it['id']:<17} {full_model:<28} {it['L']:<8} {it['W']:<8} {it['H']:<8} {it['WEIGHT']:<10} ${it['price']}")
+          PY
