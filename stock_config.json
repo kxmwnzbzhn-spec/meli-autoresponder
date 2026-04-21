@@ -596,12 +596,15 @@
     "real_stock": 10,
     "sku": "PERF-007",
     "label": "ARMAF ODYSSEY CANDEE EDP SPRAY MUJER 100ML",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "ARMAF ODYSSEY CANDEE EDP SPRAY MUJER 100ML",
     "previous_ids": [],
     "_perfume": true,
-    "_idx": 7
+    "_idx": 7,
+    "deleted": true,
+    "_deleted_at": 1776805945,
+    "_deleted_reason": "Cannot update item MLM5221330622 [status:under_review, has_bids:false]"
   },
   "MLM2880142439": {
     "real_stock": 10,
