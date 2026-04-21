@@ -1,0 +1,122 @@
+name: Publish Billie Eilish
+on: {workflow_dispatch: {}}
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          python3 <<'PY'
+          import os, json, requests
+          r = requests.post("https://api.mercadolibre.com/oauth/token", data={
+              "grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],
+              "client_secret":os.environ["MELI_APP_SECRET"],"refresh_token":os.environ["MELI_REFRESH_TOKEN"]
+          }, timeout=20)
+          tok = r.json()["access_token"]; h = {"Authorization":f"Bearer {tok}","Content-Type":"application/json"}
+          
+          CATALOG = "MLM20601206"  # Perfume Billie Eilish Eilish Mujer EDP 100ml
+          r = requests.get(f"https://api.mercadolibre.com/products/{CATALOG}", headers=h, timeout=15)
+          pd = r.json()
+          print(f"Catalog: {pd.get('name')}")
+          print(f"Category: {pd.get('category_id')} | Domain: {pd.get('domain_id')}")
+          
+          # Get GTIN and other attrs
+          src_attrs = {a.get('id'): a.get('value_name') for a in pd.get('attributes',[])}
+          gtin = src_attrs.get("GTIN")
+          print(f"GTIN: {gtin}")
+          print(f"Attrs: {list(src_attrs.keys())[:15]}")
+          
+          # Get pictures
+          pic_urls = [{"source": p.get("url") or p.get("secure_url")} for p in pd.get('pictures',[]) if p.get("url") or p.get("secure_url")][:8]
+          print(f"Pictures: {len(pic_urls)}")
+          for pu in pic_urls[:3]:
+              print(f"  {pu['source']}")
+          
+          # Determine category — use from catalog
+          category_id = pd.get('category_id') or "MLM109003"  # fallback: Perfumería femenina
+          
+          # SEO title — max 60 chars
+          # Strategy: combine brand + fragancia + EDP + 100ml + Mujer + Original
+          title = "Perfume Billie Eilish Eilish Eau Parfum 100ml Mujer Original"
+          if len(title) > 60:
+              title = "Perfume Billie Eilish Eilish EDP 100ml Mujer Original"
+          print(f"Title ({len(title)} chars): {title}")
+          
+          body = {
+              "title": title,
+              "category_id": category_id,
+              "price": 999,
+              "currency_id":"MXN",
+              "available_quantity":1,
+              "buying_mode":"buy_it_now",
+              "condition":"new",
+              "listing_type_id":"gold_pro",
+              "pictures": pic_urls,
+              "attributes":[
+                  {"id":"BRAND","value_name":"Billie Eilish"},
+                  {"id":"LINE","value_name":"Eilish"},
+                  {"id":"MODEL","value_name":"Eilish Eau de Parfum"},
+                  {"id":"GENDER","value_name":"Femenino"},
+                  {"id":"VOLUME_CAPACITY","value_name":"100 ml"},
+                  {"id":"ITEM_CONDITION","value_name":"Nuevo"},
+                  {"id":"FRAGRANCE_FAMILY","value_name":"Amaderado"},
+                  {"id":"FRAGRANCE_TYPE","value_name":"Eau de parfum"},
+              ] + ([{"id":"GTIN","value_name":gtin}] if gtin else []),
+              "sale_terms":[
+                  {"id":"WARRANTY_TYPE","value_name":"Garantía del vendedor"},
+                  {"id":"WARRANTY_TIME","value_name":"30 días"}
+              ],
+              "shipping":{"mode":"me2","local_pick_up":False,"free_shipping":False}
+          }
+          
+          r = requests.post("https://api.mercadolibre.com/items", headers=h, json=body, timeout=30)
+          print(f"\nPOST: {r.status_code}")
+          resp = r.json()
+          if r.status_code in (200,201):
+              new_id = resp.get("id")
+              print(f"✓ {new_id}")
+              print(f"  permalink: {resp.get('permalink')}")
+              print(f"  status: {resp.get('status')} sub_status: {resp.get('sub_status')}")
+              
+              desc = (
+                  "✨ BILLIE EILISH - EILISH EAU DE PARFUM 100ML ✨\n\n"
+                  "Perfume original y 100% auténtico de Billie Eilish.\n"
+                  "Fragancia amaderada para mujer, intensa y envolvente.\n\n"
+                  "CARACTERÍSTICAS:\n"
+                  "• Marca: Billie Eilish\n"
+                  "• Fragancia: Eilish (la original)\n"
+                  "• Tipo: Eau de Parfum (EDP)\n"
+                  "• Tamaño: 100 ml\n"
+                  "• Género: Femenino\n"
+                  "• Familia olfativa: Amaderada\n"
+                  "• Notas destacadas: Mandarina, Vainilla, Cacao, Almizcle\n\n"
+                  "GARANTÍAS:\n"
+                  "✅ Producto NUEVO, sellado de fábrica\n"
+                  "✅ 100% Original — compra con confianza\n"
+                  "✅ 30 días de garantía del vendedor\n"
+                  "✅ Envío el MISMO día (compras antes de 3pm)\n\n"
+                  "¿Preguntas? Contáctanos, respondemos rápido.\n"
+                  "— Sonix Mx"
+              )
+              rd = requests.post(f"https://api.mercadolibre.com/items/{new_id}/description", headers=h,
+                  json={"plain_text":desc}, timeout=15)
+              print(f"  description: {rd.status_code}")
+              
+              tt=os.environ.get("TELEGRAM_BOT_TOKEN"); tc=os.environ.get("TELEGRAM_CHAT_ID")
+              if tt and tc:
+                  msg = f"🌸 *Billie Eilish publicado*\n\n"
+                  msg += f"`{new_id}` ${999}\n"
+                  msg += f"Status: {resp.get('status')}\n"
+                  msg += f"[Ver]({resp.get('permalink','')})"
+                  requests.post(f"https://api.telegram.org/bot{tt}/sendMessage", json={"chat_id":tc,"parse_mode":"Markdown","text":msg})
+          else:
+              print(json.dumps(resp, indent=2)[:2500])
+          PY
