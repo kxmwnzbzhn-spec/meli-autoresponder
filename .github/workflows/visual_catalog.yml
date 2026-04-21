@@ -1,0 +1,177 @@
+name: Build visual catalog
+on: {workflow_dispatch: {}}
+permissions: {contents: write}
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+        run: |
+          python3 <<'PY'
+          import os, requests, time, html, json
+          def get_tok():
+              for _ in range(3):
+                  r = requests.post("https://api.mercadolibre.com/oauth/token", data={
+                      "grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],
+                      "client_secret":os.environ["MELI_APP_SECRET"],"refresh_token":os.environ["MELI_REFRESH_TOKEN"]
+                  }, timeout=20)
+                  b = r.json()
+                  if r.status_code == 200 and "access_token" in b: return b["access_token"]
+                  time.sleep(5)
+              raise Exception("auth")
+          tok = get_tok(); h = {"Authorization":f"Bearer {tok}"}
+          r = requests.get("https://api.mercadolibre.com/users/me", headers=h, timeout=15)
+          sid = r.json()["id"]
+          
+          # Get all items
+          all_items = []
+          for st in ("active","paused","under_review"):
+              r = requests.get(f"https://api.mercadolibre.com/users/{sid}/items/search?status={st}&limit=100", headers=h, timeout=15)
+              for iid in r.json().get("results",[]):
+                  r2 = requests.get(f"https://api.mercadolibre.com/items/{iid}", headers=h, timeout=8)
+                  it = r2.json()
+                  pics = [p.get("url") or p.get("secure_url") for p in it.get("pictures",[])]
+                  all_items.append({
+                      "id": iid, "title": it.get("title",""), "price": it.get("price"),
+                      "status": it.get("status"), "qty": it.get("available_quantity"),
+                      "permalink": it.get("permalink"), "pics": pics,
+                  })
+          print(f"Total items: {len(all_items)}")
+          # Sort by status then title
+          all_items.sort(key=lambda x: (x["status"], x["title"]))
+          
+          html_parts = ["""<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>Catalogo Visual Sonix Mx</title>
+<style>
+  body{font-family:-apple-system,Arial,sans-serif;margin:0;background:#f5f5f7;padding:20px;}
+  h1{color:#333;}
+  .stats{background:#fff;padding:15px;border-radius:8px;margin-bottom:20px;box-shadow:0 1px 3px rgba(0,0,0,.1);}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:15px;}
+  .card{background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.08);transition:transform .15s;}
+  .card:hover{transform:translateY(-2px);}
+  .card img{width:100%;height:220px;object-fit:contain;background:#fff;display:block;}
+  .body{padding:12px;}
+  .title{font-size:13px;font-weight:600;color:#222;line-height:1.3;margin:0 0 8px 0;min-height:52px;}
+  .meta{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#555;margin-bottom:8px;}
+  .price{font-size:18px;font-weight:700;color:#000;}
+  .id{font-family:monospace;color:#555;font-size:11px;}
+  .status{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;}
+  .status.active{background:#d4edda;color:#155724;}
+  .status.paused{background:#fff3cd;color:#856404;}
+  .status.under_review{background:#f8d7da;color:#721c24;}
+  .actions{display:flex;gap:8px;margin-top:8px;}
+  .btn{font-size:11px;padding:5px 10px;border-radius:4px;text-decoration:none;flex:1;text-align:center;}
+  .btn-meli{background:#ffe600;color:#000;}
+  .btn-wrong{background:#dc3545;color:#fff;border:none;cursor:pointer;}
+  .flagged{border:3px solid #dc3545;}
+  .flagged .body{background:#ffe6e6;}
+  .photos-count{font-size:11px;color:#888;margin-top:4px;}
+  .filter-bar{margin-bottom:15px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+  .filter-bar input{padding:8px;border:1px solid #ccc;border-radius:4px;}
+  .filter-bar button{padding:8px 16px;border:1px solid #333;background:#fff;border-radius:4px;cursor:pointer;}
+  .filter-bar button.active{background:#333;color:#fff;}
+</style></head><body>
+<h1>🧴 Catalogo Visual</h1>"""]
+          
+          counts = {"active":0,"paused":0,"under_review":0}
+          for it in all_items: counts[it["status"]] = counts.get(it["status"],0)+1
+          html_parts.append(f'<div class="stats">📊 Total: <b>{len(all_items)}</b> · 🟢 Activos: <b>{counts["active"]}</b> · 🟡 Pausados: <b>{counts["paused"]}</b> · 🔴 En revisión: <b>{counts["under_review"]}</b></div>')
+          
+          html_parts.append('''<div class="filter-bar">
+<input type="text" id="search" placeholder="Buscar por título o ID..." oninput="filter()">
+<button onclick="filterBy('all')" class="active" id="fall">Todos</button>
+<button onclick="filterBy('active')" id="factive">Activos</button>
+<button onclick="filterBy('paused')" id="fpaused">Pausados</button>
+<button onclick="filterBy('under_review')" id="funder_review">En revisión</button>
+<button onclick="filterFlagged()" id="fflagged">🚩 Marcados</button>
+<button onclick="exportFlagged()">📋 Exportar marcados</button>
+</div>
+<div class="grid" id="grid">''')
+          
+          for it in all_items:
+              pic = (it["pics"][0] if it["pics"] else "https://via.placeholder.com/320x220?text=SIN+FOTO").replace("http://","https://")
+              title_safe = html.escape(it["title"])
+              permalink = it["permalink"] or "#"
+              html_parts.append(f'''
+<div class="card" data-id="{it["id"]}" data-status="{it["status"]}" data-title="{title_safe.lower()}">
+  <img src="{pic}" alt="{title_safe}" loading="lazy" onerror="this.src='https://via.placeholder.com/320x220?text=IMG+ERROR'">
+  <div class="body">
+    <p class="title">{title_safe}</p>
+    <div class="meta">
+      <span class="id">{it["id"]}</span>
+      <span class="status {it["status"]}">{it["status"]}</span>
+    </div>
+    <div class="meta">
+      <span class="price">${it["price"]}</span>
+      <span>qty: {it["qty"]}</span>
+    </div>
+    <div class="photos-count">📷 {len(it["pics"])} fotos</div>
+    <div class="actions">
+      <a href="{permalink}" target="_blank" class="btn btn-meli">Ver en MELI</a>
+      <button class="btn btn-wrong" onclick="flag(this)">🚩 Foto/Título MAL</button>
+    </div>
+  </div>
+</div>''')
+          
+          html_parts.append('''</div>
+<script>
+function filter(){
+  const q = document.getElementById('search').value.toLowerCase();
+  document.querySelectorAll('.card').forEach(c => {
+    const t = c.dataset.title + ' ' + c.dataset.id.toLowerCase();
+    c.style.display = t.includes(q) ? '' : 'none';
+  });
+}
+function filterBy(s){
+  document.querySelectorAll('.filter-bar button').forEach(b=>b.classList.remove('active'));
+  document.getElementById('f'+s).classList.add('active');
+  document.querySelectorAll('.card').forEach(c => {
+    c.style.display = (s==='all' || c.dataset.status===s) ? '' : 'none';
+  });
+}
+function filterFlagged(){
+  document.querySelectorAll('.filter-bar button').forEach(b=>b.classList.remove('active'));
+  document.getElementById('fflagged').classList.add('active');
+  document.querySelectorAll('.card').forEach(c => {
+    c.style.display = c.classList.contains('flagged') ? '' : 'none';
+  });
+}
+function flag(btn){
+  const card = btn.closest('.card');
+  card.classList.toggle('flagged');
+  if(card.classList.contains('flagged')){
+    btn.textContent = '✓ Marcado — click para desmarcar';
+  } else {
+    btn.textContent = '🚩 Foto/Título MAL';
+  }
+}
+function exportFlagged(){
+  const flagged = [];
+  document.querySelectorAll('.card.flagged').forEach(c => {
+    flagged.push({id: c.dataset.id, title: c.dataset.title});
+  });
+  if(flagged.length===0){ alert('No hay items marcados'); return; }
+  const text = flagged.map(f=>f.id).join('\\n');
+  navigator.clipboard.writeText(text);
+  alert('Copiado al portapapeles '+flagged.length+' IDs:\\n\\n'+text);
+}
+</script>
+</body></html>''')
+          
+          with open("catalogo_visual.html","w") as f:
+              f.write("\n".join(html_parts))
+          print(f"Saved catalogo_visual.html with {len(all_items)} items")
+          PY
+      - run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add catalogo_visual.html
+          git diff --cached --quiet || git commit -m "add visual catalog"
+          git push || echo "no push"
