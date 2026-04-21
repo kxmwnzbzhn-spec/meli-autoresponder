@@ -21,17 +21,6 @@ jobs:
               "client_secret":os.environ["MELI_APP_SECRET"],"refresh_token":os.environ["MELI_REFRESH_TOKEN"]
           }, timeout=20)
           tok = r.json()["access_token"]; h = {"Authorization":f"Bearer {tok}","Content-Type":"application/json"}
-          
-          # Look up valid GENDER values for MLM1271
-          r = requests.get("https://api.mercadolibre.com/categories/MLM1271/attributes", headers=h, timeout=15)
-          attrs = r.json()
-          for a in attrs:
-              if a.get("id") == "GENDER":
-                  print(f"GENDER values:")
-                  for v in (a.get("values") or [])[:5]:
-                      print(f"  id={v.get('id')} name={v.get('name')}")
-          
-          # Fetch catalog pics
           r = requests.get("https://api.mercadolibre.com/products/MLM20601206", headers=h, timeout=15)
           pd = r.json()
           pic_urls = [{"source": p.get("url") or p.get("secure_url")} for p in pd.get('pictures',[]) if p.get("url") or p.get("secure_url")][:8]
@@ -48,8 +37,10 @@ jobs:
               "pictures": pic_urls,
               "attributes":[
                   {"id":"BRAND","value_name":"Billie Eilish"},
+                  {"id":"PERFUME_NAME","value_name":"Eilish"},
                   {"id":"MODEL","value_name":"Eilish Eau de Parfum"},
                   {"id":"NET_VOLUME","value_name":"100 mL"},
+                  {"id":"UNIT_VOLUME","value_name":"100 mL"},
                   {"id":"FRAGRANCE_TYPE","value_name":"Eau de parfum"},
                   {"id":"ITEM_CONDITION","value_name":"Nuevo"},
                   {"id":"GENDER","value_name":"Mujer"},
@@ -61,7 +52,7 @@ jobs:
               "shipping":{"mode":"me2","local_pick_up":False,"free_shipping":False}
           }
           r = requests.post("https://api.mercadolibre.com/items", headers=h, json=body, timeout=30)
-          print(f"\nPOST: {r.status_code}")
+          print(f"POST: {r.status_code}")
           resp = r.json()
           if r.status_code in (200,201):
               new_id = resp.get("id")
@@ -71,7 +62,7 @@ jobs:
               desc = ("BILLIE EILISH - EILISH EAU DE PARFUM 100ML\n\n"
                       "Perfume original y 100% autentico de Billie Eilish. Fragancia amaderada para mujer, intensa y envolvente.\n\n"
                       "CARACTERISTICAS:\n"
-                      "- Marca: Billie Eilish\n- Fragancia: Eilish (la original)\n"
+                      "- Marca: Billie Eilish\n- Fragancia: Eilish\n"
                       "- Tipo: Eau de Parfum (EDP)\n- Tamano: 100 ml\n- Genero: Femenino\n"
                       "- Familia: Amaderada\n- Notas: Mandarina, Vainilla, Cacao, Almizcle\n\n"
                       "GARANTIAS:\n- NUEVO y sellado de fabrica\n- 100% Original\n"
@@ -81,9 +72,9 @@ jobs:
               tt=os.environ.get("TELEGRAM_BOT_TOKEN"); tc=os.environ.get("TELEGRAM_CHAT_ID")
               if tt and tc:
                   requests.post(f"https://api.telegram.org/bot{tt}/sendMessage", json={"chat_id":tc,"parse_mode":"Markdown",
-                      "text":f"🌸 *Billie Eilish publicado*\n\n`{new_id}` $999\nStatus: {resp.get('status')}\n[Ver]({resp.get('permalink','')})"})
+                      "text":f"🌸 *Billie Eilish publicado*\n\n`{new_id}` $999\n[Ver]({resp.get('permalink','')})"})
           else:
               errs = [c for c in resp.get("cause",[]) if isinstance(c, dict) and c.get("type")=="error"]
               for c in errs[:6]:
-                  print(f"  {c.get('code')}: {c.get('message','')[:140]}")
+                  print(f"  {c.get('code')}: {c.get('message','')[:160]}")
           PY
