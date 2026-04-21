@@ -513,5 +513,16 @@
       "MLM2878381981"
     ],
     "_auto_discovered": true
+  },
+  "MLM5221355572": {
+    "real_stock": 10,
+    "sku": "PERF-001",
+    "label": "RABANNE 1 MILLION GOLD INTENSE EDP HOMBRE 100ML OR",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "seo_title": "RABANNE 1 MILLION GOLD INTENSE EDP HOMBRE 100ML ORIGINAL",
+    "previous_ids": [],
+    "_perfume": true,
+    "_idx": 1
   }
 }
