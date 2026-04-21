@@ -1,0 +1,107 @@
+name: Publish test Oficial
+on: {workflow_dispatch: {}}
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+          MELI_REFRESH_TOKEN_OFICIAL: ${{ secrets.MELI_REFRESH_TOKEN_OFICIAL }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          python3 <<'PY'
+          import os, json, requests
+          
+          def refresh(rt):
+              r = requests.post("https://api.mercadolibre.com/oauth/token", data={
+                  "grant_type":"refresh_token",
+                  "client_id":os.environ["MELI_APP_ID"],
+                  "client_secret":os.environ["MELI_APP_SECRET"],
+                  "refresh_token":rt
+              }, timeout=20)
+              return r.status_code, r.json()
+          
+          # Get OFICIAL token
+          sc, body = refresh(os.environ["MELI_REFRESH_TOKEN_OFICIAL"])
+          print(f"OFICIAL refresh: {sc}")
+          if sc != 200:
+              print(f"ERR: {body}")
+              raise SystemExit(1)
+          ofic_token = body["access_token"]
+          # Save new refresh if it rotated
+          new_refresh_o = body.get("refresh_token")
+          h_o = {"Authorization":f"Bearer {ofic_token}","Content-Type":"application/json"}
+          
+          # Verify account
+          r = requests.get("https://api.mercadolibre.com/users/me", headers=h_o, timeout=15)
+          me = r.json()
+          print(f"Account: {me.get('nickname')} ({me.get('id')})")
+          
+          # Get source item (public, no auth needed)
+          r = requests.get("https://api.mercadolibre.com/items/MLM2876026329", timeout=15)
+          src = r.json()
+          print(f"Source: {src.get('title')} ${src.get('price')}")
+          
+          pic_urls = [{"source": p.get("url") or p.get("secure_url")} for p in src.get("pictures",[]) if p.get("url") or p.get("secure_url")]
+          print(f"Pictures: {len(pic_urls)}")
+          
+          # Build publish body
+          body_pub = {
+              "title": "Bocina Bluetooth Jbl Go 4 Portatil Negra Original Usada",
+              "category_id": src.get("category_id","MLM59800"),
+              "price": 299,
+              "currency_id": "MXN",
+              "available_quantity": 1,
+              "buying_mode": "buy_it_now",
+              "condition": "used",
+              "listing_type_id": "gold_pro",
+              "pictures": pic_urls[:8],
+              "attributes": [
+                  {"id":"BRAND","value_name":"JBL"},
+                  {"id":"MODEL","value_name":"Go 4"},
+                  {"id":"COLOR","value_name":"Negro"},
+                  {"id":"LINE","value_name":"Go"},
+              ],
+              "sale_terms": [
+                  {"id":"WARRANTY_TYPE","value_name":"Garantía del vendedor"},
+                  {"id":"WARRANTY_TIME","value_name":"30 días"}
+              ],
+              "shipping": {"mode":"me2","local_pick_up":False,"free_shipping":False}
+          }
+          
+          r = requests.post("https://api.mercadolibre.com/items", headers=h_o, json=body_pub, timeout=30)
+          print(f"\nPOST: {r.status_code}")
+          resp = r.json()
+          if r.status_code in (200,201):
+              new_id = resp.get("id")
+              print(f"✓ CREATED: {new_id}")
+              print(f"  URL: {resp.get('permalink')}")
+              print(f"  Status: {resp.get('status')}")
+              print(f"  Sub_status: {resp.get('sub_status')}")
+              
+              # Add description
+              desc = "Bocina Bluetooth JBL Go 4 portátil, color Negro. Condición usada, probada y funcional al 100%. Incluye cable de carga. Envío el mismo día. Garantía del vendedor 30 días."
+              rd = requests.post(f"https://api.mercadolibre.com/items/{new_id}/description", headers=h_o,
+                  json={"plain_text": desc}, timeout=15)
+              print(f"  description: {rd.status_code}")
+              
+              tt=os.environ.get("TELEGRAM_BOT_TOKEN"); tc=os.environ.get("TELEGRAM_CHAT_ID")
+              if tt and tc:
+                  msg = f"🎯 *Test publicación Oficial*\n\n"
+                  msg += f"`{new_id}` JBL Go 4 Negra\n"
+                  msg += f"Precio: $299 | qty: 1\n"
+                  msg += f"Status: {resp.get('status')}\n"
+                  if resp.get('sub_status'):
+                      msg += f"Sub_status: {resp.get('sub_status')}\n"
+                  msg += f"\n[Ver]({resp.get('permalink','')})"
+                  requests.post(f"https://api.telegram.org/bot{tt}/sendMessage", json={"chat_id":tc,"parse_mode":"Markdown","text":msg})
+          else:
+              print(f"✗ ERROR")
+              print(json.dumps(resp, indent=2)[:1500])
+          PY
