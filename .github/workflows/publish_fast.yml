@@ -1,0 +1,140 @@
+name: Publish perfumes FAST
+on: {workflow_dispatch: {}}
+permissions: {contents: write}
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          python3 <<'PY'
+          import os, json, requests, time
+          r = requests.post("https://api.mercadolibre.com/oauth/token", data={
+              "grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],
+              "client_secret":os.environ["MELI_APP_SECRET"],"refresh_token":os.environ["MELI_REFRESH_TOKEN"]
+          }, timeout=20)
+          tok = r.json()["access_token"]; h = {"Authorization":f"Bearer {tok}","Content-Type":"application/json"}
+          
+          with open("perfumes.json") as f:
+              all_perfumes = json.load(f)
+          try:
+              with open("stock_config.json") as f: stock = json.load(f)
+          except: stock = {}
+          
+          # Find missing indexes
+          done = set(v.get("_idx",999) for v in stock.values() if isinstance(v,dict) and v.get("_perfume"))
+          missing_idx = [i for i in range(40) if i not in done]
+          print(f"Missing: {missing_idx}")
+          
+          tt=os.environ.get("TELEGRAM_BOT_TOKEN"); tc=os.environ.get("TELEGRAM_CHAT_ID")
+          def tg(msg):
+              if tt and tc:
+                  try: requests.post(f"https://api.telegram.org/bot{tt}/sendMessage", json={"chat_id":tc,"parse_mode":"Markdown","text":msg[:4000]}, timeout=10)
+                  except: pass
+          
+          def find_catalog(search_q):
+              try:
+                  r = requests.get(f"https://api.mercadolibre.com/products/search?site_id=MLM&q={search_q}&limit=10", headers=h, timeout=15)
+                  for p in r.json().get("results",[]):
+                      pid = p.get("id")
+                      r2 = requests.get(f"https://api.mercadolibre.com/products/{pid}", headers=h, timeout=8)
+                      pd = r2.json()
+                      pics = [{"source": pic.get("url") or pic.get("secure_url")} for pic in pd.get("pictures",[]) if pic.get("url") or pic.get("secure_url")]
+                      if not pics: continue
+                      gtin = next((a.get("value_name") for a in pd.get("attributes",[]) if a.get("id")=="GTIN"), None)
+                      return pid, pics[:8], gtin
+              except: pass
+              return None, [], None
+          
+          ok_list = []; err_list = []
+          for i, idx in enumerate(missing_idx):
+              p = all_perfumes[idx]
+              title = p["title"]; price = p["price"]
+              search = p["search"].replace(" ","+")
+              brand = p["brand"]; vol = p["vol"]; gender = p["gender"]
+              
+              cat_pid, pics, gtin = find_catalog(search)
+              if not pics:
+                  print(f"[{idx}] ✗ no pics | {title[:50]}")
+                  err_list.append((idx, title, "no_pics"))
+                  continue
+              
+              attrs = [
+                  {"id":"BRAND","value_name":brand},
+                  {"id":"GENDER","value_name":gender},
+                  {"id":"UNIT_VOLUME","value_name":vol},
+                  {"id":"NET_VOLUME","value_name":vol},
+                  {"id":"PERFUME_NAME","value_name":title.split()[0].capitalize()},
+                  {"id":"ITEM_CONDITION","value_name":"Nuevo"},
+              ]
+              if gtin: attrs.append({"id":"GTIN","value_name":gtin})
+              body = {
+                  "title": title, "category_id": "MLM1271", "price": price,
+                  "currency_id":"MXN", "available_quantity": 1, "buying_mode":"buy_it_now",
+                  "condition":"new", "listing_type_id":"gold_pro",
+                  "pictures": pics, "attributes": attrs,
+                  "sale_terms":[{"id":"WARRANTY_TYPE","value_name":"Garantía del vendedor"},{"id":"WARRANTY_TIME","value_name":"30 días"}],
+                  "shipping":{"mode":"me2","local_pick_up":False,"free_shipping":False}
+              }
+              if cat_pid:
+                  body["catalog_product_id"] = cat_pid
+              r = requests.post("https://api.mercadolibre.com/items", headers=h, json=body, timeout=25)
+              resp = r.json()
+              if r.status_code not in (200,201) and cat_pid:
+                  body.pop("catalog_product_id", None)
+                  r = requests.post("https://api.mercadolibre.com/items", headers=h, json=body, timeout=25)
+                  resp = r.json()
+              if r.status_code in (200,201):
+                  new_id = resp.get("id")
+                  print(f"[{idx}] ✓ {new_id} | {title[:50]}")
+                  try:
+                      desc = (f"{title}\n\nPerfume original 100% autentico.\n\n"
+                              f"CARACTERISTICAS:\n- Marca: {brand}\n- Volumen: {vol}\n- Genero: {gender}\n"
+                              f"- Condicion: Nuevo, sellado de fabrica\n\nGARANTIAS:\n- NUEVO y 100% Original\n"
+                              f"- 30 dias de garantia\n- Factura disponible\n- Envio el mismo dia antes de 3pm\n\n- Sonix Mx")
+                      requests.post(f"https://api.mercadolibre.com/items/{new_id}/description", headers=h, json={"plain_text":desc}, timeout=10)
+                  except: pass
+                  stock[new_id] = {"real_stock":10,"sku":f"PERF-{idx:03d}","label":title[:50],
+                                   "auto_replenish":True,"replenish_quantity":1,"seo_title":title,
+                                   "previous_ids":[],"_perfume":True,"_idx":idx}
+                  ok_list.append((idx, new_id, price, title))
+              else:
+                  errs = [c for c in resp.get("cause",[]) if isinstance(c,dict) and c.get("type")=="error"]
+                  err_codes = [c.get("code","?") for c in errs[:2]]
+                  print(f"[{idx}] ✗ {r.status_code} {err_codes} | {title[:45]}")
+                  err_list.append((idx, title, ",".join(err_codes)))
+              # Small throttle between items
+              time.sleep(3)
+              # Save every 5 items
+              if (i+1) % 5 == 0:
+                  with open("stock_config.json","w") as f:
+                      json.dump(stock, f, indent=2, ensure_ascii=False)
+                  tg(f"📊 Progreso: {i+1}/{len(missing_idx)} · OK: {len(ok_list)} Err: {len(err_list)}")
+          
+          with open("stock_config.json","w") as f:
+              json.dump(stock, f, indent=2, ensure_ascii=False)
+          
+          print(f"\n=== FINAL === OK:{len(ok_list)} ERR:{len(err_list)}")
+          m = f"🎉 *Publicación FAST completa*\n\nOK: *{len(ok_list)}/{len(missing_idx)}*\nErr: *{len(err_list)}*\n\n"
+          if err_list:
+              m += "*Errores:*\n"
+              for idx, title, err in err_list[:10]:
+                  m += f"• idx {idx}: {title[:35]}\n  `{err[:50]}`\n"
+          tg(m)
+          PY
+      - run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add stock_config.json
+          git diff --cached --quiet || git commit -m "[perfumes] fast publish all remaining"
+          git push || echo "no push"
