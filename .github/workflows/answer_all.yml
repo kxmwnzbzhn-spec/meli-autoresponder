@@ -1,0 +1,124 @@
+name: Answer all pending
+on: {workflow_dispatch: {}}
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          python3 <<'PY'
+          import os, json, requests, unicodedata, re
+          r = requests.post("https://api.mercadolibre.com/oauth/token", data={
+              "grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],
+              "client_secret":os.environ["MELI_APP_SECRET"],"refresh_token":os.environ["MELI_REFRESH_TOKEN"]
+          }, timeout=20)
+          tok = r.json()["access_token"]; h = {"Authorization":f"Bearer {tok}","Content-Type":"application/json"}
+          r = requests.get("https://api.mercadolibre.com/users/me", headers=h, timeout=15)
+          sid = r.json()["id"]
+          
+          def norm(s):
+              s = (s or "").lower()
+              s = unicodedata.normalize("NFD", s)
+              return "".join(c for c in s if unicodedata.category(c) != "Mn")
+          
+          templates = [
+              (["^hola$","^buenas$","^buen dia$","^saludos$","^hey$","^info$","^informes$","^informacion$","^ola$"],
+               "Hola! Claro, con gusto te ayudo. ¿Qué duda tienes sobre el producto?"),
+              (["disponible","sigue disponible","tienes stock","hay stock","cuantas hay","aun tienes","cuantos hay","hay piezas","cuenta con","tiene en existencia"],
+               "Hola! Sí, está disponible con envío inmediato."),
+              (["cuanto tarda","tiempo de envio","cuando llega","llegaria","envio rapido","tarda mucho","cuanto tiempo"],
+               "Hola! Enviamos el mismo día si compras antes de las 3pm. Tiempo estimado: 1-3 días hábiles."),
+              (["envio gratis","tiene envio","cuanto cuesta el envio","costo de envio","envio a domicilio"],
+               "Hola! El envío lo calcula MercadoLibre según tu código postal. Checa 'Calcular costo de envío'."),
+              (["caja","empaque","con caja","caja original"],
+               "Hola! Sí, viene con su caja original sellada. Todos los accesorios incluidos."),
+              (["fotos","foto","mas foto","otra foto","imagen","marcas visibles"],
+               "Hola! Las fotos del anuncio son reales del producto exacto. Si necesitas una específica dime y te la tomo."),
+              (["es original","original","autentico","autentica","pirata","clon","copia","sera original"],
+               "Hola! Sí, es 100% original y auténtico. Producto sellado de fábrica."),
+              (["garantia","garantiza","si se descompone","devolucion si falla","si no me gusta"],
+               "Hola! Tiene 30 días de garantía del vendedor. Si algo falla lo resolvemos sin problema."),
+              (["es nuevo","nueva","esta nuevo","viene nuevo","usado","seminuevo","que problema","como esta","condicion"],
+               "Hola! Es producto nuevo, sellado de fábrica, 100% original."),
+              (["enciende","prende","funciona","se escucha","reproduce","suena"],
+               "Hola! Sí, funciona al 100%. Probado antes de enviar."),
+              (["mas barato","descuento","rebaja","oferta","precio especial","bajas el precio","ultimo precio","dejas"],
+               "Hola! El precio mostrado ya es nuestro mejor precio."),
+              (["factura","facturar","tiene factura","dan factura"],
+               "Hola! Sí, facturamos. Al confirmar la compra envía tus datos fiscales por mensaje."),
+              (["color","que color","que tonos","colores disponibles","mismo color"],
+               "Hola! El color disponible es el que aparece en el título y las fotos."),
+              (["que modelo","modelo exacto","que version"],
+               "Hola! El modelo exacto aparece en el título del anuncio. Specs completas en la descripción."),
+              (["bateria","cuanto dura","duracion bateria","horas de reproduccion","horas"],
+               "Hola! La duración depende del volumen y uso. Consulta las specs oficiales en la descripción."),
+              (["resistente al agua","agua","sumergible","ipx","impermeable"],
+               "Hola! Según el fabricante tiene resistencia al agua IP67."),
+              (["bluetooth","se conecta","compatible con","funciona con","iphone","android","se empareja"],
+               "Hola! Funciona con cualquier dispositivo Bluetooth (iPhone, Android, PC)."),
+              (["recoger","paso por el","ir por el","entrega en mano","recolecto"],
+               "Hola! Solo manejamos envío por MercadoEnvíos, no hay recolección en persona."),
+              (["efectivo","oxxo","contraentrega","pago contra","pago efectivo"],
+               "Hola! Pagos por MercadoPago (tarjeta, OXXO, SPEI). No manejamos pago contra entrega."),
+              (["jbl","marca"],
+               "Hola! Sí, marca original como se indica en el título."),
+              (["huele","aroma","olor","fragancia","notas"],
+               "Hola! Las notas olfativas están descritas en el anuncio. Aroma original del fabricante, producto auténtico."),
+              (["volumen","ml","tamaño","tamano"],
+               "Hola! El volumen exacto aparece en el título del anuncio."),
+              (["dura","durabilidad","permanencia","cuanto dura el aroma"],
+               "Hola! La duración de la fragancia depende de la piel y clima, pero típicamente es de 6-8 horas."),
+              (["hombre","mujer","unisex","para el","para ella","genero","género"],
+               "Hola! El género (Hombre/Mujer/Unisex) está especificado en el título del anuncio."),
+              (["sellado","de fabrica","de caja"],
+               "Hola! Sí, producto sellado de fábrica, 100% original."),
+          ]
+          
+          r = requests.get(f"https://api.mercadolibre.com/questions/search?seller_id={sid}&status=UNANSWERED&limit=50&sort_fields=date_created&sort_types=ASC", headers=h, timeout=15)
+          pending = r.json().get("questions",[]) or []
+          print(f"=== {len(pending)} PENDIENTES ===\n")
+          SIG = "\n\n— Sonix Mx"
+          answered = []; unmatched = []
+          for q in pending:
+              qid = q.get("id"); qt = q.get("text","")
+              qn = norm(qt).strip()
+              matched = None
+              for keys, resp in templates:
+                  for k in keys:
+                      if k.startswith("^") and k.endswith("$"):
+                          if re.match(k, qn): matched = resp; break
+                      elif k in qn:
+                          matched = resp; break
+                  if matched: break
+              if not matched:
+                  unmatched.append((qid, qt))
+                  continue
+              r_a = requests.post("https://api.mercadolibre.com/answers", headers=h,
+                  json={"question_id": int(qid), "text": matched + SIG}, timeout=15)
+              if r_a.status_code == 200:
+                  answered.append((qid, qt[:50]))
+                  print(f"  ✓ {qid} | {qt[:60]}")
+              else:
+                  unmatched.append((qid, qt))
+          print(f"\nRespondidas: {len(answered)}")
+          print(f"Sin template: {len(unmatched)}")
+          for qid, qt in unmatched[:20]:
+              print(f"    · {qid}: {qt[:90]}")
+          
+          tt=os.environ.get("TELEGRAM_BOT_TOKEN"); tc=os.environ.get("TELEGRAM_CHAT_ID")
+          if tt and tc:
+              m = f"💬 *Q&A sweep*\n\nRespondidas: *{len(answered)}*\nSin template: *{len(unmatched)}*\n"
+              if unmatched:
+                  m += "\n*Pendientes manuales:*\n"
+                  for qid, qt in unmatched[:10]:
+                      m += f"• `{qid}`: {qt[:70]}\n"
+              requests.post(f"https://api.telegram.org/bot{tt}/sendMessage", json={"chat_id":tc,"parse_mode":"Markdown","text":m[:4000]})
+          PY
