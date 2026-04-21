@@ -1,0 +1,95 @@
+name: Cleanup duplicate Rabanne + retry Guerlain
+on: {workflow_dispatch: {}}
+permissions: {contents: write}
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+        run: |
+          python3 <<'PY'
+          import os, json, requests
+          r = requests.post("https://api.mercadolibre.com/oauth/token", data={
+              "grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],
+              "client_secret":os.environ["MELI_APP_SECRET"],"refresh_token":os.environ["MELI_REFRESH_TOKEN"]
+          }, timeout=20)
+          tok = r.json()["access_token"]; h = {"Authorization":f"Bearer {tok}","Content-Type":"application/json"}
+          
+          # Close duplicate
+          for iid in ["MLM2879334963"]:
+              r = requests.put(f"https://api.mercadolibre.com/items/{iid}", headers=h, json={"status":"closed"}, timeout=15)
+              print(f"Close {iid}: {r.status_code}")
+          
+          # Retry Guerlain Patchouli - use more search variations
+          for search_q in ["Guerlain Patchouli Ardent", "Patchouli Ardent Guerlain 125"]:
+              r = requests.get(f"https://api.mercadolibre.com/products/search?site_id=MLM&q={search_q.replace(' ','+')}&limit=10", headers=h, timeout=20)
+              for p in r.json().get("results",[]):
+                  pid = p.get("id")
+                  r2 = requests.get(f"https://api.mercadolibre.com/products/{pid}", headers=h, timeout=10)
+                  pd = r2.json()
+                  pics = [{"source": pic.get("url") or pic.get("secure_url")} for pic in pd.get("pictures",[]) if pic.get("url") or pic.get("secure_url")]
+                  if not pics: continue
+                  gtin = next((a.get("value_name") for a in pd.get("attributes",[]) if a.get("id")=="GTIN"), None)
+                  print(f"Trying catalog {pid} gtin={gtin} pics={len(pics)}")
+                  
+                  attrs = [
+                      {"id":"BRAND","value_name":"Guerlain"},
+                      {"id":"GENDER","value_name":"Sin género"},
+                      {"id":"UNIT_VOLUME","value_name":"125 mL"},
+                      {"id":"NET_VOLUME","value_name":"125 mL"},
+                      {"id":"FRAGRANCE_TYPE","value_name":"Eau de parfum"},
+                      {"id":"PERFUME_NAME","value_name":"Patchouli Ardent"},
+                      {"id":"ITEM_CONDITION","value_name":"Nuevo"},
+                  ]
+                  if gtin:
+                      attrs.append({"id":"GTIN","value_name":gtin})
+                  
+                  body = {
+                      "title": "GUERLAIN PATCHOULI ARDENT EAU DE PARFUM 125 ML ORIGINAL",
+                      "category_id": "MLM1271", "price": 1999,
+                      "currency_id":"MXN", "available_quantity":1, "buying_mode":"buy_it_now",
+                      "condition":"new", "listing_type_id":"gold_pro",
+                      "pictures": pics[:8], "attributes": attrs,
+                      "sale_terms":[{"id":"WARRANTY_TYPE","value_name":"Garantía del vendedor"},{"id":"WARRANTY_TIME","value_name":"30 días"}],
+                      "shipping":{"mode":"me2","local_pick_up":False,"free_shipping":False}
+                  }
+                  r = requests.post("https://api.mercadolibre.com/items", headers=h, json=body, timeout=30)
+                  resp = r.json()
+                  print(f"POST (no catalog): {r.status_code}")
+                  if r.status_code in (200,201):
+                      new_id = resp.get("id")
+                      print(f"✓ {new_id} | {resp.get('permalink','')}")
+                      
+                      # Update stock_config
+                      try:
+                          with open("stock_config.json") as f: stock = json.load(f)
+                      except: stock = {}
+                      stock[new_id] = {
+                          "real_stock": 10, "sku": f"PERF-003",
+                          "label": "GUERLAIN PATCHOULI ARDENT EAU DE PARFUM 125 ML ORIGINAL"[:50],
+                          "auto_replenish": True, "replenish_quantity": 1,
+                          "seo_title": "GUERLAIN PATCHOULI ARDENT EAU DE PARFUM 125 ML ORIGINAL",
+                          "previous_ids": [], "_perfume": True, "_idx": 3
+                      }
+                      with open("stock_config.json","w") as f:
+                          json.dump(stock, f, indent=2, ensure_ascii=False)
+                      raise SystemExit(0)
+                  else:
+                      errs = resp.get("cause",[])
+                      for c in errs[:2]:
+                          if isinstance(c, dict):
+                              print(f"  err: {c.get('code')}: {c.get('message','')[:120]}")
+          PY
+      - run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add stock_config.json
+          git diff --cached --quiet || git commit -m "[perfumes] retry Guerlain Patchouli"
+          git push || echo "no push"
