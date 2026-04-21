@@ -1,0 +1,74 @@
+name: Delete old JBL usados
+on: {workflow_dispatch: {}}
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          python3 <<'PY'
+          import os, requests, time
+          def get_tok():
+              for _ in range(3):
+                  r = requests.post("https://api.mercadolibre.com/oauth/token", data={
+                      "grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],
+                      "client_secret":os.environ["MELI_APP_SECRET"],"refresh_token":os.environ["MELI_REFRESH_TOKEN"]
+                  }, timeout=20)
+                  b = r.json()
+                  if r.status_code == 200 and "access_token" in b: return b["access_token"]
+                  time.sleep(5)
+              raise Exception("auth")
+          tok = get_tok(); h = {"Authorization":f"Bearer {tok}","Content-Type":"application/json"}
+          r = requests.get("https://api.mercadolibre.com/users/me", headers=h, timeout=15)
+          sid = r.json()["id"]
+          
+          # Find all closed JBL that are NOT Reacondicionado
+          closed_old = []
+          for iid in (r := requests.get(f"https://api.mercadolibre.com/users/{sid}/items/search?status=closed&limit=100", headers=h, timeout=15)).json().get("results",[]):
+              r2 = requests.get(f"https://api.mercadolibre.com/items/{iid}?attributes=id,title,sub_status", headers=h, timeout=6)
+              t = r2.json()
+              title = (t.get("title","") or "").lower()
+              if "jbl" in title and "reacondicionado" not in title:
+                  closed_old.append((iid, t.get("title",""), t.get("sub_status",[])))
+          
+          # Also check inactive/forbidden that could be deleted
+          for iid in (r := requests.get(f"https://api.mercadolibre.com/users/{sid}/items/search?status=inactive&limit=100", headers=h, timeout=15)).json().get("results",[]):
+              r2 = requests.get(f"https://api.mercadolibre.com/items/{iid}?attributes=id,title,sub_status", headers=h, timeout=6)
+              t = r2.json()
+              title = (t.get("title","") or "").lower()
+              if "jbl" in title and "reacondicionado" not in title:
+                  closed_old.append((iid, t.get("title",""), t.get("sub_status",[])))
+          
+          print(f"=== {len(closed_old)} JBL usados closed/inactive a eliminar ===")
+          
+          ok = 0; err = 0
+          for iid, title, ss in closed_old:
+              if "deleted" in (ss or []):
+                  print(f"  [ya deleted] {iid}")
+                  continue
+              # PUT status=closed + sub_status=deleted
+              r = requests.put(f"https://api.mercadolibre.com/items/{iid}", headers=h,
+                  json={"deleted":"true"}, timeout=15)
+              if r.status_code == 200:
+                  print(f"  ✓ DELETED {iid} | {title[:50]}")
+                  ok += 1
+              else:
+                  msg = r.json().get("message","")[:100]
+                  print(f"  ✗ {iid}: {r.status_code} {msg}")
+                  err += 1
+              time.sleep(0.5)
+          
+          print(f"\n=== OK:{ok} ERR:{err} ===")
+          tt=os.environ.get("TELEGRAM_BOT_TOKEN"); tc=os.environ.get("TELEGRAM_CHAT_ID")
+          if tt and tc:
+              requests.post(f"https://api.telegram.org/bot{tt}/sendMessage", json={"chat_id":tc,"parse_mode":"Markdown",
+                  "text":f"🗑 *JBL usados borrados*\n\nDeleted: *{ok}*\nErr: {err}"})
+          PY
