@@ -62,8 +62,6 @@ attrs=[
     {"id":"COLOR","value_name":"Negro"},
     {"id":"MODEL","value_name":"SRS-XB100"},
     {"id":"ITEM_CONDITION","value_name":"Nuevo"},
-    {"id":"GTIN","value_name":"No aplica"},
-    {"id":"ALPHANUMERIC_MODEL","value_name":"SRS-XB100"},
 ]
 seen={a["id"] for a in attrs}
 for ca in cat_attrs:
