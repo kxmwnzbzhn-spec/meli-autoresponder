@@ -13,12 +13,21 @@ jobs:
           MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
         run: |
           python3 <<'PY'
-          import os, json, requests
-          r = requests.post("https://api.mercadolibre.com/oauth/token", data={
-              "grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],
-              "client_secret":os.environ["MELI_APP_SECRET"],"refresh_token":os.environ["MELI_REFRESH_TOKEN"]
-          }, timeout=20)
-          tok = r.json()["access_token"]; h = {"Authorization":f"Bearer {tok}"}
+          import os, json, requests, time
+          def get_token():
+              for attempt in range(3):
+                  r = requests.post("https://api.mercadolibre.com/oauth/token", data={
+                      "grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],
+                      "client_secret":os.environ["MELI_APP_SECRET"],"refresh_token":os.environ["MELI_REFRESH_TOKEN"]
+                  }, timeout=20)
+                  body = r.json()
+                  print(f"refresh attempt {attempt+1}: {r.status_code} {body}")
+                  if r.status_code == 200 and "access_token" in body:
+                      return body["access_token"]
+                  time.sleep(5)
+              raise Exception(f"Failed to refresh token: {body}")
+          tok = get_token()
+          h = {"Authorization":f"Bearer {tok}"}
           r = requests.get("https://api.mercadolibre.com/users/me", headers=h, timeout=15)
           sid = r.json()["id"]
           
@@ -27,57 +36,43 @@ jobs:
               r = requests.get(f"https://api.mercadolibre.com/users/{sid}/items/search?status={st}&limit=100", headers=h, timeout=15)
               all_items.extend([(iid, st) for iid in r.json().get("results",[])])
           
-          categories = {
-              "pending_documentation": [],
-              "waiting_for_patch": [],
-              "forbidden_deleted": [],
-              "other_paused": [],
-              "other_under_review": [],
-              "under_review_clean": [],
-              "active_ok": [],
-          }
-          
+          pending_doc=[]; waiting_patch=[]; forbidden=[]; other_paused=[]; under_review=[]; active_ok=[]
           for iid, _ in all_items:
               r = requests.get(f"https://api.mercadolibre.com/items/{iid}?attributes=id,title,status,sub_status", headers=h, timeout=8)
               it = r.json()
-              title = it.get("title","")[:45]
+              title = it.get("title","")[:50]
               status = it.get("status","")
               ss = it.get("sub_status") or []
               if isinstance(ss, str): ss = [ss]
               
               if "pending_documentation" in ss:
-                  categories["pending_documentation"].append((iid, title, status))
+                  pending_doc.append((iid, title, status))
               elif "waiting_for_patch" in ss:
-                  categories["waiting_for_patch"].append((iid, title, status))
+                  waiting_patch.append((iid, title, status))
               elif any(s in ss for s in ("forbidden","deleted")):
-                  categories["forbidden_deleted"].append((iid, title, status, ss))
-              elif status == "paused" and ss:
-                  categories["other_paused"].append((iid, title, ss))
+                  forbidden.append((iid, title, status, ss))
+              elif status == "paused":
+                  other_paused.append((iid, title, ss))
               elif status == "under_review":
-                  categories["under_review_clean"].append((iid, title, ss))
+                  under_review.append((iid, title, ss))
               elif status == "active":
-                  categories["active_ok"].append((iid, title))
+                  active_ok.append((iid, title))
           
-          print(f"=== TOTAL escaneados: {len(all_items)} ===\n")
-          print(f"🚨 PENDING_DOCUMENTATION (piden factura): {len(categories['pending_documentation'])}")
-          for iid, title, status in categories["pending_documentation"]:
+          print(f"\n=== TOTAL: {len(all_items)} ===")
+          print(f"🚨 PENDING_DOC (factura): {len(pending_doc)}")
+          for iid, title, status in pending_doc:
               print(f"  {iid} [{status}] | {title}")
-          
-          print(f"\n📝 WAITING_FOR_PATCH: {len(categories['waiting_for_patch'])}")
-          for iid, title, status in categories["waiting_for_patch"]:
+          print(f"\n📝 WAITING_FOR_PATCH: {len(waiting_patch)}")
+          for iid, title, status in waiting_patch:
               print(f"  {iid} [{status}] | {title}")
-          
-          print(f"\n❌ FORBIDDEN/DELETED: {len(categories['forbidden_deleted'])}")
-          for iid, title, status, ss in categories["forbidden_deleted"]:
+          print(f"\n❌ FORBIDDEN/DELETED: {len(forbidden)}")
+          for iid, title, status, ss in forbidden:
               print(f"  {iid} [{status}] ss={ss} | {title}")
-          
-          print(f"\n⚠ UNDER_REVIEW (sin causa clara): {len(categories['under_review_clean'])}")
-          for iid, title, ss in categories["under_review_clean"]:
+          print(f"\n⚠ UNDER_REVIEW: {len(under_review)}")
+          for iid, title, ss in under_review:
               print(f"  {iid} ss={ss} | {title}")
-          
-          print(f"\n🟡 OTRAS PAUSADAS: {len(categories['other_paused'])}")
-          for iid, title, ss in categories["other_paused"]:
+          print(f"\n🟡 OTRAS PAUSADAS: {len(other_paused)}")
+          for iid, title, ss in other_paused[:20]:
               print(f"  {iid} ss={ss} | {title}")
-          
-          print(f"\n🟢 ACTIVAS: {len(categories['active_ok'])}")
+          print(f"\n🟢 ACTIVAS OK: {len(active_ok)}")
           PY
