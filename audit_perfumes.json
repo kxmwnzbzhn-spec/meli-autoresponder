@@ -1,0 +1,186 @@
+{
+  "total": 39,
+  "flagged": [
+    {
+      "id": "MLM5221767428",
+      "title": "Oud Royal Armani Privé 100 Ml Eau De Parfum Original",
+      "status": "active",
+      "ss": [],
+      "price": 1999,
+      "brand": "Giorgio Armani",
+      "perfume_name": "Oud",
+      "gtin": "3605521807953",
+      "catalog": null,
+      "pic0": "http://http2.mlstatic.com/D_600957-MLA74782757343_022024-O.jpg",
+      "issues": [
+        "BRAND 'Giorgio Armani' no aparece en título → posible mismatch con foto"
+      ]
+    },
+    {
+      "id": "MLM5221356390",
+      "title": "Club De Nuit Maleka Edp Armaf 105ml Original Mujer Lujo",
+      "status": "active",
+      "ss": [],
+      "price": 499,
+      "brand": "Armaf",
+      "perfume_name": "Club",
+      "gtin": "0000001023",
+      "catalog": null,
+      "pic0": "http://http2.mlstatic.com/D_889593-MLA85106647330_052025-O.jpg",
+      "issues": [
+        "GTIN placeholder: 0000001023 — alto riesgo de bloqueo"
+      ]
+    },
+    {
+      "id": "MLM5221355572",
+      "title": "Rabanne 1 Million Gold Intense Edp Hombre 100ml Original",
+      "status": "active",
+      "ss": [],
+      "price": 999,
+      "brand": "Paco Rabanne",
+      "perfume_name": "Rabanne",
+      "gtin": null,
+      "catalog": "MLM64206961",
+      "pic0": "http://http2.mlstatic.com/D_626859-MLA104645079171_012026-O.jpg",
+      "issues": [
+        "BRAND 'Paco Rabanne' no aparece en título → posible mismatch con foto"
+      ]
+    },
+    {
+      "id": "MLM5221355096",
+      "title": "Perfume Game Of Spades Wildcard Parfum 100ml",
+      "status": "active",
+      "ss": [],
+      "price": 499,
+      "brand": "Genérico",
+      "perfume_name": "Perfume",
+      "gtin": null,
+      "catalog": "MLM24836013",
+      "pic0": "http://http2.mlstatic.com/D_682804-MLU73698892955_122023-O.jpg",
+      "issues": [
+        "BRAND 'Genérico' no aparece en título → posible mismatch con foto"
+      ]
+    },
+    {
+      "id": "MLM5221332874",
+      "title": "Perfume Sauvage Eau Forte 100 Mi Hombre Cítrico Amaderado",
+      "status": "active",
+      "ss": [],
+      "price": 999,
+      "brand": "Dior",
+      "perfume_name": "Perfume",
+      "gtin": "3348901628181",
+      "catalog": null,
+      "pic0": "http://http2.mlstatic.com/D_874555-MLA79823817530_102024-O.jpg",
+      "issues": [
+        "BRAND 'Dior' no aparece en título → posible mismatch con foto"
+      ]
+    },
+    {
+      "id": "MLM5221330720",
+      "title": "Perfume Armaf Odyssey Spectra Hombre 100ml Eau De Parfum",
+      "status": "active",
+      "ss": [],
+      "price": 499,
+      "brand": "Armaf",
+      "perfume_name": "Perfume",
+      "gtin": "0000001031",
+      "catalog": null,
+      "pic0": "http://http2.mlstatic.com/D_736289-MLA92449901997_092025-O.jpg",
+      "issues": [
+        "GTIN placeholder: 0000001031 — alto riesgo de bloqueo"
+      ]
+    },
+    {
+      "id": "MLM5221330622",
+      "title": "Armaf Odyssey Candee Edp Spray Mujer 100ml",
+      "status": "active",
+      "ss": [],
+      "price": 499,
+      "brand": "Armaf",
+      "perfume_name": "Armaf",
+      "gtin": "000000001007",
+      "catalog": null,
+      "pic0": "http://http2.mlstatic.com/D_700299-MLA79638883932_102024-O.jpg",
+      "issues": [
+        "GTIN placeholder: 000000001007 — alto riesgo de bloqueo"
+      ]
+    },
+    {
+      "id": "MLM5221328952",
+      "title": "Perfume Original Marshmallow Blush Edp 100ml Mujer Importado",
+      "status": "active",
+      "ss": [],
+      "price": 499,
+      "brand": "Genérico",
+      "perfume_name": "Perfume",
+      "gtin": null,
+      "catalog": "MLM63675864",
+      "pic0": "http://http2.mlstatic.com/D_935214-MLA102618759290_122025-O.jpg",
+      "issues": [
+        "BRAND 'Genérico' no aparece en título → posible mismatch con foto"
+      ]
+    },
+    {
+      "id": "MLM2880142605",
+      "title": "Jean Paul Gaultier Le Male Elixir Parfum 125ml Hombre",
+      "status": "active",
+      "ss": [],
+      "price": 999,
+      "brand": "Jean Paul Gaultier",
+      "perfume_name": "Jean",
+      "gtin": "000000001038",
+      "catalog": null,
+      "pic0": "http://http2.mlstatic.com/D_613128-MLA91308147935_082025-O.jpg",
+      "issues": [
+        "GTIN placeholder: 000000001038 — alto riesgo de bloqueo"
+      ]
+    },
+    {
+      "id": "MLM2879717657",
+      "title": "Kurky Maison Francis 70 Ml Eau De Parfum Original",
+      "status": "active",
+      "ss": [],
+      "price": 1999,
+      "brand": "Maison Francis Kurkdjian",
+      "perfume_name": "Kurky",
+      "gtin": null,
+      "catalog": null,
+      "pic0": "http://http2.mlstatic.com/D_937664-MLA84609478005_052025-O.webp",
+      "issues": [
+        "BRAND=MAISON FRANCIS KURKDJIAN: OK — es la marca real",
+        "BRAND 'Maison Francis Kurkdjian' no aparece en título → posible mismatch con foto"
+      ]
+    },
+    {
+      "id": "MLM2879386811",
+      "title": "Rabanne 1 Million Gold Intense Edp Hombre 100ml Original",
+      "status": "active",
+      "ss": [],
+      "price": 999,
+      "brand": "Paco Rabanne",
+      "perfume_name": "Rabanne",
+      "gtin": null,
+      "catalog": "MLM64206961",
+      "pic0": "http://http2.mlstatic.com/D_626859-MLA104645079171_012026-O.jpg",
+      "issues": [
+        "BRAND 'Paco Rabanne' no aparece en título → posible mismatch con foto"
+      ]
+    },
+    {
+      "id": "MLM2879335659",
+      "title": "Baccarat Rouge 540 Extrait 70ml Maison Francis Kurkdjian",
+      "status": "active",
+      "ss": [],
+      "price": 1999,
+      "brand": "Maison Francis Kurkdjian",
+      "perfume_name": "Baccarat",
+      "gtin": null,
+      "catalog": null,
+      "pic0": "http://http2.mlstatic.com/D_870590-MLU74335578955_012024-O.jpg",
+      "issues": [
+        "BRAND=MAISON FRANCIS KURKDJIAN: OK — es la marca real"
+      ]
+    }
+  ]
+}
