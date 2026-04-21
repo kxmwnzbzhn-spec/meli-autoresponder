@@ -187,14 +187,14 @@
     "real_stock": 30,
     "sku": "AUTO-158472",
     "label": "Bocina Bluetooth Jbl Flip 7 Portatil Roja Original Usada - $399",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "Bocina Bluetooth Jbl Flip 7 Portatil Roja Original Usada",
     "previous_ids": [],
     "_auto_discovered": true,
     "deleted": true,
     "_deleted_at": 1776740063,
-    "_deleted_reason": "It's not possible to relist an item that has been already deleted. [MLM5213158472 deleted]"
+    "_deleted_reason": "JBL usado deprecado - reemplazado por Reacondicionado"
   },
   "MLM2874596985": {
     "real_stock": 30,
@@ -223,7 +223,7 @@
     "real_stock": 29,
     "sku": "AUTO-158476",
     "label": "Bocina Bluetooth Jbl Flip 7 Portatil Morada Original Usada - $399",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "Bocina Bluetooth Jbl Flip 7 Portatil Morada Original Usada",
     "previous_ids": [
@@ -232,7 +232,7 @@
     "_auto_discovered": true,
     "deleted": true,
     "_deleted_at": 1776785673,
-    "_deleted_reason": "It's not possible to relist an item that has been already deleted. [MLM5213557568 deleted]"
+    "_deleted_reason": "JBL usado deprecado - reemplazado por Reacondicionado"
   },
   "MLM5214751640": {
     "real_stock": 29,
@@ -349,7 +349,7 @@
     "real_stock": 29,
     "sku": "AUTO-612190",
     "label": "Bocina Bluetooth Jbl Charge 6 Portatil Roja Original Usada - $499",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "Bocina Bluetooth Jbl Charge 6 Portatil Roja Original Usada",
     "previous_ids": [
@@ -358,7 +358,7 @@
     "_auto_discovered": true,
     "deleted": true,
     "_deleted_at": 1776778041,
-    "_deleted_reason": "It's not possible to relist an item that has been already deleted. [MLM5218321152 deleted]"
+    "_deleted_reason": "JBL usado deprecado - reemplazado por Reacondicionado"
   },
   "MLM5220679640": {
     "real_stock": 46,
