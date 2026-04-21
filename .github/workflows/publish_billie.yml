@@ -22,86 +22,24 @@ jobs:
           }, timeout=20)
           tok = r.json()["access_token"]; h = {"Authorization":f"Bearer {tok}","Content-Type":"application/json"}
           
-          # Predict category
-          title = "Perfume Billie Eilish Eilish Eau Parfum 100ml Mujer Original"
-          r = requests.get(f"https://api.mercadolibre.com/sites/MLM/category_predictor/predict?title={title}", headers=h, timeout=15)
-          pr = r.json()
-          print(f"Predicted: {pr.get('id')} - {pr.get('name')}")
-          category_id = pr.get('id')
+          # Browse categories to find perfumes
+          print("MLM root categories:")
+          r = requests.get("https://api.mercadolibre.com/sites/MLM/categories", headers=h, timeout=15)
+          for c in r.json():
+              if 'belleza' in c.get('name','').lower() or 'perfume' in c.get('name','').lower():
+                  print(f"  {c.get('id')} - {c.get('name')}")
           
-          # Also: get a sample active perfume listing to see exact attrs used
-          print("\nSample active perfume listings:")
-          r = requests.get("https://api.mercadolibre.com/sites/MLM/search?q=billie+eilish+perfume+100ml&limit=3", headers=h, timeout=15)
-          for it in r.json().get('results',[])[:3]:
-              print(f"  {it.get('id')} | ${it.get('price')} | cat={it.get('category_id')} | {it.get('title','')[:70]}")
-              if not category_id:
-                  category_id = it.get('category_id')
+          # Common perfume cats in MLM
+          for cat in ["MLM109003","MLM109012","MLM175794","MLM1246","MLM87195"]:
+              r = requests.get(f"https://api.mercadolibre.com/categories/{cat}", headers=h, timeout=10)
+              if r.status_code == 200:
+                  c = r.json()
+                  listing_types = [s.get("site_id") for s in c.get("settings",{}).get("listing_allowed_attributes",[])]
+                  print(f"  {cat} | {c.get('name')}")
           
-          CATALOG = "MLM20601206"
-          r = requests.get(f"https://api.mercadolibre.com/products/{CATALOG}", headers=h, timeout=15)
-          pd = r.json()
-          pic_urls = [{"source": p.get("url") or p.get("secure_url")} for p in pd.get('pictures',[]) if p.get("url") or p.get("secure_url")][:8]
-          print(f"\nFinal category: {category_id}")
-          print(f"Pictures: {len(pic_urls)}")
-          
-          body = {
-              "title": title,
-              "category_id": category_id,
-              "price": 999,
-              "currency_id":"MXN",
-              "available_quantity":1,
-              "buying_mode":"buy_it_now",
-              "condition":"new",
-              "listing_type_id":"gold_pro",
-              "pictures": pic_urls,
-              "attributes":[
-                  {"id":"BRAND","value_name":"Billie Eilish"},
-                  {"id":"MODEL","value_name":"Eilish Eau de Parfum"},
-                  {"id":"GENDER","value_name":"Femenino"},
-                  {"id":"VOLUME_CAPACITY","value_name":"100 ml"},
-                  {"id":"FRAGRANCE_FAMILY","value_name":"Amaderado"},
-                  {"id":"FRAGRANCE_TYPE","value_name":"Eau de parfum"},
-              ],
-              "sale_terms":[
-                  {"id":"WARRANTY_TYPE","value_name":"Garantía del vendedor"},
-                  {"id":"WARRANTY_TIME","value_name":"30 días"}
-              ],
-              "shipping":{"mode":"me2","local_pick_up":False,"free_shipping":False}
-          }
-          r = requests.post("https://api.mercadolibre.com/items", headers=h, json=body, timeout=30)
-          print(f"\nPOST: {r.status_code}")
-          resp = r.json()
-          if r.status_code in (200,201):
-              new_id = resp.get("id")
-              print(f"✓ {new_id}")
-              print(f"  permalink: {resp.get('permalink')}")
-              print(f"  status: {resp.get('status')} sub_status: {resp.get('sub_status')}")
-              desc = (
-                  "BILLIE EILISH - EILISH EAU DE PARFUM 100ML\n\n"
-                  "Perfume original y 100% auténtico de Billie Eilish.\n"
-                  "Fragancia amaderada para mujer, intensa y envolvente.\n\n"
-                  "CARACTERÍSTICAS:\n"
-                  "- Marca: Billie Eilish\n"
-                  "- Fragancia: Eilish (la original)\n"
-                  "- Tipo: Eau de Parfum (EDP)\n"
-                  "- Tamaño: 100 ml\n"
-                  "- Género: Femenino\n"
-                  "- Familia olfativa: Amaderada\n"
-                  "- Notas: Mandarina, Vainilla, Cacao, Almizcle\n\n"
-                  "GARANTIAS:\n"
-                  "- Producto NUEVO, sellado de fabrica\n"
-                  "- 100% Original\n"
-                  "- 30 dias de garantia del vendedor\n"
-                  "- Envio el mismo dia (compras antes de 3pm)\n\n"
-                  "- Sonix Mx"
-              )
-              rd = requests.post(f"https://api.mercadolibre.com/items/{new_id}/description", headers=h,
-                  json={"plain_text":desc}, timeout=15)
-              print(f"  description: {rd.status_code}")
-              tt=os.environ.get("TELEGRAM_BOT_TOKEN"); tc=os.environ.get("TELEGRAM_CHAT_ID")
-              if tt and tc:
-                  requests.post(f"https://api.telegram.org/bot{tt}/sendMessage", json={"chat_id":tc,"parse_mode":"Markdown",
-                      "text":f"🌸 *Billie Eilish publicado*\n\n`{new_id}` $999\nStatus: {resp.get('status')}\n[Ver]({resp.get('permalink','')})"})
-          else:
-              print(json.dumps(resp, indent=2)[:2500])
+          # Best bet: MLM109003 is Perfumes.
+          # Try predicting via the correct API
+          print("\nPredict:")
+          r = requests.get("https://api.mercadolibre.com/sites/MLM/domain_discovery/search?limit=3&q=Billie%20Eilish%20Perfume%20100ml", headers=h, timeout=15)
+          print(r.text[:600])
           PY
