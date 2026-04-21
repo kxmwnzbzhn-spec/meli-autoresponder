@@ -1,0 +1,105 @@
+name: Adjust package dimensions
+on: {workflow_dispatch: {}}
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          python3 <<'PY'
+          import os, json, requests
+          r = requests.post("https://api.mercadolibre.com/oauth/token", data={
+              "grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],
+              "client_secret":os.environ["MELI_APP_SECRET"],"refresh_token":os.environ["MELI_REFRESH_TOKEN"]
+          }, timeout=20)
+          tok = r.json()["access_token"]; h = {"Authorization":f"Bearer {tok}","Content-Type":"application/json"}
+          r = requests.get("https://api.mercadolibre.com/users/me", headers=h, timeout=15)
+          sid = r.json()["id"]
+          
+          # Perfil de dimensiones por tipo de producto (cm + gramos)
+          # Reales + ligeramente conservador para no caer en re-pesaje
+          PROFILES = {
+              # Perfumes 100ml - caja + envoltorio
+              "perfume_100":  {"L":15,"W":10,"H":10,"WEIGHT":400},
+              "perfume_70":   {"L":13,"W":9,"H":9,"WEIGHT":350},
+              "perfume_60":   {"L":12,"W":8,"H":8,"WEIGHT":300},
+              "perfume_90":   {"L":14,"W":10,"H":10,"WEIGHT":380},
+              "perfume_105":  {"L":15,"W":10,"H":10,"WEIGHT":420},
+              "perfume_125":  {"L":16,"W":11,"H":11,"WEIGHT":500},
+              # JBL
+              "jbl_go":       {"L":15,"W":10,"H":9,"WEIGHT":300},
+              "jbl_clip":     {"L":12,"W":9,"H":6,"WEIGHT":250},
+              "jbl_flip":     {"L":19,"W":9,"H":9,"WEIGHT":650},
+              "jbl_charge":   {"L":23,"W":10,"H":10,"WEIGHT":960},
+              "jbl_grip":     {"L":16,"W":10,"H":9,"WEIGHT":400},
+              # Dashcam
+              "dashcam":      {"L":20,"W":12,"H":8,"WEIGHT":400},
+              # Redmi Buds (audífonos pequeños)
+              "redmi_buds":   {"L":10,"W":7,"H":4,"WEIGHT":100},
+              # Default conservador
+              "default":     {"L":15,"W":10,"H":10,"WEIGHT":400},
+          }
+          
+          def profile_for(title):
+              t = title.lower()
+              # JBL first
+              if "jbl" in t:
+                  if "charge" in t: return PROFILES["jbl_charge"]
+                  if "flip" in t: return PROFILES["jbl_flip"]
+                  if "clip" in t: return PROFILES["jbl_clip"]
+                  if "grip" in t: return PROFILES["jbl_grip"]
+                  if "go 4" in t or "go 3" in t or "go" in t: return PROFILES["jbl_go"]
+              if "dashcam" in t or "dvr" in t: return PROFILES["dashcam"]
+              if "redmi" in t or "buds" in t or "audifono" in t: return PROFILES["redmi_buds"]
+              # Perfumes
+              if "perfume" in t or "parfum" in t or "eau de" in t or "edp" in t or "edt" in t or "fragancia" in t:
+                  for mlv,key in [("125","perfume_125"),("105","perfume_105"),("100","perfume_100"),("90","perfume_90"),("70","perfume_70"),("60","perfume_60")]:
+                      if f"{mlv}ml" in t.replace(" ","") or f"{mlv} ml" in t:
+                          return PROFILES[key]
+                  return PROFILES["perfume_100"]
+              return PROFILES["default"]
+          
+          # Scan active items
+          r = requests.get(f"https://api.mercadolibre.com/users/{sid}/items/search?status=active&limit=50", headers=h, timeout=15)
+          active = r.json().get("results",[])
+          print(f"=== {len(active)} items activos ===\n")
+          
+          ok = err = skip = 0
+          for iid in active:
+              r = requests.get(f"https://api.mercadolibre.com/items/{iid}?attributes=id,title,attributes", headers=h, timeout=10)
+              it = r.json()
+              title = it.get("title","")
+              prof = profile_for(title)
+              # Current dimensions
+              cur_attrs = {a.get("id"): a.get("value_name") for a in it.get("attributes",[])}
+              # Build attrs to set
+              new_attrs = [
+                  {"id":"PACKAGE_LENGTH","value_name":f"{prof['L']} cm"},
+                  {"id":"PACKAGE_WIDTH","value_name":f"{prof['W']} cm"},
+                  {"id":"PACKAGE_HEIGHT","value_name":f"{prof['H']} cm"},
+                  {"id":"PACKAGE_WEIGHT","value_name":f"{prof['WEIGHT']} g"},
+              ]
+              r = requests.put(f"https://api.mercadolibre.com/items/{iid}", headers=h,
+                  json={"attributes": new_attrs}, timeout=15)
+              if r.status_code == 200:
+                  print(f"  ✓ {iid} [{prof['L']}x{prof['W']}x{prof['H']}cm {prof['WEIGHT']}g] {title[:45]}")
+                  ok += 1
+              else:
+                  msg = r.json().get("message","")[:80]
+                  print(f"  ✗ {iid}: {r.status_code} {msg} | {title[:40]}")
+                  err += 1
+          
+          print(f"\n=== RESUMEN ===\n  OK: {ok} | ERR: {err}")
+          tt=os.environ.get("TELEGRAM_BOT_TOKEN"); tc=os.environ.get("TELEGRAM_CHAT_ID")
+          if tt and tc:
+              requests.post(f"https://api.telegram.org/bot{tt}/sendMessage", json={"chat_id":tc,"parse_mode":"Markdown",
+                  "text":f"📦 *Medidas envío ajustadas*\n\nOK: {ok}\nErr: {err}\n\nProducto con dimensiones optimizadas para reducir costo de ME."})
+          PY
