@@ -3,39 +3,41 @@ on: {workflow_dispatch: {}}
 jobs:
   run:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
       - run: pip install requests -q
       - env:
-          MELI_CLIENT_ID: ${{ secrets.MELI_CLIENT_ID }}
-          MELI_CLIENT_SECRET: ${{ secrets.MELI_CLIENT_SECRET }}
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
           MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
-          SID: "2681696373"
         run: |
           python <<'PY'
-          import os,requests,json
-          r=requests.post("https://api.mercadolibre.com/oauth/token",data={"grant_type":"refresh_token","client_id":os.environ["MELI_CLIENT_ID"],"client_secret":os.environ["MELI_CLIENT_SECRET"],"refresh_token":os.environ["MELI_REFRESH_TOKEN"]}).json()
-          tok=r["access_token"]
-          sid=os.environ["SID"]
-          H={"Authorization":f"Bearer {tok}"}
-          ids=[]
-          s=0
+          import os,requests,json,time
+          def tok():
+              for _ in range(3):
+                  r=requests.post("https://api.mercadolibre.com/oauth/token",data={"grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],"client_secret":os.environ["MELI_APP_SECRET"],"refresh_token":os.environ["MELI_REFRESH_TOKEN"]},timeout=20).json()
+                  if "access_token" in r: return r["access_token"]
+                  time.sleep(3)
+          t=tok(); H={"Authorization":f"Bearer {t}"}
+          sid=requests.get("https://api.mercadolibre.com/users/me",headers=H).json()["id"]
+          ids=[]; s=0
           while True:
               d=requests.get(f"https://api.mercadolibre.com/users/{sid}/items/search?status=active&limit=100&offset={s}",headers=H).json()
               got=d.get("results",[])
               if not got: break
-              ids+=got
-              s+=100
+              ids+=got; s+=100
               if s>=d.get("paging",{}).get("total",0): break
-          print(f"total active: {len(ids)}")
+          print(f"active:{len(ids)}")
           out=[]
           for i in range(0,len(ids),20):
-              batch=",".join(ids[i:i+20])
-              res=requests.get(f"https://api.mercadolibre.com/items?ids={batch}&attributes=id,title,price,status,condition,catalog_product_id,catalog_listing,listing_type_id,available_quantity,sold_quantity,sub_status",headers=H).json()
+              b=",".join(ids[i:i+20])
+              res=requests.get(f"https://api.mercadolibre.com/items?ids={b}&attributes=id,title,price,status,condition,catalog_product_id,catalog_listing,listing_type_id,available_quantity,sold_quantity",headers=H).json()
               for x in res:
-                  b=x.get("body",{})
-                  t=(b.get("title") or "").lower()
-                  if any(k in t for k in ["jbl","sony srs","bocina","parlante","speaker"]):
-                      out.append({"id":b.get("id"),"title":b.get("title"),"price":b.get("price"),"status":b.get("status"),"cond":b.get("condition"),"cpid":b.get("catalog_product_id"),"clist":b.get("catalog_listing"),"lt":b.get("listing_type_id"),"aq":b.get("available_quantity"),"sq":b.get("sold_quantity")})
+                  b2=x.get("body",{})
+                  t2=(b2.get("title") or "").lower()
+                  if any(k in t2 for k in ["jbl","sony srs","bocina"]):
+                      out.append(b2)
           print(json.dumps(out,indent=1,ensure_ascii=False))
           PY
