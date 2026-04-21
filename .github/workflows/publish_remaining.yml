@@ -1,0 +1,176 @@
+name: Publish remaining 30 perfumes
+on: {workflow_dispatch: {}}
+permissions: {contents: write}
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          python3 <<'PY'
+          import os, json, requests, time
+          
+          r = requests.post("https://api.mercadolibre.com/oauth/token", data={
+              "grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],
+              "client_secret":os.environ["MELI_APP_SECRET"],"refresh_token":os.environ["MELI_REFRESH_TOKEN"]
+          }, timeout=20)
+          tok = r.json()["access_token"]; h = {"Authorization":f"Bearer {tok}","Content-Type":"application/json"}
+          
+          def refresh_token():
+              r = requests.post("https://api.mercadolibre.com/oauth/token", data={
+                  "grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],
+                  "client_secret":os.environ["MELI_APP_SECRET"],"refresh_token":os.environ["MELI_REFRESH_TOKEN"]
+              }, timeout=20)
+              return r.json()["access_token"]
+          
+          with open("perfumes.json") as f:
+              all_perfumes = json.load(f)
+          
+          try:
+              with open("stock_config.json") as f: stock = json.load(f)
+          except: stock = {}
+          
+          tt = os.environ.get("TELEGRAM_BOT_TOKEN"); tc = os.environ.get("TELEGRAM_CHAT_ID")
+          def tg(msg):
+              if tt and tc:
+                  requests.post(f"https://api.telegram.org/bot{tt}/sendMessage",
+                      json={"chat_id":tc,"parse_mode":"Markdown","text":msg[:4000]})
+          
+          def find_catalog(search_q):
+              r = requests.get(f"https://api.mercadolibre.com/products/search?site_id=MLM&q={search_q}&limit=10", headers=h, timeout=20)
+              for p in r.json().get("results",[]):
+                  pid = p.get("id")
+                  r2 = requests.get(f"https://api.mercadolibre.com/products/{pid}", headers=h, timeout=10)
+                  pd = r2.json()
+                  pics = [{"source": pic.get("url") or pic.get("secure_url")} for pic in pd.get("pictures",[]) if pic.get("url") or pic.get("secure_url")]
+                  if not pics: continue
+                  gtin = next((a.get("value_name") for a in pd.get("attributes",[]) if a.get("id")=="GTIN"), None)
+                  return pid, pics[:8], gtin
+              r = requests.get(f"https://api.mercadolibre.com/sites/MLM/search?q={search_q}&limit=5&category=MLM1271", headers=h, timeout=15)
+              for it in r.json().get("results",[])[:3]:
+                  iid = it.get("id")
+                  r2 = requests.get(f"https://api.mercadolibre.com/items/{iid}", headers=h, timeout=10)
+                  it_full = r2.json()
+                  pics = [{"source": pic.get("url") or pic.get("secure_url")} for pic in it_full.get("pictures",[]) if pic.get("url") or pic.get("secure_url")]
+                  if pics: return None, pics[:8], None
+              return None, [], None
+          
+          def publish_one(p, idx):
+              title = p["title"]; price = p["price"]
+              search = p["search"].replace(" ","+")
+              brand = p["brand"]; vol = p["vol"]; gender = p["gender"]
+              print(f"\n[{idx}] {title} (${price})")
+              cat_pid, pics, gtin = find_catalog(search)
+              print(f"  catalog={cat_pid} pics={len(pics)} gtin={gtin}")
+              if not pics:
+                  return None, "no_pics"
+              attrs = [
+                  {"id":"BRAND","value_name":brand},
+                  {"id":"GENDER","value_name":gender},
+                  {"id":"UNIT_VOLUME","value_name":vol},
+                  {"id":"NET_VOLUME","value_name":vol},
+                  {"id":"PERFUME_NAME","value_name":title.split()[0].capitalize()},
+                  {"id":"ITEM_CONDITION","value_name":"Nuevo"},
+              ]
+              if gtin:
+                  attrs.append({"id":"GTIN","value_name":gtin})
+              body = {
+                  "title": title, "category_id": "MLM1271", "price": price,
+                  "currency_id":"MXN", "available_quantity": 1, "buying_mode":"buy_it_now",
+                  "condition":"new", "listing_type_id":"gold_pro",
+                  "pictures": pics, "attributes": attrs,
+                  "sale_terms":[{"id":"WARRANTY_TYPE","value_name":"Garantía del vendedor"},{"id":"WARRANTY_TIME","value_name":"30 días"}],
+                  "shipping":{"mode":"me2","local_pick_up":False,"free_shipping":False}
+              }
+              if cat_pid:
+                  body["catalog_product_id"] = cat_pid
+              r = requests.post("https://api.mercadolibre.com/items", headers=h, json=body, timeout=30)
+              resp = r.json()
+              if r.status_code not in (200,201) and cat_pid:
+                  body.pop("catalog_product_id", None)
+                  r = requests.post("https://api.mercadolibre.com/items", headers=h, json=body, timeout=30)
+                  resp = r.json()
+              if r.status_code in (200,201):
+                  new_id = resp.get("id")
+                  print(f"  ✓ {new_id}")
+                  desc = (f"{title}\n\nPerfume original 100% autentico.\n\n"
+                          f"CARACTERISTICAS:\n- Marca: {brand}\n- Volumen: {vol}\n"
+                          f"- Genero: {gender}\n- Condicion: Nuevo, sellado de fabrica\n\n"
+                          f"GARANTIAS:\n- NUEVO y 100% Original\n- 30 dias de garantia\n"
+                          f"- Factura disponible\n- Envio el mismo dia antes de 3pm\n\n- Sonix Mx")
+                  requests.post(f"https://api.mercadolibre.com/items/{new_id}/description", headers=h, json={"plain_text":desc}, timeout=15)
+                  stock[new_id] = {
+                      "real_stock": 10, "sku": f"PERF-{idx:03d}",
+                      "label": title[:50], "auto_replenish": True,
+                      "replenish_quantity": 1, "seo_title": title,
+                      "previous_ids": [], "_perfume": True, "_idx": idx
+                  }
+                  return new_id, "ok"
+              else:
+                  errs = [c for c in resp.get("cause",[]) if isinstance(c, dict) and c.get("type")=="error"]
+                  err_codes = [c.get("code","?") for c in errs[:3]]
+                  for c in errs[:3]:
+                      print(f"    {c.get('code')}: {c.get('message','')[:130]}")
+                  return None, f"err_{r.status_code}:{','.join(err_codes)}"
+          
+          # Batches 10-14, 15-19, 20-24, 25-29, 30-34, 35-39
+          batches = [(10,15), (15,20), (20,25), (25,30), (30,35), (35,40)]
+          all_results = []
+          for bi, (start, end) in enumerate(batches):
+              batch_items = all_perfumes[start:end]
+              print(f"\n{'='*60}\n=== BATCH {bi+2} (idx {start}-{end-1}) ===\n{'='*60}")
+              ok_count = err_count = 0
+              batch_ok = []
+              batch_err = []
+              for i, p in enumerate(batch_items):
+                  idx = start + i
+                  new_id, status = publish_one(p, idx)
+                  if status == "ok":
+                      ok_count += 1
+                      batch_ok.append((new_id, p["price"], p["title"]))
+                  else:
+                      err_count += 1
+                      batch_err.append((p["title"], status))
+                  all_results.append({"idx":idx,"title":p["title"],"id":new_id,"status":status})
+              # Save stock after each batch
+              with open("stock_config.json","w") as f:
+                  json.dump(stock, f, indent=2, ensure_ascii=False)
+              # Telegram notify
+              m = f"💐 *Batch {bi+2} (idx {start}-{end-1})*\n\nOK: *{ok_count}* | Err: *{err_count}*\n\n"
+              for iid, price, title in batch_ok:
+                  m += f"✓ `{iid}` ${price} {title[:38]}\n"
+              for title, err in batch_err:
+                  m += f"✗ {title[:38]}: {err[:30]}\n"
+              tg(m)
+              # Sleep between batches (except after last)
+              if bi < len(batches) - 1:
+                  print(f"\n[[ Sleeping 5 min before next batch... ]]\n")
+                  # Refresh token mid-way to avoid expiration
+                  try:
+                      new_tok = refresh_token()
+                      h["Authorization"] = f"Bearer {new_tok}"
+                  except: pass
+                  time.sleep(300)
+          
+          # Final summary
+          ok = [r for r in all_results if r.get("status")=="ok"]
+          errs = [r for r in all_results if r.get("status")!="ok"]
+          print(f"\n{'='*60}\n=== FINAL === OK:{len(ok)} ERR:{len(errs)}")
+          tg(f"🎉 *Publicación completa perfumes*\n\nOK: *{len(ok)}/30*\nErr: *{len(errs)}*\n\nRevisar xlsx para items con errores.")
+          PY
+      - run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add stock_config.json
+          git diff --cached --quiet || git commit -m "[perfumes] batches 2-7 complete"
+          git push || echo "no push"
