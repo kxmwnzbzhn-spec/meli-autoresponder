@@ -1402,11 +1402,14 @@
     "real_stock": 30,
     "sku": "AUTO-766137",
     "label": "Bocina Jbl Go Jbl Go 4 Go4 Portátil Con Bluetooth Waterproof - $449",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "Bocina Jbl Go Jbl Go 4 Go4 Portátil Con Bluetooth Waterproof Jbl Go4 Azul",
     "previous_ids": [],
-    "_auto_discovered": true
+    "_auto_discovered": true,
+    "deleted": true,
+    "_deleted_at": 1776808464,
+    "_deleted_reason": "Cannot update item MLM2880766137 [status:closed, has_bids:false]"
   },
   "MLM2880766117": {
     "real_stock": 30,
@@ -1478,11 +1481,14 @@
     "real_stock": 30,
     "sku": "AUTO-754295",
     "label": "Bocina Jbl Go Jbl Go 4 Go4 Portátil Con Bluetooth Waterproof - $449",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "Bocina Jbl Go Jbl Go 4 Go4 Portátil Con Bluetooth Waterproof Jbl Go4 Azul",
     "previous_ids": [],
-    "_auto_discovered": true
+    "_auto_discovered": true,
+    "deleted": true,
+    "_deleted_at": 1776808466,
+    "_deleted_reason": "Cannot update item MLM2880754295 [status:closed, has_bids:false]"
   },
   "MLM2880754279": {
     "real_stock": 30,
@@ -1508,7 +1514,7 @@
     "_deleted_reason": "Cannot update item MLM2880754229 [status:under_review, has_bids:false]"
   },
   "MLM2880754209": {
-    "real_stock": 30,
+    "real_stock": 28,
     "sku": "AUTO-754209",
     "label": "Parlante Portátil Jbl Flip 7 Blanco - $799",
     "auto_replenish": true,
