@@ -1871,12 +1871,13 @@
     "min_visible_stock": 1
   },
   "MLM5223547820": {
-    "real_stock": 9,
+    "real_stock": 0,
     "sku": "REACOND-Go4-AZUL",
     "label": "Go 4 Azul Reacondicionada",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
-    "min_visible_stock": 1
+    "min_visible_stock": 1,
+    "deleted": true
   },
   "MLM2880863661": {
     "real_stock": 5,
