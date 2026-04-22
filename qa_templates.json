@@ -229,6 +229,28 @@
         "donde se fabrica"
       ],
       "response": "Hola! Si, es 100% original JBL de fabrica (version OEM). El precio mas accesible se debe a que es version OEM sin el empaque retail oficial licenciado. El hardware es identico al modelo retail. Viene con factura y garantia 30 dias."
+    },
+    {
+      "id": "auto_oem_firmware",
+      "keywords": [
+        "por que no se conecta",
+        "porque no se conecta",
+        "por que no es compatible",
+        "porque no es compatible",
+        "por que no funciona la app",
+        "porque no funciona la app",
+        "por que no reconoce",
+        "porque no reconoce",
+        "porque no la detecta",
+        "por que no la detecta",
+        "firmware",
+        "no aparece en la app",
+        "no conecta con la app",
+        "no se empareja con la app",
+        "por que no puede conectar",
+        "porque no puede conectar"
+      ],
+      "response": "Hola! La razon es que nuestras bocinas JBL son version de fabrica autorizada con FIRMWARE independiente de JBL Inc. Este firmware no esta registrado en los servidores de autenticacion de la app oficial JBL Portable, por eso la app no las reconoce ni puede administrarlas. El hardware es 100% identico al retail (audio, bateria, bluetooth, codecs, resistencia al agua). Funciona perfecto via Bluetooth estandar con cualquier dispositivo (iPhone, Android, Samsung, etc). Factura y garantia 30 dias. Saludos!"
     }
   ]
 }
