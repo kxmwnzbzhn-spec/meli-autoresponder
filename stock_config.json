@@ -200,11 +200,14 @@
     "real_stock": 30,
     "sku": "AUTO-596985",
     "label": "Dashcam Camara Para Auto 3 Lentes Full Hd Pantalla Reversa - $299",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "Dashcam Camara Para Auto 3 Lentes Full Hd Pantalla Reversa",
     "previous_ids": [],
-    "_auto_discovered": true
+    "_auto_discovered": true,
+    "deleted": true,
+    "_deleted_at": 1776856870,
+    "_deleted_reason": "Cannot update item MLM2874596985 [status:under_review, has_bids:false]"
   },
   "MLM2874537869": {
     "real_stock": 30,
@@ -433,12 +436,15 @@
     "real_stock": 10,
     "sku": "PERF-004",
     "label": "GUERLAIN CUIR INTENSE EAU DE PARFUM 125 ML ORIGINA",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "GUERLAIN CUIR INTENSE EAU DE PARFUM 125 ML ORIGINAL",
     "previous_ids": [],
     "_perfume": true,
-    "_idx": 4
+    "_idx": 4,
+    "deleted": true,
+    "_deleted_at": 1776856871,
+    "_deleted_reason": "Cannot update item MLM2879717667 [status:under_review, has_bids:false]"
   },
   "MLM2879387291": {
     "real_stock": 10,
@@ -458,12 +464,15 @@
     "real_stock": 10,
     "sku": "PERF-006",
     "label": "BACCARAT ROUGE 540 EXTRAIT 70ML MAISON FRANCIS KUR",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "BACCARAT ROUGE 540 EXTRAIT 70ML MAISON FRANCIS KURKDJIAN",
     "previous_ids": [],
     "_perfume": true,
-    "_idx": 6
+    "_idx": 6,
+    "deleted": true,
+    "_deleted_at": 1776856872,
+    "_deleted_reason": "Cannot update item MLM2879335659 [status:under_review, has_bids:false]"
   },
   "MLM5220682462": {
     "real_stock": 10,
@@ -523,11 +532,14 @@
     "real_stock": 30,
     "sku": "AUTO-716551",
     "label": "Perfume Billie Eilish Eilish Eau Parfum 100ml Mujer Original - $999",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "Perfume Billie Eilish Eilish Eau Parfum 100ml Mujer Original",
     "previous_ids": [],
-    "_auto_discovered": true
+    "_auto_discovered": true,
+    "deleted": true,
+    "_deleted_at": 1776856873,
+    "_deleted_reason": "Cannot update item MLM2879716551 [status:under_review, has_bids:true]"
   },
   "MLM2879385901": {
     "real_stock": 30,
@@ -574,12 +586,15 @@
     "real_stock": 10,
     "sku": "PERF-003",
     "label": "GUERLAIN PATCHOULI ARDENT EAU DE PARFUM 125 ML ORI",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "GUERLAIN PATCHOULI ARDENT EAU DE PARFUM 125 ML ORIGINAL",
     "previous_ids": [],
     "_perfume": true,
-    "_idx": 3
+    "_idx": 3,
+    "deleted": true,
+    "_deleted_at": 1776856874,
+    "_deleted_reason": "Cannot update item MLM2879724127 [status:under_review, has_bids:false]"
   },
   "MLM5221356312": {
     "real_stock": 0,
@@ -694,12 +709,15 @@
     "real_stock": 10,
     "sku": "PERF-017",
     "label": "TOM FORD BOIS PACIFIQUE EDP 100ML PERFUME UNISEX O",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "TOM FORD BOIS PACIFIQUE EDP 100ML PERFUME UNISEX ORIGINAL",
     "previous_ids": [],
     "_perfume": true,
-    "_idx": 17
+    "_idx": 17,
+    "deleted": true,
+    "_deleted_at": 1776856875,
+    "_deleted_reason": "Cannot update item MLM5221330656 [status:under_review, has_bids:false]"
   },
   "MLM2879724209": {
     "real_stock": 10,
@@ -719,12 +737,15 @@
     "real_stock": 10,
     "sku": "PERF-020",
     "label": "DUMONT NITRO RED EDP 100ML PARA HOMBRE ORIGINAL LU",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "DUMONT NITRO RED EDP 100ML PARA HOMBRE ORIGINAL LUJO",
     "previous_ids": [],
     "_perfume": true,
-    "_idx": 20
+    "_idx": 20,
+    "deleted": true,
+    "_deleted_at": 1776856876,
+    "_deleted_reason": "Cannot update item MLM5221330674 [status:under_review, has_bids:true]"
   },
   "MLM5221356390": {
     "real_stock": 10,
@@ -828,12 +849,15 @@
     "real_stock": 10,
     "sku": "PERF-033",
     "label": "PERFUME BYREDO MOJAVE GHOST, 100 ML, PARA UNISEX",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "PERFUME BYREDO MOJAVE GHOST, 100 ML, PARA UNISEX",
     "previous_ids": [],
     "_perfume": true,
-    "_idx": 33
+    "_idx": 33,
+    "deleted": true,
+    "_deleted_at": 1776856877,
+    "_deleted_reason": "Cannot update item MLM5221330734 [status:under_review, has_bids:false]"
   },
   "MLM2880142605": {
     "real_stock": 10,
@@ -853,21 +877,27 @@
     "real_stock": 30,
     "sku": "AUTO-355096",
     "label": "Perfume Game Of Spades Wildcard Parfum 100ml - $499",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "Perfume Game Of Spades Wildcard Parfum 100ml",
     "previous_ids": [],
-    "_auto_discovered": true
+    "_auto_discovered": true,
+    "deleted": true,
+    "_deleted_at": 1776856878,
+    "_deleted_reason": "Cannot update item MLM5221355096 [status:under_review, has_bids:false]"
   },
   "MLM5221328952": {
     "real_stock": 30,
     "sku": "AUTO-328952",
     "label": "Perfume Original Marshmallow Blush Edp 100ml Mujer Importado - $499",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "Perfume Original Marshmallow Blush Edp 100ml Mujer Importado",
     "previous_ids": [],
-    "_auto_discovered": true
+    "_auto_discovered": true,
+    "deleted": true,
+    "_deleted_at": 1776856878,
+    "_deleted_reason": "Cannot update item MLM5221328952 [status:under_review, has_bids:false]"
   },
   "MLM5221767078": {
     "real_stock": 10,
@@ -971,12 +1001,15 @@
     "real_stock": 8,
     "sku": "PERF-036",
     "label": "LATTAFA MAYAR EAU DE PARFUM 100ML ORIGINAL MUJER",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "LATTAFA MAYAR EAU DE PARFUM 100ML ORIGINAL MUJER",
     "previous_ids": [],
     "_perfume": true,
-    "_idx": 36
+    "_idx": 36,
+    "deleted": true,
+    "_deleted_at": 1776856879,
+    "_deleted_reason": "Cannot update item MLM5221358624 [status:under_review, has_bids:true]"
   },
   "MLM5221767442": {
     "real_stock": 10,
@@ -1427,14 +1460,16 @@
     "_deleted_reason": "Cannot update item MLM2880766137 [status:closed, has_bids:false]"
   },
   "MLM2880766117": {
-    "real_stock": 198,
+    "real_stock": 197,
     "sku": "CAT-NEW-Go4-NEGRA",
     "label": "Catalog NEW Go 4 Negra",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "min_visible_stock": 1,
-    "deleted": false,
-    "source": "bodega_electronica"
+    "deleted": true,
+    "source": "bodega_electronica",
+    "_deleted_at": 1776856880,
+    "_deleted_reason": "Cannot update item MLM2880766117 [status:under_review, has_bids:true]"
   },
   "MLM2880766097": {
     "real_stock": 30,
@@ -1466,11 +1501,13 @@
     "real_stock": 204,
     "sku": "CAT-NEW-Clip5-NEGRA",
     "label": "Catalog NEW Clip 5 Negra",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "min_visible_stock": 1,
-    "deleted": false,
-    "source": "bodega_electronica"
+    "deleted": true,
+    "source": "bodega_electronica",
+    "_deleted_at": 1776856881,
+    "_deleted_reason": "Cannot update item MLM2880766045 [status:under_review, has_bids:true]"
   },
   "MLM2880766021": {
     "real_stock": 30,
@@ -1528,11 +1565,13 @@
     "real_stock": 2,
     "sku": "CAT-NEW-Clip5-ROSA",
     "label": "Catalog NEW Clip 5 Rosa",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "min_visible_stock": 1,
-    "deleted": false,
-    "source": "bodega_electronica"
+    "deleted": true,
+    "source": "bodega_electronica",
+    "_deleted_at": 1776856882,
+    "_deleted_reason": "Cannot update item MLM2880754229 [status:under_review, has_bids:true]"
   },
   "MLM2880754209": {
     "real_stock": 28,
@@ -1577,192 +1616,247 @@
     "real_stock": 30,
     "sku": "AUTO-214318",
     "label": "Bocina Jbl Flip 7 Bluetooth Portatil Roja Ip68 Nueva - $819",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "Bocina Jbl Flip 7 Bluetooth Portatil Roja Ip68 Nueva",
     "previous_ids": [],
-    "_auto_discovered": true
+    "_auto_discovered": true,
+    "deleted": true,
+    "_deleted_at": 1776856883,
+    "_deleted_reason": "Cannot update item MLM5223214318 [status:under_review, has_bids:false]"
   },
   "MLM5223210438": {
     "real_stock": 29,
     "sku": "AUTO-210438",
     "label": "Sony Srs-xb100 Altavoz De Viaje Inalámbrico Bluetooth Port C - $549",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "Sony Srs-xb100 Altavoz De Viaje Inalámbrico Bluetooth Port Color Negro",
     "previous_ids": [],
     "_auto_discovered": true,
-    "_last_relist_alert": 1776816983
+    "_last_relist_alert": 1776816983,
+    "deleted": true,
+    "_deleted_at": 1776856884,
+    "_deleted_reason": "Cannot update item MLM5223210438 [status:closed, has_bids:false]"
   },
   "MLM2880794089": {
     "real_stock": 29,
     "sku": "AUTO-794089",
     "label": "Bocina Jbl Grip Bluetooth Portatil Negra Luz Led Nueva - $619",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "Bocina Jbl Grip Bluetooth Portatil Negra Luz Led Nueva",
     "previous_ids": [],
-    "_auto_discovered": true
+    "_auto_discovered": true,
+    "deleted": true,
+    "_deleted_at": 1776856885,
+    "_deleted_reason": "Cannot update item MLM2880794089 [status:under_review, has_bids:true]"
   },
   "MLM2880774951": {
     "real_stock": 27,
     "sku": "AUTO-774951",
     "label": "Bocina Jbl Charge 6 Bluetooth Portatil Roja Ip68 Nueva - $919",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "Bocina Jbl Charge 6 Bluetooth Portatil Roja Ip68 Nueva",
     "previous_ids": [],
-    "_auto_discovered": true
+    "_auto_discovered": true,
+    "deleted": true,
+    "_deleted_at": 1776856886,
+    "_deleted_reason": "Cannot update item MLM2880774951 [status:under_review, has_bids:true]"
   },
   "MLM2880763001": {
     "real_stock": 28,
     "sku": "AUTO-763001",
     "label": "Bocina Jbl Charge 6 Bluetooth Portatil Azul Ip68 Nueva - $919",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "Bocina Jbl Charge 6 Bluetooth Portatil Azul Ip68 Nueva",
     "previous_ids": [],
-    "_auto_discovered": true
+    "_auto_discovered": true,
+    "deleted": true,
+    "_deleted_at": 1776856887,
+    "_deleted_reason": "Cannot update item MLM2880763001 [status:under_review, has_bids:true]"
   },
   "MLM2880762579": {
     "real_stock": 30,
     "sku": "AUTO-762579",
     "label": "Bocina Jbl Charge 6 Bluetooth Portatil Camuflaje Ip68 Nueva - $919",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "Bocina Jbl Charge 6 Bluetooth Portatil Camuflaje Ip68 Nueva",
     "previous_ids": [],
-    "_auto_discovered": true
+    "_auto_discovered": true,
+    "deleted": true,
+    "_deleted_at": 1776856888,
+    "_deleted_reason": "Cannot update item MLM2880762579 [status:under_review, has_bids:true]"
   },
   "MLM2880762535": {
     "real_stock": 28,
     "sku": "AUTO-762535",
     "label": "Bocina Jbl Clip 5 Bluetooth Portatil Morada Ip67 Nueva - $719",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "Bocina Jbl Clip 5 Bluetooth Portatil Morada Ip67 Nueva",
     "previous_ids": [],
-    "_auto_discovered": true
+    "_auto_discovered": true,
+    "deleted": true,
+    "_deleted_at": 1776856889,
+    "_deleted_reason": "Cannot update item MLM2880762535 [status:under_review, has_bids:true]"
   },
   "MLM5223214798": {
     "real_stock": 27,
     "sku": "AUTO-214798",
     "label": "Bocina Jbl Go 4 Bluetooth Portatil Azul Marino Ip67 Nueva - $469",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "Bocina Jbl Go 4 Bluetooth Portatil Azul Marino Ip67 Nueva",
     "previous_ids": [],
-    "_auto_discovered": true
+    "_auto_discovered": true,
+    "deleted": true,
+    "_deleted_at": 1776856890,
+    "_deleted_reason": "Cannot update item MLM5223214798 [status:under_review, has_bids:true]"
   },
   "MLM2880775007": {
     "real_stock": 30,
     "sku": "AUTO-775007",
     "label": "Jbl Go Essential 2 Bluetooth Portatil Roja Ip67 - $469",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "Jbl Go Essential 2 Bluetooth Portatil Roja Ip67",
     "previous_ids": [],
-    "_auto_discovered": true
+    "_auto_discovered": true,
+    "deleted": true,
+    "_deleted_at": 1776856891,
+    "_deleted_reason": "Cannot update item MLM2880775007 [status:under_review, has_bids:false]"
   },
   "MLM2880774949": {
     "real_stock": 29,
     "sku": "AUTO-774949",
     "label": "Bocina Jbl Go 3 Bluetooth Portatil Negra Ip67 Nueva - $469",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "Bocina Jbl Go 3 Bluetooth Portatil Negra Ip67 Nueva",
     "previous_ids": [],
-    "_auto_discovered": true
+    "_auto_discovered": true,
+    "deleted": true,
+    "_deleted_at": 1776856892,
+    "_deleted_reason": "Cannot update item MLM2880774949 [status:under_review, has_bids:true]"
   },
   "MLM2880763019": {
     "real_stock": 30,
     "sku": "AUTO-763019",
     "label": "Bocina Jbl Go 4 Bluetooth Portatil Roja Ip67 Nueva - $469",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "Bocina Jbl Go 4 Bluetooth Portatil Roja Ip67 Nueva",
     "previous_ids": [],
-    "_auto_discovered": true
+    "_auto_discovered": true,
+    "deleted": true,
+    "_deleted_at": 1776856892,
+    "_deleted_reason": "Cannot update item MLM2880763019 [status:under_review, has_bids:false]"
   },
   "MLM2880762595": {
     "real_stock": 30,
     "sku": "AUTO-762595",
     "label": "Jbl Go Essential 2 Bluetooth Portatil Azul Ip67 - $469",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "Jbl Go Essential 2 Bluetooth Portatil Azul Ip67",
     "previous_ids": [],
-    "_auto_discovered": true
+    "_auto_discovered": true,
+    "deleted": true,
+    "_deleted_at": 1776856893,
+    "_deleted_reason": "Cannot update item MLM2880762595 [status:under_review, has_bids:false]"
   },
   "MLM5223535424": {
     "real_stock": 30,
     "sku": "AUTO-535424",
     "label": "Bocina Sony Srs-xb100 Bluetooth Reacondicionada Negra Origin - $449",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "Bocina Sony Srs-xb100 Bluetooth Reacondicionada Negra Origin",
     "previous_ids": [],
-    "_auto_discovered": true
+    "_auto_discovered": true,
+    "deleted": true,
+    "_deleted_at": 1776856894,
+    "_deleted_reason": "Cannot update item MLM5223535424 [status:under_review, has_bids:false]"
   },
   "MLM5223451400": {
     "real_stock": 28,
     "sku": "AUTO-451400",
     "label": "Bocina Jbl Go 4 Bluetooth Portatil Rosa Ip67 Nueva Original - $489",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "Bocina Jbl Go 4 Bluetooth Portatil Rosa Ip67 Nueva Original",
     "previous_ids": [],
-    "_auto_discovered": true
+    "_auto_discovered": true,
+    "deleted": true,
+    "_deleted_at": 1776856895,
+    "_deleted_reason": "Cannot update item MLM5223451400 [status:under_review, has_bids:true]"
   },
   "MLM5223449418": {
     "real_stock": 28,
     "sku": "AUTO-449418",
     "label": "Bocina Sony Srs-xb100 Bluetooth Portatil Negra Ipx4 Nueva - $549",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "Bocina Sony Srs-xb100 Bluetooth Portatil Negra Ipx4 Nueva",
     "previous_ids": [],
-    "_auto_discovered": true
+    "_auto_discovered": true,
+    "deleted": true,
+    "_deleted_at": 1776856896,
+    "_deleted_reason": "Cannot update item MLM5223449418 [status:under_review, has_bids:true]"
   },
   "MLM5222774418": {
     "real_stock": 30,
     "sku": "AUTO-774418",
     "label": "Dashcam 3 Cámaras Con Pantalla | Grabación Full Hd Y Cámara  - $199",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "Dashcam 3 Cámaras Con Pantalla | Grabación Full Hd Y Cámara De Reversa",
     "previous_ids": [],
-    "_auto_discovered": true
+    "_auto_discovered": true,
+    "deleted": true,
+    "_deleted_at": 1776856897,
+    "_deleted_reason": "Cannot update item MLM5222774418 [status:under_review, has_bids:false]"
   },
   "MLM2880803051": {
     "real_stock": 28,
     "sku": "AUTO-803051",
     "label": "Bocina Jbl Charge 6 Bluetooth Portatil Negra Ip68 Nueva - $909",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "Bocina Jbl Charge 6 Bluetooth Portatil Negra Ip68 Nueva",
     "previous_ids": [],
-    "_auto_discovered": true
+    "_auto_discovered": true,
+    "deleted": true,
+    "_deleted_at": 1776856898,
+    "_deleted_reason": "Cannot update item MLM2880803051 [status:under_review, has_bids:true]"
   },
   "MLM2880758743": {
     "real_stock": 155,
     "sku": "CAT-NEW-Flip7-MORADA",
     "label": "Catalog NEW Flip 7 Morada",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "min_visible_stock": 1,
-    "deleted": false,
-    "source": "bodega_electronica"
+    "deleted": true,
+    "source": "bodega_electronica",
+    "_deleted_at": 1776856899,
+    "_deleted_reason": "Cannot update item MLM2880758743 [status:under_review, has_bids:true]"
   },
   "MLM2880762615": {
     "real_stock": 535,
     "sku": "CAT-NEW-Go4-CAMUFLAJE",
     "label": "Catalog NEW Go 4 Camuflaje",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "min_visible_stock": 1,
-    "deleted": false,
-    "source": "bodega_electronica"
+    "deleted": true,
+    "source": "bodega_electronica",
+    "_deleted_at": 1776856900,
+    "_deleted_reason": "Cannot update item MLM2880762615 [status:under_review, has_bids:true]"
   },
   "MLM2880754185": {
     "real_stock": 0,
@@ -1789,17 +1883,23 @@
     "real_stock": 179,
     "sku": "REACOND-Flip7-NEGRO",
     "label": "Flip 7 Negro Reacondicionada",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
-    "min_visible_stock": 1
+    "min_visible_stock": 1,
+    "deleted": true,
+    "_deleted_at": 1776856901,
+    "_deleted_reason": "Cannot update item MLM5223653274 [status:under_review, has_bids:false]"
   },
   "MLM5223547784": {
     "real_stock": 63,
     "sku": "REACOND-Flip7-AZUL",
     "label": "Flip 7 Azul Reacondicionada",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
-    "min_visible_stock": 1
+    "min_visible_stock": 1,
+    "deleted": true,
+    "_deleted_at": 1776856902,
+    "_deleted_reason": "Cannot update item MLM5223547784 [status:under_review, has_bids:false]"
   },
   "MLM2880875371": {
     "real_stock": 30,
@@ -1816,57 +1916,78 @@
     "real_stock": 31,
     "sku": "REACOND-Go4-NEGRO",
     "label": "Go 4 Negro Reacondicionada",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
-    "min_visible_stock": 1
+    "min_visible_stock": 1,
+    "deleted": true,
+    "_deleted_at": 1776856903,
+    "_deleted_reason": "Cannot update item MLM2880875381 [status:under_review, has_bids:false]"
   },
   "MLM5223653300": {
     "real_stock": 30,
     "sku": "REACOND-Clip5-NEGRO",
     "label": "Clip 5 Negro Reacondicionada",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
-    "min_visible_stock": 1
+    "min_visible_stock": 1,
+    "deleted": true,
+    "_deleted_at": 1776856904,
+    "_deleted_reason": "Cannot update item MLM5223653300 [status:under_review, has_bids:false]"
   },
   "MLM2880863645": {
     "real_stock": 22,
     "sku": "REACOND-Charge6-ROJO",
     "label": "Charge 6 Rojo Reacondicionada",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
-    "min_visible_stock": 1
+    "min_visible_stock": 1,
+    "deleted": true,
+    "_deleted_at": 1776856905,
+    "_deleted_reason": "Cannot update item MLM2880863645 [status:under_review, has_bids:false]"
   },
   "MLM2880875395": {
     "real_stock": 19,
     "sku": "REACOND-Go4-ROJO",
     "label": "Go 4 Rojo Reacondicionada",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
-    "min_visible_stock": 1
+    "min_visible_stock": 1,
+    "deleted": true,
+    "_deleted_at": 1776856905,
+    "_deleted_reason": "Cannot update item MLM2880875395 [status:under_review, has_bids:false]"
   },
   "MLM5223653312": {
     "real_stock": 12,
     "sku": "REACOND-Go4-CAMUFLAJE",
     "label": "Go 4 Camuflaje Reacondicionada",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
-    "min_visible_stock": 1
+    "min_visible_stock": 1,
+    "deleted": true,
+    "_deleted_at": 1776856906,
+    "_deleted_reason": "Cannot update item MLM5223653312 [status:under_review, has_bids:false]"
   },
   "MLM5223653316": {
     "real_stock": 11,
     "sku": "REACOND-Clip5-MORADO",
     "label": "Clip 5 Morado Reacondicionada",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
-    "min_visible_stock": 1
+    "min_visible_stock": 1,
+    "deleted": true,
+    "_deleted_at": 1776856907,
+    "_deleted_reason": "Cannot update item MLM5223653316 [status:under_review, has_bids:false]"
   },
   "MLM5223547812": {
     "real_stock": 10,
     "sku": "REACOND-Go4-ROSA",
     "label": "Go 4 Rosa Reacondicionada",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
-    "min_visible_stock": 1
+    "min_visible_stock": 1,
+    "deleted": true,
+    "_deleted_at": 1776856908,
+    "_deleted_reason": "Cannot update item MLM5223547812 [status:under_review, has_bids:false]"
   },
   "MLM5223547820": {
     "real_stock": 0,
@@ -1881,25 +2002,34 @@
     "real_stock": 5,
     "sku": "REACOND-Grip-NEGRO",
     "label": "Grip Negro Reacondicionada",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
-    "min_visible_stock": 1
+    "min_visible_stock": 1,
+    "deleted": true,
+    "_deleted_at": 1776856909,
+    "_deleted_reason": "Cannot update item MLM2880863661 [status:under_review, has_bids:false]"
   },
   "MLM5223547830": {
     "real_stock": 5,
     "sku": "REACOND-Go3-NEGRO",
     "label": "Go 3 Negro Reacondicionada",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
-    "min_visible_stock": 1
+    "min_visible_stock": 1,
+    "deleted": true,
+    "_deleted_at": 1776856910,
+    "_deleted_reason": "Cannot update item MLM5223547830 [status:under_review, has_bids:false]"
   },
   "MLM2880875423": {
     "real_stock": 2,
     "sku": "REACOND-Charge6-CAMUFLAJE",
     "label": "Charge 6 Camuflaje Reacondicionada",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
-    "min_visible_stock": 1
+    "min_visible_stock": 1,
+    "deleted": true,
+    "_deleted_at": 1776856911,
+    "_deleted_reason": "Cannot update item MLM2880875423 [status:under_review, has_bids:false]"
   },
   "MLM2880863675": {
     "real_stock": 2,
@@ -1927,11 +2057,13 @@
     "real_stock": 82,
     "sku": "CAT-NEW-Flip7-AZUL",
     "label": "Catalog NEW Flip 7 Azul",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "min_visible_stock": 1,
-    "deleted": false,
-    "source": "bodega_electronica"
+    "deleted": true,
+    "source": "bodega_electronica",
+    "_deleted_at": 1776856912,
+    "_deleted_reason": "Cannot update item MLM2880898001 [status:under_review, has_bids:false]"
   },
   "MLM2880865907": {
     "real_stock": 0,
@@ -1989,21 +2121,25 @@
     "real_stock": 238,
     "sku": "CAT-NEW-Clip5-MORADO",
     "label": "Catalog NEW Clip 5 Morado",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "min_visible_stock": 1,
-    "deleted": false,
-    "source": "bodega_electronica"
+    "deleted": true,
+    "source": "bodega_electronica",
+    "_deleted_at": 1776856913,
+    "_deleted_reason": "Cannot update item MLM5223655448 [status:under_review, has_bids:true]"
   },
   "MLM2880865935": {
     "real_stock": 235,
     "sku": "CAT-NEW-Grip-NEGRO",
     "label": "Catalog NEW Grip Negro",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "min_visible_stock": 1,
-    "deleted": false,
-    "source": "bodega_electronica"
+    "deleted": true,
+    "source": "bodega_electronica",
+    "_deleted_at": 1776856914,
+    "_deleted_reason": "Cannot update item MLM2880865935 [status:under_review, has_bids:true]"
   },
   "MLM2880898033": {
     "real_stock": 0,
@@ -2019,61 +2155,76 @@
     "real_stock": 128,
     "sku": "CAT-NEW-Go4-ROSA",
     "label": "Catalog NEW Go 4 Rosa",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "min_visible_stock": 1,
-    "deleted": false,
-    "source": "bodega_electronica"
+    "deleted": true,
+    "source": "bodega_electronica",
+    "_deleted_at": 1776856915,
+    "_deleted_reason": "Cannot update item MLM2880877631 [status:under_review, has_bids:false]"
   },
   "MLM2880898041": {
     "real_stock": 498,
     "sku": "CAT-NEW-Go4-AZUL",
     "label": "Catalog NEW Go 4 Azul",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "min_visible_stock": 1,
-    "deleted": false,
-    "source": "bodega_electronica"
+    "deleted": true,
+    "source": "bodega_electronica",
+    "_deleted_at": 1776856916,
+    "_deleted_reason": "Cannot update item MLM2880898041 [status:under_review, has_bids:true]"
   },
   "MLM2880898049": {
     "real_stock": 882,
     "sku": "CAT-NEW-Go3-NEGRO",
     "label": "Catalog NEW Go 3 Negro",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "min_visible_stock": 1,
-    "deleted": false,
-    "source": "bodega_electronica"
+    "deleted": true,
+    "source": "bodega_electronica",
+    "_deleted_at": 1776856917,
+    "_deleted_reason": "Cannot update item MLM2880898049 [status:under_review, has_bids:true]"
   },
   "MLM5223664218": {
     "real_stock": 30,
     "sku": "AUTO-664218",
     "label": "Bocina Jbl Charge 6 Bluetooth Reacondicionada Negra Usb-c - $699",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "Bocina Jbl Charge 6 Bluetooth Reacondicionada Negra Usb-c",
     "previous_ids": [],
-    "_auto_discovered": true
+    "_auto_discovered": true,
+    "deleted": true,
+    "_deleted_at": 1776856918,
+    "_deleted_reason": "Cannot update item MLM5223664218 [status:under_review, has_bids:true]"
   },
   "MLM2880877517": {
     "real_stock": 30,
     "sku": "AUTO-877517",
     "label": "Bocina Jbl Charge 6 Bluetooth Reacondicionada Azul Usb-c - $699",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "Bocina Jbl Charge 6 Bluetooth Reacondicionada Azul Usb-c",
     "previous_ids": [],
-    "_auto_discovered": true
+    "_auto_discovered": true,
+    "deleted": true,
+    "_deleted_at": 1776856918,
+    "_deleted_reason": "Cannot update item MLM2880877517 [status:under_review, has_bids:true]"
   },
   "MLM2881178447": {
     "real_stock": 34,
     "sku": "REACOND-Flip7-ROJO",
     "label": "Flip 7 Rojo Reacondicionada",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "min_visible_stock": 1,
     "previous_ids": [
       "MLM2880863639"
-    ]
+    ],
+    "deleted": true,
+    "_deleted_at": 1776856919,
+    "_deleted_reason": "Cannot update item MLM2881178447 [status:under_review, has_bids:true]"
   }
 }
