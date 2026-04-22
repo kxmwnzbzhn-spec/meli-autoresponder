@@ -968,7 +968,7 @@
     "_deleted_reason": "Cannot update item MLM5221767428 [status:under_review, has_bids:false]"
   },
   "MLM5221358624": {
-    "real_stock": 10,
+    "real_stock": 9,
     "sku": "PERF-036",
     "label": "LATTAFA MAYAR EAU DE PARFUM 100ML ORIGINAL MUJER",
     "auto_replenish": true,
@@ -1635,7 +1635,7 @@
     "_auto_discovered": true
   },
   "MLM2880762535": {
-    "real_stock": 30,
+    "real_stock": 29,
     "sku": "AUTO-762535",
     "label": "Bocina Jbl Clip 5 Bluetooth Portatil Morada Ip67 Nueva - $719",
     "auto_replenish": true,
@@ -1745,7 +1745,7 @@
     "_auto_discovered": true
   },
   "MLM2880758743": {
-    "real_stock": 197,
+    "real_stock": 195,
     "sku": "CAT-NEW-Flip7-MORADA",
     "label": "Catalog NEW Flip 7 Morada",
     "auto_replenish": true,
@@ -1974,7 +1974,7 @@
     "source": "bodega_electronica"
   },
   "MLM2880877603": {
-    "real_stock": 3,
+    "real_stock": 1,
     "sku": "CAT-NEW-Charge6-CAMUFLAJE",
     "label": "Catalog NEW Charge 6 Camuflaje",
     "auto_replenish": true,
