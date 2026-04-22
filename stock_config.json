@@ -1793,5 +1793,133 @@
     "auto_replenish": true,
     "replenish_quantity": 1,
     "min_visible_stock": 1
+  },
+  "MLM5223653274": {
+    "real_stock": 179,
+    "sku": "REACOND-Flip7-NEGRO",
+    "label": "Flip 7 Negro Reacondicionada",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "min_visible_stock": 1
+  },
+  "MLM5223547784": {
+    "real_stock": 63,
+    "sku": "REACOND-Flip7-AZUL",
+    "label": "Flip 7 Azul Reacondicionada",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "min_visible_stock": 1
+  },
+  "MLM2880875371": {
+    "real_stock": 59,
+    "sku": "REACOND-Flip7-MORADO",
+    "label": "Flip 7 Morado Reacondicionada",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "min_visible_stock": 1
+  },
+  "MLM2880863639": {
+    "real_stock": 35,
+    "sku": "REACOND-Flip7-ROJO",
+    "label": "Flip 7 Rojo Reacondicionada",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "min_visible_stock": 1
+  },
+  "MLM2880875381": {
+    "real_stock": 31,
+    "sku": "REACOND-Go4-NEGRO",
+    "label": "Go 4 Negro Reacondicionada",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "min_visible_stock": 1
+  },
+  "MLM5223653300": {
+    "real_stock": 30,
+    "sku": "REACOND-Clip5-NEGRO",
+    "label": "Clip 5 Negro Reacondicionada",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "min_visible_stock": 1
+  },
+  "MLM2880863645": {
+    "real_stock": 22,
+    "sku": "REACOND-Charge6-ROJO",
+    "label": "Charge 6 Rojo Reacondicionada",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "min_visible_stock": 1
+  },
+  "MLM2880875395": {
+    "real_stock": 19,
+    "sku": "REACOND-Go4-ROJO",
+    "label": "Go 4 Rojo Reacondicionada",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "min_visible_stock": 1
+  },
+  "MLM5223653312": {
+    "real_stock": 12,
+    "sku": "REACOND-Go4-CAMUFLAJE",
+    "label": "Go 4 Camuflaje Reacondicionada",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "min_visible_stock": 1
+  },
+  "MLM5223653316": {
+    "real_stock": 11,
+    "sku": "REACOND-Clip5-MORADO",
+    "label": "Clip 5 Morado Reacondicionada",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "min_visible_stock": 1
+  },
+  "MLM5223547812": {
+    "real_stock": 10,
+    "sku": "REACOND-Go4-ROSA",
+    "label": "Go 4 Rosa Reacondicionada",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "min_visible_stock": 1
+  },
+  "MLM5223547820": {
+    "real_stock": 9,
+    "sku": "REACOND-Go4-AZUL",
+    "label": "Go 4 Azul Reacondicionada",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "min_visible_stock": 1
+  },
+  "MLM2880863661": {
+    "real_stock": 5,
+    "sku": "REACOND-Grip-NEGRO",
+    "label": "Grip Negro Reacondicionada",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "min_visible_stock": 1
+  },
+  "MLM5223547830": {
+    "real_stock": 5,
+    "sku": "REACOND-Go3-NEGRO",
+    "label": "Go 3 Negro Reacondicionada",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "min_visible_stock": 1
+  },
+  "MLM2880875423": {
+    "real_stock": 2,
+    "sku": "REACOND-Charge6-CAMUFLAJE",
+    "label": "Charge 6 Camuflaje Reacondicionada",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "min_visible_stock": 1
+  },
+  "MLM2880863675": {
+    "real_stock": 2,
+    "sku": "REACOND-Charge6-NEGRO",
+    "label": "Charge 6 Negro Reacondicionada",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "min_visible_stock": 1
   }
 }
