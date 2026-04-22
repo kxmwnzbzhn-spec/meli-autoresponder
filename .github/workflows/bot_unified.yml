@@ -1,0 +1,16 @@
+name: bot-unified-only
+on:
+  workflow_dispatch:
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    permissions: {contents: write}
+    steps:
+      - uses: actions/checkout@v4
+      - run: python scripts/bot_unified.py
+      - run: |
+          git config user.name bot
+          git config user.email b@b.com
+          git add stock_config.json
+          git diff --cached --quiet || git commit -m "bot solo replenish MLM2883448187"
+          git push || true
