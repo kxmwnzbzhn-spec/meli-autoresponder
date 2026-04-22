@@ -1463,7 +1463,7 @@
     "_deleted_reason": "Cannot update item MLM2880766083 [status:under_review, has_bids:false]"
   },
   "MLM2880766045": {
-    "real_stock": 205,
+    "real_stock": 204,
     "sku": "CAT-NEW-Clip5-NEGRA",
     "label": "Catalog NEW Clip 5 Negra",
     "auto_replenish": true,
