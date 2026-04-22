@@ -1665,7 +1665,7 @@
     "_auto_discovered": true
   },
   "MLM2880774949": {
-    "real_stock": 30,
+    "real_stock": 29,
     "sku": "AUTO-774949",
     "label": "Bocina Jbl Go 3 Bluetooth Portatil Negra Ip67 Nueva - $469",
     "auto_replenish": true,
@@ -1745,7 +1745,7 @@
     "_auto_discovered": true
   },
   "MLM2880758743": {
-    "real_stock": 195,
+    "real_stock": 192,
     "sku": "CAT-NEW-Flip7-MORADA",
     "label": "Catalog NEW Flip 7 Morada",
     "auto_replenish": true,
@@ -1964,7 +1964,7 @@
     "_deleted_reason": "Cannot update item MLM2880865909 [status:under_review, has_bids:false]"
   },
   "MLM2880865911": {
-    "real_stock": 1,
+    "real_stock": 0,
     "sku": "CAT-NEW-Charge6-ROJO",
     "label": "Catalog NEW Charge 6 Rojo",
     "auto_replenish": true,
@@ -1974,7 +1974,7 @@
     "source": "bodega_electronica"
   },
   "MLM2880877603": {
-    "real_stock": 1,
+    "real_stock": 0,
     "sku": "CAT-NEW-Charge6-CAMUFLAJE",
     "label": "Catalog NEW Charge 6 Camuflaje",
     "auto_replenish": true,
@@ -2044,7 +2044,7 @@
     "source": "bodega_electronica"
   },
   "MLM2880898049": {
-    "real_stock": 901,
+    "real_stock": 899,
     "sku": "CAT-NEW-Go3-NEGRO",
     "label": "Catalog NEW Go 3 Negro",
     "auto_replenish": true,
