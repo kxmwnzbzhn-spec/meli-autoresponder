@@ -52,5 +52,125 @@
     "replenish_quantity": 1,
     "min_visible_stock": 1,
     "account": "oficial"
+  },
+  "MLM5226013726": {
+    "real_stock": 1,
+    "label": "Perfume Game Of Spades Wildcard Parfum 100ml",
+    "auto_replenish": false,
+    "min_visible_stock": 1,
+    "account": "oficial",
+    "cloned_from": "MLM5220687332"
+  },
+  "MLM5226013728": {
+    "real_stock": 1,
+    "label": "Perfume Original Marshmallow Blush Edp 100ml Mujer",
+    "auto_replenish": false,
+    "min_visible_stock": 1,
+    "account": "oficial",
+    "cloned_from": "MLM2879723051"
+  },
+  "MLM5226039188": {
+    "real_stock": 1,
+    "label": "Rabanne 1 Million Gold Intense Edp Hombre 100ml Or",
+    "auto_replenish": false,
+    "min_visible_stock": 1,
+    "account": "oficial",
+    "cloned_from": "MLM2879334963"
+  },
+  "MLM5226039192": {
+    "real_stock": 1,
+    "label": "Lattafa Mayar Eau De Parfum 100ml Original Mujer",
+    "auto_replenish": false,
+    "min_visible_stock": 1,
+    "account": "oficial",
+    "cloned_from": "MLM5221358624"
+  },
+  "MLM5226039196": {
+    "real_stock": 1,
+    "label": "Armaf The Lions Club Rugir Edp 100ml Hombre Origin",
+    "auto_replenish": false,
+    "min_visible_stock": 1,
+    "account": "oficial",
+    "cloned_from": "MLM5221767386"
+  },
+  "MLM5226090834": {
+    "real_stock": 1,
+    "label": "Paco Rabanne Million Gold For Her Edp Para Mujer 9",
+    "auto_replenish": false,
+    "min_visible_stock": 1,
+    "account": "oficial",
+    "cloned_from": "MLM5221767078"
+  },
+  "MLM5226052142": {
+    "real_stock": 1,
+    "label": "Giorgio Armani Prive Oud Royal Edp 100ml Original",
+    "auto_replenish": false,
+    "min_visible_stock": 1,
+    "account": "oficial",
+    "cloned_from": "MLM5221767428"
+  },
+  "MLM5226052150": {
+    "real_stock": 1,
+    "label": "Jean Paul Gaultier Le Beau Edt Hombre 125 Ml",
+    "auto_replenish": false,
+    "min_visible_stock": 1,
+    "account": "oficial",
+    "cloned_from": "MLM5221767442"
+  },
+  "MLM5226013748": {
+    "real_stock": 1,
+    "label": "Armaf Club De Nuit Iconic Eau De Parfum",
+    "auto_replenish": false,
+    "min_visible_stock": 1,
+    "account": "oficial",
+    "cloned_from": "MLM5221767374"
+  },
+  "MLM5226039214": {
+    "real_stock": 1,
+    "label": "Miss Dior Eau De Parfum Mujer",
+    "auto_replenish": false,
+    "min_visible_stock": 1,
+    "account": "oficial",
+    "cloned_from": "MLM5221356410"
+  },
+  "MLM5226052156": {
+    "real_stock": 1,
+    "label": "Al Haramain Amber Oud Gold Edp Spray 60 Ml",
+    "auto_replenish": false,
+    "min_visible_stock": 1,
+    "account": "oficial",
+    "cloned_from": "MLM5221358608"
+  },
+  "MLM5226039220": {
+    "real_stock": 1,
+    "label": "Perfume Original Armaf Delight Island Bliss Edp 10",
+    "auto_replenish": false,
+    "min_visible_stock": 1,
+    "account": "oficial",
+    "cloned_from": "MLM5221356352"
+  },
+  "MLM5226013756": {
+    "real_stock": 1,
+    "label": "Paco Rabanne 1 Million Gold Intense Edp 100ml Homb",
+    "auto_replenish": false,
+    "min_visible_stock": 1,
+    "account": "oficial",
+    "cloned_from": "MLM5221355572"
+  },
+  "MLM5226039226": {
+    "real_stock": 1,
+    "label": "Perfume Rue Broca Marshmallow Blush Edp 100ml Muje",
+    "auto_replenish": false,
+    "min_visible_stock": 1,
+    "account": "oficial",
+    "cloned_from": "MLM5221328952"
+  },
+  "MLM5226090850": {
+    "real_stock": 1,
+    "label": "Perfume Original Marc Jacobs Perfect Elixir Edp 10",
+    "auto_replenish": false,
+    "min_visible_stock": 1,
+    "account": "oficial",
+    "cloned_from": "MLM5221356396"
   }
 }
