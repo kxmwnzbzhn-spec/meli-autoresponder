@@ -2271,5 +2271,12 @@
         "orig_id": "MLM5223451400"
       }
     }
+  },
+  "MLM2883448233": {
+    "real_stock": 0,
+    "sku": "ZOMBI-Go4-Camuflaje",
+    "label": "Zombi Go 4 Camuflaje relisted",
+    "auto_replenish": false,
+    "deleted": true
   }
 }
