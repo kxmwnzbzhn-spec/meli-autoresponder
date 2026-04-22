@@ -1745,7 +1745,7 @@
     "_auto_discovered": true
   },
   "MLM2880758743": {
-    "real_stock": 180,
+    "real_stock": 177,
     "sku": "CAT-NEW-Flip7-MORADA",
     "label": "Catalog NEW Flip 7 Morada",
     "auto_replenish": true,
@@ -1755,7 +1755,7 @@
     "source": "bodega_electronica"
   },
   "MLM2880762615": {
-    "real_stock": 536,
+    "real_stock": 535,
     "sku": "CAT-NEW-Go4-CAMUFLAJE",
     "label": "Catalog NEW Go 4 Camuflaje",
     "auto_replenish": true,
@@ -1811,14 +1811,6 @@
     "deleted": true,
     "_deleted_at": 1776826301,
     "_deleted_reason": "Cannot update item MLM2880875371 [status:closed, has_bids:false]"
-  },
-  "MLM2880863639": {
-    "real_stock": 35,
-    "sku": "REACOND-Flip7-ROJO",
-    "label": "Flip 7 Rojo Reacondicionada",
-    "auto_replenish": true,
-    "replenish_quantity": 1,
-    "min_visible_stock": 1
   },
   "MLM2880875381": {
     "real_stock": 31,
@@ -2004,7 +1996,7 @@
     "source": "bodega_electronica"
   },
   "MLM2880865935": {
-    "real_stock": 238,
+    "real_stock": 236,
     "sku": "CAT-NEW-Grip-NEGRO",
     "label": "Catalog NEW Grip Negro",
     "auto_replenish": true,
@@ -2044,7 +2036,7 @@
     "source": "bodega_electronica"
   },
   "MLM2880898049": {
-    "real_stock": 890,
+    "real_stock": 889,
     "sku": "CAT-NEW-Go3-NEGRO",
     "label": "Catalog NEW Go 3 Negro",
     "auto_replenish": true,
@@ -2072,5 +2064,16 @@
     "seo_title": "Bocina Jbl Charge 6 Bluetooth Reacondicionada Azul Usb-c",
     "previous_ids": [],
     "_auto_discovered": true
+  },
+  "MLM2881178447": {
+    "real_stock": 34,
+    "sku": "REACOND-Flip7-ROJO",
+    "label": "Flip 7 Rojo Reacondicionada",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "min_visible_stock": 1,
+    "previous_ids": [
+      "MLM2880863639"
+    ]
   }
 }
