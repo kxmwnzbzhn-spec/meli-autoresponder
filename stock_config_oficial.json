@@ -693,5 +693,173 @@
     "auto_replenish": false,
     "account": "oficial",
     "cloned_from": "MLM5223535424"
+  },
+  "MLM5226014888": {
+    "real_stock": 1,
+    "label": "Odyssey Mandarin Sky Armaf Perfume Hombre Parfum 1",
+    "auto_replenish": false,
+    "account": "oficial",
+    "cloned_from": "MLM2879718161"
+  },
+  "MLM5226040342": {
+    "real_stock": 1,
+    "label": "Bocina Jbl Grip Bluetooth Reacondicionada Negra Lu",
+    "auto_replenish": false,
+    "account": "oficial",
+    "cloned_from": "MLM2880863661"
+  },
+  "MLM5226040346": {
+    "real_stock": 1,
+    "label": "Bocina Jbl Charge 6 Bluetooth Reacondicionada Azul",
+    "auto_replenish": false,
+    "account": "oficial",
+    "cloned_from": "MLM2880877517"
+  },
+  "MLM5226053314": {
+    "real_stock": 1,
+    "label": "Bocina Jbl Charge 6 Bluetooth Reacondicionada Camu",
+    "auto_replenish": false,
+    "account": "oficial",
+    "cloned_from": "MLM2880875423"
+  },
+  "MLM5226014924": {
+    "real_stock": 1,
+    "label": "Bocina Jbl Go 4 Bluetooth Reacondicionada Negra Ip",
+    "auto_replenish": false,
+    "account": "oficial",
+    "cloned_from": "MLM2880875381"
+  },
+  "MLM5226040380": {
+    "real_stock": 1,
+    "label": "Bocina Jbl Go 4 Bluetooth Reacondicionada Roja Ip6",
+    "auto_replenish": false,
+    "account": "oficial",
+    "cloned_from": "MLM2880875395"
+  },
+  "MLM5226040386": {
+    "real_stock": 1,
+    "label": "Jbl Flip 7 Black Bluetooth Color Azul",
+    "auto_replenish": false,
+    "account": "oficial",
+    "cloned_from": "MLM2880898001"
+  },
+  "MLM5226040394": {
+    "real_stock": 1,
+    "label": "Bocina Jbl Charge 6 Bluetooth Portatil Azul Ip68 N",
+    "auto_replenish": false,
+    "account": "oficial",
+    "cloned_from": "MLM2880763001"
+  },
+  "MLM5226092066": {
+    "real_stock": 1,
+    "label": "Jbl Go Essential 2 Bluetooth Portatil Roja Ip67",
+    "auto_replenish": false,
+    "account": "oficial",
+    "cloned_from": "MLM2880775007"
+  },
+  "MLM5226014972": {
+    "real_stock": 1,
+    "label": "Bocina Jbl Charge 6 Bluetooth Reacondicionada Roja",
+    "auto_replenish": false,
+    "account": "oficial",
+    "cloned_from": "MLM2880863645"
+  },
+  "MLM5226092082": {
+    "real_stock": 1,
+    "label": "Bocina Portátil Jbl Flip 7 Parlante Con Bluetooth ",
+    "auto_replenish": false,
+    "account": "oficial",
+    "cloned_from": "MLM2880758743"
+  },
+  "MLM5226014992": {
+    "real_stock": 1,
+    "label": "Bocina Jbl Charge 6 Bluetooth Portatil Roja Ip68 N",
+    "auto_replenish": false,
+    "account": "oficial",
+    "cloned_from": "MLM2880774951"
+  },
+  "MLM5226092096": {
+    "real_stock": 1,
+    "label": "Bocina Jbl Charge 6 Bluetooth Portatil Negra Ip68 ",
+    "auto_replenish": false,
+    "account": "oficial",
+    "cloned_from": "MLM2880803051"
+  },
+  "MLM5226040450": {
+    "real_stock": 1,
+    "label": "Jbl Go Essential 2 Bluetooth Portatil Azul Ip67",
+    "auto_replenish": false,
+    "account": "oficial",
+    "cloned_from": "MLM2880762595"
+  },
+  "MLM5226015016": {
+    "real_stock": 1,
+    "label": "Bocina Jbl Charge 6 Bluetooth Portatil Camuflaje I",
+    "auto_replenish": false,
+    "account": "oficial",
+    "cloned_from": "MLM2880762579"
+  },
+  "MLM5226040464": {
+    "real_stock": 1,
+    "label": "Parlante Bluetooth Jbl Flip 7 Resistente Al Agua Y",
+    "auto_replenish": false,
+    "account": "oficial",
+    "cloned_from": "MLM2880754185"
+  },
+  "MLM5226015054": {
+    "real_stock": 1,
+    "label": "Bocina Jbl Grip Bluetooth Portatil Negra Luz Led N",
+    "auto_replenish": false,
+    "account": "oficial",
+    "cloned_from": "MLM2880794089"
+  },
+  "MLM5226040494": {
+    "real_stock": 1,
+    "label": "Bocina Portátil Jbl Clip 5 Bluetooth Negro",
+    "auto_replenish": false,
+    "account": "oficial",
+    "cloned_from": "MLM2880766045"
+  },
+  "MLM5226015076": {
+    "real_stock": 1,
+    "label": "Bocina Jbl Go 4 Bluetooth Portatil Roja Ip67 Nueva",
+    "auto_replenish": false,
+    "account": "oficial",
+    "cloned_from": "MLM2880763019"
+  },
+  "MLM5226015090": {
+    "real_stock": 1,
+    "label": "Bocina Jbl Go 4 Bluetooth Portatil Camuflaje Ip67 ",
+    "auto_replenish": false,
+    "account": "oficial",
+    "cloned_from": "MLM2880762615"
+  },
+  "MLM5226040530": {
+    "real_stock": 1,
+    "label": "Bocina Jbl Clip 5 Bluetooth Portatil Morada Ip67 N",
+    "auto_replenish": false,
+    "account": "oficial",
+    "cloned_from": "MLM2880762535"
+  },
+  "MLM5226053530": {
+    "real_stock": 1,
+    "label": "Bocina Jbl Go 3 Bluetooth Portatil Negra Ip67 Nuev",
+    "auto_replenish": false,
+    "account": "oficial",
+    "cloned_from": "MLM2880774949"
+  },
+  "MLM5226053550": {
+    "real_stock": 1,
+    "label": "Jbl Charge 6 Negro Bluetooth",
+    "auto_replenish": false,
+    "account": "oficial",
+    "cloned_from": "MLM2880877609"
+  },
+  "MLM5226015114": {
+    "real_stock": 1,
+    "label": "Bocina Jbl Flip 7 Bluetooth Reacondicionada Roja U",
+    "auto_replenish": false,
+    "account": "oficial",
+    "cloned_from": "MLM2881178447"
   }
 }
