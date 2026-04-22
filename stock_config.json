@@ -1911,14 +1911,15 @@
     "min_visible_stock": 1
   },
   "MLM5221973786": {
-    "real_stock": 30,
+    "real_stock": 0,
     "sku": "AUTO-973786",
     "label": "Bocina Jbl Go Jbl Go 4 Go4 Portátil Con Bluetooth Waterproof - $499",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "Bocina Jbl Go Jbl Go 4 Go4 Portátil Con Bluetooth Waterproof Jbl Go4 Azul",
     "previous_ids": [],
-    "_auto_discovered": true
+    "_auto_discovered": true,
+    "deleted": true
   },
   "MLM2880898001": {
     "real_stock": 82,
