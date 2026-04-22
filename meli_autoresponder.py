@@ -1122,6 +1122,47 @@ def check_and_replenish_stock(token, state):
             stock_meli = it.get("available_quantity", 0)
             status = it.get("status", "")
             sold = it.get("sold_quantity", 0)
+            # Si tiene variaciones, procesar por variacion
+            variations = it.get("variations") or []
+            if variations and meta.get("variations"):
+                # check each variation: qty=0 + stock_real>0 -> refill qty=1
+                need_refill = False
+                new_vars = []
+                for v in variations:
+                    ac = v.get("attribute_combinations") or []
+                    color = ac[0].get("value_name","") if ac else ""
+                    vcfg = meta["variations"].get(color) or {}
+                    vreal = int(vcfg.get("stock", 0))
+                    vqty = int(v.get("available_quantity") or 0)
+                    target = v.get("available_quantity") or 0
+                    if vqty == 0 and vreal > 0:
+                        target = 1
+                        need_refill = True
+                        _log(f"    var {color}: refill qty=0 -> 1 (real={vreal})")
+                    nv = {"id": v.get("id"), "price": v.get("price"),
+                          "available_quantity": target,
+                          "attribute_combinations": ac}
+                    if v.get("attributes"): nv["attributes"]=v["attributes"]
+                    if v.get("picture_ids"): nv["picture_ids"]=v["picture_ids"]
+                    new_vars.append(nv)
+                if need_refill and status == "active":
+                    # tambien necesitamos pictures top-level completos
+                    all_pics = [{"id":p.get("id")} for p in (it.get("pictures") or []) if p.get("id")]
+                    pr_code, pr_resp = meli("PUT", f"/items/{item_id}", token, body={"pictures": all_pics, "variations": new_vars})
+                    if pr_code in (200,201):
+                        _log(f"  {item_id}: variations refill OK")
+                        # Descontar stock real por color refillado
+                        for v in new_vars:
+                            ac = v.get("attribute_combinations") or []
+                            color = ac[0].get("value_name","") if ac else ""
+                            if color in meta["variations"]:
+                                meta["variations"][color]["stock"] = max(0, meta["variations"][color].get("stock",0) - 1)
+                        meta["real_stock"] = sum(vv.get("stock",0) for vv in meta["variations"].values())
+                        cfg[item_id] = meta
+                        changed = True
+                    else:
+                        _log(f"  {item_id}: variations refill err {pr_code}")
+                continue  # saltar logica de item sin variaciones
             # Si esta activo con stock, dejarlo en paz
             if stock_meli > 0 and status == "active":
                 continue
