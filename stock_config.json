@@ -1785,5 +1785,13 @@
     "seo_title": "Parlante Bluetooth Jbl Flip 7 Resistente Al Agua Y Polvo Ip6 Color Negro",
     "previous_ids": [],
     "_auto_discovered": true
+  },
+  "MLM2880862569": {
+    "real_stock": 4,
+    "sku": "REACOND-Charge6-AZUL",
+    "label": "Charge 6 Azul Reacondicionada",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "min_visible_stock": 1
   }
 }
