@@ -1427,17 +1427,12 @@
     "_deleted_reason": "Cannot update item MLM2880766137 [status:closed, has_bids:false]"
   },
   "MLM2880766117": {
-    "real_stock": 30,
+    "real_stock": 25,
     "sku": "AUTO-766117",
-    "label": "Parlante Jbl Go Jbl Go 4 Go4 Portátil Con Bluetooth Waterpro - $449",
-    "auto_replenish": false,
+    "label": "Catalog Go 4 Negra",
+    "auto_replenish": true,
     "replenish_quantity": 1,
-    "seo_title": "Parlante Jbl Go Jbl Go 4 Go4 Portátil Con Bluetooth Waterproof Negro",
-    "previous_ids": [],
-    "_auto_discovered": true,
-    "deleted": true,
-    "_deleted_at": 1776806975,
-    "_deleted_reason": "Cannot update item MLM2880766117 [status:under_review, has_bids:false]"
+    "min_visible_stock": 1
   },
   "MLM2880766097": {
     "real_stock": 30,
@@ -1466,17 +1461,13 @@
     "_deleted_reason": "Cannot update item MLM2880766083 [status:under_review, has_bids:false]"
   },
   "MLM2880766045": {
-    "real_stock": 30,
-    "sku": "AUTO-766045",
-    "label": "Bocina Portátil Jbl Clip 5 Bluetooth Negro - $699",
-    "auto_replenish": false,
+    "real_stock": 209,
+    "sku": "CAT-Clip5-NEGRA",
+    "label": "Pending Clip 5 Negra",
+    "auto_replenish": true,
     "replenish_quantity": 1,
-    "seo_title": "Bocina Portátil Jbl Clip 5 Bluetooth Negro",
-    "previous_ids": [],
-    "_auto_discovered": true,
-    "deleted": true,
-    "_deleted_at": 1776811920,
-    "_deleted_reason": "Cannot update item MLM2880766045 [status:under_review, has_bids:true]"
+    "min_visible_stock": 1,
+    "deleted": false
   },
   "MLM2880766021": {
     "real_stock": 30,
@@ -1531,17 +1522,13 @@
     "_deleted_reason": "Cannot update item MLM2880754279 [status:closed, has_bids:false]"
   },
   "MLM2880754229": {
-    "real_stock": 30,
-    "sku": "AUTO-754229",
-    "label": "Bocina Portátil Bluetooth Jbl Clip 5 - $699",
-    "auto_replenish": false,
+    "real_stock": 3,
+    "sku": "CAT-Clip5-ROSA",
+    "label": "Pending Clip 5 Rosa",
+    "auto_replenish": true,
     "replenish_quantity": 1,
-    "seo_title": "Bocina Portátil Bluetooth Jbl Clip 5",
-    "previous_ids": [],
-    "_auto_discovered": true,
-    "deleted": true,
-    "_deleted_at": 1776806886,
-    "_deleted_reason": "Cannot update item MLM2880754229 [status:under_review, has_bids:false]"
+    "min_visible_stock": 1,
+    "deleted": false
   },
   "MLM2880754209": {
     "real_stock": 28,
@@ -1755,27 +1742,26 @@
   },
   "MLM2880758743": {
     "real_stock": 59,
-    "sku": "FLIP7-MORADA",
-    "label": "Flip 7 Morada",
+    "sku": "CAT-Flip7-MORADA",
+    "label": "Pending Flip 7 Morada",
     "auto_replenish": true,
     "replenish_quantity": 1,
     "min_visible_stock": 1,
     "deleted": false
   },
   "MLM2880762615": {
-    "real_stock": 0,
-    "sku": "AUTO-762615",
-    "label": "Bocina Jbl Go 4 Bluetooth Portatil Camuflaje Ip67 Nueva - $469",
+    "real_stock": 12,
+    "sku": "CAT-Go4-CAMUFLAJE",
+    "label": "Pending Go 4 Camuflaje",
     "auto_replenish": true,
     "replenish_quantity": 1,
-    "seo_title": "Bocina Jbl Go 4 Bluetooth Portatil Camuflaje Ip67 Nueva",
-    "previous_ids": [],
-    "_auto_discovered": true
+    "min_visible_stock": 1,
+    "deleted": false
   },
   "MLM2880754185": {
     "real_stock": 179,
-    "sku": "FLIP7-NEGRA",
-    "label": "Flip 7 Negra",
+    "sku": "CAT-Flip7-NEGRA",
+    "label": "Pending Flip 7 Negra",
     "auto_replenish": true,
     "replenish_quantity": 1,
     "min_visible_stock": 1,
@@ -1944,7 +1930,7 @@
     "min_visible_stock": 1
   },
   "MLM2880865909": {
-    "real_stock": 4,
+    "real_stock": 2,
     "sku": "CAT-Charge6-AZUL",
     "label": "Catalog Charge 6 Azul",
     "auto_replenish": true,
@@ -1952,7 +1938,7 @@
     "min_visible_stock": 1
   },
   "MLM2880865911": {
-    "real_stock": 22,
+    "real_stock": 2,
     "sku": "CAT-Charge6-ROJO",
     "label": "Catalog Charge 6 Rojo",
     "auto_replenish": true,
@@ -1960,7 +1946,7 @@
     "min_visible_stock": 1
   },
   "MLM2880877603": {
-    "real_stock": 2,
+    "real_stock": 3,
     "sku": "CAT-Charge6-CAMUFLAJE",
     "label": "Catalog Charge 6 Camuflaje",
     "auto_replenish": true,
@@ -1968,7 +1954,7 @@
     "min_visible_stock": 1
   },
   "MLM2880877609": {
-    "real_stock": 2,
+    "real_stock": 9,
     "sku": "CAT-Charge6-NEGRO",
     "label": "Catalog Charge 6 Negro",
     "auto_replenish": true,
@@ -1984,7 +1970,7 @@
     "min_visible_stock": 1
   },
   "MLM2880865935": {
-    "real_stock": 5,
+    "real_stock": 243,
     "sku": "CAT-Grip-NEGRO",
     "label": "Catalog Grip Negro",
     "auto_replenish": true,
@@ -2000,7 +1986,7 @@
     "min_visible_stock": 1
   },
   "MLM2880877631": {
-    "real_stock": 10,
+    "real_stock": 128,
     "sku": "CAT-Go4-ROSA",
     "label": "Catalog Go 4 Rosa",
     "auto_replenish": true,
@@ -2008,15 +1994,15 @@
     "min_visible_stock": 1
   },
   "MLM2880898041": {
-    "real_stock": 9,
+    "real_stock": 0,
     "sku": "CAT-Go4-AZUL",
     "label": "Catalog Go 4 Azul",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "min_visible_stock": 1
   },
   "MLM2880898049": {
-    "real_stock": 5,
+    "real_stock": 905,
     "sku": "CAT-Go3-NEGRO",
     "label": "Catalog Go 3 Negro",
     "auto_replenish": true,
