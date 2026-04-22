@@ -1754,17 +1754,13 @@
     "_auto_discovered": true
   },
   "MLM2880758743": {
-    "real_stock": 0,
-    "sku": "AUTO-758743",
-    "label": "Bocina Portátil Jbl Flip 7 Parlante Con Bluetooth Violeta Pu - $799",
-    "auto_replenish": false,
+    "real_stock": 59,
+    "sku": "FLIP7-MORADA",
+    "label": "Flip 7 Morada",
+    "auto_replenish": true,
     "replenish_quantity": 1,
-    "seo_title": "Bocina Portátil Jbl Flip 7 Parlante Con Bluetooth Violeta Purple",
-    "previous_ids": [],
-    "_auto_discovered": true,
-    "deleted": true,
-    "_deleted_at": 1776817430,
-    "_deleted_reason": "Cannot update item MLM2880758743 [status:under_review, has_bids:true]"
+    "min_visible_stock": 1,
+    "deleted": false
   },
   "MLM2880762615": {
     "real_stock": 0,
@@ -1777,15 +1773,13 @@
     "_auto_discovered": true
   },
   "MLM2880754185": {
-    "real_stock": 0,
-    "sku": "AUTO-754185",
-    "label": "Parlante Bluetooth Jbl Flip 7 Resistente Al Agua Y Polvo Ip6 - $799",
-    "auto_replenish": false,
+    "real_stock": 179,
+    "sku": "FLIP7-NEGRA",
+    "label": "Flip 7 Negra",
+    "auto_replenish": true,
     "replenish_quantity": 1,
-    "seo_title": "Parlante Bluetooth Jbl Flip 7 Resistente Al Agua Y Polvo Ip6 Color Negro",
-    "previous_ids": [],
-    "_auto_discovered": true,
-    "deleted": true
+    "min_visible_stock": 1,
+    "deleted": false
   },
   "MLM2880862569": {
     "real_stock": 4,
@@ -1932,5 +1926,101 @@
     "seo_title": "Bocina Jbl Go Jbl Go 4 Go4 Portátil Con Bluetooth Waterproof Jbl Go4 Azul",
     "previous_ids": [],
     "_auto_discovered": true
+  },
+  "MLM2880898001": {
+    "real_stock": 63,
+    "sku": "CAT-Flip7-AZUL",
+    "label": "Catalog Flip 7 Azul",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "min_visible_stock": 1
+  },
+  "MLM2880865907": {
+    "real_stock": 35,
+    "sku": "CAT-Flip7-ROJO",
+    "label": "Catalog Flip 7 Rojo",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "min_visible_stock": 1
+  },
+  "MLM2880865909": {
+    "real_stock": 4,
+    "sku": "CAT-Charge6-AZUL",
+    "label": "Catalog Charge 6 Azul",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "min_visible_stock": 1
+  },
+  "MLM2880865911": {
+    "real_stock": 22,
+    "sku": "CAT-Charge6-ROJO",
+    "label": "Catalog Charge 6 Rojo",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "min_visible_stock": 1
+  },
+  "MLM2880877603": {
+    "real_stock": 2,
+    "sku": "CAT-Charge6-CAMUFLAJE",
+    "label": "Catalog Charge 6 Camuflaje",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "min_visible_stock": 1
+  },
+  "MLM2880877609": {
+    "real_stock": 2,
+    "sku": "CAT-Charge6-NEGRO",
+    "label": "Catalog Charge 6 Negro",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "min_visible_stock": 1
+  },
+  "MLM5223655448": {
+    "real_stock": 11,
+    "sku": "CAT-Clip5-MORADO",
+    "label": "Catalog Clip 5 Morado",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "min_visible_stock": 1
+  },
+  "MLM2880865935": {
+    "real_stock": 5,
+    "sku": "CAT-Grip-NEGRO",
+    "label": "Catalog Grip Negro",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "min_visible_stock": 1
+  },
+  "MLM2880898033": {
+    "real_stock": 19,
+    "sku": "CAT-Go4-ROJO",
+    "label": "Catalog Go 4 Rojo",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "min_visible_stock": 1
+  },
+  "MLM2880877631": {
+    "real_stock": 10,
+    "sku": "CAT-Go4-ROSA",
+    "label": "Catalog Go 4 Rosa",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "min_visible_stock": 1
+  },
+  "MLM2880898041": {
+    "real_stock": 9,
+    "sku": "CAT-Go4-AZUL",
+    "label": "Catalog Go 4 Azul",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "min_visible_stock": 1
+  },
+  "MLM2880898049": {
+    "real_stock": 5,
+    "sku": "CAT-Go3-NEGRO",
+    "label": "Catalog Go 3 Negro",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "min_visible_stock": 1
   }
 }
