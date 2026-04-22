@@ -1,0 +1,16 @@
+name: restrict-replenish
+on:
+  workflow_dispatch:
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    permissions: {contents: write}
+    steps:
+      - uses: actions/checkout@v4
+      - run: python scripts/restrict_replenish.py
+      - run: |
+          git config user.name bot
+          git config user.email b@b.com
+          git add stock_config.json
+          git diff --cached --quiet || git commit -m "restrict auto_replenish a 5 Go 4"
+          git push || true
