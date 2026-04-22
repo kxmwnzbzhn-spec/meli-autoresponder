@@ -2234,9 +2234,11 @@
     "real_stock": 10,
     "sku": "GO4-MLM5227773714",
     "label": "Go 4 MLM5227773714",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "min_visible_stock": 1,
-    "deleted": false
+    "deleted": true,
+    "_deleted_at": 1776880496,
+    "_deleted_reason": "Cannot update item MLM5227773714 [status:under_review, has_bids:false]"
   }
 }
