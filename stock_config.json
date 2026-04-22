@@ -968,7 +968,7 @@
     "_deleted_reason": "Cannot update item MLM5221767428 [status:under_review, has_bids:false]"
   },
   "MLM5221358624": {
-    "real_stock": 9,
+    "real_stock": 8,
     "sku": "PERF-036",
     "label": "LATTAFA MAYAR EAU DE PARFUM 100ML ORIGINAL MUJER",
     "auto_replenish": true,
@@ -1463,7 +1463,7 @@
     "_deleted_reason": "Cannot update item MLM2880766083 [status:under_review, has_bids:false]"
   },
   "MLM2880766045": {
-    "real_stock": 206,
+    "real_stock": 205,
     "sku": "CAT-NEW-Clip5-NEGRA",
     "label": "Catalog NEW Clip 5 Negra",
     "auto_replenish": true,
@@ -1645,7 +1645,7 @@
     "_auto_discovered": true
   },
   "MLM5223214798": {
-    "real_stock": 28,
+    "real_stock": 27,
     "sku": "AUTO-214798",
     "label": "Bocina Jbl Go 4 Bluetooth Portatil Azul Marino Ip67 Nueva - $469",
     "auto_replenish": true,
@@ -1745,7 +1745,7 @@
     "_auto_discovered": true
   },
   "MLM2880758743": {
-    "real_stock": 163,
+    "real_stock": 161,
     "sku": "CAT-NEW-Flip7-MORADA",
     "label": "Catalog NEW Flip 7 Morada",
     "auto_replenish": true,
@@ -1996,7 +1996,7 @@
     "source": "bodega_electronica"
   },
   "MLM2880865935": {
-    "real_stock": 236,
+    "real_stock": 235,
     "sku": "CAT-NEW-Grip-NEGRO",
     "label": "Catalog NEW Grip Negro",
     "auto_replenish": true,
@@ -2036,7 +2036,7 @@
     "source": "bodega_electronica"
   },
   "MLM2880898049": {
-    "real_stock": 886,
+    "real_stock": 885,
     "sku": "CAT-NEW-Go3-NEGRO",
     "label": "Catalog NEW Go 3 Negro",
     "auto_replenish": true,
