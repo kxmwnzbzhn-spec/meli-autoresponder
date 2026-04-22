@@ -1427,7 +1427,7 @@
     "_deleted_reason": "Cannot update item MLM2880766137 [status:closed, has_bids:false]"
   },
   "MLM2880766117": {
-    "real_stock": 25,
+    "real_stock": 200,
     "sku": "CAT-NEW-Go4-NEGRA",
     "label": "Catalog NEW Go 4 Negra",
     "auto_replenish": true,
@@ -1755,7 +1755,7 @@
     "source": "bodega_electronica"
   },
   "MLM2880762615": {
-    "real_stock": 12,
+    "real_stock": 537,
     "sku": "CAT-NEW-Go4-CAMUFLAJE",
     "label": "Catalog NEW Go 4 Camuflaje",
     "auto_replenish": true,
@@ -2021,10 +2021,10 @@
     "source": "bodega_electronica"
   },
   "MLM2880898041": {
-    "real_stock": 0,
+    "real_stock": 499,
     "sku": "CAT-NEW-Go4-AZUL",
     "label": "Catalog NEW Go 4 Azul",
-    "auto_replenish": false,
+    "auto_replenish": true,
     "replenish_quantity": 1,
     "min_visible_stock": 1,
     "deleted": false,
