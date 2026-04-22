@@ -1,0 +1,47 @@
+{
+  "MLM5224043294": {
+    "real_stock": 10,
+    "sku": "REACOND-Go4-NEGRO",
+    "label": "Go 4 Negro Reacond (Claribel)",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "min_visible_stock": 1,
+    "account": "oficial"
+  },
+  "MLM2880882839": {
+    "real_stock": 10,
+    "sku": "REACOND-Go4-ROJO",
+    "label": "Go 4 Rojo Reacond (Claribel)",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "min_visible_stock": 1,
+    "account": "oficial"
+  },
+  "MLM5223660600": {
+    "real_stock": 10,
+    "sku": "REACOND-Go4-ROSA",
+    "label": "Go 4 Rosa Reacond (Claribel)",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "min_visible_stock": 1,
+    "account": "oficial"
+  },
+  "MLM2880903119": {
+    "real_stock": 10,
+    "sku": "REACOND-Go4-AZUL",
+    "label": "Go 4 Azul Reacond (Claribel)",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "min_visible_stock": 1,
+    "account": "oficial"
+  },
+  "MLM2880882857": {
+    "real_stock": 10,
+    "sku": "REACOND-Go4-CAMUFLAJE",
+    "label": "Go 4 Camuflaje Reacond (Claribel)",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "min_visible_stock": 1,
+    "account": "oficial"
+  }
+}
