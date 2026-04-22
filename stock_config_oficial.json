@@ -43,5 +43,14 @@
     "replenish_quantity": 1,
     "min_visible_stock": 1,
     "account": "oficial"
+  },
+  "MLM2880906401": {
+    "real_stock": 10,
+    "sku": "REACOND-Flip7-NEGRA",
+    "label": "Flip 7 Negra Reacond Claribel",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "min_visible_stock": 1,
+    "account": "oficial"
   }
 }
