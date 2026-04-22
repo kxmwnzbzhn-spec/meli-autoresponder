@@ -1428,11 +1428,13 @@
   },
   "MLM2880766117": {
     "real_stock": 25,
-    "sku": "AUTO-766117",
-    "label": "Catalog Go 4 Negra",
+    "sku": "CAT-NEW-Go4-NEGRA",
+    "label": "Catalog NEW Go 4 Negra",
     "auto_replenish": true,
     "replenish_quantity": 1,
-    "min_visible_stock": 1
+    "min_visible_stock": 1,
+    "deleted": false,
+    "source": "bodega_electronica"
   },
   "MLM2880766097": {
     "real_stock": 30,
@@ -1462,12 +1464,13 @@
   },
   "MLM2880766045": {
     "real_stock": 209,
-    "sku": "CAT-Clip5-NEGRA",
-    "label": "Pending Clip 5 Negra",
+    "sku": "CAT-NEW-Clip5-NEGRA",
+    "label": "Catalog NEW Clip 5 Negra",
     "auto_replenish": true,
     "replenish_quantity": 1,
     "min_visible_stock": 1,
-    "deleted": false
+    "deleted": false,
+    "source": "bodega_electronica"
   },
   "MLM2880766021": {
     "real_stock": 30,
@@ -1523,12 +1526,13 @@
   },
   "MLM2880754229": {
     "real_stock": 3,
-    "sku": "CAT-Clip5-ROSA",
-    "label": "Pending Clip 5 Rosa",
+    "sku": "CAT-NEW-Clip5-ROSA",
+    "label": "Catalog NEW Clip 5 Rosa",
     "auto_replenish": true,
     "replenish_quantity": 1,
     "min_visible_stock": 1,
-    "deleted": false
+    "deleted": false,
+    "source": "bodega_electronica"
   },
   "MLM2880754209": {
     "real_stock": 28,
@@ -1741,31 +1745,34 @@
     "_auto_discovered": true
   },
   "MLM2880758743": {
-    "real_stock": 59,
-    "sku": "CAT-Flip7-MORADA",
-    "label": "Pending Flip 7 Morada",
+    "real_stock": 202,
+    "sku": "CAT-NEW-Flip7-MORADA",
+    "label": "Catalog NEW Flip 7 Morada",
     "auto_replenish": true,
     "replenish_quantity": 1,
     "min_visible_stock": 1,
-    "deleted": false
+    "deleted": false,
+    "source": "bodega_electronica"
   },
   "MLM2880762615": {
     "real_stock": 12,
-    "sku": "CAT-Go4-CAMUFLAJE",
-    "label": "Pending Go 4 Camuflaje",
+    "sku": "CAT-NEW-Go4-CAMUFLAJE",
+    "label": "Catalog NEW Go 4 Camuflaje",
     "auto_replenish": true,
     "replenish_quantity": 1,
     "min_visible_stock": 1,
-    "deleted": false
+    "deleted": false,
+    "source": "bodega_electronica"
   },
   "MLM2880754185": {
-    "real_stock": 179,
-    "sku": "CAT-Flip7-NEGRA",
-    "label": "Pending Flip 7 Negra",
+    "real_stock": 12,
+    "sku": "CAT-NEW-Flip7-NEGRA",
+    "label": "Catalog NEW Flip 7 Negra",
     "auto_replenish": true,
     "replenish_quantity": 1,
     "min_visible_stock": 1,
-    "deleted": false
+    "deleted": false,
+    "source": "bodega_electronica"
   },
   "MLM2880862569": {
     "real_stock": 4,
@@ -1914,99 +1921,123 @@
     "_auto_discovered": true
   },
   "MLM2880898001": {
-    "real_stock": 63,
-    "sku": "CAT-Flip7-AZUL",
-    "label": "Catalog Flip 7 Azul",
+    "real_stock": 82,
+    "sku": "CAT-NEW-Flip7-AZUL",
+    "label": "Catalog NEW Flip 7 Azul",
     "auto_replenish": true,
     "replenish_quantity": 1,
-    "min_visible_stock": 1
+    "min_visible_stock": 1,
+    "deleted": false,
+    "source": "bodega_electronica"
   },
   "MLM2880865907": {
-    "real_stock": 35,
-    "sku": "CAT-Flip7-ROJO",
-    "label": "Catalog Flip 7 Rojo",
-    "auto_replenish": true,
+    "real_stock": 0,
+    "sku": "CAT-NEW-Flip7-ROJO",
+    "label": "Catalog NEW Flip 7 Rojo",
+    "auto_replenish": false,
     "replenish_quantity": 1,
-    "min_visible_stock": 1
+    "min_visible_stock": 1,
+    "deleted": false,
+    "source": "bodega_electronica"
   },
   "MLM2880865909": {
     "real_stock": 2,
-    "sku": "CAT-Charge6-AZUL",
-    "label": "Catalog Charge 6 Azul",
+    "sku": "CAT-NEW-Charge6-AZUL",
+    "label": "Catalog NEW Charge 6 Azul",
     "auto_replenish": true,
     "replenish_quantity": 1,
-    "min_visible_stock": 1
+    "min_visible_stock": 1,
+    "deleted": false,
+    "source": "bodega_electronica"
   },
   "MLM2880865911": {
     "real_stock": 2,
-    "sku": "CAT-Charge6-ROJO",
-    "label": "Catalog Charge 6 Rojo",
+    "sku": "CAT-NEW-Charge6-ROJO",
+    "label": "Catalog NEW Charge 6 Rojo",
     "auto_replenish": true,
     "replenish_quantity": 1,
-    "min_visible_stock": 1
+    "min_visible_stock": 1,
+    "deleted": false,
+    "source": "bodega_electronica"
   },
   "MLM2880877603": {
     "real_stock": 3,
-    "sku": "CAT-Charge6-CAMUFLAJE",
-    "label": "Catalog Charge 6 Camuflaje",
+    "sku": "CAT-NEW-Charge6-CAMUFLAJE",
+    "label": "Catalog NEW Charge 6 Camuflaje",
     "auto_replenish": true,
     "replenish_quantity": 1,
-    "min_visible_stock": 1
+    "min_visible_stock": 1,
+    "deleted": false,
+    "source": "bodega_electronica"
   },
   "MLM2880877609": {
     "real_stock": 9,
-    "sku": "CAT-Charge6-NEGRO",
-    "label": "Catalog Charge 6 Negro",
+    "sku": "CAT-NEW-Charge6-NEGRO",
+    "label": "Catalog NEW Charge 6 Negro",
     "auto_replenish": true,
     "replenish_quantity": 1,
-    "min_visible_stock": 1
+    "min_visible_stock": 1,
+    "deleted": false,
+    "source": "bodega_electronica"
   },
   "MLM5223655448": {
-    "real_stock": 11,
-    "sku": "CAT-Clip5-MORADO",
-    "label": "Catalog Clip 5 Morado",
+    "real_stock": 240,
+    "sku": "CAT-NEW-Clip5-MORADO",
+    "label": "Catalog NEW Clip 5 Morado",
     "auto_replenish": true,
     "replenish_quantity": 1,
-    "min_visible_stock": 1
+    "min_visible_stock": 1,
+    "deleted": false,
+    "source": "bodega_electronica"
   },
   "MLM2880865935": {
     "real_stock": 243,
-    "sku": "CAT-Grip-NEGRO",
-    "label": "Catalog Grip Negro",
+    "sku": "CAT-NEW-Grip-NEGRO",
+    "label": "Catalog NEW Grip Negro",
     "auto_replenish": true,
     "replenish_quantity": 1,
-    "min_visible_stock": 1
+    "min_visible_stock": 1,
+    "deleted": false,
+    "source": "bodega_electronica"
   },
   "MLM2880898033": {
-    "real_stock": 19,
-    "sku": "CAT-Go4-ROJO",
-    "label": "Catalog Go 4 Rojo",
-    "auto_replenish": true,
+    "real_stock": 0,
+    "sku": "CAT-NEW-Go4-ROJO",
+    "label": "Catalog NEW Go 4 Rojo",
+    "auto_replenish": false,
     "replenish_quantity": 1,
-    "min_visible_stock": 1
+    "min_visible_stock": 1,
+    "deleted": false,
+    "source": "bodega_electronica"
   },
   "MLM2880877631": {
     "real_stock": 128,
-    "sku": "CAT-Go4-ROSA",
-    "label": "Catalog Go 4 Rosa",
+    "sku": "CAT-NEW-Go4-ROSA",
+    "label": "Catalog NEW Go 4 Rosa",
     "auto_replenish": true,
     "replenish_quantity": 1,
-    "min_visible_stock": 1
+    "min_visible_stock": 1,
+    "deleted": false,
+    "source": "bodega_electronica"
   },
   "MLM2880898041": {
     "real_stock": 0,
-    "sku": "CAT-Go4-AZUL",
-    "label": "Catalog Go 4 Azul",
+    "sku": "CAT-NEW-Go4-AZUL",
+    "label": "Catalog NEW Go 4 Azul",
     "auto_replenish": false,
     "replenish_quantity": 1,
-    "min_visible_stock": 1
+    "min_visible_stock": 1,
+    "deleted": false,
+    "source": "bodega_electronica"
   },
   "MLM2880898049": {
     "real_stock": 905,
-    "sku": "CAT-Go3-NEGRO",
-    "label": "Catalog Go 3 Negro",
+    "sku": "CAT-NEW-Go3-NEGRO",
+    "label": "Catalog NEW Go 3 Negro",
     "auto_replenish": true,
     "replenish_quantity": 1,
-    "min_visible_stock": 1
+    "min_visible_stock": 1,
+    "deleted": false,
+    "source": "bodega_electronica"
   }
 }
