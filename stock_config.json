@@ -380,7 +380,7 @@
     "deleted": true
   },
   "MLM2879334963": {
-    "real_stock": 10,
+    "real_stock": 0,
     "sku": "PERF-001",
     "label": "RABANNE 1 MILLION GOLD INTENSE EDP HOMBRE 100ML OR",
     "auto_replenish": false,
@@ -397,15 +397,16 @@
     "real_stock": 0,
     "sku": "PERF-000",
     "label": "KURKY MAISON FRANCIS 70 ML EAU DE PARFUM ORIGINAL",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "KURKY MAISON FRANCIS 70 ML EAU DE PARFUM ORIGINAL",
     "previous_ids": [],
     "_perfume": true,
-    "_idx": 0
+    "_idx": 0,
+    "deleted": true
   },
   "MLM2879386811": {
-    "real_stock": 10,
+    "real_stock": 0,
     "sku": "PERF-001",
     "label": "RABANNE 1 MILLION GOLD INTENSE EDP HOMBRE 100ML OR",
     "auto_replenish": false,
@@ -419,7 +420,7 @@
     "_deleted_reason": "Cannot update item MLM2879386811 [status:under_review, has_bids:false]"
   },
   "MLM5220681982": {
-    "real_stock": 10,
+    "real_stock": 0,
     "sku": "PERF-002",
     "label": "PERFUME ORIGINAL BABY DIOR BONNE ÉTOILE EDP 100ML ",
     "auto_replenish": false,
@@ -433,7 +434,7 @@
     "_deleted_reason": "Cannot update item MLM5220681982 [status:under_review, has_bids:false]"
   },
   "MLM2879717667": {
-    "real_stock": 10,
+    "real_stock": 0,
     "sku": "PERF-004",
     "label": "GUERLAIN CUIR INTENSE EAU DE PARFUM 125 ML ORIGINA",
     "auto_replenish": false,
@@ -447,7 +448,7 @@
     "_deleted_reason": "Cannot update item MLM2879717667 [status:under_review, has_bids:false]"
   },
   "MLM2879387291": {
-    "real_stock": 10,
+    "real_stock": 0,
     "sku": "PERF-005",
     "label": "ROSE AMIRA GUERLAIN EAU DE PARFUM 125 ML ORIGINAL",
     "auto_replenish": false,
@@ -461,7 +462,7 @@
     "_deleted_reason": "Cannot update item MLM2879387291 [status:under_review, has_bids:false]"
   },
   "MLM2879335659": {
-    "real_stock": 10,
+    "real_stock": 0,
     "sku": "PERF-006",
     "label": "BACCARAT ROUGE 540 EXTRAIT 70ML MAISON FRANCIS KUR",
     "auto_replenish": false,
@@ -475,7 +476,7 @@
     "_deleted_reason": "Cannot update item MLM2879335659 [status:under_review, has_bids:false]"
   },
   "MLM5220682462": {
-    "real_stock": 10,
+    "real_stock": 0,
     "sku": "PERF-007",
     "label": "ARMAF ODYSSEY CANDEE EDP SPRAY MUJER 100ML",
     "auto_replenish": false,
@@ -489,7 +490,7 @@
     "_deleted_reason": "Cannot update item MLM5220682462 [status:under_review, has_bids:false]"
   },
   "MLM5220682468": {
-    "real_stock": 10,
+    "real_stock": 0,
     "sku": "PERF-008",
     "label": "ARMAF ODYSSEY HOMME WHITE EDITION EDP 100 ML HOMBR",
     "auto_replenish": false,
@@ -503,7 +504,7 @@
     "_deleted_reason": "Cannot update item MLM5220682468 [status:under_review, has_bids:false]"
   },
   "MLM2879718161": {
-    "real_stock": 10,
+    "real_stock": 0,
     "sku": "PERF-009",
     "label": "ODYSSEY MANDARIN SKY ARMAF PERFUME HOMBRE PARFUM 1",
     "auto_replenish": false,
@@ -529,7 +530,7 @@
     "deleted": true
   },
   "MLM2879716551": {
-    "real_stock": 30,
+    "real_stock": 0,
     "sku": "AUTO-716551",
     "label": "Perfume Billie Eilish Eilish Eau Parfum 100ml Mujer Original - $999",
     "auto_replenish": false,
@@ -569,7 +570,7 @@
     "deleted": true
   },
   "MLM5221355572": {
-    "real_stock": 10,
+    "real_stock": 0,
     "sku": "PERF-001",
     "label": "RABANNE 1 MILLION GOLD INTENSE EDP HOMBRE 100ML OR",
     "auto_replenish": false,
@@ -583,7 +584,7 @@
     "_deleted_reason": "Cannot update item MLM5221355572 [status:under_review, has_bids:false]"
   },
   "MLM2879724127": {
-    "real_stock": 10,
+    "real_stock": 0,
     "sku": "PERF-003",
     "label": "GUERLAIN PATCHOULI ARDENT EAU DE PARFUM 125 ML ORI",
     "auto_replenish": false,
@@ -600,15 +601,16 @@
     "real_stock": 0,
     "sku": "PERF-005",
     "label": "ROSE AMIRA GUERLAIN EAU DE PARFUM 125 ML ORIGINAL",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "ROSE AMIRA GUERLAIN EAU DE PARFUM 125 ML ORIGINAL",
     "previous_ids": [],
     "_perfume": true,
-    "_idx": 5
+    "_idx": 5,
+    "deleted": true
   },
   "MLM5221330622": {
-    "real_stock": 10,
+    "real_stock": 0,
     "sku": "PERF-007",
     "label": "ARMAF ODYSSEY CANDEE EDP SPRAY MUJER 100ML",
     "auto_replenish": false,
@@ -622,7 +624,7 @@
     "_deleted_reason": "Cannot update item MLM5221330622 [status:under_review, has_bids:false]"
   },
   "MLM2880142439": {
-    "real_stock": 10,
+    "real_stock": 0,
     "sku": "PERF-010",
     "label": "PERFUME ORIGINAL ARMAF ODYSSEY AQUA MEN EDP 100ML ",
     "auto_replenish": false,
@@ -636,7 +638,7 @@
     "_deleted_reason": "Cannot update item MLM2880142439 [status:under_review, has_bids:false]"
   },
   "MLM5221330632": {
-    "real_stock": 10,
+    "real_stock": 0,
     "sku": "PERF-011",
     "label": "ARMAF ODYSSEY MEGA MAN LIMITED EDITION EDP 100 ML",
     "auto_replenish": false,
@@ -650,7 +652,7 @@
     "_deleted_reason": "Cannot update item MLM5221330632 [status:under_review, has_bids:false]"
   },
   "MLM2880142457": {
-    "real_stock": 10,
+    "real_stock": 0,
     "sku": "PERF-012",
     "label": "CHRISTIAN DIOR DUNE EDT 100ML ORIGINAL MUJER PERFU",
     "auto_replenish": false,
@@ -664,7 +666,7 @@
     "_deleted_reason": "Cannot update item MLM2880142457 [status:under_review, has_bids:false]"
   },
   "MLM5221330650": {
-    "real_stock": 10,
+    "real_stock": 0,
     "sku": "PERF-013",
     "label": "PERFUME LATTAFA HIS CONFESSION HOMBRE 100 ML EDP",
     "auto_replenish": false,
@@ -678,7 +680,7 @@
     "_deleted_reason": "Cannot update item MLM5221330650 [status:under_review, has_bids:false]"
   },
   "MLM5221356352": {
-    "real_stock": 10,
+    "real_stock": 0,
     "sku": "PERF-014",
     "label": "PERFUME ORIGINAL ARMAF DELIGHT ISLAND BLISS EDP 10",
     "auto_replenish": false,
@@ -692,7 +694,7 @@
     "_deleted_reason": "Cannot update item MLM5221356352 [status:under_review, has_bids:false]"
   },
   "MLM5221356358": {
-    "real_stock": 10,
+    "real_stock": 0,
     "sku": "PERF-016",
     "label": "JADORE DIOR EAU DE PARFUM 100 ML MUJER ORIGINAL",
     "auto_replenish": false,
@@ -706,7 +708,7 @@
     "_deleted_reason": "Cannot update item MLM5221356358 [status:under_review, has_bids:false]"
   },
   "MLM5221330656": {
-    "real_stock": 10,
+    "real_stock": 0,
     "sku": "PERF-017",
     "label": "TOM FORD BOIS PACIFIQUE EDP 100ML PERFUME UNISEX O",
     "auto_replenish": false,
@@ -720,7 +722,7 @@
     "_deleted_reason": "Cannot update item MLM5221330656 [status:under_review, has_bids:false]"
   },
   "MLM2879724209": {
-    "real_stock": 10,
+    "real_stock": 0,
     "sku": "PERF-018",
     "label": "MISS DIOR BLOOMING BOUQUET 100 ML EAU DE TOILETTE",
     "auto_replenish": false,
@@ -734,7 +736,7 @@
     "_deleted_reason": "Cannot update item MLM2879724209 [status:under_review, has_bids:false]"
   },
   "MLM5221330674": {
-    "real_stock": 10,
+    "real_stock": 0,
     "sku": "PERF-020",
     "label": "DUMONT NITRO RED EDP 100ML PARA HOMBRE ORIGINAL LU",
     "auto_replenish": false,
@@ -748,7 +750,7 @@
     "_deleted_reason": "Cannot update item MLM5221330674 [status:under_review, has_bids:true]"
   },
   "MLM5221356390": {
-    "real_stock": 10,
+    "real_stock": 0,
     "sku": "PERF-023",
     "label": "CLUB DE NUIT MALEKA EDP ARMAF 105ML ORIGINAL MUJER",
     "auto_replenish": false,
@@ -762,7 +764,7 @@
     "_deleted_reason": "Cannot update item MLM5221356390 [status:under_review, has_bids:false]"
   },
   "MLM5221356396": {
-    "real_stock": 10,
+    "real_stock": 0,
     "sku": "PERF-024",
     "label": "PERFUME ORIGINAL MARC JACOBS PERFECT ELIXIR EDP 10",
     "auto_replenish": false,
@@ -776,7 +778,7 @@
     "_deleted_reason": "Cannot update item MLM5221356396 [status:under_review, has_bids:false]"
   },
   "MLM2880142515": {
-    "real_stock": 10,
+    "real_stock": 0,
     "sku": "PERF-025",
     "label": "OPULENT SHAIK SAPPHIRE EAU DE PARFUM",
     "auto_replenish": false,
@@ -790,7 +792,7 @@
     "_deleted_reason": "Cannot update item MLM2880142515 [status:under_review, has_bids:false]"
   },
   "MLM2880142523": {
-    "real_stock": 10,
+    "real_stock": 0,
     "sku": "PERF-026",
     "label": "PERFUME ORIGINAL ANGEL NOVA FRUITTé MUGLER EDP 100",
     "auto_replenish": false,
@@ -804,7 +806,7 @@
     "_deleted_reason": "Cannot update item MLM2880142523 [status:under_review, has_bids:false]"
   },
   "MLM5221356410": {
-    "real_stock": 10,
+    "real_stock": 0,
     "sku": "PERF-028",
     "label": "MISS DIOR EAU DE PARFUM MUJER",
     "auto_replenish": false,
@@ -818,7 +820,7 @@
     "_deleted_reason": "Cannot update item MLM5221356410 [status:under_review, has_bids:false]"
   },
   "MLM5221330712": {
-    "real_stock": 10,
+    "real_stock": 0,
     "sku": "PERF-029",
     "label": "ARMAF ODYSSEY DUBAI CHOCOLAT EAU DE PARFUM 100 ML ",
     "auto_replenish": false,
@@ -832,7 +834,7 @@
     "_deleted_reason": "Cannot update item MLM5221330712 [status:under_review, has_bids:false]"
   },
   "MLM5221330720": {
-    "real_stock": 10,
+    "real_stock": 0,
     "sku": "PERF-031",
     "label": "PERFUME ARMAF ODYSSEY SPECTRA HOMBRE 100ML EAU DE ",
     "auto_replenish": false,
@@ -846,7 +848,7 @@
     "_deleted_reason": "Cannot update item MLM5221330720 [status:under_review, has_bids:false]"
   },
   "MLM5221330734": {
-    "real_stock": 10,
+    "real_stock": 0,
     "sku": "PERF-033",
     "label": "PERFUME BYREDO MOJAVE GHOST, 100 ML, PARA UNISEX",
     "auto_replenish": false,
@@ -860,7 +862,7 @@
     "_deleted_reason": "Cannot update item MLM5221330734 [status:under_review, has_bids:false]"
   },
   "MLM2880142605": {
-    "real_stock": 10,
+    "real_stock": 0,
     "sku": "PERF-038",
     "label": "JEAN PAUL GAULTIER LE MALE ELIXIR PARFUM 125ML HOM",
     "auto_replenish": false,
@@ -874,7 +876,7 @@
     "_deleted_reason": "Cannot update item MLM2880142605 [status:under_review, has_bids:false]"
   },
   "MLM5221355096": {
-    "real_stock": 30,
+    "real_stock": 0,
     "sku": "AUTO-355096",
     "label": "Perfume Game Of Spades Wildcard Parfum 100ml - $499",
     "auto_replenish": false,
@@ -887,7 +889,7 @@
     "_deleted_reason": "Cannot update item MLM5221355096 [status:under_review, has_bids:false]"
   },
   "MLM5221328952": {
-    "real_stock": 30,
+    "real_stock": 0,
     "sku": "AUTO-328952",
     "label": "Perfume Original Marshmallow Blush Edp 100ml Mujer Importado - $499",
     "auto_replenish": false,
@@ -900,7 +902,7 @@
     "_deleted_reason": "Cannot update item MLM5221328952 [status:under_review, has_bids:false]"
   },
   "MLM5221767078": {
-    "real_stock": 10,
+    "real_stock": 0,
     "sku": "PERF-035",
     "label": "PACO RABANNE MILLION GOLD FOR HER EDP PARA MUJER 9",
     "auto_replenish": false,
@@ -914,7 +916,7 @@
     "_deleted_reason": "Cannot update item MLM5221767078 [status:under_review, has_bids:false]"
   },
   "MLM5221767374": {
-    "real_stock": 10,
+    "real_stock": 0,
     "sku": "PERF-019",
     "label": "ARMAF CLUB DE NUIT ICONIC EAU DE PARFUM",
     "auto_replenish": false,
@@ -928,7 +930,7 @@
     "_deleted_reason": "Cannot update item MLM5221767374 [status:under_review, has_bids:false]"
   },
   "MLM5221767386": {
-    "real_stock": 10,
+    "real_stock": 0,
     "sku": "PERF-022",
     "label": "ARMAF THE LIONS CLUB RUGIR EDP 100ML HOMBRE ORIGIN",
     "auto_replenish": false,
@@ -942,7 +944,7 @@
     "_deleted_reason": "Cannot update item MLM5221767386 [status:under_review, has_bids:false]"
   },
   "MLM5221358592": {
-    "real_stock": 10,
+    "real_stock": 0,
     "sku": "PERF-027",
     "label": "PERFUME ORIGINAL DIOR SAUVAGE EAU DE PARFUM 100ML ",
     "auto_replenish": false,
@@ -956,7 +958,7 @@
     "_deleted_reason": "Cannot update item MLM5221358592 [status:under_review, has_bids:false]"
   },
   "MLM5221332874": {
-    "real_stock": 10,
+    "real_stock": 0,
     "sku": "PERF-030",
     "label": "PERFUME SAUVAGE EAU FORTE 100 MI HOMBRE CíTRICO AM",
     "auto_replenish": false,
@@ -970,7 +972,7 @@
     "_deleted_reason": "Cannot update item MLM5221332874 [status:under_review, has_bids:false]"
   },
   "MLM5221358608": {
-    "real_stock": 10,
+    "real_stock": 0,
     "sku": "PERF-032",
     "label": "AL HARAMAIN AMBER OUD GOLD EDP SPRAY 60 ML",
     "auto_replenish": false,
@@ -984,7 +986,7 @@
     "_deleted_reason": "Cannot update item MLM5221358608 [status:under_review, has_bids:false]"
   },
   "MLM5221767428": {
-    "real_stock": 10,
+    "real_stock": 0,
     "sku": "PERF-034",
     "label": "OUD ROYAL ARMANI PRIVé 100 ML EAU DE PARFUM ORIGIN",
     "auto_replenish": false,
@@ -998,7 +1000,7 @@
     "_deleted_reason": "Cannot update item MLM5221767428 [status:under_review, has_bids:false]"
   },
   "MLM5221358624": {
-    "real_stock": 8,
+    "real_stock": 0,
     "sku": "PERF-036",
     "label": "LATTAFA MAYAR EAU DE PARFUM 100ML ORIGINAL MUJER",
     "auto_replenish": false,
@@ -1012,7 +1014,7 @@
     "_deleted_reason": "Cannot update item MLM5221358624 [status:under_review, has_bids:true]"
   },
   "MLM5221767442": {
-    "real_stock": 10,
+    "real_stock": 0,
     "sku": "PERF-037",
     "label": "JEAN PAUL GAULTIER LE BEAU EDT HOMBRE 125 ML",
     "auto_replenish": false,
@@ -1029,15 +1031,16 @@
     "real_stock": 0,
     "sku": "PERF-039",
     "label": "PERFUME ORIGINAL CARTIER LA PANTHERE EDP 100ML MUJ",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "PERFUME ORIGINAL CARTIER LA PANTHERE EDP 100ML MUJER LUJO",
     "previous_ids": [],
     "_perfume": true,
-    "_idx": 39
+    "_idx": 39,
+    "deleted": true
   },
   "MLM5220687404": {
-    "real_stock": 30,
+    "real_stock": 0,
     "sku": "AUTO-687404",
     "label": "Paco Rabanne Million Gold For Her Edp Para Mujer 90 Ml - $999",
     "auto_replenish": false,
