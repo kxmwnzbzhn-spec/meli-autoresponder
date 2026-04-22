@@ -2242,7 +2242,7 @@
     "_deleted_reason": "Cannot update item MLM5227773714 [status:under_review, has_bids:false]"
   },
   "MLM2883448187": {
-    "real_stock": 630,
+    "real_stock": 1667,
     "sku": "GO4-UNIFIED",
     "label": "Go 4 Unified (5 colors)",
     "auto_replenish": true,
@@ -2269,6 +2269,10 @@
       "Rosa": {
         "stock": 28,
         "orig_id": "MLM5223451400"
+      },
+      "Aqua": {
+        "stock": 1037,
+        "orig_id": "MLM2747271435"
       }
     }
   },
