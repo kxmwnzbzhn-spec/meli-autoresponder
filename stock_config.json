@@ -1708,15 +1708,15 @@
     "_deleted_reason": "Cannot update item MLM2880762535 [status:under_review, has_bids:true]"
   },
   "MLM5223214798": {
-    "real_stock": 27,
+    "real_stock": 0,
     "sku": "AUTO-214798",
     "label": "Bocina Jbl Go 4 Bluetooth Portatil Azul Marino Ip67 Nueva - $469",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "Bocina Jbl Go 4 Bluetooth Portatil Azul Marino Ip67 Nueva",
     "previous_ids": [],
     "_auto_discovered": true,
-    "deleted": false,
+    "deleted": true,
     "_deleted_at": 1776856890,
     "_deleted_reason": "Cannot update item MLM5223214798 [status:under_review, has_bids:true]"
   },
@@ -1747,15 +1747,15 @@
     "_deleted_reason": "Cannot update item MLM2880774949 [status:under_review, has_bids:true]"
   },
   "MLM2880763019": {
-    "real_stock": 29,
+    "real_stock": 0,
     "sku": "AUTO-763019",
     "label": "Bocina Jbl Go 4 Bluetooth Portatil Roja Ip67 Nueva - $469",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "Bocina Jbl Go 4 Bluetooth Portatil Roja Ip67 Nueva",
     "previous_ids": [],
     "_auto_discovered": true,
-    "deleted": false,
+    "deleted": true,
     "_deleted_at": 1776856892,
     "_deleted_reason": "Cannot update item MLM2880763019 [status:under_review, has_bids:false]"
   },
@@ -1786,15 +1786,15 @@
     "_deleted_reason": "Cannot update item MLM5223535424 [status:under_review, has_bids:false]"
   },
   "MLM5223451400": {
-    "real_stock": 28,
+    "real_stock": 0,
     "sku": "AUTO-451400",
     "label": "Bocina Jbl Go 4 Bluetooth Portatil Rosa Ip67 Nueva Original - $489",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "Bocina Jbl Go 4 Bluetooth Portatil Rosa Ip67 Nueva Original",
     "previous_ids": [],
     "_auto_discovered": true,
-    "deleted": false,
+    "deleted": true,
     "_deleted_at": 1776856895,
     "_deleted_reason": "Cannot update item MLM5223451400 [status:under_review, has_bids:true]"
   },
@@ -1850,13 +1850,13 @@
     "_deleted_reason": "Cannot update item MLM2880758743 [status:under_review, has_bids:true]"
   },
   "MLM2880762615": {
-    "real_stock": 535,
+    "real_stock": 0,
     "sku": "CAT-NEW-Go4-CAMUFLAJE",
     "label": "Catalog NEW Go 4 Camuflaje",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "min_visible_stock": 1,
-    "deleted": false,
+    "deleted": true,
     "source": "bodega_electronica",
     "_deleted_at": 1776856900,
     "_deleted_reason": "Cannot update item MLM2880762615 [status:under_review, has_bids:true]"
@@ -2231,7 +2231,7 @@
     "_deleted_reason": "Cannot update item MLM2881178447 [status:under_review, has_bids:true]"
   },
   "MLM5227773714": {
-    "real_stock": 10,
+    "real_stock": 0,
     "sku": "GO4-MLM5227773714",
     "label": "Go 4 MLM5227773714",
     "auto_replenish": false,
@@ -2240,5 +2240,36 @@
     "deleted": true,
     "_deleted_at": 1776880496,
     "_deleted_reason": "Cannot update item MLM5227773714 [status:under_review, has_bids:false]"
+  },
+  "MLM2883448187": {
+    "real_stock": 630,
+    "sku": "GO4-UNIFIED",
+    "label": "Go 4 Unified (5 colors)",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "min_visible_stock": 1,
+    "deleted": false,
+    "variations": {
+      "Negro": {
+        "stock": 10,
+        "orig_id": "MLM5227773714"
+      },
+      "Azul": {
+        "stock": 27,
+        "orig_id": "MLM5223214798"
+      },
+      "Rojo": {
+        "stock": 30,
+        "orig_id": "MLM2880763019"
+      },
+      "Camuflaje": {
+        "stock": 535,
+        "orig_id": "MLM2880762615"
+      },
+      "Rosa": {
+        "stock": 28,
+        "orig_id": "MLM5223451400"
+      }
+    }
   }
 }
