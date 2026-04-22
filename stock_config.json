@@ -1747,7 +1747,7 @@
     "_deleted_reason": "Cannot update item MLM2880774949 [status:under_review, has_bids:true]"
   },
   "MLM2880763019": {
-    "real_stock": 30,
+    "real_stock": 29,
     "sku": "AUTO-763019",
     "label": "Bocina Jbl Go 4 Bluetooth Portatil Roja Ip67 Nueva - $469",
     "auto_replenish": true,
