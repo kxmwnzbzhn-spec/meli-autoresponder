@@ -1,0 +1,29 @@
+name: clone-perf2
+on:
+  workflow_dispatch:
+    inputs:
+      start:
+        default: '0'
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions: {contents: write}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - run: pip install requests -q
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+          MELI_REFRESH_TOKEN_OFICIAL: ${{ secrets.MELI_REFRESH_TOKEN_OFICIAL }}
+          START: ${{ inputs.start }}
+        run: python scripts/clone_perf2.py
+      - run: |
+          git config user.name bot
+          git config user.email b@b.com
+          git add stock_config_oficial.json
+          git diff --cached --quiet || git commit -m "clone perfumes batch"
+          git push || true
