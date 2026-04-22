@@ -1767,7 +1767,7 @@
     "_deleted_reason": "Cannot update item MLM2880758743 [status:under_review, has_bids:true]"
   },
   "MLM2880762615": {
-    "real_stock": 13,
+    "real_stock": 0,
     "sku": "AUTO-762615",
     "label": "Bocina Jbl Go 4 Bluetooth Portatil Camuflaje Ip67 Nueva - $469",
     "auto_replenish": true,
@@ -1812,7 +1812,7 @@
     "min_visible_stock": 1
   },
   "MLM2880875371": {
-    "real_stock": 59,
+    "real_stock": 30,
     "sku": "REACOND-Flip7-MORADO",
     "label": "Flip 7 Morado Reacondicionada",
     "auto_replenish": true,
@@ -1922,5 +1922,15 @@
     "auto_replenish": true,
     "replenish_quantity": 1,
     "min_visible_stock": 1
+  },
+  "MLM5221973786": {
+    "real_stock": 30,
+    "sku": "AUTO-973786",
+    "label": "Bocina Jbl Go Jbl Go 4 Go4 Portátil Con Bluetooth Waterproof - $499",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "seo_title": "Bocina Jbl Go Jbl Go 4 Go4 Portátil Con Bluetooth Waterproof Jbl Go4 Azul",
+    "previous_ids": [],
+    "_auto_discovered": true
   }
 }
