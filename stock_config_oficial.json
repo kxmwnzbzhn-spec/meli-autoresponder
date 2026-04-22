@@ -236,5 +236,77 @@
     "min_visible_stock": 1,
     "account": "oficial",
     "cloned_from": "MLM2879724127"
+  },
+  "MLM5226052484": {
+    "real_stock": 1,
+    "label": "Club De Nuit Maleka Edp Armaf 105ml Original Mujer",
+    "auto_replenish": false,
+    "min_visible_stock": 1,
+    "account": "oficial",
+    "cloned_from": "MLM5221356390"
+  },
+  "MLM5226052490": {
+    "real_stock": 1,
+    "label": "Perfume Original Dior Sauvage Eau De Parfum 100ml ",
+    "auto_replenish": false,
+    "min_visible_stock": 1,
+    "account": "oficial",
+    "cloned_from": "MLM5221358592"
+  },
+  "MLM5226039586": {
+    "real_stock": 1,
+    "label": "Jadore Dior Eau De Parfum 100 Ml Mujer Original",
+    "auto_replenish": false,
+    "min_visible_stock": 1,
+    "account": "oficial",
+    "cloned_from": "MLM5221356358"
+  },
+  "MLM5226039588": {
+    "real_stock": 1,
+    "label": "Tom Ford Bois Pacifique Edp 100ml Perfume Unisex O",
+    "auto_replenish": false,
+    "min_visible_stock": 1,
+    "account": "oficial",
+    "cloned_from": "MLM5221330656"
+  },
+  "MLM5226091240": {
+    "real_stock": 1,
+    "label": "Perfume Armaf Odyssey Spectra Hombre 100ml Eau De ",
+    "auto_replenish": false,
+    "min_visible_stock": 1,
+    "account": "oficial",
+    "cloned_from": "MLM5221330720"
+  },
+  "MLM5226014174": {
+    "real_stock": 1,
+    "label": "Rose Amira Guerlain Eau De Parfum 125 Ml Original",
+    "auto_replenish": false,
+    "min_visible_stock": 1,
+    "account": "oficial",
+    "cloned_from": "MLM5221356312"
+  },
+  "MLM5226039608": {
+    "real_stock": 1,
+    "label": "Perfume Dior Sauvage Eau Forte 100ml Hombre Amader",
+    "auto_replenish": false,
+    "min_visible_stock": 1,
+    "account": "oficial",
+    "cloned_from": "MLM5221332874"
+  },
+  "MLM5226091266": {
+    "real_stock": 1,
+    "label": "Armaf Odyssey Candee Edp Spray Mujer 100ml",
+    "auto_replenish": false,
+    "min_visible_stock": 1,
+    "account": "oficial",
+    "cloned_from": "MLM5221330622"
+  },
+  "MLM5226091270": {
+    "real_stock": 1,
+    "label": "Opulent Shaik Sapphire Eau De Parfum",
+    "auto_replenish": false,
+    "min_visible_stock": 1,
+    "account": "oficial",
+    "cloned_from": "MLM5220687352"
   }
 }
