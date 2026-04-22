@@ -861,5 +861,12 @@
     "auto_replenish": false,
     "account": "oficial",
     "cloned_from": "MLM2881178447"
+  },
+  "MLM5226092352": {
+    "real_stock": 1,
+    "label": "Parlante Jbl Go Jbl Go 4 Go4 Portátil Con Bluetoot",
+    "auto_replenish": false,
+    "account": "oficial",
+    "cloned_from": "MLM2880766117"
   }
 }
