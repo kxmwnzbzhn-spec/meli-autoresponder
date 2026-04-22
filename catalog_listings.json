@@ -12,5 +12,148 @@
     "floor_alerted": false,
     "sync_price_to_traditional": true,
     "sync_stock": true
+  },
+  "MLM58806550": {
+    "catalog_item_id": "MLM2880774951",
+    "traditional_item_id": null,
+    "label": "JBL Charge 6 Roja",
+    "floor": 720,
+    "step": 10,
+    "active": true,
+    "sync_price_to_traditional": false,
+    "sync_stock": false,
+    "floor_alerted": false
+  },
+  "MLM58829227": {
+    "catalog_item_id": "MLM2880762579",
+    "traditional_item_id": null,
+    "label": "JBL Charge 6 Camuflaje",
+    "floor": 720,
+    "step": 10,
+    "active": true,
+    "sync_price_to_traditional": false,
+    "sync_stock": false,
+    "floor_alerted": false
+  },
+  "MLM51435334": {
+    "catalog_item_id": "MLM2880803051",
+    "traditional_item_id": null,
+    "label": "JBL Charge 6 Negra",
+    "floor": 720,
+    "step": 10,
+    "active": true,
+    "sync_price_to_traditional": false,
+    "sync_stock": false,
+    "floor_alerted": false
+  },
+  "MLM48958711": {
+    "catalog_item_id": "MLM5223214318",
+    "traditional_item_id": null,
+    "label": "JBL Flip 7 Roja",
+    "floor": 640,
+    "step": 10,
+    "active": true,
+    "sync_price_to_traditional": false,
+    "sync_stock": false,
+    "floor_alerted": false
+  },
+  "MLM45586155": {
+    "catalog_item_id": "MLM2880762535",
+    "traditional_item_id": null,
+    "label": "JBL Clip 5 Morada",
+    "floor": 690,
+    "step": 10,
+    "active": true,
+    "sync_price_to_traditional": false,
+    "sync_stock": false,
+    "floor_alerted": false
+  },
+  "MLM59802579": {
+    "catalog_item_id": "MLM2880794089",
+    "traditional_item_id": null,
+    "label": "JBL Grip Negra",
+    "floor": 565,
+    "step": 10,
+    "active": true,
+    "sync_price_to_traditional": false,
+    "sync_stock": false,
+    "floor_alerted": false
+  },
+  "MLM25912333": {
+    "catalog_item_id": "MLM5223449418",
+    "traditional_item_id": null,
+    "label": "Sony XB100 Negra",
+    "floor": 500,
+    "step": 10,
+    "active": true,
+    "sync_price_to_traditional": false,
+    "sync_stock": false,
+    "floor_alerted": false
+  },
+  "MLM44711997": {
+    "catalog_item_id": "MLM2880762595",
+    "traditional_item_id": null,
+    "label": "JBL Go Essential 2 Azul",
+    "floor": 430,
+    "step": 10,
+    "active": true,
+    "sync_price_to_traditional": false,
+    "sync_stock": false,
+    "floor_alerted": false
+  },
+  "MLM44712071": {
+    "catalog_item_id": "MLM2880775007",
+    "traditional_item_id": null,
+    "label": "JBL Go Essential 2 Roja",
+    "floor": 430,
+    "step": 10,
+    "active": true,
+    "sync_price_to_traditional": false,
+    "sync_stock": false,
+    "floor_alerted": false
+  },
+  "MLM64389753": {
+    "catalog_item_id": "MLM2880763019",
+    "traditional_item_id": null,
+    "label": "JBL Go 4 Roja",
+    "floor": 430,
+    "step": 10,
+    "active": true,
+    "sync_price_to_traditional": false,
+    "sync_stock": false,
+    "floor_alerted": false
+  },
+  "MLM65831856": {
+    "catalog_item_id": "MLM5223451400",
+    "traditional_item_id": null,
+    "label": "JBL Go 4 Rosa",
+    "floor": 430,
+    "step": 10,
+    "active": true,
+    "sync_price_to_traditional": false,
+    "sync_stock": false,
+    "floor_alerted": false
+  },
+  "MLM44731712": {
+    "catalog_item_id": "MLM5223214798",
+    "traditional_item_id": null,
+    "label": "JBL Go 4 Azul Marino",
+    "floor": 430,
+    "step": 10,
+    "active": true,
+    "sync_price_to_traditional": false,
+    "sync_stock": false,
+    "floor_alerted": false
+  },
+  "MLM44709174": {
+    "catalog_item_id": "MLM2880774949",
+    "traditional_item_id": null,
+    "label": "JBL Go 3 Negra",
+    "floor": 430,
+    "step": 10,
+    "active": true,
+    "sync_price_to_traditional": false,
+    "sync_stock": false,
+    "floor_alerted": false
   }
 }
