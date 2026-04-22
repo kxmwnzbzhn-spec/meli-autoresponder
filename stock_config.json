@@ -1615,7 +1615,7 @@
     "_auto_discovered": true
   },
   "MLM2880763001": {
-    "real_stock": 30,
+    "real_stock": 29,
     "sku": "AUTO-763001",
     "label": "Bocina Jbl Charge 6 Bluetooth Portatil Azul Ip68 Nueva - $919",
     "auto_replenish": true,
@@ -1735,7 +1735,7 @@
     "_auto_discovered": true
   },
   "MLM2880803051": {
-    "real_stock": 30,
+    "real_stock": 29,
     "sku": "AUTO-803051",
     "label": "Bocina Jbl Charge 6 Bluetooth Portatil Negra Ip68 Nueva - $909",
     "auto_replenish": true,
@@ -1745,7 +1745,7 @@
     "_auto_discovered": true
   },
   "MLM2880758743": {
-    "real_stock": 202,
+    "real_stock": 200,
     "sku": "CAT-NEW-Flip7-MORADA",
     "label": "Catalog NEW Flip 7 Morada",
     "auto_replenish": true,
@@ -1765,7 +1765,7 @@
     "source": "bodega_electronica"
   },
   "MLM2880754185": {
-    "real_stock": 12,
+    "real_stock": 5,
     "sku": "CAT-NEW-Flip7-NEGRA",
     "label": "Catalog NEW Flip 7 Negra",
     "auto_replenish": true,
@@ -1780,7 +1780,10 @@
     "label": "Charge 6 Azul Reacondicionada",
     "auto_replenish": true,
     "replenish_quantity": 1,
-    "min_visible_stock": 1
+    "min_visible_stock": 1,
+    "deleted": true,
+    "_deleted_at": 1776826300,
+    "_deleted_reason": "It's not possible to relist an item that has been already deleted. [MLM2880862569 deleted]"
   },
   "MLM5223653274": {
     "real_stock": 179,
@@ -1802,9 +1805,12 @@
     "real_stock": 30,
     "sku": "REACOND-Flip7-MORADO",
     "label": "Flip 7 Morado Reacondicionada",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
-    "min_visible_stock": 1
+    "min_visible_stock": 1,
+    "deleted": true,
+    "_deleted_at": 1776826301,
+    "_deleted_reason": "Cannot update item MLM2880875371 [status:closed, has_bids:false]"
   },
   "MLM2880863639": {
     "real_stock": 35,
@@ -1907,9 +1913,12 @@
     "real_stock": 2,
     "sku": "REACOND-Charge6-NEGRO",
     "label": "Charge 6 Negro Reacondicionada",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
-    "min_visible_stock": 1
+    "min_visible_stock": 1,
+    "deleted": true,
+    "_deleted_at": 1776826304,
+    "_deleted_reason": "Cannot update item MLM2880863675 [status:closed, has_bids:false]"
   },
   "MLM5221973786": {
     "real_stock": 0,
@@ -1946,14 +1955,16 @@
     "real_stock": 2,
     "sku": "CAT-NEW-Charge6-AZUL",
     "label": "Catalog NEW Charge 6 Azul",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "min_visible_stock": 1,
-    "deleted": false,
-    "source": "bodega_electronica"
+    "deleted": true,
+    "source": "bodega_electronica",
+    "_deleted_at": 1776826305,
+    "_deleted_reason": "Cannot update item MLM2880865909 [status:under_review, has_bids:false]"
   },
   "MLM2880865911": {
-    "real_stock": 2,
+    "real_stock": 1,
     "sku": "CAT-NEW-Charge6-ROJO",
     "label": "Catalog NEW Charge 6 Rojo",
     "auto_replenish": true,
@@ -1973,7 +1984,7 @@
     "source": "bodega_electronica"
   },
   "MLM2880877609": {
-    "real_stock": 9,
+    "real_stock": 0,
     "sku": "CAT-NEW-Charge6-NEGRO",
     "label": "Catalog NEW Charge 6 Negro",
     "auto_replenish": true,
@@ -1993,7 +2004,7 @@
     "source": "bodega_electronica"
   },
   "MLM2880865935": {
-    "real_stock": 243,
+    "real_stock": 242,
     "sku": "CAT-NEW-Grip-NEGRO",
     "label": "Catalog NEW Grip Negro",
     "auto_replenish": true,
@@ -2023,7 +2034,7 @@
     "source": "bodega_electronica"
   },
   "MLM2880898041": {
-    "real_stock": 499,
+    "real_stock": 498,
     "sku": "CAT-NEW-Go4-AZUL",
     "label": "Catalog NEW Go 4 Azul",
     "auto_replenish": true,
@@ -2033,7 +2044,7 @@
     "source": "bodega_electronica"
   },
   "MLM2880898049": {
-    "real_stock": 905,
+    "real_stock": 903,
     "sku": "CAT-NEW-Go3-NEGRO",
     "label": "Catalog NEW Go 3 Negro",
     "auto_replenish": true,
@@ -2041,5 +2052,25 @@
     "min_visible_stock": 1,
     "deleted": false,
     "source": "bodega_electronica"
+  },
+  "MLM5223664218": {
+    "real_stock": 30,
+    "sku": "AUTO-664218",
+    "label": "Bocina Jbl Charge 6 Bluetooth Reacondicionada Negra Usb-c - $699",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "seo_title": "Bocina Jbl Charge 6 Bluetooth Reacondicionada Negra Usb-c",
+    "previous_ids": [],
+    "_auto_discovered": true
+  },
+  "MLM2880877517": {
+    "real_stock": 30,
+    "sku": "AUTO-877517",
+    "label": "Bocina Jbl Charge 6 Bluetooth Reacondicionada Azul Usb-c - $699",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "seo_title": "Bocina Jbl Charge 6 Bluetooth Reacondicionada Azul Usb-c",
+    "previous_ids": [],
+    "_auto_discovered": true
   }
 }
