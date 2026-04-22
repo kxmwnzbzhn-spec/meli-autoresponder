@@ -1525,7 +1525,7 @@
     "_deleted_reason": "Cannot update item MLM2880754279 [status:closed, has_bids:false]"
   },
   "MLM2880754229": {
-    "real_stock": 3,
+    "real_stock": 2,
     "sku": "CAT-NEW-Clip5-ROSA",
     "label": "Catalog NEW Clip 5 Rosa",
     "auto_replenish": true,
@@ -1615,7 +1615,7 @@
     "_auto_discovered": true
   },
   "MLM2880763001": {
-    "real_stock": 29,
+    "real_stock": 28,
     "sku": "AUTO-763001",
     "label": "Bocina Jbl Charge 6 Bluetooth Portatil Azul Ip68 Nueva - $919",
     "auto_replenish": true,
@@ -1705,7 +1705,7 @@
     "_auto_discovered": true
   },
   "MLM5223451400": {
-    "real_stock": 30,
+    "real_stock": 29,
     "sku": "AUTO-451400",
     "label": "Bocina Jbl Go 4 Bluetooth Portatil Rosa Ip67 Nueva Original - $489",
     "auto_replenish": true,
@@ -1745,7 +1745,7 @@
     "_auto_discovered": true
   },
   "MLM2880758743": {
-    "real_stock": 200,
+    "real_stock": 198,
     "sku": "CAT-NEW-Flip7-MORADA",
     "label": "Catalog NEW Flip 7 Morada",
     "auto_replenish": true,
@@ -1765,7 +1765,7 @@
     "source": "bodega_electronica"
   },
   "MLM2880754185": {
-    "real_stock": 5,
+    "real_stock": 1,
     "sku": "CAT-NEW-Flip7-NEGRA",
     "label": "Catalog NEW Flip 7 Negra",
     "auto_replenish": true,
@@ -2004,7 +2004,7 @@
     "source": "bodega_electronica"
   },
   "MLM2880865935": {
-    "real_stock": 242,
+    "real_stock": 241,
     "sku": "CAT-NEW-Grip-NEGRO",
     "label": "Catalog NEW Grip Negro",
     "auto_replenish": true,
@@ -2044,7 +2044,7 @@
     "source": "bodega_electronica"
   },
   "MLM2880898049": {
-    "real_stock": 903,
+    "real_stock": 902,
     "sku": "CAT-NEW-Go3-NEGRO",
     "label": "Catalog NEW Go 3 Negro",
     "auto_replenish": true,
