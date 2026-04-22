@@ -1754,7 +1754,7 @@
     "_auto_discovered": true
   },
   "MLM2880758743": {
-    "real_stock": 27,
+    "real_stock": 0,
     "sku": "AUTO-758743",
     "label": "Bocina Portátil Jbl Flip 7 Parlante Con Bluetooth Violeta Pu - $799",
     "auto_replenish": false,
@@ -1777,14 +1777,15 @@
     "_auto_discovered": true
   },
   "MLM2880754185": {
-    "real_stock": 30,
+    "real_stock": 0,
     "sku": "AUTO-754185",
     "label": "Parlante Bluetooth Jbl Flip 7 Resistente Al Agua Y Polvo Ip6 - $799",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "Parlante Bluetooth Jbl Flip 7 Resistente Al Agua Y Polvo Ip6 Color Negro",
     "previous_ids": [],
-    "_auto_discovered": true
+    "_auto_discovered": true,
+    "deleted": true
   },
   "MLM2880862569": {
     "real_stock": 4,
