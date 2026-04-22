@@ -198,6 +198,37 @@
         "pago contra"
       ],
       "response": "Hola! Los pagos se procesan por MercadoPago (tarjeta, OXXO, SPEI). No manejamos pago contra entrega. Saludos!"
+    },
+    {
+      "id": "auto_jbl_app",
+      "keywords": [
+        "app jbl",
+        "jbl portable",
+        "aplicacion jbl",
+        "app oficial",
+        "no se conecta",
+        "jbl portable app",
+        "conectar con la app",
+        "app de jbl",
+        "aplicación jbl",
+        "aplicación oficial"
+      ],
+      "response": "Hola! Gracias por tu interes. Nuestras bocinas JBL son de fabrica original (OEM), con hardware y componentes identicos al modelo retail. Sin embargo, por ser version OEM NO son compatibles con la app oficial JBL Portable (la app requiere codigo de autenticacion de la version retail con caja oficial). Funciona al 100% via Bluetooth estandar con cualquier dispositivo: iPhone, Android, Samsung, etc. Viene con factura y garantia de 30 dias. Cualquier duda avisame!"
+    },
+    {
+      "id": "auto_oem_precio",
+      "keywords": [
+        "por que tan barato",
+        "porque el precio",
+        "precio bajo",
+        "precio accesible",
+        "tan economico",
+        "es replica",
+        "no es oficial",
+        "donde viene",
+        "donde se fabrica"
+      ],
+      "response": "Hola! Si, es 100% original JBL de fabrica (version OEM). El precio mas accesible se debe a que es version OEM sin el empaque retail oficial licenciado. El hardware es identico al modelo retail. Viene con factura y garantia 30 dias."
     }
   ]
 }
