@@ -172,5 +172,69 @@
     "min_visible_stock": 1,
     "account": "oficial",
     "cloned_from": "MLM5221356396"
+  },
+  "MLM5226013832": {
+    "real_stock": 1,
+    "label": "Perfume Original Baby Dior Bonne Étoile Edp 100ml ",
+    "auto_replenish": false,
+    "min_visible_stock": 1,
+    "account": "oficial",
+    "cloned_from": "MLM5220681982"
+  },
+  "MLM5226039326": {
+    "real_stock": 1,
+    "label": "Armaf Odyssey Homme White Edition Edp 100 Ml Hombr",
+    "auto_replenish": false,
+    "min_visible_stock": 1,
+    "account": "oficial",
+    "cloned_from": "MLM5220682468"
+  },
+  "MLM5226013842": {
+    "real_stock": 1,
+    "label": "Jean Paul Gaultier Le Male Elixir Parfum 125ml Hom",
+    "auto_replenish": false,
+    "min_visible_stock": 1,
+    "account": "oficial",
+    "cloned_from": "MLM2880142605"
+  },
+  "MLM5226039346": {
+    "real_stock": 1,
+    "label": "Perfume Original Cartier La Panthere Edp 100ml Muj",
+    "auto_replenish": false,
+    "min_visible_stock": 1,
+    "account": "oficial",
+    "cloned_from": "MLM2880144815"
+  },
+  "MLM5226052256": {
+    "real_stock": 1,
+    "label": "Perfume Original Angel Nova Fruitté Mugler Edp 100",
+    "auto_replenish": false,
+    "min_visible_stock": 1,
+    "account": "oficial",
+    "cloned_from": "MLM2880142523"
+  },
+  "MLM5226090954": {
+    "real_stock": 1,
+    "label": "Perfume Billie Eilish Eilish Eau Parfum 100ml Muje",
+    "auto_replenish": false,
+    "min_visible_stock": 1,
+    "account": "oficial",
+    "cloned_from": "MLM2879716551"
+  },
+  "MLM5226013860": {
+    "real_stock": 1,
+    "label": "Christian Dior Dune Edt 100ml Original Mujer Perfu",
+    "auto_replenish": false,
+    "min_visible_stock": 1,
+    "account": "oficial",
+    "cloned_from": "MLM2880142457"
+  },
+  "MLM5226090976": {
+    "real_stock": 1,
+    "label": "Guerlain Patchouli Ardent Eau De Parfum 125 Ml Ori",
+    "auto_replenish": false,
+    "min_visible_stock": 1,
+    "account": "oficial",
+    "cloned_from": "MLM2879724127"
   }
 }
