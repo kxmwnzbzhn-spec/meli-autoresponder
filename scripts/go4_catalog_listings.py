@@ -102,7 +102,7 @@ for label,rt,cond in ACCOUNTS:
             print(f"  {color} {cpid}: OK {iid}")
             RESULTS[label].append({"color":color,"id":iid,"cpid":cpid})
         else:
-            print(f"  {color} {cpid}: {rp.status_code} {rp.text[:250]}")
+            print(f"  {color} {cpid}: {rp.status_code} {rp.text[:800]}")
         time.sleep(2)
 
 print("\n=== RESUMEN ===")
