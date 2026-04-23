@@ -125,6 +125,7 @@ def publish(color,stock,pics):
         "condition":"new","listing_type_id":"gold_pro","buying_mode":"buy_it_now","catalog_listing":False,
         "pictures":[{"id":p} for p in pics],
         "attributes":attrs,
+        "family_name":f"Bocina Bluetooth IP67 {color}",
         "shipping":{"mode":"me2","local_pick_up":False,"free_shipping":True,"free_methods":[{"id":73328,"rule":{"default":False,"free_mode":"country","value":None}}]},
         "sale_terms":[{"id":"WARRANTY_TYPE","value_name":"Garantia del vendedor"},{"id":"WARRANTY_TIME","value_name":"30 dias"}]
     }
