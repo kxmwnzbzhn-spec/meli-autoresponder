@@ -1,0 +1,21 @@
+name: raymundo-save-secret
+on: {workflow_dispatch: {}}
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    permissions: {contents: write}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - run: pip install requests pynacl -q
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          GH_PAT: ${{ secrets.GH_PAT }}
+        run: python scripts/raymundo_save_secret.py
+      - run: |
+          git config user.email b@b.com && git config user.name bot
+          git rm -f RT_RAYMUNDO.enc 2>/dev/null || true
+          git diff --cached --quiet || git commit -m "cleanup RT_RAYMUNDO.enc"
+          git push || true
