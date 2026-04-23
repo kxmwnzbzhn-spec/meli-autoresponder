@@ -1,0 +1,16 @@
+name: upd-negro
+on:
+  workflow_dispatch:
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    permissions: {contents: write}
+    steps:
+      - uses: actions/checkout@v4
+      - run: python scripts/upd_negro.py
+      - run: |
+          git config user.name bot
+          git config user.email b@b.com
+          git add stock_config.json
+          git diff --cached --quiet || git commit -m "Go 4 Negro stock 20"
+          git push || true
