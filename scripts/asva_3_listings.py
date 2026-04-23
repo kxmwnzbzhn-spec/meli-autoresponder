@@ -120,7 +120,7 @@ def build_attrs(color):
 def publish(color,stock,pics):
     attrs=build_attrs(color)
     body={
-        "site_id":"MLM","title":seo_title(color),"category_id":cat_id,"currency_id":"MXN",
+        "site_id":"MLM","category_id":cat_id,"currency_id":"MXN",
         "price":299,"available_quantity":1,
         "condition":"new","listing_type_id":"gold_pro","buying_mode":"buy_it_now","catalog_listing":False,
         "pictures":[{"id":p} for p in pics],
