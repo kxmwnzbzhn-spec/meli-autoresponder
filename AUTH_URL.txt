@@ -1,0 +1,1 @@
+https://auth.mercadolibre.com.mx/authorization?response_type=code&client_id=5211907102822632&redirect_uri=https://oauth.pstmn.io/v1/callback
