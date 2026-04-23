@@ -1,8 +1,14 @@
 name: raymundo-oauth
-on: {workflow_dispatch: {}}
+on:
+  workflow_dispatch:
+    inputs:
+      code:
+        description: 'MELI auth code TG-xxx'
+        required: true
 jobs:
   run:
     runs-on: ubuntu-latest
+    permissions: {contents: write}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -12,4 +18,9 @@ jobs:
           MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
           MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
           GH_PAT: ${{ secrets.GH_PAT }}
-        run: python scripts/raymundo_oauth.py
+        run: python scripts/raymundo_oauth.py "${{ github.event.inputs.code }}"
+      - run: |
+          git config user.email b@b.com && git config user.name bot
+          git add RT_RAYMUNDO.enc 2>/dev/null || true
+          git diff --cached --quiet || git commit -m "RT raymundo encrypted"
+          git push || true
