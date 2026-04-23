@@ -86,7 +86,7 @@ attrs=[
 ]
 
 body={
-    "site_id":"MLM","catalog_product_id":CPID,"category_id":"MLM59800","currency_id":"MXN",
+    "site_id":"MLM","title":"Bocina JBL Go 4 Bluetooth Portatil IP67 - Usada","catalog_product_id":CPID,"category_id":"MLM59800","currency_id":"MXN",
     "listing_type_id":"gold_special","condition":"used","buying_mode":"buy_it_now",
     "sale_terms":[
         {"id":"WARRANTY_TYPE","value_name":"Garantía del vendedor"},
