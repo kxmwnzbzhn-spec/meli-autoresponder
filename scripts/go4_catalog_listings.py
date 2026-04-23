@@ -81,6 +81,7 @@ for label,rt,cond in ACCOUNTS:
             continue
         body={
             "site_id":"MLM",
+            "title":f"JBL Go 4 Bluetooth Portatil IP67 {color}",
             "catalog_product_id":cpid,
             "catalog_listing":True,
             "price":599,
