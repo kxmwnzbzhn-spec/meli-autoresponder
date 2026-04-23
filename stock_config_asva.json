@@ -27,21 +27,27 @@
     "account": "asva"
   },
   "MLM5233454100": {
-    "title": "Bocina Bluetooth Portatil Impermeable Ip67 Bass 35w Azul",
     "color": "Azul",
     "stock": 82,
-    "max_stock": 82
+    "max_stock": 82,
+    "active": true
   },
   "MLM2886030837": {
-    "title": "Bocina Bluetooth Portatil Impermeable Ip67 Bass 35w Rojo",
     "color": "Rojo",
     "stock": 35,
-    "max_stock": 35
+    "max_stock": 35,
+    "active": true
   },
   "MLM2886136351": {
-    "title": "Bocina Bluetooth Portatil Impermeable Ip67 Bass 35w Morado",
     "color": "Morado",
     "stock": 202,
-    "max_stock": 202
+    "max_stock": 202,
+    "active": true
+  },
+  "MLM5233480022": {
+    "color": "Negro",
+    "stock": 179,
+    "max_stock": 179,
+    "active": true
   }
 }
