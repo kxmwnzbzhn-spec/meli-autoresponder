@@ -1,1 +1,29 @@
-{}
+{
+  "MLM2886024307": {
+    "real_stock": 179,
+    "sku": "BOCINA-BT-IP67-NEGRO",
+    "label": "Bocina Bluetooth IP67 Negro ASVA",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "min_visible_stock": 1,
+    "account": "asva"
+  },
+  "MLM2886024313": {
+    "real_stock": 82,
+    "sku": "BOCINA-BT-IP67-AZUL",
+    "label": "Bocina Bluetooth IP67 Azul ASVA",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "min_visible_stock": 1,
+    "account": "asva"
+  },
+  "MLM2886037029": {
+    "real_stock": 202,
+    "sku": "BOCINA-BT-IP67-MORADO",
+    "label": "Bocina Bluetooth IP67 Morado ASVA",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "min_visible_stock": 1,
+    "account": "asva"
+  }
+}
