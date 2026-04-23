@@ -2242,7 +2242,7 @@
     "_deleted_reason": "Cannot update item MLM5227773714 [status:under_review, has_bids:false]"
   },
   "MLM2883448187": {
-    "real_stock": 2475,
+    "real_stock": 2316,
     "sku": "GO4-UNIFIED",
     "label": "Go 4 Unified (5 colors)",
     "auto_replenish": true,
@@ -2251,7 +2251,7 @@
     "deleted": false,
     "variations": {
       "Negro": {
-        "stock": 179,
+        "stock": 20,
         "orig_id": "MLM5227773714"
       },
       "Azul": {
