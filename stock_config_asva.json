@@ -49,5 +49,47 @@
     "stock": 179,
     "max_stock": 179,
     "active": true
+  },
+  "MLM2886523677": {
+    "color": "Rosa",
+    "stock": 10,
+    "max_stock": 10,
+    "active": true,
+    "line": "Go4-Generica"
+  },
+  "MLM5235934108": {
+    "color": "Aqua",
+    "stock": 10,
+    "max_stock": 10,
+    "active": true,
+    "line": "Go4-Generica"
+  },
+  "MLM2886523697": {
+    "color": "Azul",
+    "stock": 10,
+    "max_stock": 10,
+    "active": true,
+    "line": "Go4-Generica"
+  },
+  "MLM5235934132": {
+    "color": "Negro",
+    "stock": 10,
+    "max_stock": 10,
+    "active": true,
+    "line": "Go4-Generica"
+  },
+  "MLM5235946486": {
+    "color": "Rojo",
+    "stock": 10,
+    "max_stock": 10,
+    "active": true,
+    "line": "Go4-Generica"
+  },
+  "MLM5235934150": {
+    "color": "Camuflaje",
+    "stock": 10,
+    "max_stock": 10,
+    "active": true,
+    "line": "Go4-Generica"
   }
 }
