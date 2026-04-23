@@ -1,0 +1,18 @@
+name: gen-auth-url
+on: {workflow_dispatch: {}}
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    permissions: {contents: write}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+        run: python scripts/gen_auth_url.py
+      - run: |
+          git config user.email b@b.com && git config user.name bot
+          git add AUTH_URL.txt
+          git diff --cached --quiet || git commit -m "auth url generated"
+          git push || true
