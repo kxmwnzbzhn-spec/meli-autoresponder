@@ -66,7 +66,7 @@ results={}
 for color,info in COLORES.items():
     title=TITLE_TPL.format(COLOR=color)[:60]
     body={
-        "site_id":"MLM","title":title,"category_id":cat_id,"currency_id":"MXN",
+        "site_id":"MLM","family_name":title,"category_id":cat_id,"currency_id":"MXN",
         "price":299,"available_quantity":info["stock"],
         "listing_type_id":"gold_special","condition":"new","buying_mode":"buy_it_now",
         "sale_terms":[{"id":"WARRANTY_TYPE","value_name":"Garantía del vendedor"},{"id":"WARRANTY_TIME","value_name":"30 días"}],
