@@ -77,7 +77,8 @@ for ca in cat_attrs:
 
 body={
     "site_id":"MLM",
-    "catalog_product_id":"MLM61785271",  # Enlaza al catalog Grip -> acepta sin GTIN manual
+    "title":"Bocina Jbl Grip Bluetooth Portatil Ip67 Original Negra",
+    "catalog_product_id":"MLM61785271",
     "category_id":cat_id,"currency_id":"MXN",
     "price":699,"available_quantity":10,
     "listing_type_id":"gold_special","condition":"new","buying_mode":"buy_it_now",
