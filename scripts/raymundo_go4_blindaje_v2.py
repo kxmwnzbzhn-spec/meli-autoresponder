@@ -74,9 +74,7 @@ def update_desc(iid,desc):
     if rp.status_code in (200,201): return "PUT_text_html",rp.status_code
     return f"FAIL {rp.status_code}: {rp.text[:300]}",rp.status_code
 
-print(f"=== UPDATE DESC {IID_A} ===")
-m,s=update_desc(IID_A,DESC_A)
-print(f"  {m} -> {s}")
+print("=== Desc A ya aplicada en run anterior, skip ===")
 
 # ========== A/B TEST: Crear publicacion B con titulo/desc distinto ==========
 # Leer el item A para clonar pics/variations
@@ -185,7 +183,7 @@ El producto enviado coincide con lo descrito aqui. Cualquier reclamo contrario c
 
 body_B={
     "site_id":"MLM",
-    "catalog_product_id":"MLM64277114",
+    "title":"Bocina Jbl Go 4 Sumergible Ip67 Bluetooth Bass 7h Seminueva","catalog_product_id":"MLM64277114",
     "category_id":cat_id,"currency_id":"MXN",
     "listing_type_id":"gold_special","condition":"used","buying_mode":"buy_it_now",
     "sale_terms":[{"id":"WARRANTY_TYPE","value_name":"Garantía del vendedor"},{"id":"WARRANTY_TIME","value_name":"30 días"}],
