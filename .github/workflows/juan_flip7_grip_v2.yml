@@ -1,0 +1,22 @@
+name: juan-flip7-grip-v2
+on: {workflow_dispatch: {}}
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions: {contents: write}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - run: pip install requests -q
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+        run: python scripts/juan_flip7_grip_v2.py
+      - run: |
+          git config user.email b@b.com && git config user.name bot
+          git add stock_config.json 2>/dev/null || true
+          git diff --cached --quiet || git commit -m "Juan v2: Flip7 + Grip original"
+          git push || true
