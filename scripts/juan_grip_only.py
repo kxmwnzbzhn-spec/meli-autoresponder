@@ -46,7 +46,7 @@ print(f"pics uploaded: {len(pics)}")
 ga=[
     {"id":"BRAND","value_name":"JBL"},
     {"id":"MODEL","value_name":"Grip"},
-    {"id":"GTIN","value_name":"6925281999898"},
+    {"id":"GTIN","value_name":"0050036459333"},
     {"id":"COLOR","value_name":"Negro"},
     {"id":"ITEM_CONDITION","value_name":"Nuevo"},
     {"id":"MAX_BATTERY_AUTONOMY","value_name":"12 h"},
