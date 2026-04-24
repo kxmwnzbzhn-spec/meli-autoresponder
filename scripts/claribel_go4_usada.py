@@ -55,7 +55,7 @@ for c,pids in color_pics.items():
         if p not in all_pics: all_pics.append(p)
 
 body={
-    "site_id":"MLM",
+    "site_id":"MLM","title":"Bocina Jbl Go 4 Bluetooth Portatil Ip67 Usada",
     "catalog_product_id":"MLM64277114",
     "category_id":"MLM59800","currency_id":"MXN",
     "listing_type_id":"gold_special","condition":"used","buying_mode":"buy_it_now",
