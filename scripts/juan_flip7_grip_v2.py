@@ -191,7 +191,7 @@ if grip_pics:
         {"id":"MODEL","value_name":"Grip"},
         {"id":"LINE","value_name":"Grip"},
         {"id":"COLOR","value_name":"Negro"},
-        {"id":"GTIN","value_name":"050036400242"},
+        # GTIN removed - not valid 13-digit
         {"id":"ITEM_CONDITION","value_name":"Nuevo"},
         {"id":"MAX_BATTERY_AUTONOMY","value_name":"12 h"},
         {"id":"POWER_OUTPUT_RMS","value_name":"15 W"},
