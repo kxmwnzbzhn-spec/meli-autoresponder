@@ -1,8 +1,8 @@
 {
   "questions_seen": [],
   "claims_seen": [
-    "5502336104",
     "5502636400",
+    "5502336104",
     "5501400150"
   ],
   "claim_states": {
@@ -41,5 +41,6 @@
   "daily_stats": {
     "relists": 0,
     "auto_answered": 0
-  }
+  },
+  "_stock_config_dirty": true
 }
