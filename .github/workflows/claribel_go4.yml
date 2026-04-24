@@ -1,6 +1,5 @@
-name: claribel-go4
-on:
-  workflow_dispatch:
+name: claribel-go4-usada
+on: {workflow_dispatch: {}}
 jobs:
   run:
     runs-on: ubuntu-latest
@@ -14,11 +13,11 @@ jobs:
       - env:
           MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
           MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
-          MELI_REFRESH_TOKEN_OFICIAL: ${{ secrets.MELI_REFRESH_TOKEN_OFICIAL }}
-        run: python scripts/claribel_go4.py
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+          MELI_REFRESH_TOKEN_CLARIBEL: ${{ secrets.MELI_REFRESH_TOKEN_CLARIBEL }}
+        run: python scripts/claribel_go4_usada.py
       - run: |
-          git config user.name bot
-          git config user.email b@b.com
-          git add stock_config_oficial.json
-          git diff --cached --quiet || git commit -m "Claribel Go 4 reacondicionadas"
+          git config user.email b@b.com && git config user.name bot
+          git add stock_config_claribel.json 2>/dev/null || true
+          git diff --cached --quiet || git commit -m "Claribel Go4 usada unificada"
           git push || true
