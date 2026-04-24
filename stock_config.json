@@ -2242,7 +2242,7 @@
     "_deleted_reason": "Cannot update item MLM5227773714 [status:under_review, has_bids:false]"
   },
   "MLM2883448187": {
-    "real_stock": 2232,
+    "real_stock": 2226,
     "sku": "GO4-UNIFIED",
     "label": "Go 4 Unified (5 colors)",
     "auto_replenish": true,
@@ -2251,27 +2251,27 @@
     "deleted": false,
     "variations": {
       "Negro": {
-        "stock": 6,
+        "stock": 5,
         "orig_id": "MLM5227773714"
       },
       "Azul": {
-        "stock": 464,
+        "stock": 463,
         "orig_id": "MLM5223214798"
       },
       "Rojo": {
-        "stock": 165,
+        "stock": 164,
         "orig_id": "MLM2880763019"
       },
       "Camuflaje": {
-        "stock": 502,
+        "stock": 501,
         "orig_id": "MLM2880762615"
       },
       "Rosa": {
-        "stock": 93,
+        "stock": 92,
         "orig_id": "MLM5223451400"
       },
       "Aqua": {
-        "stock": 1002,
+        "stock": 1001,
         "orig_id": "MLM2747271435"
       }
     }
@@ -2318,11 +2318,14 @@
     "real_stock": 30,
     "sku": "AUTO-824025",
     "label": "Bocina Jbl Flip 7 Bluetooth Portatil Ip67 Original Nueva - $799",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "Bocina Jbl Flip 7 Bluetooth Portatil Ip67 Original Nueva",
     "previous_ids": [],
-    "_auto_discovered": true
+    "_auto_discovered": true,
+    "deleted": true,
+    "_deleted_at": 1777066015,
+    "_deleted_reason": "Cannot update item MLM2887824025 [status:closed, has_bids:false]"
   },
   "MLM2887818059": {
     "real_stock": 30,
