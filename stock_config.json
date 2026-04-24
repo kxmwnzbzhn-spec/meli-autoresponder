@@ -2282,5 +2282,12 @@
     "label": "Zombi Go 4 Camuflaje relisted",
     "auto_replenish": false,
     "deleted": true
+  },
+  "MLM2886592129": {
+    "color": "Negro",
+    "line": "Flip7-Generica",
+    "stock": 10,
+    "max_stock": 10,
+    "active": true
   }
 }
