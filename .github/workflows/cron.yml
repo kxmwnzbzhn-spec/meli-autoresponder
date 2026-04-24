@@ -27,11 +27,6 @@ jobs:
           path: .meli_token.json
           key: meli-refresh-token
           restore-keys: meli-refresh-token
-      - uses: actions/cache@v4
-        with:
-          path: .seen_claims.json
-          key: seen-state
-          restore-keys: seen-state
       - name: Run auto-responder loop (15s polling, 14 min)
         env:
           MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
@@ -55,29 +50,31 @@ jobs:
             fi
           done
           echo "total iter: $iter"
-      - name: Commit stock_config.json if changed
+      - name: Commit state + stock_config if changed
         if: always()
         run: |
-          if ! git diff --quiet stock_config.json 2>/dev/null; then
-            git config user.name "meli-bot"
-            git config user.email "bot@sonixmx.local"
-            git add stock_config.json
-            git commit -m "[bot] auto-replenish: actualizar real_stock"
-            git push
-            echo "stock_config committed"
+          git config user.name "meli-bot"
+          git config user.email "bot@sonixmx.local"
+          git pull --rebase --no-edit || true
+          # commit bot_state.json SIEMPRE que cambie (persistencia real)
+          git add bot_state.json stock_config.json 2>/dev/null || true
+          if ! git diff --cached --quiet 2>/dev/null; then
+            git commit -m "[bot] state sync"
+            # push con retry si hay conflicto
+            for i in 1 2 3; do
+              if git push; then break; fi
+              git pull --rebase --no-edit && git push && break
+              sleep 2
+            done
+            echo "bot_state+stock_config committed"
           else
-            echo "stock_config sin cambios"
+            echo "state sin cambios"
           fi
       - if: always()
         uses: actions/cache/save@v4
         with:
           path: .meli_token.json
           key: meli-refresh-token-${{ github.run_id }}
-      - if: always()
-        uses: actions/cache/save@v4
-        with:
-          path: .seen_claims.json
-          key: seen-state-${{ github.run_id }}
       - name: Auto-chain next run (no dependes del schedule de GH)
         if: always()
         env:

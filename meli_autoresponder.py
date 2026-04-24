@@ -26,7 +26,7 @@ API = "https://api.mercadolibre.com"
 APP_ID = os.environ["MELI_APP_ID"]
 APP_SECRET = os.environ["MELI_APP_SECRET"]
 TOKEN_FILE = ".meli_token.json"
-STATE_FILE = ".seen_claims.json"
+STATE_FILE = "bot_state.json"
 
 TG_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
 TG_CHAT = os.environ.get("TELEGRAM_CHAT_ID")
@@ -854,6 +854,14 @@ def handle_claims(token, state):
                 "order_id": str(order_id),
             })
 
+        # Dedup por tiempo: no re-alertar si ya se alertó en últimas 6h
+        alert_key=f"alert_{cid}"
+        last_alert=state.get("alert_log",{}).get(alert_key,0)
+        if int(time.time())-last_alert < 6*3600:
+            _log(f"  skip alert #{cid} (alertado hace {(int(time.time())-last_alert)/60:.0f} min)")
+            continue
+        state.setdefault("alert_log",{})[alert_key]=int(time.time())
+
         # Mensaje Telegram con botones
         amount_line = f"\nMonto: ${amount:.0f} MXN" if amount else ""
         txt = (
@@ -905,6 +913,13 @@ def track_status_changes(token, state):
         curr = d.get("stage") or d.get("status") or ""
         prev = cst.get("last_status")
         if curr and curr != prev:
+            # Rate limit: 6h entre mismos cambios
+            skey=f"status_{cid}_{curr}"
+            last_sa=state.get("alert_log",{}).get(skey,0)
+            if int(time.time())-last_sa < 6*3600:
+                cst["last_status"]=curr
+                continue
+            state.setdefault("alert_log",{})[skey]=int(time.time())
             prev_lbl = STATUS_LABELS.get(prev, prev or "?")
             curr_lbl = STATUS_LABELS.get(curr, curr)
             tg_send(
