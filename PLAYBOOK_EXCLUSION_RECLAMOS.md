@@ -52,3 +52,15 @@ El producto fue publicado y vendido como [CONDICION], tal como consta en la desc
 |---|---|---|---|
 | 24-abr-2026 | 5502336104 | PDD9943 no es original | ✅ Excluido |
 | pendiente | 5501400150 | PDD9943 no compatible app | 🔄 En trámite |
+
+## Párrafo extra para Solicitud de Exclusión
+
+```
+El producto enviado NO difiere del ofertado: condicion, marca, modelo, color y caracteristicas coinciden exactamente con lo publicado. No existe incumplimiento objetivo.
+```
+
+## Versión combinada (≤350 chars)
+
+```
+Producto vendido como [CONDICION]. El producto enviado NO difiere del ofertado: condicion, marca, modelo y caracteristicas coinciden con lo publicado. Caja original, serial SN y codigos UPC/EAN oficiales [MARCA]. Ofreci reembolso si canal oficial confirma inautenticidad. Comprador no aporta peritaje. Afirmacion subjetiva sin sustento.
+```
