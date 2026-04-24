@@ -2294,11 +2294,14 @@
     "real_stock": 30,
     "sku": "AUTO-045906",
     "label": "Bocina Bluetooth Portatil Ip67 Bass 35w 16h Multicolor - $399",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "Bocina Bluetooth Portatil Ip67 Bass 35w 16h Multicolor",
     "previous_ids": [],
-    "_auto_discovered": true
+    "_auto_discovered": true,
+    "deleted": true,
+    "_deleted_at": 1777037265,
+    "_deleted_reason": "Cannot update item MLM5236045906 [status:closed, has_bids:false]"
   },
   "MLM2887821733": {
     "line": "Flip7-Original-JBL",
@@ -2310,5 +2313,25 @@
     },
     "active": true,
     "price": 799
+  },
+  "MLM2887824025": {
+    "real_stock": 30,
+    "sku": "AUTO-824025",
+    "label": "Bocina Jbl Flip 7 Bluetooth Portatil Ip67 Original Nueva - $799",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "seo_title": "Bocina Jbl Flip 7 Bluetooth Portatil Ip67 Original Nueva",
+    "previous_ids": [],
+    "_auto_discovered": true
+  },
+  "MLM2887818059": {
+    "real_stock": 30,
+    "sku": "AUTO-818059",
+    "label": "Bocina Bluetooth Portatil Ip67 Bass 35w 16h Multicolor - $799",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "seo_title": "Bocina Bluetooth Portatil Ip67 Bass 35w 16h Multicolor",
+    "previous_ids": [],
+    "_auto_discovered": true
   }
 }
