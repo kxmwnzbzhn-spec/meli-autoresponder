@@ -82,10 +82,10 @@ def build_attrs():
         seen.add(aid)
     return a
 
-TITLE="Bocina Bluetooth Portatil Ip67 Bass 35w 16h Negro No Original"[:60]
+TITLE="Bocina Bluetooth Portatil Ip67 Bass 35w 16h Negro Generica"[:60]
 
 body={
-    "site_id":"MLM","family_name":TITLE,"category_id":cat_id,"currency_id":"MXN",
+    "site_id":"MLM","title":TITLE,"category_id":cat_id,"currency_id":"MXN",
     "price":399,"available_quantity":10,
     "listing_type_id":"gold_special","condition":"new","buying_mode":"buy_it_now",
     "sale_terms":[
