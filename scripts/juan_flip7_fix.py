@@ -81,7 +81,35 @@ for kid in (parent.get("children_ids") or []):
 if not negro_pics:
     for p in (parent.get("pictures") or [])[:5]:
         if p.get("url"): negro_pics.append(p.get("url"))
+
+# Fallback 2: buscar items activos JBL Flip 7 en MELI search y tomar pics
+if not negro_pics:
+    search_res=requests.get("https://api.mercadolibre.com/sites/MLM/search?q=Bocina+JBL+Flip+7+Negra&category=MLM59800&limit=10&condition=new",headers=H).json()
+    for r_ in (search_res.get("results") or [])[:10]:
+        if "Flip 7" in r_.get("title","") and "JBL" in r_.get("title","") and "Negr" in r_.get("title",""):
+            iid=r_.get("id")
+            d=requests.get(f"https://api.mercadolibre.com/items/{iid}?attributes=pictures,title",headers=H).json()
+            for p in (d.get("pictures") or [])[:5]:
+                if p.get("url"): negro_pics.append(p.get("url"))
+            if negro_pics: 
+                print(f"  pics desde item live: {iid}")
+                break
+
 print(f"  pics para original: {len(negro_pics)}")
+
+# Tambien, si negro_cpid sigue None, intentar usar otros catalog IDs conocidos
+if not negro_cpid:
+    for c in ["MLM64166697","MLM63648344","MLM62944208","MLM47584787"]:
+        try:
+            pk=requests.get(f"https://api.mercadolibre.com/products/{c}",headers=H,timeout=10).json()
+            color_k=None
+            for a in (pk.get("attributes") or []):
+                if a.get("id")=="COLOR": color_k=a.get("value_name"); break
+            if color_k=="Negro":
+                negro_cpid=c
+                print(f"  catalog cpid negro fallback: {c}")
+                break
+        except: pass
 
 # Re-subir a Juan
 def upload(url):
