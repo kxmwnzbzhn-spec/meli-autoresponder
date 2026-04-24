@@ -1,6 +1,6 @@
 import os,requests,json,time
 
-ITEMS=["MLM5226013726","MLM5226014888"]
+ITEMS=["MLM5226013726"]
 
 ACCOUNTS={
     "CLARIBEL":os.environ["MELI_REFRESH_TOKEN_CLARIBEL"],
@@ -59,7 +59,7 @@ for iid in ITEMS:
     
     # Atributos limpios - usar value_id cuando disponible
     attrs=[]
-    IGNORED={"IS_HIGHLIGHT_BRAND","IS_TOM_BRAND"}
+    IGNORED={"IS_HIGHLIGHT_BRAND","IS_TOM_BRAND","PERFUME_TYPE","OLFACTORY_FAMILIES"}
     for a in (d.get("attributes") or []):
         aid=a.get("id")
         if aid in BAD_ATTR or aid in IGNORED: continue
