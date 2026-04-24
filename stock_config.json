@@ -2242,7 +2242,7 @@
     "_deleted_reason": "Cannot update item MLM5227773714 [status:under_review, has_bids:false]"
   },
   "MLM2883448187": {
-    "real_stock": 2250,
+    "real_stock": 2244,
     "sku": "GO4-UNIFIED",
     "label": "Go 4 Unified (5 colors)",
     "auto_replenish": true,
@@ -2251,27 +2251,27 @@
     "deleted": false,
     "variations": {
       "Negro": {
-        "stock": 9,
+        "stock": 8,
         "orig_id": "MLM5227773714"
       },
       "Azul": {
-        "stock": 467,
+        "stock": 466,
         "orig_id": "MLM5223214798"
       },
       "Rojo": {
-        "stock": 168,
+        "stock": 167,
         "orig_id": "MLM2880763019"
       },
       "Camuflaje": {
-        "stock": 505,
+        "stock": 504,
         "orig_id": "MLM2880762615"
       },
       "Rosa": {
-        "stock": 96,
+        "stock": 95,
         "orig_id": "MLM5223451400"
       },
       "Aqua": {
-        "stock": 1005,
+        "stock": 1004,
         "orig_id": "MLM2747271435"
       }
     }
