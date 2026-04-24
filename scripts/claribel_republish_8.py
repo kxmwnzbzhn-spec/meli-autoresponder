@@ -1,6 +1,6 @@
 import os,requests,json,time
 
-ITEMS=["MLM5226013726","MLM5226013748","MLM5226014378","MLM5226014380","MLM5226014888","MLM5226039220","MLM5226052484","MLM5226091240"]
+ITEMS=["MLM5226013726","MLM5226013748","MLM5226014378","MLM5226014380","MLM5226014888","MLM5226039220","MLM5226052484"]
 
 # Claribel token
 rc=requests.post("https://api.mercadolibre.com/oauth/token",data={"grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],"client_secret":os.environ["MELI_APP_SECRET"],"refresh_token":os.environ["MELI_REFRESH_TOKEN_CLARIBEL"]}).json()
