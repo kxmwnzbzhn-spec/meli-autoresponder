@@ -1,15 +1,45 @@
 {
   "questions_seen": [],
-  "claims_seen": ["5501400150", "5502336104", "5502636400"],
+  "claims_seen": [
+    "5502336104",
+    "5502636400",
+    "5501400150"
+  ],
   "claim_states": {
-    "5501400150": {"type": "no_original", "step": "pending_user_action", "last_status": "claim", "created_at": 1745435000, "urgent_alerted_at": 1745521400},
-    "5502336104": {"type": "no_original", "step": "completed", "last_status": "closed", "created_at": 1745435000, "urgent_alerted_at": 1745521400},
-    "5502636400": {"type": "defecto", "step": "pending_user_action", "last_status": "claim", "created_at": 1745521000, "urgent_alerted_at": 1745521400}
+    "5501400150": {
+      "type": "no_original",
+      "step": "pending_user_action",
+      "last_status": "claim",
+      "created_at": 1745435000,
+      "urgent_alerted_at": 1745521400
+    },
+    "5502336104": {
+      "type": "no_original",
+      "step": "completed",
+      "last_status": "closed",
+      "created_at": 1745435000,
+      "urgent_alerted_at": 1745521400
+    },
+    "5502636400": {
+      "type": "defecto",
+      "step": "pending_user_action",
+      "last_status": "claim",
+      "created_at": 1745521000,
+      "urgent_alerted_at": 1745521400
+    }
   },
   "last_telegram_update_id": 0,
   "alert_log": {
     "alert_5501400150": 1745608800,
     "alert_5502336104": 1745608800,
     "alert_5502636400": 1745608800
+  },
+  "seller_id": 2681696373,
+  "seen_returns": {},
+  "return_states": {},
+  "last_daily_digest_key": "2026-04-24",
+  "daily_stats": {
+    "relists": 0,
+    "auto_answered": 0
   }
 }
