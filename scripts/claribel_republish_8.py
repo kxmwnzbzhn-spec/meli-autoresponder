@@ -1,6 +1,6 @@
 import os,requests,json,time
 
-ITEMS=["MLM5226013726","MLM5226013748","MLM5226014378","MLM5226014380","MLM5226014888","MLM5226039220","MLM5226052484"]
+ITEMS=["MLM5226013726","MLM5226014888"]
 
 # Claribel token
 rc=requests.post("https://api.mercadolibre.com/oauth/token",data={"grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],"client_secret":os.environ["MELI_APP_SECRET"],"refresh_token":os.environ["MELI_REFRESH_TOKEN_CLARIBEL"]}).json()
@@ -72,6 +72,7 @@ for iid,info in items_data.items():
     for a in (d.get("attributes") or []):
         aid=a.get("id")
         if aid in BAD_ATTR: continue
+        if aid=="GTIN" and val and ("aplica" in val.lower() or len(val.replace(" ","").replace("-",""))<8): continue
         val=a.get("value_name") or a.get("values",[{}])[0].get("name") if a.get("values") else None
         if val:
             attrs.append({"id":aid,"value_name":val})
@@ -87,7 +88,7 @@ for iid,info in items_data.items():
         "listing_type_id":d.get("listing_type_id","gold_special"),
         "condition":d.get("condition"),
         "buying_mode":d.get("buying_mode","buy_it_now"),
-        "sale_terms":d.get("sale_terms",[]),
+        "sale_terms":[st for st in (d.get("sale_terms") or []) if st.get("id") not in ("PURCHASE_MAX_QUANTITY","MAX_UNITS_PER_BUYER")],
         "shipping":{"mode":"me2","local_pick_up":False,"free_shipping":True,"free_methods":[]},
         "pictures":[{"id":p} for p in new_pics],
         "attributes":attrs,
@@ -106,7 +107,7 @@ for iid,info in items_data.items():
             variations.append({
                 "price":v.get("price") or d.get("price"),
                 "available_quantity":v.get("available_quantity") or 1,
-                "attribute_combinations":v.get("attribute_combinations",[]),
+                "attribute_combinations":[ac for ac in v.get("attribute_combinations",[]) if not (ac.get("id")=="GTIN" and ("aplica" in (ac.get("value_name","") or "").lower() or len((ac.get("value_name","") or "").replace(" ","").replace("-",""))<8))],
                 "picture_ids":new_var_pics,
             })
         body["variations"]=variations
