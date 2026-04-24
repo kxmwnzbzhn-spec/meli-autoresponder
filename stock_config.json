@@ -2289,5 +2289,15 @@
     "stock": 10,
     "max_stock": 10,
     "active": true
+  },
+  "MLM5236045906": {
+    "real_stock": 30,
+    "sku": "AUTO-045906",
+    "label": "Bocina Bluetooth Portatil Ip67 Bass 35w 16h Multicolor - $399",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "seo_title": "Bocina Bluetooth Portatil Ip67 Bass 35w 16h Multicolor",
+    "previous_ids": [],
+    "_auto_discovered": true
   }
 }
