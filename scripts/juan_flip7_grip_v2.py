@@ -81,10 +81,8 @@ for c in ["Negro","Azul","Rojo","Morado"]:
     if not color_pics.get(c): continue
     variations.append({
         "price":799,"available_quantity":10,
-        "attribute_combinations":[
-            {"id":"COLOR","value_name":c},
-            {"id":"GTIN","value_name":GTIN_PER_COLOR[c]},
-        ],
+        "attribute_combinations":[{"id":"COLOR","value_name":c}],
+        "attributes":[{"id":"GTIN","value_name":GTIN_PER_COLOR[c]}],
         "picture_ids":color_pics[c],
     })
 all_pics=[]
@@ -147,20 +145,27 @@ else:
     print(json.dumps(d,ensure_ascii=False)[:2000])
 
 # ===== GRIP =====
-print("\n\n=== GRIP: buscar pics en catalog o search live =====")
-# Buscar un item vivo de JBL Grip en MELI de cualquier vendedor para obtener su pic_ids
-s=requests.get("https://api.mercadolibre.com/sites/MLM/search?q=JBL+Grip+bocina&limit=10",headers=H).json()
+print("\n\n=== GRIP: fetch pics de catalog MLM61785271 + children =====")
 grip_pics_urls=[]
-for r_ in (s.get("results") or []):
-    if "Grip" in r_.get("title","") and "JBL" in r_.get("title",""):
-        tn=r_.get("thumbnail","")
-        if tn and "http" in tn:
-            # secondary picture
-            iid=r_.get("id")
-            d=requests.get(f"https://api.mercadolibre.com/items/{iid}?attributes=pictures",headers=H).json()
+# catalog product JBL Grip
+for cpid in ["MLM61785271"]:
+    pr=requests.get(f"https://api.mercadolibre.com/products/{cpid}",headers=H).json()
+    for p in (pr.get("pictures") or [])[:5]:
+        if p.get("url"): grip_pics_urls.append(p.get("url"))
+    # children (variantes por color)
+    for kid in (pr.get("children_ids") or [])[:3]:
+        pk=requests.get(f"https://api.mercadolibre.com/products/{kid}",headers=H).json()
+        for p in (pk.get("pictures") or [])[:3]:
+            if p.get("url") and p.get("url") not in grip_pics_urls: grip_pics_urls.append(p.get("url"))
+# alternative: buscar en MELI search publico
+if not grip_pics_urls:
+    ps=requests.get("https://api.mercadolibre.com/sites/MLM/search?q=bocina+JBL+Grip&limit=5",headers=H).json()
+    for r_ in (ps.get("results") or [])[:3]:
+        d=requests.get(f"https://api.mercadolibre.com/items/{r_.get('id')}?attributes=pictures,title",headers=H).json()
+        if "Grip" in d.get("title",""):
             for p in (d.get("pictures") or [])[:5]:
                 if p.get("url"): grip_pics_urls.append(p.get("url"))
-            break
+            if grip_pics_urls: break
 print(f"  URLs pics Grip: {len(grip_pics_urls)}")
 
 # Download each URL
