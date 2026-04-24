@@ -72,8 +72,7 @@ for iid,info in items_data.items():
     for a in (d.get("attributes") or []):
         aid=a.get("id")
         if aid in BAD_ATTR: continue
-        if aid=="GTIN" and val and ("aplica" in val.lower() or len(val.replace(" ","").replace("-",""))<8): continue
-        val=a.get("value_name") or a.get("values",[{}])[0].get("name") if a.get("values") else None
+                val=a.get("value_name") or a.get("values",[{}])[0].get("name") if a.get("values") else None
         if val:
             attrs.append({"id":aid,"value_name":val})
     
@@ -88,7 +87,7 @@ for iid,info in items_data.items():
         "listing_type_id":d.get("listing_type_id","gold_special"),
         "condition":d.get("condition"),
         "buying_mode":d.get("buying_mode","buy_it_now"),
-        "sale_terms":[st for st in (d.get("sale_terms") or []) if st.get("id") not in ("PURCHASE_MAX_QUANTITY","MAX_UNITS_PER_BUYER")],
+        "sale_terms":d.get("sale_terms",[]),
         "shipping":{"mode":"me2","local_pick_up":False,"free_shipping":True,"free_methods":[]},
         "pictures":[{"id":p} for p in new_pics],
         "attributes":attrs,
@@ -124,7 +123,7 @@ for iid,info in items_data.items():
         results.append({"old":iid,"new":new_id,"title":d.get("title","")[:50]})
     else:
         err=rp.json()
-        print(f"{rp.status_code} {str(err)[:400]}")
+        print(f"{rp.status_code} {str(err)[:1500]}")
     time.sleep(2)
 
 print("\n=== RESUMEN ===")
