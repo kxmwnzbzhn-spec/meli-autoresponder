@@ -57,22 +57,22 @@ for iid in ITEMS:
         if n: new_pics.append(n)
     print(f"  pics: {len(new_pics)}")
     
-    # Atributos limpios
+    # Atributos limpios - usar value_id cuando disponible
     attrs=[]
+    IGNORED={"IS_HIGHLIGHT_BRAND","IS_TOM_BRAND"}
     for a in (d.get("attributes") or []):
         aid=a.get("id")
-        if aid in BAD_ATTR: continue
-        val=a.get("value_name","")
-        if not val and a.get("values"):
-            val=(a.get("values") or [{}])[0].get("name","")
-        if not val: continue
-        # GTIN inválido -> No aplica con value_id MELI
-        if aid=="GTIN":
-            vc=val.replace(" ","").replace("-","").lower()
-            if "aplica" in vc or len(vc)<8:
-                attrs.append({"id":"GTIN","value_id":"-1"})
-                continue
-        attrs.append({"id":aid,"value_name":val})
+        if aid in BAD_ATTR or aid in IGNORED: continue
+        val_name=a.get("value_name","")
+        val_id=a.get("value_id")
+        if not val_name and a.get("values"):
+            val_name=(a.get("values") or [{}])[0].get("name","")
+            val_id=val_id or (a.get("values") or [{}])[0].get("id")
+        if not val_name: continue
+        item_attr={"id":aid,"value_name":val_name}
+        if val_id:
+            item_attr["value_id"]=str(val_id)
+        attrs.append(item_attr)
     
     # Sale terms: SKIP PURCHASE_MAX_QUANTITY porque MELI no permite modificarlo
     sale_terms=[st for st in (d.get("sale_terms") or []) if st.get("id") not in ("PURCHASE_MAX_QUANTITY","MAX_UNITS_PER_BUYER")]
