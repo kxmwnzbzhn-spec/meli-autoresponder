@@ -52,44 +52,56 @@
   },
   "MLM2886523677": {
     "color": "Rosa",
-    "stock": 10,
-    "max_stock": 10,
-    "active": true,
-    "line": "Go4-Generica"
+    "line": "Go4-Generica",
+    "stock": 200,
+    "max_stock": 200,
+    "visible_qty": 1,
+    "hidden_stock": true,
+    "active": true
   },
   "MLM5235934108": {
     "color": "Aqua",
-    "stock": 10,
-    "max_stock": 10,
-    "active": true,
-    "line": "Go4-Generica"
+    "line": "Go4-Generica",
+    "stock": 200,
+    "max_stock": 200,
+    "visible_qty": 1,
+    "hidden_stock": true,
+    "active": true
   },
   "MLM2886523697": {
     "color": "Azul",
-    "stock": 10,
-    "max_stock": 10,
-    "active": true,
-    "line": "Go4-Generica"
+    "line": "Go4-Generica",
+    "stock": 200,
+    "max_stock": 200,
+    "visible_qty": 1,
+    "hidden_stock": true,
+    "active": true
   },
   "MLM5235934132": {
     "color": "Negro",
-    "stock": 10,
-    "max_stock": 10,
-    "active": true,
-    "line": "Go4-Generica"
+    "line": "Go4-Generica",
+    "stock": 15,
+    "max_stock": 15,
+    "visible_qty": 1,
+    "hidden_stock": true,
+    "active": true
   },
   "MLM5235946486": {
     "color": "Rojo",
-    "stock": 10,
-    "max_stock": 10,
-    "active": true,
-    "line": "Go4-Generica"
+    "line": "Go4-Generica",
+    "stock": 200,
+    "max_stock": 200,
+    "visible_qty": 1,
+    "hidden_stock": true,
+    "active": true
   },
   "MLM5235934150": {
     "color": "Camuflaje",
-    "stock": 10,
-    "max_stock": 10,
-    "active": true,
-    "line": "Go4-Generica"
+    "line": "Go4-Generica",
+    "stock": 200,
+    "max_stock": 200,
+    "visible_qty": 1,
+    "hidden_stock": true,
+    "active": true
   }
 }
