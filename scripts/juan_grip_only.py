@@ -46,6 +46,7 @@ print(f"pics uploaded: {len(pics)}")
 ga=[
     {"id":"BRAND","value_name":"JBL"},
     {"id":"MODEL","value_name":"Grip"},
+    {"id":"GTIN","value_name":"6925281999898"},
     {"id":"COLOR","value_name":"Negro"},
     {"id":"ITEM_CONDITION","value_name":"Nuevo"},
     {"id":"MAX_BATTERY_AUTONOMY","value_name":"12 h"},
@@ -64,7 +65,7 @@ ga=[
     {"id":"SPEAKER_FORMAT","value_name":"1.0"},
 ]
 seen={x["id"] for x in ga}
-BAD={"EAN","UPC","MPN","SELLER_SKU","GTIN","IS_SMART","PACKAGE_LENGTH","PACKAGE_WIDTH","PACKAGE_HEIGHT","PACKAGE_WEIGHT","LENGTH","WIDTH","HEIGHT","WEIGHT","ALPHANUMERIC_MODEL","LINE","GRADING","HAS_MICROPHONE","IS_DUAL_VOICE_COIL","WITH_HANDSFREE_FUNCTION","HAS_LED_LIGHTS","IS_DUAL_VOICE_ASSISTANTS","HAS_FM_RADIO","HAS_SD_MEMORY_INPUT","HAS_APP_CONTROL","WITH_AUX","HAS_USB_INPUT"}
+BAD={"EAN","UPC","MPN","SELLER_SKU","IS_SMART","PACKAGE_LENGTH","PACKAGE_WIDTH","PACKAGE_HEIGHT","PACKAGE_WEIGHT","LENGTH","WIDTH","HEIGHT","WEIGHT","ALPHANUMERIC_MODEL","LINE","GRADING","HAS_MICROPHONE","IS_DUAL_VOICE_COIL","WITH_HANDSFREE_FUNCTION","HAS_LED_LIGHTS","IS_DUAL_VOICE_ASSISTANTS","HAS_FM_RADIO","HAS_SD_MEMORY_INPUT","HAS_APP_CONTROL","WITH_AUX","HAS_USB_INPUT"}
 for ca in cat_attrs:
     aid=ca.get("id"); tags=ca.get("tags") or {}
     req=tags.get("required") or tags.get("catalog_required") or tags.get("conditional_required")
