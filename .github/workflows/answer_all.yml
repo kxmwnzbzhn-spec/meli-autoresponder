@@ -1,10 +1,9 @@
-name: answer-all-jbl
-on:
-  workflow_dispatch:
+name: answer-all-accounts
+on: {workflow_dispatch: {}}
 jobs:
   run:
     runs-on: ubuntu-latest
-    permissions: {contents: write}
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -14,10 +13,7 @@ jobs:
           MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
           MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
           MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
-        run: python scripts/answer_all.py
-      - run: |
-          git config user.name bot
-          git config user.email b@b.com
-          git add qa_templates.json
-          git diff --cached --quiet || git commit -m "add OEM+app templates"
-          git push || true
+          MELI_REFRESH_TOKEN_CLARIBEL: ${{ secrets.MELI_REFRESH_TOKEN_CLARIBEL }}
+          MELI_REFRESH_TOKEN_ASVA: ${{ secrets.MELI_REFRESH_TOKEN_ASVA }}
+          MELI_REFRESH_TOKEN_RAYMUNDO: ${{ secrets.MELI_REFRESH_TOKEN_RAYMUNDO }}
+        run: python scripts/answer_all_accounts.py
