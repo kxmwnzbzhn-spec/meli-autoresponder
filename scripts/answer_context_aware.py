@@ -25,6 +25,7 @@ def get_item_context(iid,H):
     ctx={
         "id":iid,
         "title":(d.get("title") or ""),
+        "status":d.get("status",""),
         "condition":d.get("condition"),
         "brand":attrs.get("BRAND",""),
         "model":attrs.get("MODEL",""),
@@ -147,6 +148,10 @@ for label,rt in ACCOUNTS.items():
         text=ques.get("text","")
         iid=ques.get("item_id")
         ctx=get_item_context(iid,H)
+        # Skip closed/paused items (MELI rejects answers there)
+        if ctx and ctx.get("status") and ctx.get("status") != "active":
+            print(f"  [skip {iid} status={ctx.get('status')}] Q: '{text[:60]}'")
+            continue
         ans=craft_answer(text,ctx)
         title_short=(ctx.get("title","") if ctx else "")[:40]
         print(f"  [{iid} '{title_short}'] Q: '{text[:70]}'")
@@ -159,3 +164,4 @@ for label,rt in ACCOUNTS.items():
         time.sleep(1)
 
 print(f"\n=== TOTAL: {total} respondidas ===")
+
