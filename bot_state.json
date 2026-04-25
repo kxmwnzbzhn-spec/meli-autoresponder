@@ -1,11 +1,11 @@
 {
   "questions_seen": [],
   "claims_seen": [
-    "5502854071",
-    "5502336104",
     "5501400150",
+    "5502854071",
+    "5502636400",
     "5502933251",
-    "5502636400"
+    "5502336104"
   ],
   "claim_states": {
     "5501400150": {
@@ -66,7 +66,7 @@
   "last_daily_digest_key": "2026-04-24",
   "daily_stats": {
     "relists": 0,
-    "auto_answered": 1
+    "auto_answered": 3
   },
   "_stock_config_dirty": true,
   "seen_questions": {
@@ -74,6 +74,16 @@
       "answered": true,
       "template": "auto_06",
       "ts": 1777087250
+    },
+    "13570678302": {
+      "answered": true,
+      "template": "auto_06",
+      "ts": 1777095132
+    },
+    "13569922659": {
+      "answered": true,
+      "template": "auto_06",
+      "ts": 1777095344
     }
   }
 }
