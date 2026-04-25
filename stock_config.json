@@ -2349,5 +2349,49 @@
     "seo_title": "Bocina Jbl Go 4 Bluetooth Ip67 Reacondicionada Excelente",
     "previous_ids": [],
     "_auto_discovered": true
+  },
+  "MLM2890793859": {
+    "real_stock": 15,
+    "sku": "JBL-GO4-AZUL-CAT499",
+    "label": "JBL Go 4 Azul - Catálogo $499 (15u/día)",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "min_visible_stock": 1,
+    "daily_reset_to": 15,
+    "account": "juan",
+    "catalog_product_id": "MLM44710367"
+  },
+  "MLM2890818973": {
+    "real_stock": 15,
+    "sku": "JBL-GO4-ROJA-CAT499",
+    "label": "JBL Go 4 Roja - Catálogo $499 (15u/día)",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "min_visible_stock": 1,
+    "daily_reset_to": 15,
+    "account": "juan",
+    "catalog_product_id": "MLM44710313"
+  },
+  "MLM2890793871": {
+    "real_stock": 15,
+    "sku": "JBL-GO4-CELESTE-CAT499",
+    "label": "JBL Go 4 Celeste - Catálogo $499 (15u/día)",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "min_visible_stock": 1,
+    "daily_reset_to": 15,
+    "account": "juan",
+    "catalog_product_id": "MLM61262890"
+  },
+  "MLM2890856611": {
+    "real_stock": 15,
+    "sku": "JBL-GO4-CAMU-CAT499",
+    "label": "JBL Go 4 Camuflaje - Catálogo $499 (15u/día)",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "min_visible_stock": 1,
+    "daily_reset_to": 15,
+    "account": "juan",
+    "catalog_product_id": "MLM37361021"
   }
 }
