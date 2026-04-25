@@ -2393,5 +2393,15 @@
     "daily_reset_to": 15,
     "account": "juan",
     "catalog_product_id": "MLM37361021"
+  },
+  "MLM5244431296": {
+    "real_stock": 30,
+    "sku": "AUTO-431296",
+    "label": "Sony Srs-xb100 Altavoz De Viaje Inalámbrico Bluetooth Port C - $549",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "seo_title": "Sony Srs-xb100 Altavoz De Viaje Inalámbrico Bluetooth Port Color Negro",
+    "previous_ids": [],
+    "_auto_discovered": true
   }
 }
