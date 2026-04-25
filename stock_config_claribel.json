@@ -537,5 +537,83 @@
     "active": true,
     "condition": "new",
     "type": "catalog_no_variations"
+  },
+  "MLM2890996761": {
+    "line": "Catalog-Claribel-MandarinSky",
+    "label": "Perfume Armaf Odyssey Mandarin Sky 60ml Para ",
+    "price": 499.0,
+    "catalog_product_id": "MLM46926154",
+    "auto_replenish": true,
+    "min_visible": 1,
+    "real_stock": 10,
+    "daily_reset_to": 10,
+    "active": true,
+    "condition": "new",
+    "type": "catalog_no_variations"
+  },
+  "MLM5245546734": {
+    "line": "Catalog-Claribel-MandarinSky",
+    "label": "Perfume Armaf Odyssey Mandarin Sky Limited Ed",
+    "price": 499.0,
+    "catalog_product_id": "MLM63357676",
+    "auto_replenish": true,
+    "min_visible": 1,
+    "real_stock": 10,
+    "daily_reset_to": 10,
+    "active": true,
+    "condition": "new",
+    "type": "catalog_no_variations"
+  },
+  "MLM5245546756": {
+    "line": "Catalog-Claribel-MandarinSky",
+    "label": "Perfume Armaf Odyssey Mandarin Sky Limited Ar",
+    "price": 499.0,
+    "catalog_product_id": "MLM65066279",
+    "auto_replenish": true,
+    "min_visible": 1,
+    "real_stock": 10,
+    "daily_reset_to": 10,
+    "active": true,
+    "condition": "new",
+    "type": "catalog_no_variations"
+  },
+  "MLM2890996849": {
+    "line": "Catalog-Claribel-MandarinSky",
+    "label": "Perfume Armaf Odyssey Mandarin Sky Elixir par",
+    "price": 499.0,
+    "catalog_product_id": "MLM66233752",
+    "auto_replenish": true,
+    "min_visible": 1,
+    "real_stock": 10,
+    "daily_reset_to": 10,
+    "active": true,
+    "condition": "new",
+    "type": "catalog_no_variations"
+  },
+  "MLM2890996865": {
+    "line": "Catalog-Claribel-MandarinSky",
+    "label": "Perfume Armaf Odyssey Mandarin Sky Limited Ed",
+    "price": 499.0,
+    "catalog_product_id": "MLM22299658",
+    "auto_replenish": true,
+    "min_visible": 1,
+    "real_stock": 10,
+    "daily_reset_to": 10,
+    "active": true,
+    "condition": "new",
+    "type": "catalog_no_variations"
+  },
+  "MLM5245546822": {
+    "line": "Catalog-Claribel-MandarinSky",
+    "label": "Perfume Hombre Armaf Odyssey Mandarin Sky Edp",
+    "price": 499.0,
+    "catalog_product_id": "MLM53673404",
+    "auto_replenish": true,
+    "min_visible": 1,
+    "real_stock": 10,
+    "daily_reset_to": 10,
+    "active": true,
+    "condition": "new",
+    "type": "catalog_no_variations"
   }
 }
