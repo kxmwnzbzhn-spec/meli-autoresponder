@@ -446,5 +446,31 @@
     "active": true,
     "condition": "new",
     "type": "catalog_no_variations"
+  },
+  "MLM2890951427": {
+    "line": "Catalog-Claribel-Rojo",
+    "label": "Altavoz Bluetooth JBL GO 4 Portátil Impermeab",
+    "price": 499.0,
+    "catalog_product_id": "MLM47119316",
+    "auto_replenish": true,
+    "min_visible": 1,
+    "real_stock": 10,
+    "daily_reset_to": 10,
+    "active": true,
+    "condition": "new",
+    "type": "catalog_no_variations"
+  },
+  "MLM2890988575": {
+    "line": "Catalog-Claribel-Rojo",
+    "label": "Jbl Go 4 - Altavoz Ultraportátil Bluetooth Co",
+    "price": 499.0,
+    "catalog_product_id": "MLM64389753",
+    "auto_replenish": true,
+    "min_visible": 1,
+    "real_stock": 10,
+    "daily_reset_to": 10,
+    "active": true,
+    "condition": "new",
+    "type": "catalog_no_variations"
   }
 }
