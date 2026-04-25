@@ -1,5 +1,8 @@
 name: answer-context-aware
-on: {workflow_dispatch: {}}
+on:
+  schedule:
+    - cron: '*/30 * * * *'  # cada 30 min
+  workflow_dispatch:
 jobs:
   run:
     runs-on: ubuntu-latest
@@ -16,4 +19,6 @@ jobs:
           MELI_REFRESH_TOKEN_CLARIBEL: ${{ secrets.MELI_REFRESH_TOKEN_CLARIBEL }}
           MELI_REFRESH_TOKEN_ASVA: ${{ secrets.MELI_REFRESH_TOKEN_ASVA }}
           MELI_REFRESH_TOKEN_RAYMUNDO: ${{ secrets.MELI_REFRESH_TOKEN_RAYMUNDO }}
+          MELI_REFRESH_TOKEN_DILCIE: ${{ secrets.MELI_REFRESH_TOKEN_DILCIE }}
+          MELI_REFRESH_TOKEN_MILDRED: ${{ secrets.MELI_REFRESH_TOKEN_MILDRED }}
         run: python scripts/answer_context_aware.py

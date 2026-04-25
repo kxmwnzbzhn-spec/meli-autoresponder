@@ -5,6 +5,8 @@ ACCOUNTS={
     "CLARIBEL":os.environ.get("MELI_REFRESH_TOKEN_CLARIBEL"),
     "ASVA":os.environ.get("MELI_REFRESH_TOKEN_ASVA"),
     "RAYMUNDO":os.environ.get("MELI_REFRESH_TOKEN_RAYMUNDO"),
+    "DILCIE":os.environ.get("MELI_REFRESH_TOKEN_DILCIE"),
+    "MILDRED":os.environ.get("MELI_REFRESH_TOKEN_MILDRED"),
 }
 
 ITEM_CACHE={}
