@@ -1,0 +1,16 @@
+{
+  "items": {
+    "MLM44710367": "MLM2890793859",
+    "MLM44710313": "MLM2890818973",
+    "MLM61262890": "MLM2890793871",
+    "MLM37361021": "MLM2890856611"
+  },
+  "qty_per_day": 15,
+  "price": 499.0,
+  "notas": {
+    "MLM2890793859": "JBL Go 4 Azul",
+    "MLM2890818973": "JBL Go 4 Roja",
+    "MLM2890793871": "JBL Go 4 Celeste",
+    "MLM2890856611": "JBL Go 4 Camuflaje"
+  }
+}
