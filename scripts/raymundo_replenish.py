@@ -48,8 +48,11 @@ for iid,info in cfg.items():
                 new_vars.append(nv)
         
         if any_repuesto:
-            rp=requests.put(f"https://api.mercadolibre.com/items/{iid}",headers=H,json={"variations":new_vars},timeout=30)
-            print(f"    update: {rp.status_code}")
+            payload={"variations":new_vars}
+            if cur.get("status") == "paused":
+                payload["status"]="active"
+            rp=requests.put(f"https://api.mercadolibre.com/items/{iid}",headers=H,json=payload,timeout=30)
+            print(f"    update: {rp.status_code}{' REACTIVADO' if cur.get('status')=='paused' else ''}")
 
 json.dump(cfg,open("stock_config_raymundo.json","w"),indent=2,ensure_ascii=False)
 print("\nDone")
