@@ -1,6 +1,24 @@
 {
   "MLM5239571436": {
-    "line": "Go4-Usada-Claribel",
+    "line": "Go4-Usada-Claribel-A",
+    "auto_replenish": true,
+    "min_visible": 1,
+    "variations": {
+      "Negro": 10,
+      "Azul": 10,
+      "Rojo": 10,
+      "Camuflaje": 10,
+      "Rosa": 10,
+      "Aqua": 10
+    },
+    "active": true,
+    "price": 299,
+    "condition": "used"
+  },
+  "MLM5244862560": {
+    "line": "Go4-Usada-Claribel-B-test",
+    "auto_replenish": true,
+    "min_visible": 1,
     "variations": {
       "Negro": 10,
       "Azul": 10,
