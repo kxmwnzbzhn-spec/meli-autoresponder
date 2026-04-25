@@ -158,4 +158,42 @@ if TG_TOKEN and TG_CHAT:
             print(f"telegram chunk {i+1}/{len(chunks)}: {r.status_code}")
             time.sleep(1)
 
-print(f"\nTotal claims: {len(all_claims)}")
+# Export to claims_today.json + CSV for Chrome automation
+import csv
+export = []
+for label, nick, c, ord_data in all_claims:
+    cid = c.get("id")
+    items_o = ord_data.get("order_items",[])
+    product = items_o[0].get("item",{}).get("title","")[:80] if items_o else ""
+    export.append({
+        "claim_id": cid,
+        "account": label,
+        "nickname": nick,
+        "order_id": c.get("resource_id"),
+        "product": product,
+        "buyer": ord_data.get("buyer",{}).get("nickname",""),
+        "buyer_id": ord_data.get("buyer",{}).get("id",""),
+        "amount": ord_data.get("total_amount",""),
+        "reason_id": c.get("reason_id",""),
+        "reason_label": REASON_LABELS.get(c.get("reason_id",""), c.get("reason_id","")),
+        "type": c.get("type",""),
+        "stage": c.get("stage",""),
+        "status": c.get("status",""),
+        "date_created": c.get("date_created",""),
+        "claim_url": f"https://www.mercadolibre.com.mx/reclamos/MLM/{cid}/",
+        "processed": False
+    })
+
+with open("claims_today.json","w") as f:
+    json.dump({"date": today, "claims": export, "total": len(export)}, f, indent=2, ensure_ascii=False)
+
+with open("claims_today.csv","w",newline="") as f:
+    if export:
+        w = csv.DictWriter(f, fieldnames=list(export[0].keys()))
+        w.writeheader()
+        w.writerows(export)
+    else:
+        f.write("no_claims_today\n")
+
+print(f"\nExportado: claims_today.json + claims_today.csv ({len(export)} registros)")
+print(f"Total claims: {len(all_claims)}")
