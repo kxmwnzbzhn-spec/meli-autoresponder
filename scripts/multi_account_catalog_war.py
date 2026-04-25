@@ -27,6 +27,7 @@ GAP = 10                         # winner = ext_competitor - $10
 STAIRCASE_GAP = 50               # cada cuenta sucesiva: winner + N*50
 STAIRCASE_ORDER = ["JUAN", "ASVA", "RAYMUNDO", "DILCIE", "MILDRED"]  # orden ascendente del escalón
 DEFAULT_FLOOR_PCT = 0.55
+MIN_FLOOR_PRICE = 299  # piso absoluto: nunca bajar de $299
 DEFAULT_CEIL_PCT  = 1.30
 MIN_DELTA = 5                    # solo cambiar si delta ≥ $5
 
@@ -126,7 +127,7 @@ for cpid, items in by_cpid.items():
     # Calculate winner target
     if winner_item:
         original = max(state["items"].get(winner_item["iid"],{}).get("original_price", winner_item["price"]), winner_item["price"])
-        floor = FLOOR_OVERRIDES.get(winner_item["iid"], original * DEFAULT_FLOOR_PCT)
+        floor = max(FLOOR_OVERRIDES.get(winner_item["iid"], original * DEFAULT_FLOOR_PCT), MIN_FLOOR_PRICE)
         ceiling = CEIL_OVERRIDES.get(winner_item["iid"], original * DEFAULT_CEIL_PCT)
         if ext_price is not None:
             winner_target = ext_price - GAP
@@ -167,7 +168,7 @@ for cpid, items in by_cpid.items():
             print(f"    ⊘ [{it['account']}] {it['iid']} sin ref — mantener")
             continue
         original = max(state["items"].get(it["iid"],{}).get("original_price", it["price"]), it["price"])
-        floor = FLOOR_OVERRIDES.get(it["iid"], original * DEFAULT_FLOOR_PCT)
+        floor = max(FLOOR_OVERRIDES.get(it["iid"], original * DEFAULT_FLOOR_PCT), MIN_FLOOR_PRICE)
         ceiling = CEIL_OVERRIDES.get(it["iid"], original * DEFAULT_CEIL_PCT)
         # Step (idx+1) above winner
         target = winner_target + (idx + 1) * STAIRCASE_GAP
