@@ -1,0 +1,22 @@
+name: raymundo-fix-stock
+on: {workflow_dispatch: {}}
+permissions: {contents: write}
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - run: pip install requests -q
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_RAYMUNDO: ${{ secrets.MELI_REFRESH_TOKEN_RAYMUNDO }}
+        run: python scripts/raymundo_fix_stock.py
+      - run: |
+          git config user.email b@b.com && git config user.name bot
+          git pull --rebase --no-edit || true
+          git add stock_config_raymundo.json
+          git diff --cached --quiet || git commit -m "Raymundo stock setup 50/color"
+          git push || true
