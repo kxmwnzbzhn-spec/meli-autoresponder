@@ -1,0 +1,26 @@
+name: claribel-publish-azul
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.REPO_PAT }}
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests -q
+      - run: python scripts/claribel_publish_azul.py
+        env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_CLARIBEL: ${{ secrets.MELI_REFRESH_TOKEN_CLARIBEL }}
+      - run: |
+          git config user.email b@b.com && git config user.name bot
+          git pull --rebase 2>/dev/null || true
+          git add stock_config_claribel.json
+          git diff --cached --quiet || (git commit -m "Claribel: 11 azul catálogos añadidos" && git push origin main)
