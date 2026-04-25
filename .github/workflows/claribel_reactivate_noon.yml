@@ -1,0 +1,29 @@
+name: claribel-reactivate-noon
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 18 * * *'  # 18:00 UTC = 12:00 PM CDMX (UTC-6)
+permissions:
+  contents: write
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.REPO_PAT }}
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests -q
+      - run: python scripts/claribel_reactivate_noon.py
+        env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_CLARIBEL: ${{ secrets.MELI_REFRESH_TOKEN_CLARIBEL }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+      - run: |
+          git config user.email b@b.com && git config user.name bot
+          git pull --rebase 2>/dev/null || true
+          git add claribel_throttle_state.json
+          git diff --cached --quiet || (git commit -m "claribel reactivate state" && git push origin main)
