@@ -290,5 +290,18 @@
     "active": true,
     "condition": "new",
     "type": "catalog_no_variations"
+  },
+  "MLM5244434176": {
+    "line": "Auto-added-perfume",
+    "label": "Jo Milano Game Of Spades Wildcard Parfum",
+    "price": 799,
+    "catalog_product_id": "MLM24836013",
+    "auto_replenish": true,
+    "min_visible": 1,
+    "real_stock": 10,
+    "daily_reset_to": 10,
+    "active": true,
+    "condition": "new",
+    "type": "catalog_no_variations"
   }
 }
