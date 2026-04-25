@@ -1,10 +1,10 @@
 {
   "questions_seen": [],
   "claims_seen": [
-    "5502854071",
-    "5502336104",
-    "5501400150",
     "5502933251",
+    "5502854071",
+    "5501400150",
+    "5502336104",
     "5502636400"
   ],
   "claim_states": {
@@ -63,10 +63,10 @@
   "seller_id": 2681696373,
   "seen_returns": {},
   "return_states": {},
-  "last_daily_digest_key": "2026-04-24",
+  "last_daily_digest_key": "2026-04-25",
   "daily_stats": {
     "relists": 0,
-    "auto_answered": 3
+    "auto_answered": 0
   },
   "_stock_config_dirty": true,
   "seen_questions": {

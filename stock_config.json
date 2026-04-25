@@ -2242,7 +2242,7 @@
     "_deleted_reason": "Cannot update item MLM5227773714 [status:under_review, has_bids:false]"
   },
   "MLM2883448187": {
-    "real_stock": 2181,
+    "real_stock": 2171,
     "sku": "GO4-UNIFIED",
     "label": "Go 4 Unified (5 colors)",
     "auto_replenish": true,
@@ -2255,23 +2255,23 @@
         "orig_id": "MLM5227773714"
       },
       "Azul": {
-        "stock": 455,
+        "stock": 453,
         "orig_id": "MLM5223214798"
       },
       "Rojo": {
-        "stock": 156,
+        "stock": 154,
         "orig_id": "MLM2880763019"
       },
       "Camuflaje": {
-        "stock": 493,
+        "stock": 491,
         "orig_id": "MLM2880762615"
       },
       "Rosa": {
-        "stock": 84,
+        "stock": 82,
         "orig_id": "MLM5223451400"
       },
       "Aqua": {
-        "stock": 993,
+        "stock": 991,
         "orig_id": "MLM2747271435"
       }
     }
@@ -2331,9 +2331,22 @@
     "real_stock": 30,
     "sku": "AUTO-818059",
     "label": "Bocina Bluetooth Portatil Ip67 Bass 35w 16h Multicolor - $799",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "seo_title": "Bocina Bluetooth Portatil Ip67 Bass 35w 16h Multicolor",
+    "previous_ids": [],
+    "_auto_discovered": true,
+    "deleted": true,
+    "_deleted_at": 1777129421,
+    "_deleted_reason": "Cannot update item MLM2887818059 [status:closed, has_bids:false]"
+  },
+  "MLM5244765752": {
+    "real_stock": 30,
+    "sku": "AUTO-765752",
+    "label": "Bocina Jbl Go 4 Bluetooth Ip67 Reacondicionada Excelente - $399",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "seo_title": "Bocina Jbl Go 4 Bluetooth Ip67 Reacondicionada Excelente",
     "previous_ids": [],
     "_auto_discovered": true
   }
