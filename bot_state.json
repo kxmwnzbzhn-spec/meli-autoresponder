@@ -1,13 +1,14 @@
 {
   "questions_seen": [],
   "claims_seen": [
-    "5502854071",
-    "5503096585",
-    "5502933251",
+    "5503227787",
     "5503148321",
+    "5502933251",
+    "5503096585",
     "5501400150",
     "5502336104",
-    "5502636400"
+    "5502636400",
+    "5502854071"
   ],
   "claim_states": {
     "5501400150": {
@@ -75,6 +76,17 @@
       "created_at": 1777148967,
       "last_status": "dispute",
       "step": "pending_user_action"
+    },
+    "5503227787": {
+      "type": "otro",
+      "stage": "dispute",
+      "reason": "PDD9943",
+      "amount": 599.0,
+      "product_title": "Bocina Jbl Go 4 Bluetooth Portatil Ip67 Nueva Original Color",
+      "product_item": "MLM2883448187",
+      "created_at": 1777160383,
+      "last_status": "dispute",
+      "step": "pending_user_action"
     }
   },
   "last_telegram_update_id": 0,
@@ -85,7 +97,8 @@
     "alert_5502854071": 1777075324,
     "alert_5502933251": 1777093954,
     "alert_5503096585": 1777148967,
-    "alert_5503148321": 1777148967
+    "alert_5503148321": 1777148967,
+    "alert_5503227787": 1777160383
   },
   "seller_id": 2681696373,
   "seen_returns": {},
