@@ -2,9 +2,9 @@
   "items": {
     "MLM5241336574": {
       "original_price": 499.0,
-      "floor": 274.45000000000005,
+      "floor": 299,
       "ceiling": 648.7,
-      "last_change_at": 1777141790,
+      "last_change_at": 1777142499,
       "role": "winner",
       "label": "Armaf Odyssey Mega Man Edici\u00f3n Limi"
     },
@@ -20,7 +20,7 @@
       "original_price": 723.0,
       "floor": 397.65000000000003,
       "ceiling": 939.9,
-      "last_change_at": 1777141790,
+      "last_change_at": 1777142499,
       "role": "step_1",
       "label": "Bocina Port\u00e1til Jbl Go 4 Bluetooth,"
     },
@@ -28,7 +28,7 @@
       "original_price": 667.0,
       "floor": 366.85,
       "ceiling": 867.1,
-      "last_change_at": 1777141790,
+      "last_change_at": 1777142499,
       "role": "step_1",
       "label": "Bocina Jbl Go 4 Jblgo4 Port\u00e1til Con"
     },
@@ -44,15 +44,15 @@
       "original_price": 719.0,
       "floor": 395.45000000000005,
       "ceiling": 934.7,
-      "last_change_at": 1777141790,
+      "last_change_at": 1777142499,
       "role": "step_1",
       "label": "Bocina Jbl Go 4 Jblgo4 Port\u00e1til Con"
     },
     "MLM5241631618": {
       "original_price": 474.0,
-      "floor": 260.70000000000005,
+      "floor": 299,
       "ceiling": 616.2,
-      "last_change_at": 1777141790,
+      "last_change_at": 1777142499,
       "role": "winner",
       "label": "Perfume Lattafa His Confession 100m"
     },
@@ -77,7 +77,7 @@
       "original_price": 673.0,
       "floor": 370.15000000000003,
       "ceiling": 874.9,
-      "last_change_at": 1777141790,
+      "last_change_at": 1777142499,
       "role": "winner",
       "label": "Bocina Port\u00e1til Jbl Go 4 Bluetooth,"
     },
@@ -85,15 +85,15 @@
       "original_price": 617.0,
       "floor": 339.35,
       "ceiling": 802.1,
-      "last_change_at": 1777141790,
+      "last_change_at": 1777142499,
       "role": "winner",
       "label": "Bocina Jbl Go 4 Jblgo4 Port\u00e1til Con"
     },
     "MLM5244431430": {
       "original_price": 474.0,
-      "floor": 260.70000000000005,
+      "floor": 299,
       "ceiling": 616.2,
-      "last_change_at": 1777141790,
+      "last_change_at": 1777142499,
       "role": "winner",
       "label": "Armaf Delight Island Bliss Edp 100 "
     },
@@ -101,7 +101,7 @@
       "original_price": 589.0,
       "floor": 323.95000000000005,
       "ceiling": 765.7,
-      "last_change_at": 1777141790,
+      "last_change_at": 1777142499,
       "role": "winner",
       "label": "Armaf Club De Nuit Maleka Edp Mujer"
     },
@@ -122,6 +122,6 @@
       "label": "Bocina Jbl Go 4 Jblgo4 Port\u00e1til Con"
     }
   },
-  "last_run": 1777141790,
+  "last_run": 1777142499,
   "winner_account": "CLARIBEL"
 }
