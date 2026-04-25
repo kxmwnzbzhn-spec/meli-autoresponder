@@ -2,10 +2,12 @@
   "questions_seen": [],
   "claims_seen": [
     "5502933251",
-    "5501400150",
+    "5503096585",
     "5502636400",
+    "5503148321",
+    "5502854071",
     "5502336104",
-    "5502854071"
+    "5501400150"
   ],
   "claim_states": {
     "5501400150": {
@@ -38,7 +40,8 @@
       "product_item": "MLM5213612190",
       "created_at": 1777075324,
       "last_status": "claim",
-      "step": "pending_user_action"
+      "step": "pending_user_action",
+      "urgent_alerted_at": 1777148974
     },
     "5502933251": {
       "type": "otro",
@@ -50,6 +53,28 @@
       "created_at": 1777093954,
       "last_status": "claim",
       "step": "pending_user_action"
+    },
+    "5503096585": {
+      "type": "otro",
+      "stage": "claim",
+      "reason": "PDD9939",
+      "amount": 499.0,
+      "product_title": "Bocina Bluetooth Jbl Charge 6 Portatil Azul Original Usada",
+      "product_item": "MLM5215976922",
+      "created_at": 1777148967,
+      "last_status": "claim",
+      "step": "pending_user_action"
+    },
+    "5503148321": {
+      "type": "otro",
+      "stage": "dispute",
+      "reason": "PDD9946",
+      "amount": 499.0,
+      "product_title": "Bocina Jbl Go 4 Bluetooth Portatil Ip67 Nueva Original Color",
+      "product_item": "MLM2883448187",
+      "created_at": 1777148967,
+      "last_status": "dispute",
+      "step": "pending_user_action"
     }
   },
   "last_telegram_update_id": 0,
@@ -58,7 +83,9 @@
     "alert_5502336104": 1745608800,
     "alert_5502636400": 1745608800,
     "alert_5502854071": 1777075324,
-    "alert_5502933251": 1777093954
+    "alert_5502933251": 1777093954,
+    "alert_5503096585": 1777148967,
+    "alert_5503148321": 1777148967
   },
   "seller_id": 2681696373,
   "seen_returns": {},
