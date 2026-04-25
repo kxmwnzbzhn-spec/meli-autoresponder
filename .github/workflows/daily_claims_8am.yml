@@ -2,12 +2,16 @@ name: daily-claims-8am
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 14 * * *'  # 14:00 UTC = 8:00 AM CDMX (UTC-6)
+    - cron: '0 14 * * *'  # 8:00 AM CDMX
+permissions:
+  contents: write
 jobs:
   run:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.REPO_PAT }}
       - uses: actions/setup-python@v5
         with: { python-version: '3.11' }
       - run: pip install requests -q
@@ -23,3 +27,8 @@ jobs:
           MELI_REFRESH_TOKEN_MILDRED: ${{ secrets.MELI_REFRESH_TOKEN_MILDRED }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+      - run: |
+          git config user.email b@b.com && git config user.name bot
+          git pull --rebase 2>/dev/null || true
+          git add claims_today.json claims_today.csv 2>/dev/null || true
+          git diff --cached --quiet || (git commit -m "daily claims report" && git push origin main)
