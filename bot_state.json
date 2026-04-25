@@ -1,9 +1,9 @@
 {
   "questions_seen": [],
   "claims_seen": [
+    "5502636400",
     "5502854071",
     "5502336104",
-    "5502636400",
     "5501400150"
   ],
   "claim_states": {
@@ -53,7 +53,14 @@
   "last_daily_digest_key": "2026-04-24",
   "daily_stats": {
     "relists": 0,
-    "auto_answered": 0
+    "auto_answered": 1
   },
-  "_stock_config_dirty": true
+  "_stock_config_dirty": true,
+  "seen_questions": {
+    "13570651676": {
+      "answered": true,
+      "template": "auto_06",
+      "ts": 1777087250
+    }
+  }
 }
