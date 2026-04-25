@@ -2,12 +2,16 @@ name: claribel-daily-reset
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 6 * * *'  # 06:00 UTC = 00:00 CDMX
+    - cron: '0 6 * * *'
+permissions:
+  contents: write
 jobs:
   run:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.REPO_PAT }}
       - uses: actions/setup-python@v5
         with: { python-version: '3.11' }
       - run: pip install requests -q
@@ -22,5 +26,4 @@ jobs:
           git config user.email b@b.com && git config user.name bot
           git pull --rebase 2>/dev/null || true
           git add stock_config_claribel.json
-          git commit -m "claribel daily reset state" || true
-          git push origin main || true
+          git diff --cached --quiet || (git commit -m "claribel daily reset state" && git push origin main)
