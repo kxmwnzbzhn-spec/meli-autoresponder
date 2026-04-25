@@ -511,5 +511,18 @@
     "active": true,
     "condition": "new",
     "type": "catalog_no_variations"
+  },
+  "MLM2890977889": {
+    "line": "Catalog-Claribel-Camuflaje",
+    "label": "Parlante Bluetooth Inalámbrico Portátil Go4 5",
+    "price": 499.0,
+    "catalog_product_id": "MLM62122005",
+    "auto_replenish": true,
+    "min_visible": 1,
+    "real_stock": 10,
+    "daily_reset_to": 10,
+    "active": true,
+    "condition": "new",
+    "type": "catalog_no_variations"
   }
 }
