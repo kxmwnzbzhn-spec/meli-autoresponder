@@ -2,12 +2,16 @@ name: claribel-replenish
 on:
   workflow_dispatch:
   schedule:
-    - cron: '*/5 * * * *'
+    - cron: '*/5 * * * *'  # GitHub min 5min, dentro loop 5x cada 60s = replenish cada 1 min
 permissions:
   contents: write
+concurrency:
+  group: claribel-replenish
+  cancel-in-progress: false
 jobs:
   run:
     runs-on: ubuntu-latest
+    timeout-minutes: 8  # loop dura ~5 min
     steps:
       - uses: actions/checkout@v4
         with:
@@ -20,6 +24,8 @@ jobs:
           MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
           MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
           MELI_REFRESH_TOKEN_CLARIBEL: ${{ secrets.MELI_REFRESH_TOKEN_CLARIBEL }}
+          LOOP_ITERATIONS: "5"
+          LOOP_SLEEP: "60"
       - run: |
           git config user.email b@b.com && git config user.name bot
           git pull --rebase 2>/dev/null || true
