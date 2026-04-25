@@ -1,0 +1,23 @@
+name: claribel-replenish
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '*/5 * * * *'
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests -q
+      - run: python scripts/claribel_replenish.py
+        env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_CLARIBEL: ${{ secrets.MELI_REFRESH_TOKEN_CLARIBEL }}
+      - run: |
+          git config user.email b@b.com && git config user.name bot
+          git pull --rebase 2>/dev/null || true
+          git add stock_config_claribel.json 2>/dev/null || true
+          git diff --cached --quiet || (git commit -m "claribel auto-replenish state" && git push origin main || true)
