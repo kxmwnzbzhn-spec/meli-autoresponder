@@ -524,5 +524,18 @@
     "active": true,
     "condition": "new",
     "type": "catalog_no_variations"
+  },
+  "MLM2890989785": {
+    "line": "Catalog-Claribel-Aqua",
+    "label": "Parlante JBL Go 4 JBLGO4REDAM portátil con bl",
+    "price": 499.0,
+    "catalog_product_id": "MLM54696427",
+    "auto_replenish": true,
+    "min_visible": 1,
+    "real_stock": 10,
+    "daily_reset_to": 10,
+    "active": true,
+    "condition": "new",
+    "type": "catalog_no_variations"
   }
 }
