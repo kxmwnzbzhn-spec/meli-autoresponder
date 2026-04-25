@@ -1,9 +1,10 @@
 {
   "questions_seen": [],
   "claims_seen": [
-    "5502336104",
     "5501400150",
-    "5502636400"
+    "5502854071",
+    "5502636400",
+    "5502336104"
   ],
   "claim_states": {
     "5501400150": {
@@ -26,13 +27,25 @@
       "last_status": "claim",
       "created_at": 1745521000,
       "urgent_alerted_at": 1745521400
+    },
+    "5502854071": {
+      "type": "otro",
+      "stage": "claim",
+      "reason": "PDD9943",
+      "amount": 499.0,
+      "product_title": "Bocina Bluetooth Jbl Charge 6 Portatil Roja Original Usada",
+      "product_item": "MLM5213612190",
+      "created_at": 1777075324,
+      "last_status": "claim",
+      "step": "pending_user_action"
     }
   },
   "last_telegram_update_id": 0,
   "alert_log": {
     "alert_5501400150": 1745608800,
     "alert_5502336104": 1745608800,
-    "alert_5502636400": 1745608800
+    "alert_5502636400": 1745608800,
+    "alert_5502854071": 1777075324
   },
   "seller_id": 2681696373,
   "seen_returns": {},
