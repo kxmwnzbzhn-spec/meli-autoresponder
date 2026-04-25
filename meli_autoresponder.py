@@ -1160,10 +1160,13 @@ def check_and_replenish_stock(token, state):
                     if v.get("attributes"): nv["attributes"]=v["attributes"]
                     if v.get("picture_ids"): nv["picture_ids"]=v["picture_ids"]
                     new_vars.append(nv)
-                if need_refill and status == "active":
+                if need_refill and status in ("active","paused"):
                     # tambien necesitamos pictures top-level completos
                     all_pics = [{"id":p.get("id")} for p in (it.get("pictures") or []) if p.get("id")]
-                    pr_code, pr_resp = meli("PUT", f"/items/{item_id}", token, body={"pictures": all_pics, "variations": new_vars})
+                    body_var = {"pictures": all_pics, "variations": new_vars}
+                    if status == "paused":
+                        body_var["status"] = "active"
+                    pr_code, pr_resp = meli("PUT", f"/items/{item_id}", token, body=body_var)
                     if pr_code in (200,201):
                         _log(f"  {item_id}: variations refill OK")
                         # Descontar stock real por color refillado
