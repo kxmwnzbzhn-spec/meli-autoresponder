@@ -2,7 +2,7 @@ name: catalog-war-10min
 on:
   workflow_dispatch:
   schedule:
-    - cron: '*/10 * * * *'
+    - cron: '*/5 * * * *'
 permissions:
   contents: write
 concurrency:
