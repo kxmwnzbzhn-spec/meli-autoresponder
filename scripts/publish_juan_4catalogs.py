@@ -6,7 +6,6 @@ RT = os.getenv("MELI_REFRESH_TOKEN","")  # Juan
 CATALOGS = ["MLM44710367", "MLM44710313", "MLM61262890", "MLM37361021"]
 PRICE = 499.0
 QTY = 15
-# All 4 are JBL Go 4 = Bocinas Bluetooth
 CATEGORY = "MLM59800"
 
 r = requests.post("https://api.mercadolibre.com/oauth/token", data={
@@ -18,7 +17,6 @@ H = {"Authorization":f"Bearer {at}", "Content-Type":"application/json"}
 me = requests.get("https://api.mercadolibre.com/users/me", headers=H).json()
 print(f"Cuenta: {me.get('nickname')} ({me.get('id')})\n")
 
-# Load existing mapping
 existing = {}
 try:
     with open("juan_daily_replenish.json") as f:
@@ -32,8 +30,12 @@ for CPID in CATALOGS:
         continue
     print(f"=== {CPID} ===")
     
-    # Try minimal payload first - catalog inherits everything
+    p = requests.get(f"https://api.mercadolibre.com/products/{CPID}", headers=H).json()
+    title = (p.get("name") or "")[:60]
+    print(f"  title: '{title}'")
+    
     payload = {
+        "title": title,
         "category_id": CATEGORY,
         "catalog_product_id": CPID,
         "catalog_listing": True,
@@ -58,7 +60,7 @@ for CPID in CATALOGS:
             print(f"     {j.get('permalink','')}")
             results[CPID] = iid
         else:
-            print(f"  ❌ {json.dumps(j, ensure_ascii=False)[:1200]}")
+            print(f"  ❌ {json.dumps(j, ensure_ascii=False)[:1500]}")
     except:
         print(f"  raw: {r.text[:600]}")
     time.sleep(2)
