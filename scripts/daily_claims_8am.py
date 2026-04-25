@@ -58,10 +58,30 @@ for label, env_var in ACCOUNTS:
         "https://api.mercadolibre.com/post-purchase/v1/claims/search?status=opened&limit=20",
         headers=H, timeout=15
     ).json()
-    claims = rc.get("data") or []
-    print(f"{label}: {len(claims)} reclamos abiertos")
+    claims_raw = rc.get("data") or []
     
-    for c in claims:
+    # FILTRO: solo reclamos que afectan reputación
+    # Regla MELI: type=mediations + related_entities NO contiene 'return'
+    affecting = []
+    excluded_count = 0
+    for c in claims_raw:
+        ctype = c.get("type","")
+        rel_ents = c.get("related_entities",[]) or []
+        # Get full detail to confirm related_entities
+        try:
+            full = requests.get(f"https://api.mercadolibre.com/post-purchase/v1/claims/{c.get('id')}", headers=H, timeout=10).json()
+            rel_ents = full.get("related_entities",[]) or []
+            ctype = full.get("type","")
+        except: pass
+        affects = (ctype == "mediations") and ("return" not in rel_ents)
+        if affects:
+            affecting.append(c)
+        else:
+            excluded_count += 1
+    
+    print(f"{label}: {len(claims_raw)} totales | {len(affecting)} afectan reputación | {excluded_count} excluidos")
+    
+    for c in affecting:
         order_id = c.get("resource_id")
         order_data = {}
         try:
@@ -72,9 +92,9 @@ for label, env_var in ACCOUNTS:
 # Build Telegram message
 today = (datetime.now(timezone.utc) - timedelta(hours=6)).strftime("%d/%m/%Y")
 if not all_claims:
-    msg = f"☀️ *Reporte reclamos {today}*\n\n✅ *0 reclamos abiertos* en las 6 cuentas\n\nQue tengas un buen día 🙌"
+    msg = f"☀️ *Reporte reclamos {today}*\n\n✅ *0 reclamos afectando reputación* en las 6 cuentas\n\nQue tengas un buen día 🙌"
 else:
-    lines = [f"☀️ *Reporte reclamos {today}* — {len(all_claims)} abiertos\n"]
+    lines = [f"☀️ *Reclamos que afectan reputación — {today}* — {len(all_claims)}\n"]
     
     # Group by account
     by_account = {}
