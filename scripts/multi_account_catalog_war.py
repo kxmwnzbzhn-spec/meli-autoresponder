@@ -34,6 +34,23 @@ MIN_DELTA = 5                    # solo cambiar si delta ≥ $5
 FLOOR_OVERRIDES = {}
 CEIL_OVERRIDES = {}
 
+# Load per-item overrides from stock_config files
+def _load_stock_overrides():
+    floors, ceils = {}, {}
+    for fn in ("stock_config_claribel.json","stock_config_raymundo.json","stock_config.json"):
+        try:
+            with open(fn) as f: cfg = json.load(f)
+            for iid, info in cfg.items():
+                if not isinstance(info, dict): continue
+                if info.get("ceiling_override"): ceils[iid] = float(info["ceiling_override"])
+                if info.get("floor_override"): floors[iid] = float(info["floor_override"])
+        except Exception: pass
+    return floors, ceils
+_F, _C = _load_stock_overrides()
+FLOOR_OVERRIDES.update(_F)
+CEIL_OVERRIDES.update(_C)
+print(f"Loaded {len(FLOOR_OVERRIDES)} floor + {len(CEIL_OVERRIDES)} ceiling overrides from stock_config")
+
 STATE_FILE = "catalog_war_state.json"
 try: state = json.load(open(STATE_FILE))
 except: state = {"items": {}, "last_run": 0}
