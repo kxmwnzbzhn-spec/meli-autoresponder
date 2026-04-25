@@ -1,12 +1,17 @@
 name: answer-context-aware
 on:
   schedule:
-    - cron: '*/30 * * * *'  # cada 30 min
+    - cron: '*/5 * * * *'  # cada 5 min, dentro loop 5x60s = answer cada 1 min efectivo
   workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: answer-ctx
+  cancel-in-progress: false
 jobs:
   run:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 8
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -21,4 +26,6 @@ jobs:
           MELI_REFRESH_TOKEN_RAYMUNDO: ${{ secrets.MELI_REFRESH_TOKEN_RAYMUNDO }}
           MELI_REFRESH_TOKEN_DILCIE: ${{ secrets.MELI_REFRESH_TOKEN_DILCIE }}
           MELI_REFRESH_TOKEN_MILDRED: ${{ secrets.MELI_REFRESH_TOKEN_MILDRED }}
+          LOOP_ITERATIONS: "5"
+          LOOP_SLEEP: "60"
         run: python scripts/answer_context_aware.py
