@@ -1,13 +1,29 @@
 {
   "MLM5235542250": {
-    "title": "JBL Go 4 Usada Unificada",
+    "line": "Go4-Raymundo",
+    "auto_replenish": true,
+    "min_visible": 1,
     "variations": {
-      "Negro": 10,
-      "Azul": 10,
-      "Rojo": 10,
-      "Rosa": 10,
-      "Camuflaje": 10,
-      "Aqua": 10
+      "Negro": 50,
+      "Azul": 50,
+      "Rojo": 50,
+      "Rosa": 50,
+      "Camuflaje": 50,
+      "Aqua": 50
+    },
+    "active": true
+  },
+  "MLM5241291642": {
+    "line": "Go4-Raymundo",
+    "auto_replenish": true,
+    "min_visible": 1,
+    "variations": {
+      "Negro": 50,
+      "Azul": 50,
+      "Rojo": 50,
+      "Rosa": 50,
+      "Camuflaje": 50,
+      "Aqua": 50
     },
     "active": true
   }
