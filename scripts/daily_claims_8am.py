@@ -73,7 +73,8 @@ for label, env_var in ACCOUNTS:
             rel_ents = full.get("related_entities",[]) or []
             ctype = full.get("type","")
         except: pass
-        affects = (ctype == "mediations") and ("return" not in rel_ents)
+        # NO afecta SOLO si type=mediations + has return entity. Todo lo demás afecta.
+        affects = not (ctype == "mediations" and "return" in rel_ents)
         if affects:
             affecting.append(c)
         else:
