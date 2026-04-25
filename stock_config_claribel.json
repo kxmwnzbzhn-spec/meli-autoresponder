@@ -472,5 +472,44 @@
     "active": true,
     "condition": "new",
     "type": "catalog_no_variations"
+  },
+  "MLM2890952081": {
+    "line": "Catalog-Claribel-Rosa",
+    "label": "Altavoz Bluetooth Jbl Go 4 rosa",
+    "price": 499.0,
+    "catalog_product_id": "MLM45530822",
+    "auto_replenish": true,
+    "min_visible": 1,
+    "real_stock": 10,
+    "daily_reset_to": 10,
+    "active": true,
+    "condition": "new",
+    "type": "catalog_no_variations"
+  },
+  "MLM2890989189": {
+    "line": "Catalog-Claribel-Rosa",
+    "label": "Parlante Bluetooth Jbl Go 4 Portátil Rosa",
+    "price": 499.0,
+    "catalog_product_id": "MLM45700101",
+    "auto_replenish": true,
+    "min_visible": 1,
+    "real_stock": 10,
+    "daily_reset_to": 10,
+    "active": true,
+    "condition": "new",
+    "type": "catalog_no_variations"
+  },
+  "MLM2890989209": {
+    "line": "Catalog-Claribel-Rosa",
+    "label": "Jbl Go 4 - Altavoz Bluetooth ultraportátil ro",
+    "price": 499.0,
+    "catalog_product_id": "MLM65831856",
+    "auto_replenish": true,
+    "min_visible": 1,
+    "real_stock": 10,
+    "daily_reset_to": 10,
+    "active": true,
+    "condition": "new",
+    "type": "catalog_no_variations"
   }
 }
