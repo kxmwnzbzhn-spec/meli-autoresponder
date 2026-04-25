@@ -1,0 +1,36 @@
+{
+  "accounts": {
+    "JUAN": {
+      "date": "2026-04-25",
+      "throttled": false,
+      "items_paused": [],
+      "sales_count": 6
+    },
+    "CLARIBEL": {
+      "date": "2026-04-25",
+      "throttled": false,
+      "items_paused": [],
+      "sales_count": 5
+    },
+    "RAYMUNDO": {
+      "date": "2026-04-25",
+      "throttled": false,
+      "items_paused": [],
+      "sales_count": 0
+    },
+    "DILCIE": {
+      "date": "2026-04-25",
+      "throttled": false,
+      "items_paused": [],
+      "sales_count": 0
+    },
+    "MILDRED": {
+      "date": "2026-04-25",
+      "throttled": false,
+      "items_paused": [],
+      "sales_count": 0
+    }
+  },
+  "last_run": 1777143543,
+  "last_run_date": "2026-04-25"
+}
