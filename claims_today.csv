@@ -1,0 +1,3 @@
+claim_id,account,nickname,order_id,product,buyer,buyer_id,amount,reason_id,reason_label,type,stage,status,date_created,claim_url,processed
+5502933251,JUAN,HFCBHDGAE33468,2000016097154510,Bocina Portátil Jbl Flip 7 Parlante Con Bluetooth Violeta Purple,R20260220022507,3216447874,899.0,PDD9943,no es original,returns,claim,opened,2026-04-25T00:44:30.000-04:00,https://www.mercadolibre.com.mx/reclamos/MLM/5502933251/,False
+5502636400,JUAN,HFCBHDGAE33468,2000016060816222,Bocina Bluetooth Jbl Charge 6 Portatil Negra Original Usada,ELTIGRE117602,287704055,499.0,PDD9944,producto defectuoso/dañado,mediations,claim,opened,2026-04-24T12:16:33.000-04:00,https://www.mercadolibre.com.mx/reclamos/MLM/5502636400/,False

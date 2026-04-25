@@ -1,0 +1,42 @@
+{
+  "date": "25/04/2026",
+  "claims": [
+    {
+      "claim_id": 5502933251,
+      "account": "JUAN",
+      "nickname": "HFCBHDGAE33468",
+      "order_id": 2000016097154510,
+      "product": "Bocina Portátil Jbl Flip 7 Parlante Con Bluetooth Violeta Purple",
+      "buyer": "R20260220022507",
+      "buyer_id": 3216447874,
+      "amount": 899.0,
+      "reason_id": "PDD9943",
+      "reason_label": "no es original",
+      "type": "returns",
+      "stage": "claim",
+      "status": "opened",
+      "date_created": "2026-04-25T00:44:30.000-04:00",
+      "claim_url": "https://www.mercadolibre.com.mx/reclamos/MLM/5502933251/",
+      "processed": false
+    },
+    {
+      "claim_id": 5502636400,
+      "account": "JUAN",
+      "nickname": "HFCBHDGAE33468",
+      "order_id": 2000016060816222,
+      "product": "Bocina Bluetooth Jbl Charge 6 Portatil Negra Original Usada",
+      "buyer": "ELTIGRE117602",
+      "buyer_id": 287704055,
+      "amount": 499.0,
+      "reason_id": "PDD9944",
+      "reason_label": "producto defectuoso/dañado",
+      "type": "mediations",
+      "stage": "claim",
+      "status": "opened",
+      "date_created": "2026-04-24T12:16:33.000-04:00",
+      "claim_url": "https://www.mercadolibre.com.mx/reclamos/MLM/5502636400/",
+      "processed": false
+    }
+  ],
+  "total": 2
+}
