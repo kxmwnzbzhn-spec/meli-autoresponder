@@ -77,7 +77,7 @@ body={
     "buying_mode":"buy_it_now",
     "sale_terms":[
         {"id":"WARRANTY_TYPE","value_name":"Garantía del vendedor"},
-        {"id":"WARRANTY_TIME","value_name":"30 días"},
+        {"id":"WARRANTY_TIME","value_name":"90 días"},
     ],
     "shipping":{"mode":"me2","local_pick_up":False,"free_shipping":True,"free_methods":[]},
     "pictures":[{"id":p} for p in all_pics],
