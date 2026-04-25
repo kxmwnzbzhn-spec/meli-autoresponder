@@ -1,4 +1,12 @@
 {
-  "items": {},
-  "last_run": 1777140077
+  "items": {
+    "MLM5241336574": {
+      "original_price": 499.0,
+      "last_drop_at": 1777140189,
+      "floor": 274.45000000000005,
+      "last_ref": 337.0,
+      "label": "Armaf Odyssey Mega Man Edici\u00f3n Limi"
+    }
+  },
+  "last_run": 1777140189
 }
