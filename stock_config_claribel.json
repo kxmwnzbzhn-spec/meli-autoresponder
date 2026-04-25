@@ -615,5 +615,18 @@
     "active": true,
     "condition": "new",
     "type": "catalog_no_variations"
+  },
+  "MLM5245716860": {
+    "line": "Catalog-Claribel-Custom",
+    "label": "Parlante Bluetooth Jbl Flip 7 Resistente Al A",
+    "price": 1579.8,
+    "catalog_product_id": "MLM47809248",
+    "auto_replenish": true,
+    "min_visible": 1,
+    "real_stock": 15,
+    "daily_reset_to": 15,
+    "active": true,
+    "condition": "new",
+    "type": "catalog_no_variations"
   }
 }
