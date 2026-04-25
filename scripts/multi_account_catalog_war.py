@@ -104,9 +104,15 @@ print("=== PHASE 3: Strategy escalonada ===\n")
 for cpid, items in by_cpid.items():
     # External competitor (excluding all our IDs)
     use_H = items[0]["H"]
+    has_full = False
     try:
         r = requests.get(f"https://api.mercadolibre.com/products/{cpid}/items?limit=30", headers=use_H, timeout=10).json()
         ext_competitors = [c for c in r.get("results",[]) if c.get("item_id") not in all_our_iids]
+        # Detect FULL competitors
+        for c in ext_competitors:
+            if (c.get("shipping",{}) or {}).get("logistic_type") == "fulfillment":
+                has_full = True
+                break
         if ext_competitors:
             ext_cheapest = min(ext_competitors, key=lambda x: float(x.get("price") or 999999))
             ext_price = float(ext_cheapest.get("price"))
@@ -129,12 +135,16 @@ for cpid, items in by_cpid.items():
         original = max(state["items"].get(winner_item["iid"],{}).get("original_price", winner_item["price"]), winner_item["price"])
         floor = max(FLOOR_OVERRIDES.get(winner_item["iid"], original * DEFAULT_FLOOR_PCT), MIN_FLOOR_PRICE)
         ceiling = CEIL_OVERRIDES.get(winner_item["iid"], original * DEFAULT_CEIL_PCT)
+        # GAP agresivo cuando hay competidor en FULL ($80 abajo) para vencer ventaja logística
+        effective_gap = 80 if has_full else GAP
         if ext_price is not None:
-            winner_target = ext_price - GAP
+            winner_target = ext_price - effective_gap
         else:
-            winner_target = winner_item["price"]  # sin presión externa, mantén
+            winner_target = winner_item["price"]
         winner_target = max(floor, min(ceiling, winner_target))
         winner_target = round(winner_target, 0)
+        if has_full:
+            print(f"    ⚡ FULL competitor detected — GAP agresivo $80 (vs estándar $10)")
     else:
         # No winner item — choose cheapest external as reference for staircase
         winner_target = ext_price - GAP if ext_price else None
