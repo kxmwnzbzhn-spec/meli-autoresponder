@@ -30,5 +30,70 @@
     "active": true,
     "price": 299,
     "condition": "used"
+  },
+  "MLM2890840987": {
+    "line": "Catalog-Claribel-499",
+    "label": "Go 4 Azul Catálogo",
+    "price": 499,
+    "catalog_product_id": "MLM44710367",
+    "auto_replenish": true,
+    "min_visible": 1,
+    "real_stock": 10,
+    "daily_reset_to": 10,
+    "active": true,
+    "condition": "new",
+    "type": "catalog_no_variations"
+  },
+  "MLM5245310484": {
+    "line": "Catalog-Claribel-499",
+    "label": "Go 4 Roja Catálogo",
+    "price": 499,
+    "catalog_product_id": "MLM44710313",
+    "auto_replenish": true,
+    "min_visible": 1,
+    "real_stock": 10,
+    "daily_reset_to": 10,
+    "active": true,
+    "condition": "new",
+    "type": "catalog_no_variations"
+  },
+  "MLM5245310490": {
+    "line": "Catalog-Claribel-499",
+    "label": "Go 4 Camuflaje Catálogo",
+    "price": 499,
+    "catalog_product_id": "MLM37361021",
+    "auto_replenish": true,
+    "min_visible": 1,
+    "real_stock": 10,
+    "daily_reset_to": 10,
+    "active": true,
+    "condition": "new",
+    "type": "catalog_no_variations"
+  },
+  "MLM5245310494": {
+    "line": "Catalog-Claribel-499",
+    "label": "Go 4 Celeste/Aqua Catálogo",
+    "price": 499,
+    "catalog_product_id": "MLM61262890",
+    "auto_replenish": true,
+    "min_visible": 1,
+    "real_stock": 10,
+    "daily_reset_to": 10,
+    "active": true,
+    "condition": "new",
+    "type": "catalog_no_variations"
+  },
+  "MLM5245310498": {
+    "line": "Catalog-Claribel-499",
+    "label": "Sony SRS-XB100 Negro Catálogo",
+    "price": 549,
+    "catalog_product_id": "MLM25912333",
+    "auto_replenish": true,
+    "min_visible": 1,
+    "real_stock": 10,
+    "daily_reset_to": 10,
+    "active": true,
+    "condition": "new",
+    "type": "catalog_no_variations"
   }
 }
