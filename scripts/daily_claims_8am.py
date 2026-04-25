@@ -99,12 +99,24 @@ else:
             items_o = ord_data.get("order_items",[])
             product = items_o[0].get("item",{}).get("title","?")[:50] if items_o else "?"
             
+            # Format date/time CDMX from ISO
+            created_str = "?"
+            if opened:
+                try:
+                    d = datetime.fromisoformat(opened.replace("Z","+00:00"))
+                    cdmx_dt = d - timedelta(hours=6)
+                    created_str = cdmx_dt.strftime("%d/%m/%Y %H:%M")
+                except: pass
+            
+            claim_status = c.get("status", "?")
+            
             lines.append(f"\n🚨 Claim `{cid}` — *{days_open}d abierto*")
             lines.append(f"  📦 {product}")
             lines.append(f"  🛒 Orden `{order_id}` | 💰 ${amount}")
             lines.append(f"  👤 Comprador: `{buyer}`")
             lines.append(f"  ⚠️  Motivo: *{reason}* ({reason_id})")
-            lines.append(f"  🏷️  {ctype} — {stage}")
+            lines.append(f"  📅 Creado: *{created_str}* CDMX")
+            lines.append(f"  🏷️  {ctype} | {stage} | status: *{claim_status}*")
     
     lines.append(f"\n_Próximo reporte: mañana 8:00 AM_")
     msg = "\n".join(lines)
