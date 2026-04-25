@@ -23,7 +23,7 @@ ACCOUNTS = [
 ]
 
 WINNER_ACCOUNT = "CLARIBEL"
-GAP = 10                         # winner = ext_competitor - $10
+GAP = 20                         # winner = ext_competitor - $20 (margen vs reputación)
 STAIRCASE_GAP = 50               # cada cuenta sucesiva: winner + N*50
 STAIRCASE_ORDER = ["JUAN", "ASVA", "RAYMUNDO", "DILCIE", "MILDRED"]  # orden ascendente del escalón
 DEFAULT_FLOOR_PCT = 0.55
