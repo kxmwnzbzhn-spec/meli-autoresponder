@@ -25,7 +25,7 @@ ACCOUNTS = [
 WINNER_ACCOUNT = "CLARIBEL"
 GAP = 10                         # winner = ext_competitor - $10
 STAIRCASE_GAP = 50               # cada cuenta sucesiva: winner + N*50
-STAIRCASE_ORDER = ["RAYMUNDO", "JUAN", "ASVA", "DILCIE", "MILDRED"]  # Raymundo es 1er backup de Claribel  # orden ascendente del escalón
+STAIRCASE_ORDER = ["JUAN", "ASVA", "RAYMUNDO", "DILCIE", "MILDRED"]  # orden ascendente del escalón
 DEFAULT_FLOOR_PCT = 0.55
 MIN_FLOOR_PRICE = 299  # piso absoluto: nunca bajar de $299
 DEFAULT_CEIL_PCT  = 1.30
