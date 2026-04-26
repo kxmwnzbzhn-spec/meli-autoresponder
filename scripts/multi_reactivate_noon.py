@@ -65,6 +65,14 @@ for label, env_var in THROTTLED_ACCOUNTS:
     
     # Reset state for this account
     state["accounts"][label] = {"date": today_cdmx, "throttled": False, "items_paused": [], "sales_count": 0}
+    # Claribel ramp-up: incrementar día
+    if label == "CLARIBEL":
+        ramp_day = state.get("claribel_ramp_day", 0) + 1
+        state["claribel_ramp_day"] = ramp_day
+        ramp_seq = [70, 80, 90, 100, 150]
+        ramp_idx = min(ramp_day, len(ramp_seq)-1)
+        new_limit = ramp_seq[ramp_idx]
+        print(f"  ⬆️  Claribel ramp_day → {ramp_day} (límite hoy: {new_limit}u)")
 
 state["last_reactivation"] = int(time.time())
 json.dump(state, open(STATE_FILE,"w"), indent=2, ensure_ascii=False)
