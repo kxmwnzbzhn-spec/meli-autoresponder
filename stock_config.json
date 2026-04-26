@@ -2242,7 +2242,7 @@
     "_deleted_reason": "Cannot update item MLM5227773714 [status:under_review, has_bids:false]"
   },
   "MLM2883448187": {
-    "real_stock": 2161,
+    "real_stock": 2156,
     "sku": "GO4-UNIFIED",
     "label": "Go 4 Unified (5 colors)",
     "auto_replenish": true,
@@ -2255,23 +2255,23 @@
         "orig_id": "MLM5227773714"
       },
       "Azul": {
-        "stock": 451,
+        "stock": 450,
         "orig_id": "MLM5223214798"
       },
       "Rojo": {
-        "stock": 152,
+        "stock": 151,
         "orig_id": "MLM2880763019"
       },
       "Camuflaje": {
-        "stock": 489,
+        "stock": 488,
         "orig_id": "MLM2880762615"
       },
       "Rosa": {
-        "stock": 80,
+        "stock": 79,
         "orig_id": "MLM5223451400"
       },
       "Aqua": {
-        "stock": 989,
+        "stock": 988,
         "orig_id": "MLM2747271435"
       }
     }
@@ -2373,7 +2373,7 @@
     "catalog_product_id": "MLM44710313"
   },
   "MLM2890793871": {
-    "real_stock": 15,
+    "real_stock": 14,
     "sku": "JBL-GO4-CELESTE-CAT499",
     "label": "JBL Go 4 Celeste - Catálogo $499 (15u/día)",
     "auto_replenish": true,
