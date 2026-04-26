@@ -9,27 +9,27 @@
       "label": "Armaf Odyssey Mega Man Edici\u00f3n Limi"
     },
     "MLM5244431296": {
-      "original_price": 714.0,
-      "floor": 392.70000000000005,
-      "ceiling": 928.2,
-      "last_change_at": 1777141790,
-      "role": "step_1",
+      "original_price": 740.0,
+      "floor": 407.00000000000006,
+      "ceiling": 962.0,
+      "last_change_at": 1777189929,
+      "role": "winner",
       "label": "Sony Srs-xb100 Altavoz De Viaje Ina"
     },
     "MLM2890856611": {
       "original_price": 723.0,
       "floor": 397.65000000000003,
       "ceiling": 939.9,
-      "last_change_at": 1777175242,
-      "role": "step_1",
+      "last_change_at": 1777189929,
+      "role": "winner",
       "label": "Bocina Port\u00e1til Jbl Go 4 Bluetooth,"
     },
     "MLM2890818973": {
       "original_price": 667.0,
       "floor": 366.85,
       "ceiling": 867.1,
-      "last_change_at": 1777175242,
-      "role": "step_1",
+      "last_change_at": 1777189929,
+      "role": "winner",
       "label": "Bocina Jbl Go 4 Jblgo4 Port\u00e1til Con"
     },
     "MLM2890793871": {
@@ -154,6 +154,6 @@
       "label": "Bocina Port\u00e1til Jbl Go 4 Bluetooth,"
     }
   },
-  "last_run": 1777183190,
+  "last_run": 1777189929,
   "winner_account": "CLARIBEL"
 }
