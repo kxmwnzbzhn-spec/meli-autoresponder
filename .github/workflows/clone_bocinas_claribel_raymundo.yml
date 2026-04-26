@@ -1,0 +1,25 @@
+name: clone-bocinas-claribel-to-raymundo
+on: { workflow_dispatch: }
+permissions: { contents: write }
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with: { token: '${{ secrets.REPO_PAT }}' }
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests -q
+      - run: python scripts/clone_bocinas_to_raymundo.py
+        env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_CLARIBEL: ${{ secrets.MELI_REFRESH_TOKEN_CLARIBEL }}
+          MELI_REFRESH_TOKEN_RAYMUNDO: ${{ secrets.MELI_REFRESH_TOKEN_RAYMUNDO }}
+      - run: |
+          for i in 1 2 3 4 5; do
+            git config user.email b@b.com && git config user.name bot
+            git pull --rebase 2>/dev/null && git add stock_config_raymundo.json && (git diff --cached --quiet || git commit -m "Raymundo: clone bocinas from Claribel") && git push origin main && break
+            sleep $((RANDOM % 8 + 3))
+          done
