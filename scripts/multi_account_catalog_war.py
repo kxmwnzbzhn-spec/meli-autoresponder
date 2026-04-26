@@ -25,7 +25,7 @@ ACCOUNTS = [
 WINNER_ACCOUNT = "CLARIBEL"
 GAP = 10                         # winner = ext_competitor - $10
 STAIRCASE_GAP = 50               # cada cuenta sucesiva: winner + N*50
-STAIRCASE_ORDER = ["JUAN", "ASVA", "RAYMUNDO", "DILCIE", "MILDRED"]  # orden ascendente del escalón
+STAIRCASE_ORDER = ["RAYMUNDO", "JUAN", "ASVA", "DILCIE", "MILDRED"]  # Raymundo es 1er backup de Claribel  # orden ascendente del escalón
 DEFAULT_FLOOR_PCT = 0.55
 MIN_FLOOR_PRICE = 299  # piso absoluto: nunca bajar de $299
 DEFAULT_CEIL_PCT  = 1.30
@@ -141,9 +141,41 @@ for cpid, items in by_cpid.items():
     
     print(f"  📦 {cpid} ({len(items)} cuentas nuestras) | ext_cheapest={ext_iid} ${ext_price}")
     
-    # Find winner item (Claribel) and others
-    winner_item = next((i for i in items if i["account"] == WINNER_ACCOUNT), None)
-    other_items = [i for i in items if i["account"] != WINNER_ACCOUNT]
+    # FAILOVER: si winner item está paused (throttle hit), promover al siguiente en STAIRCASE
+    # Check Claribel item status
+    primary_winner = next((i for i in items if i["account"] == WINNER_ACCOUNT), None)
+    primary_paused = False
+    if primary_winner:
+        try:
+            chk = requests.get(f"https://api.mercadolibre.com/items/{primary_winner['iid']}?attributes=status", headers=primary_winner["H"], timeout=10).json()
+            if chk.get("status") == "paused":
+                primary_paused = True
+                print(f"    ⚠️ Winner {WINNER_ACCOUNT} pausado — failover a {STAIRCASE_ORDER[0]}")
+        except: pass
+    
+    # If primary is paused/missing, promote next in STAIRCASE
+    if primary_paused or not primary_winner:
+        for stair_acct in STAIRCASE_ORDER:
+            cand = next((i for i in items if i["account"] == stair_acct), None)
+            if cand:
+                # Verify it's active
+                try:
+                    chk2 = requests.get(f"https://api.mercadolibre.com/items/{cand['iid']}?attributes=status", headers=cand["H"], timeout=10).json()
+                    if chk2.get("status") == "active":
+                        winner_item = cand
+                        # Adjust STAIRCASE for this iteration
+                        active_winner_account = stair_acct
+                        print(f"    🔄 New winner: {stair_acct}")
+                        break
+                except: pass
+        else:
+            winner_item = primary_winner
+            active_winner_account = WINNER_ACCOUNT
+    else:
+        winner_item = primary_winner
+        active_winner_account = WINNER_ACCOUNT
+    
+    other_items = [i for i in items if i["account"] != active_winner_account]
     # Sort other items by STAIRCASE_ORDER
     other_items.sort(key=lambda x: STAIRCASE_ORDER.index(x["account"]) if x["account"] in STAIRCASE_ORDER else 99)
     
@@ -174,7 +206,7 @@ for cpid, items in by_cpid.items():
                              json={"price": winner_target}, timeout=15)
             if rp.status_code in (200,201):
                 action = "💸 BAJA" if delta < 0 else "📈 SUBE"
-                line = f"{action} [{WINNER_ACCOUNT} 🏆] {winner_item['iid']} [{winner_item['title']}] ${int(winner_item['price'])}→${int(winner_target)} (ext ${int(ext_price) if ext_price else '?'})"
+                line = f"{action} [{active_winner_account} 🏆] {winner_item['iid']} [{winner_item['title']}] ${int(winner_item['price'])}→${int(winner_target)} (ext ${int(ext_price) if ext_price else '?'})"
                 print(f"    {line}")
                 if delta < 0: report_down.append(line); total_down += 1
                 else: report_up.append(line); total_up += 1
@@ -186,7 +218,7 @@ for cpid, items in by_cpid.items():
                 print(f"    ❌ winner update err {rp.status_code}: {rp.text[:150]}")
         else:
             total_won += 1
-            print(f"    ✓ [{WINNER_ACCOUNT} 🏆] {winner_item['iid']} ${int(winner_item['price'])} ya en target")
+            print(f"    ✓ [{active_winner_account} 🏆] {winner_item['iid']} ${int(winner_item['price'])} ya en target")
         time.sleep(0.5)
     
     # Apply staircase to others
