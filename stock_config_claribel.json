@@ -630,5 +630,44 @@
     "type": "catalog_no_variations",
     "base_price": 1299,
     "ceiling_override": 1299
+  },
+  "MLM5245746244": {
+    "line": "Catalog-Claribel-Custom2",
+    "label": "Bocina JBL Grip Bluetooth Portátil IP68 14 h ",
+    "price": 1036.0,
+    "catalog_product_id": "MLM62279317",
+    "auto_replenish": true,
+    "min_visible": 1,
+    "real_stock": 15,
+    "daily_reset_to": 15,
+    "active": true,
+    "condition": "new",
+    "type": "catalog_no_variations"
+  },
+  "MLM5245746252": {
+    "line": "Catalog-Claribel-Custom2",
+    "label": "Parlante JBL Grip portátil con bluetooth wate",
+    "price": 1168.96,
+    "catalog_product_id": "MLM61631985",
+    "auto_replenish": true,
+    "min_visible": 1,
+    "real_stock": 15,
+    "daily_reset_to": 15,
+    "active": true,
+    "condition": "new",
+    "type": "catalog_no_variations"
+  },
+  "MLM5245757608": {
+    "line": "Catalog-Claribel-Custom2",
+    "label": "Altavoz Bluetooth portátil JBL GRIP con luz -",
+    "price": 499,
+    "catalog_product_id": "MLM59802579",
+    "auto_replenish": true,
+    "min_visible": 1,
+    "real_stock": 15,
+    "daily_reset_to": 15,
+    "active": true,
+    "condition": "new",
+    "type": "catalog_no_variations"
   }
 }
