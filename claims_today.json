@@ -1,6 +1,60 @@
 {
-  "date": "25/04/2026",
+  "date": "26/04/2026",
   "claims": [
+    {
+      "claim_id": 5503148321,
+      "account": "JUAN",
+      "nickname": "HFCBHDGAE33468",
+      "order_id": 2000016102929494,
+      "product": "Bocina Jbl Go 4 Bluetooth Portatil Ip67 Nueva Original Color",
+      "buyer": "JUANJO ÁLVAREZ25",
+      "buyer_id": 481174846,
+      "amount": 499.0,
+      "reason_id": "PDD9946",
+      "reason_label": "PDD9946",
+      "type": "mediations",
+      "stage": "dispute",
+      "status": "opened",
+      "date_created": "2026-04-25T15:55:10.000-04:00",
+      "claim_url": "https://www.mercadolibre.com.mx/reclamos/MLM/5503148321/",
+      "processed": false
+    },
+    {
+      "claim_id": 5503287582,
+      "account": "JUAN",
+      "nickname": "HFCBHDGAE33468",
+      "order_id": 2000016101444696,
+      "product": "Bocina Jbl Go 4 Bluetooth Portatil Ip67 Nueva Original Color",
+      "buyer": "RAMIREZBRALLAN20220924225858",
+      "buyer_id": 1204760072,
+      "amount": 499.0,
+      "reason_id": "PDD9950",
+      "reason_label": "PDD9950",
+      "type": "mediations",
+      "stage": "dispute",
+      "status": "opened",
+      "date_created": "2026-04-25T23:53:50.000-04:00",
+      "claim_url": "https://www.mercadolibre.com.mx/reclamos/MLM/5503287582/",
+      "processed": false
+    },
+    {
+      "claim_id": 5503227787,
+      "account": "JUAN",
+      "nickname": "HFCBHDGAE33468",
+      "order_id": 2000016106006622,
+      "product": "Bocina Jbl Go 4 Bluetooth Portatil Ip67 Nueva Original Color",
+      "buyer": "COKA20240228091632",
+      "buyer_id": 1704529792,
+      "amount": 599.0,
+      "reason_id": "PDD9943",
+      "reason_label": "no es original",
+      "type": "mediations",
+      "stage": "dispute",
+      "status": "opened",
+      "date_created": "2026-04-25T19:39:23.000-04:00",
+      "claim_url": "https://www.mercadolibre.com.mx/reclamos/MLM/5503227787/",
+      "processed": false
+    },
     {
       "claim_id": 5502933251,
       "account": "JUAN",
@@ -36,7 +90,25 @@
       "date_created": "2026-04-24T12:16:33.000-04:00",
       "claim_url": "https://www.mercadolibre.com.mx/reclamos/MLM/5502636400/",
       "processed": false
+    },
+    {
+      "claim_id": 5503293842,
+      "account": "JUAN",
+      "nickname": "HFCBHDGAE33468",
+      "order_id": 2000016097175360,
+      "product": "Bocina Portátil Jbl Flip 7 Parlante Con Bluetooth Violeta Purple",
+      "buyer": "TIJO4831319",
+      "buyer_id": 700934991,
+      "amount": 899.0,
+      "reason_id": "PDD9943",
+      "reason_label": "no es original",
+      "type": "mediations",
+      "stage": "dispute",
+      "status": "opened",
+      "date_created": "2026-04-26T00:47:24.000-04:00",
+      "claim_url": "https://www.mercadolibre.com.mx/reclamos/MLM/5503293842/",
+      "processed": false
     }
   ],
-  "total": 2
+  "total": 6
 }
