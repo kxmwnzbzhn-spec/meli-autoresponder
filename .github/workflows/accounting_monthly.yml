@@ -1,0 +1,46 @@
+name: accounting-monthly
+on:
+  workflow_dispatch:
+    inputs:
+      month:
+        description: 'YYYY-MM (default mes anterior)'
+        required: false
+        default: ''
+  schedule:
+    - cron: '0 7 1 * *'  # día 1 de cada mes 01:00 CDMX (07:00 UTC) — cierra mes anterior
+permissions:
+  contents: write
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with: { token: '${{ secrets.REPO_PAT }}' }
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests openpyxl -q
+      - name: Compute month
+        run: |
+          if [ -n "${{ inputs.month }}" ]; then
+            MONTH="${{ inputs.month }}"
+          else
+            MONTH=$(TZ=America/Mexico_City date -d 'last month' +%Y-%m)
+          fi
+          echo "ACCOUNTING_MONTH=$MONTH" >> $GITHUB_ENV
+      - run: python scripts/monthly_close.py contabilidad_meli.xlsx
+        env:
+          ACCOUNTING_MONTH: ${{ env.ACCOUNTING_MONTH }}
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+          MELI_REFRESH_TOKEN_CLARIBEL: ${{ secrets.MELI_REFRESH_TOKEN_CLARIBEL }}
+          MELI_REFRESH_TOKEN_ASVA: ${{ secrets.MELI_REFRESH_TOKEN_ASVA }}
+          MELI_REFRESH_TOKEN_RAYMUNDO: ${{ secrets.MELI_REFRESH_TOKEN_RAYMUNDO }}
+          MELI_REFRESH_TOKEN_DILCIE: ${{ secrets.MELI_REFRESH_TOKEN_DILCIE }}
+          MELI_REFRESH_TOKEN_MILDRED: ${{ secrets.MELI_REFRESH_TOKEN_MILDRED }}
+      - run: |
+          git config user.email b@b.com && git config user.name bot
+          git pull --rebase 2>/dev/null || true
+          git add contabilidad_meli.xlsx
+          git diff --cached --quiet || (git commit -m "cierre mensual ${{ env.ACCOUNTING_MONTH }}" && git push origin main)
