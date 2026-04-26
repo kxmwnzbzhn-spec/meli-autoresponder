@@ -2,7 +2,7 @@ name: multi-account-reactivate-noon
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 18 * * *'  # 12:00 PM CDMX
+    - cron: '0 15 * * *'  # 9:00 AM CDMX
 permissions:
   contents: write
 jobs:
