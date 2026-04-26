@@ -117,24 +117,52 @@ for label, env_var in ACCOUNTS:
             order_id = o.get("id")
             amt = o.get("total_amount",0) or 0
             
-            if st == "cancelled":
-                a_ret_cnt += 1; a_ret_amt += amt
-                # Look up associated claim if any
+            # DEVOLUCIÓN REAL = órden pagada con reembolso, NO solo cancelled sin pago
+            is_real_refund = False
+            real_refund_amt = 0
+            had_paid_payment = False
+            
+            for pay in o.get("payments",[]):
+                if pay.get("status") == "approved":
+                    had_paid_payment = True
+                if pay.get("status") in ("refunded", "charged_back"):
+                    is_real_refund = True
+                    real_refund_amt += (pay.get("transaction_amount", 0) or 0)
+            
+            # Check if order was cancelled BEFORE payment — esto NO es devolución, es venta no concretada
+            if st == "cancelled" and not had_paid_payment:
+                continue  # ignorar — no es venta ni devolución
+            
+            # Check if there's an active return/refund claim
+            has_return_claim = False
+            claim_reason = None
+            try:
+                cs = requests.get(f"https://api.mercadolibre.com/post-purchase/v1/claims/search?resource_id={order_id}",headers=H,timeout=10).json()
+                cdata = cs.get("data") or []
+                for c in cdata:
+                    rid = c.get("reason_id","")
+                    rels = c.get("related_entities",[]) or []
+                    # Solo cuenta como devolución real si type=returns con stage closed/with_refund
+                    if c.get("type") == "returns" or "return" in rels:
+                        has_return_claim = True
+                        claim_reason = REASON_LABELS.get(rid, rid)
+                        break
+            except: pass
+            
+            # If real refund happened (payment status refunded/charged_back) OR has active return
+            if is_real_refund:
+                a_ret_cnt += 1; a_ret_amt += real_refund_amt
                 items_o = o.get("order_items",[])
                 prod = items_o[0].get("item",{}).get("title","")[:60] if items_o else ""
-                # Try get claim reason from /post-purchase/v1/claims/search?resource_id=order_id
-                reason = "cancelled (sin claim)"
-                try:
-                    cs = requests.get(f"https://api.mercadolibre.com/post-purchase/v1/claims/search?resource_id={order_id}",headers=H,timeout=10).json()
-                    cdata = cs.get("data") or []
-                    if cdata:
-                        rid = cdata[0].get("reason_id","")
-                        reason = REASON_LABELS.get(rid, rid or "cancelled")
-                except: pass
+                reason = claim_reason or "Reembolso (sin claim asociado)"
                 returns_by_reason[reason]["count"] += 1
-                returns_by_reason[reason]["amount"] += amt
-                returns_by_reason[reason]["products"].append((prod, label, order_id, amt))
-                continue
+                returns_by_reason[reason]["amount"] += real_refund_amt
+                returns_by_reason[reason]["products"].append((prod, label, order_id, real_refund_amt))
+                # Si el reembolso fue total, tampoco contar como venta concretada
+                if real_refund_amt >= amt:
+                    continue
+                # Si fue parcial, contar la diferencia como venta
+                amt = amt - real_refund_amt
             
             if st not in ("paid","shipped","delivered"): continue
             a_orders += 1; a_bruto += amt
