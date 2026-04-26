@@ -71,13 +71,17 @@ for label, env in ACCOUNTS:
                     if pay.get("status") in ("approved",):
                         fee = pay.get("marketplace_fee", 0) or 0
                         a_fees += fee
-                # Shipping cost from shipment
+                # Shipping cost from shipment - usar list_cost que es lo que paga el seller en envío gratis
                 sh_id = od.get("shipping",{}).get("id")
                 if sh_id:
                     sd = requests.get(f"https://api.mercadolibre.com/shipments/{sh_id}", headers=H, timeout=10).json()
-                    sc = sd.get("shipping_option",{}).get("list_cost", 0) or 0
-                    seller_share = sd.get("shipping_option",{}).get("cost", 0) or 0
-                    a_ship += seller_share
+                    so = sd.get("shipping_option",{}) or {}
+                    list_cost = so.get("list_cost", 0) or 0
+                    cost_seller = so.get("cost", 0) or 0
+                    # In MELI, list_cost is seller's price; cost is buyer's price
+                    # If free_shipping, seller pays list_cost - cost
+                    seller_pays = max(0, list_cost - cost_seller)
+                    a_ship += seller_pays
             except Exception as e:
                 pass
             
@@ -102,6 +106,11 @@ for label, env in ACCOUNTS:
     else:
         print(f"=== {label}: sin ventas ===\n")
 
+# IVA (Mexico 16%): seller remite 16% del precio sin IVA
+# bruto_con_iva / 1.16 = bruto_sin_iva → IVA = 16% × bruto_sin_iva
+g_subtotal_sin_iva = g_gross / 1.16
+g_iva_remite = g_gross - g_subtotal_sin_iva
+
 print("="*70)
 print(f"💰 TOTAL HOY ({today}):")
 print(f"   Órdenes:  {g_orders}")
@@ -109,7 +118,10 @@ print(f"   Unidades: {g_qty}")
 print(f"   Bruto:    ${g_gross:>10,.2f}")
 print(f"   - Comisión MELI:  ${g_fees:>10,.2f}  ({g_fees/g_gross*100:.1f}% del bruto)" if g_gross > 0 else "")
 print(f"   - Envío seller:   ${g_ship:>10,.2f}  ({g_ship/g_gross*100:.1f}% del bruto)" if g_gross > 0 else "")
-print(f"   = NET:    ${g_net:>10,.2f}  ({g_net/g_gross*100:.1f}% del bruto)" if g_gross > 0 else "")
+print(f"   - IVA (16%):      ${g_iva_remite:>10,.2f}  ({g_iva_remite/g_gross*100:.1f}% del bruto)")
+g_net_after_iva = g_net - g_iva_remite
+print(f"   = NET:                ${g_net:>10,.2f}  ({g_net/g_gross*100:.1f}%)")
+print(f"   = NET DESPUÉS IVA:    ${g_net_after_iva:>10,.2f}  ({g_net_after_iva/g_gross*100:.1f}%)")
 print("="*70)
 
 if hours > 0 and g_net > 0:
