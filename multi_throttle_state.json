@@ -4,13 +4,13 @@
       "date": "2026-04-25",
       "throttled": false,
       "items_paused": [],
-      "sales_count": 12
+      "sales_count": 13
     },
     "CLARIBEL": {
       "date": "2026-04-25",
       "throttled": false,
       "items_paused": [],
-      "sales_count": 25
+      "sales_count": 41
     },
     "RAYMUNDO": {
       "date": "2026-04-25",
@@ -31,6 +31,6 @@
       "sales_count": 0
     }
   },
-  "last_run": 1777161160,
+  "last_run": 1777169354,
   "last_run_date": "2026-04-25"
 }
