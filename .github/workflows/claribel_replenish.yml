@@ -24,8 +24,8 @@ jobs:
           MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
           MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
           MELI_REFRESH_TOKEN_CLARIBEL: ${{ secrets.MELI_REFRESH_TOKEN_CLARIBEL }}
-          LOOP_ITERATIONS: "5"
-          LOOP_SLEEP: "60"
+          LOOP_ITERATIONS: "6"
+          LOOP_SLEEP: "50"
       - run: |
           git config user.email b@b.com && git config user.name bot
           git pull --rebase 2>/dev/null || true
