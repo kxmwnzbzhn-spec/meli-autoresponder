@@ -197,7 +197,7 @@
       "original_price": 1118.96,
       "floor": 615.4280000000001,
       "ceiling": 1454.6480000000001,
-      "last_change_at": 1777229260,
+      "last_change_at": 1777240434,
       "role": "winner",
       "label": "Parlante Jbl Grip Port\u00e1til Con Blue"
     },
@@ -205,7 +205,7 @@
       "original_price": 709.0,
       "floor": 389.95000000000005,
       "ceiling": 921.7,
-      "last_change_at": 1777229260,
+      "last_change_at": 1777240434,
       "role": "winner",
       "label": "Altavoz Bluetooth Jbl Go 4 Port\u00e1til"
     },
@@ -218,6 +218,6 @@
       "label": "Jbl Go 4 - Altavoz Ultraport\u00e1til Bl"
     }
   },
-  "last_run": 1777239391,
+  "last_run": 1777240434,
   "winner_account": "RAYMUNDO"
 }
