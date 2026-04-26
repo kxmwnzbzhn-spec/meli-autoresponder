@@ -2379,7 +2379,7 @@
     "_deleted_reason": "Cannot update item MLM2890818973 [status:under_review, has_bids:true]"
   },
   "MLM2890793871": {
-    "real_stock": 14,
+    "real_stock": 13,
     "sku": "JBL-GO4-CELESTE-CAT499",
     "label": "JBL Go 4 Celeste - Catálogo $499 (15u/día)",
     "auto_replenish": true,
