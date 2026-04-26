@@ -63,13 +63,23 @@ for label, env in ACCOUNTS:
             for oi in o.get("order_items", []):
                 a_qty += oi.get("quantity", 0)
             
-            # Get marketplace_fee from payments
-            for pay in o.get("payments",[]):
-                if pay.get("status") in ("approved",):
-                    fee = pay.get("marketplace_fee", 0) or 0
-                    a_fees += fee
-                    sc = pay.get("shipping_cost", 0) or 0
-                    a_ship += sc
+            # Query order detail (search doesn't return fees)
+            order_id = o.get("id")
+            try:
+                od = requests.get(f"https://api.mercadolibre.com/orders/{order_id}", headers=H, timeout=10).json()
+                for pay in od.get("payments",[]):
+                    if pay.get("status") in ("approved",):
+                        fee = pay.get("marketplace_fee", 0) or 0
+                        a_fees += fee
+                # Shipping cost from shipment
+                sh_id = od.get("shipping",{}).get("id")
+                if sh_id:
+                    sd = requests.get(f"https://api.mercadolibre.com/shipments/{sh_id}", headers=H, timeout=10).json()
+                    sc = sd.get("shipping_option",{}).get("list_cost", 0) or 0
+                    seller_share = sd.get("shipping_option",{}).get("cost", 0) or 0
+                    a_ship += seller_share
+            except Exception as e:
+                pass
             
             # Sometimes shipping cost is in shipping not payments
             sh = o.get("shipping",{}) or {}
