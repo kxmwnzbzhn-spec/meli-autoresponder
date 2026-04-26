@@ -671,5 +671,21 @@
     "type": "catalog_no_variations",
     "base_price": 999,
     "ceiling_override": 999
+  },
+  "MLM2891183715": {
+    "line": "Catalog-Claribel-149",
+    "label": "Auriculares Xiaomi Redmi Buds 4 Lite Bluetoot",
+    "price": 149.0,
+    "base_price": 149.0,
+    "catalog_product_id": "MLM40336571",
+    "auto_replenish": true,
+    "min_visible": 1,
+    "real_stock": 150,
+    "daily_reset_to": 150,
+    "floor_override": 149.0,
+    "ceiling_override": 149.0,
+    "active": true,
+    "condition": "new",
+    "type": "catalog_no_variations"
   }
 }
