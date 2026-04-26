@@ -78,17 +78,29 @@ for label, env_var in ACCOUNTS:
             order_id = o.get("id")
             amt = o.get("total_amount",0) or 0
             
-            # Track cancellations/returns
-            if st == "cancelled":
+            # DEVOLUCIÓN REAL = paid + refunded, NO cancelled sin pago
+            had_paid_payment = False
+            real_refund_amt = 0
+            for pay in o.get("payments",[]):
+                if pay.get("status") == "approved":
+                    had_paid_payment = True
+                if pay.get("status") in ("refunded","charged_back"):
+                    real_refund_amt += (pay.get("transaction_amount",0) or 0)
+            
+            if st == "cancelled" and not had_paid_payment:
+                continue  # no es venta ni devolución
+            
+            if real_refund_amt > 0:
                 a_returns_count += 1
-                a_returns_amt += amt
+                a_returns_amt += real_refund_amt
                 items_o = o.get("order_items",[])
                 prod = items_o[0].get("item",{}).get("title","")[:60] if items_o else ""
                 all_returns.append({
                     "date": date_label, "account": label, "order_id": order_id,
-                    "product": prod, "amount": amt, "reason": "cancelled"
+                    "product": prod, "amount": real_refund_amt, "reason": "refunded"
                 })
-                continue
+                if real_refund_amt >= amt: continue
+                amt = amt - real_refund_amt
             
             if st not in ("paid","shipped","delivered"): continue
             a_orders += 1
