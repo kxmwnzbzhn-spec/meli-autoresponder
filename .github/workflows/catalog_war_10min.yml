@@ -34,4 +34,4 @@ jobs:
           git config user.email b@b.com && git config user.name bot
           git pull --rebase 2>/dev/null || true
           git add catalog_war_state.json
-          git diff --cached --quiet || (git commit -m "catalog war state" && git push origin main)
+          git diff --cached --quiet || (git commit -m "catalog war state" && (for i in 1 2 3 4 5; do git pull --rebase 2>/dev/null && git push origin main && break || sleep $((RANDOM % 10 + 5)); done))
