@@ -1,15 +1,16 @@
 {
   "questions_seen": [],
   "claims_seen": [
-    "5501400150",
     "5503096585",
+    "5503148321",
     "5502636400",
+    "5502933251",
+    "5503227787",
     "5502854071",
     "5502336104",
-    "5503227787",
-    "5503287582",
-    "5502933251",
-    "5503148321"
+    "5503293842",
+    "5501400150",
+    "5503287582"
   ],
   "claim_states": {
     "5501400150": {
@@ -100,6 +101,17 @@
       "created_at": 1777176084,
       "last_status": "dispute",
       "step": "pending_user_action"
+    },
+    "5503293842": {
+      "type": "otro",
+      "stage": "dispute",
+      "reason": "PDD9943",
+      "amount": 899.0,
+      "product_title": "Bocina Port\u00e1til Jbl Flip 7 Parlante Con Bluetooth Violeta Purple",
+      "product_item": "MLM2880758743",
+      "created_at": 1777178849,
+      "last_status": "dispute",
+      "step": "pending_user_action"
     }
   },
   "last_telegram_update_id": 0,
@@ -112,7 +124,8 @@
     "alert_5503096585": 1777148967,
     "alert_5503148321": 1777148967,
     "alert_5503227787": 1777160383,
-    "alert_5503287582": 1777176084
+    "alert_5503287582": 1777176084,
+    "alert_5503293842": 1777178849
   },
   "seller_id": 2681696373,
   "seen_returns": {},
