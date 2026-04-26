@@ -17,6 +17,8 @@ jobs:
           MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
           MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
           MELI_REFRESH_TOKEN_RAYMUNDO: ${{ secrets.MELI_REFRESH_TOKEN_RAYMUNDO }}
+          LOOP_ITERATIONS: "5"
+          LOOP_SLEEP: "60"
         run: python scripts/raymundo_replenish.py
       - run: |
           git config user.email b@b.com && git config user.name bot
