@@ -1,0 +1,42 @@
+name: accounting-daily
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '5 6 * * *'  # 06:05 UTC = 00:05 CDMX (cierra día anterior)
+permissions:
+  contents: write
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with: { token: '${{ secrets.REPO_PAT }}' }
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests openpyxl -q
+      - name: Compute YESTERDAY (full day)
+        id: yest
+        run: |
+          # CDMX = UTC-6, "yesterday CDMX" = today UTC-6 minus 1 day at script run time 00:05 CDMX
+          YESTERDAY=$(TZ=America/Mexico_City date -d 'yesterday' +%Y-%m-%d)
+          echo "ACCOUNTING_DATE=$YESTERDAY" >> $GITHUB_ENV
+          echo "Closing day: $YESTERDAY"
+      - name: Build accounting XLSX
+        run: python scripts/build_accounting.py contabilidad_meli.xlsx
+        env:
+          ACCOUNTING_DATE: ${{ env.ACCOUNTING_DATE }}
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+          MELI_REFRESH_TOKEN_CLARIBEL: ${{ secrets.MELI_REFRESH_TOKEN_CLARIBEL }}
+          MELI_REFRESH_TOKEN_ASVA: ${{ secrets.MELI_REFRESH_TOKEN_ASVA }}
+          MELI_REFRESH_TOKEN_RAYMUNDO: ${{ secrets.MELI_REFRESH_TOKEN_RAYMUNDO }}
+          MELI_REFRESH_TOKEN_DILCIE: ${{ secrets.MELI_REFRESH_TOKEN_DILCIE }}
+          MELI_REFRESH_TOKEN_MILDRED: ${{ secrets.MELI_REFRESH_TOKEN_MILDRED }}
+      - name: Commit XLSX
+        run: |
+          git config user.email b@b.com && git config user.name bot
+          git pull --rebase 2>/dev/null || true
+          git add contabilidad_meli.xlsx
+          git diff --cached --quiet || (git commit -m "accounting cierre $(date -u +%Y-%m-%d)" && git push origin main)
