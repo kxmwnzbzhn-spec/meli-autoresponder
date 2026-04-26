@@ -153,7 +153,7 @@ for cpid, items in by_cpid.items():
         floor = max(FLOOR_OVERRIDES.get(winner_item["iid"], original * DEFAULT_FLOOR_PCT), MIN_FLOOR_PRICE)
         ceiling = CEIL_OVERRIDES.get(winner_item["iid"], original * DEFAULT_CEIL_PCT)
         # GAP agresivo cuando hay competidor en FULL ($80 abajo) para vencer ventaja logística
-        effective_gap = 80 if has_full else GAP
+        effective_gap = 150 if has_full else GAP  # FULL agresivo
         if ext_price is not None:
             winner_target = ext_price - effective_gap
         else:
