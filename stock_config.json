@@ -2242,7 +2242,7 @@
     "_deleted_reason": "Cannot update item MLM5227773714 [status:under_review, has_bids:false]"
   },
   "MLM2883448187": {
-    "real_stock": 2141,
+    "real_stock": 2136,
     "sku": "GO4-UNIFIED",
     "label": "Go 4 Unified (5 colors)",
     "auto_replenish": true,
@@ -2255,23 +2255,23 @@
         "orig_id": "MLM5227773714"
       },
       "Azul": {
-        "stock": 447,
+        "stock": 446,
         "orig_id": "MLM5223214798"
       },
       "Rojo": {
-        "stock": 148,
+        "stock": 147,
         "orig_id": "MLM2880763019"
       },
       "Camuflaje": {
-        "stock": 485,
+        "stock": 484,
         "orig_id": "MLM2880762615"
       },
       "Rosa": {
-        "stock": 76,
+        "stock": 75,
         "orig_id": "MLM5223451400"
       },
       "Aqua": {
-        "stock": 985,
+        "stock": 984,
         "orig_id": "MLM2747271435"
       }
     }
@@ -2368,12 +2368,15 @@
     "real_stock": 15,
     "sku": "JBL-GO4-ROJA-CAT499",
     "label": "JBL Go 4 Roja - Catálogo $499 (15u/día)",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "replenish_quantity": 1,
     "min_visible_stock": 1,
     "daily_reset_to": 15,
     "account": "juan",
-    "catalog_product_id": "MLM44710313"
+    "catalog_product_id": "MLM44710313",
+    "deleted": true,
+    "_deleted_at": 1777223380,
+    "_deleted_reason": "Cannot update item MLM2890818973 [status:under_review, has_bids:true]"
   },
   "MLM2890793871": {
     "real_stock": 14,
