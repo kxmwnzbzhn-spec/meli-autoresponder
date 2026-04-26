@@ -1,62 +1,36 @@
 {
   "accounts": {
     "JUAN": {
-      "date": "2026-04-25",
+      "date": "2026-04-26",
       "throttled": false,
       "items_paused": [],
-      "sales_count": 18
+      "sales_count": 1
     },
     "CLARIBEL": {
-      "date": "2026-04-25",
-      "throttled": true,
-      "items_paused": [
-        "MLM5245716860",
-        "MLM5245310498",
-        "MLM5245310494",
-        "MLM5245310490",
-        "MLM2890989785",
-        "MLM2890989209",
-        "MLM2890989189",
-        "MLM2890988575",
-        "MLM2890987863",
-        "MLM2890987765",
-        "MLM2890987671",
-        "MLM2890976191",
-        "MLM2890975983",
-        "MLM2890952081",
-        "MLM2890951427",
-        "MLM2890950617",
-        "MLM2890938767",
-        "MLM2890938689",
-        "MLM2890938641",
-        "MLM2890938557",
-        "MLM2890840987",
-        "MLM5245746244",
-        "MLM5245746252",
-        "MLM5245757608"
-      ],
-      "sales_count": 80,
-      "throttled_at": 1777180874
+      "date": "2026-04-26",
+      "throttled": false,
+      "items_paused": [],
+      "sales_count": 10
     },
     "RAYMUNDO": {
-      "date": "2026-04-25",
+      "date": "2026-04-26",
       "throttled": false,
       "items_paused": [],
       "sales_count": 0
     },
     "DILCIE": {
-      "date": "2026-04-25",
+      "date": "2026-04-26",
       "throttled": false,
       "items_paused": [],
       "sales_count": 0
     },
     "MILDRED": {
-      "date": "2026-04-25",
+      "date": "2026-04-26",
       "throttled": false,
       "items_paused": [],
       "sales_count": 0
     }
   },
-  "last_run": 1777180876,
-  "last_run_date": "2026-04-25"
+  "last_run": 1777187327,
+  "last_run_date": "2026-04-26"
 }
