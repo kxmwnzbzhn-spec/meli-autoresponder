@@ -67,24 +67,31 @@ def _replenish_once():
             real_stock = info.get("real_stock",0)
             item_status = cur.get("status","")
             print(f"    [single] visible={curr} real={real_stock} status={item_status}")
-            if curr==0 and real_stock>0:
-                # Reponer + reactivar si está pausado
-                payload = {"available_quantity":1}
-                if item_status == "paused":
-                    payload["status"] = "active"
+            
+            # CASE A: paused sin importar qty + tenemos stock → reactivar
+            if item_status == "paused" and real_stock > 0:
+                body = {"status":"active"}
+                if curr == 0:
+                    body["available_quantity"] = 1
                 rp = requests.put(f"https://api.mercadolibre.com/items/{iid}", headers=H,
-                                 json=payload, timeout=30)
+                                 json=body, timeout=30)
+                if rp.status_code == 200:
+                    if curr == 0:
+                        info["real_stock"] = real_stock-1
+                        print(f"      -> REACTIVADO+REPUESTO visible {curr}→1, real {real_stock}→{real_stock-1}")
+                    else:
+                        print(f"      -> REACTIVADO solo (visible ya era {curr})")
+                else:
+                    print(f"      ❌ reactivate failed {rp.status_code}: {rp.text[:200]}")
+            # CASE B: active con qty=0 → reponer
+            elif curr==0 and real_stock>0:
+                rp = requests.put(f"https://api.mercadolibre.com/items/{iid}", headers=H,
+                                 json={"available_quantity":1}, timeout=30)
                 if rp.status_code == 200:
                     info["real_stock"] = real_stock-1
-                    print(f"      -> REPUESTO visible=1, real={real_stock-1}{', REACTIVADO' if item_status=='paused' else ''}")
+                    print(f"      -> REPUESTO visible=1, real={real_stock-1}")
                 else:
                     print(f"      ❌ replenish failed {rp.status_code}: {rp.text[:200]}")
-            elif item_status == "paused" and real_stock>0:
-                # Estaba pausado pero tiene visible>0 (raro): solo reactivar
-                rp = requests.put(f"https://api.mercadolibre.com/items/{iid}", headers=H,
-                                 json={"status":"active"}, timeout=30)
-                if rp.status_code == 200:
-                    print(f"      -> REACTIVADO solo (visible ya era {curr})")
     
     json.dump(cfg, open("stock_config_claribel.json","w"), indent=2, ensure_ascii=False)
     print("\nDone")
