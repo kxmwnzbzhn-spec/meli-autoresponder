@@ -3,31 +3,53 @@ APP_ID = os.environ["MELI_APP_ID"]; APP_SECRET = os.environ["MELI_APP_SECRET"]
 RT = os.environ["MELI_REFRESH_TOKEN_CLARIBEL"]
 
 ITEMS = [
-    ("MLM5245746244", "MLM62279317", "Grip IP68 14h"),
-    ("MLM5245746252", "MLM61631985", "Grip waterproof"),
-    ("MLM5245757608", "MLM59802579", "Grip con luz $999 lock"),
+    "MLM5245746244",
+    "MLM5245746252",
+    "MLM5245757608",
 ]
 
 r = requests.post("https://api.mercadolibre.com/oauth/token",data={"grant_type":"refresh_token","client_id":APP_ID,"client_secret":APP_SECRET,"refresh_token":RT}).json()
 H = {"Authorization":f"Bearer {r['access_token']}"}
 
-for iid, cpid, label in ITEMS:
-    print(f"\n{'='*70}\n=== {iid} | {label} ===")
+for iid in ITEMS:
+    print(f"\n{'='*70}\n=== {iid} ===")
     g = requests.get(f"https://api.mercadolibre.com/items/{iid}",headers=H,timeout=10).json()
+    print(f"  catalog_listing: {g.get('catalog_listing')}")
+    print(f"  catalog_product_id: {g.get('catalog_product_id')}")
     print(f"  status: {g.get('status')}")
     print(f"  price: ${g.get('price')}")
-    print(f"  qty: {g.get('available_quantity')}")
-    print(f"  free_shipping: {g.get('shipping',{}).get('free_shipping')}")
-    print(f"  logistic_type: {g.get('shipping',{}).get('logistic_type')}")
+    print(f"  tags: {g.get('tags',[])}")
     
-    # Competition
-    print(f"\n  Catálogo {cpid} — competencia:")
-    p = requests.get(f"https://api.mercadolibre.com/products/{cpid}",headers=H,timeout=10).json()
-    bbw = p.get("buy_box_winner") or {}
-    print(f"  buy_box_winner: {bbw.get('item_id','-')} ${bbw.get('price','-')}")
+    # Try the catalog_listing_status endpoint
+    try:
+        cls = requests.get(f"https://api.mercadolibre.com/items/{iid}/catalog_listing_status",headers=H,timeout=10)
+        print(f"  catalog_listing_status: {cls.status_code} → {cls.text[:500]}")
+    except Exception as e:
+        print(f"  catalog_listing_status ERR: {e}")
     
-    r2 = requests.get(f"https://api.mercadolibre.com/products/{cpid}/items?limit=10",headers=H,timeout=10).json()
-    for c in (r2.get("results",[]) or [])[:8]:
-        is_us = " 👈 NOSOTROS" if c.get("item_id") == iid else ""
-        log = (c.get("shipping",{}) or {}).get("logistic_type","")
-        print(f"    {c.get('item_id')} ${c.get('price')} log={log}{is_us}")
+    # Try competition endpoint
+    try:
+        cmp = requests.get(f"https://api.mercadolibre.com/items/{iid}/competition",headers=H,timeout=10)
+        print(f"  competition: {cmp.status_code} → {cmp.text[:500]}")
+    except Exception as e:
+        print(f"  competition ERR: {e}")
+    
+    # Try health endpoint  
+    try:
+        hth = requests.get(f"https://api.mercadolibre.com/items/{iid}/health",headers=H,timeout=10)
+        print(f"  health: {hth.status_code} → {hth.text[:500]}")
+    except Exception as e:
+        print(f"  health ERR: {e}")
+    
+    # Catalog product full data
+    cpid = g.get('catalog_product_id')
+    if cpid:
+        p = requests.get(f"https://api.mercadolibre.com/products/{cpid}?include_attributes=all",headers=H,timeout=10).json()
+        bbw = p.get("buy_box_winner")
+        print(f"  catalog buy_box_winner: {bbw}")
+        # Try also the items endpoint with filters
+        items = requests.get(f"https://api.mercadolibre.com/products/{cpid}/items?status=active&limit=5",headers=H,timeout=10).json()
+        print(f"  catalog items returned (top 5):")
+        for it in items.get("results",[])[:5]:
+            mark = " 👈 NOSOTROS" if it.get("item_id")==iid else ""
+            print(f"    {it.get('item_id')} ${it.get('price')} log={(it.get('shipping',{}) or {}).get('logistic_type','')}{mark}")
