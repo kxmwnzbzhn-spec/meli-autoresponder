@@ -1,8 +1,17 @@
 name: urgent-reactivate
-on: { workflow_dispatch: }
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '*/3 * * * *'  # cada 3 min — safety net además del replenish principal
+permissions:
+  contents: write
+concurrency:
+  group: urgent-reactivate
+  cancel-in-progress: true
 jobs:
   run:
     runs-on: ubuntu-latest
+    timeout-minutes: 3
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
