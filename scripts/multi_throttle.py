@@ -17,11 +17,14 @@ TG_CHAT = os.environ.get("TELEGRAM_CHAT_ID","")
 # CUENTAS QUE TIENEN THROTTLE (ASVA EXCLUIDA — cuenta madura sin límite)
 THROTTLED_ACCOUNTS = [
     ("JUAN", "MELI_REFRESH_TOKEN", 70),
-    ("CLARIBEL", "MELI_REFRESH_TOKEN_CLARIBEL", 70),
+    ("CLARIBEL", "MELI_REFRESH_TOKEN_CLARIBEL", 70),  # base, override por ramp_day
     ("RAYMUNDO", "MELI_REFRESH_TOKEN_RAYMUNDO", 70),
     ("DILCIE", "MELI_REFRESH_TOKEN_DILCIE", 70),
     ("MILDRED", "MELI_REFRESH_TOKEN_MILDRED", 70),
 ]
+
+# Claribel ramp-up: 70 hoy, 80 mañana, 90 después, 100, 150
+CLARIBEL_RAMP = [70, 80, 90, 100, 150]
 
 STATE_FILE = "multi_throttle_state.json"
 
@@ -46,6 +49,12 @@ print(f"Throttle check {today} (desde {date_from})\n")
 tg_alerts = []
 
 for label, env_var, daily_limit in THROTTLED_ACCOUNTS:
+    # Claribel ramp-up
+    if label == "CLARIBEL":
+        ramp_day = state.get("claribel_ramp_day", 0)
+        ramp_idx = min(ramp_day, len(CLARIBEL_RAMP)-1)
+        daily_limit = CLARIBEL_RAMP[ramp_idx]
+        print(f"  Claribel ramp_day={ramp_day} → límite {daily_limit}u")
     RT = os.environ.get(env_var, "")
     if not RT:
         print(f"[{label}] sin token — skip"); continue
