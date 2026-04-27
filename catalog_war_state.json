@@ -28,8 +28,8 @@
       "original_price": 667.0,
       "floor": 366.85,
       "ceiling": 867.1,
-      "last_change_at": 1777245973,
-      "role": "winner",
+      "last_change_at": 1777248468,
+      "role": "step_1",
       "label": "Bocina Jbl Go 4 Jblgo4 Port\u00e1til Con"
     },
     "MLM2890793871": {
@@ -170,11 +170,11 @@
       "label": "Bocina Port\u00e1til Jbl Go 4 Bluetooth,"
     },
     "MLM5246052014": {
-      "original_price": 567.0,
-      "floor": 311.85,
-      "ceiling": 737.1,
-      "last_change_at": 1777245973,
-      "role": "step_1",
+      "original_price": 577.0,
+      "floor": 317.35,
+      "ceiling": 750.1,
+      "last_change_at": 1777248468,
+      "role": "winner",
       "label": "Bocina Jbl Go 4 Jblgo4 Port\u00e1til Con"
     },
     "MLM2891189883": {
@@ -218,6 +218,6 @@
       "label": "Jbl Go 4 - Altavoz Ultraport\u00e1til Bl"
     }
   },
-  "last_run": 1777245973,
+  "last_run": 1777248468,
   "winner_account": "RAYMUNDO"
 }
