@@ -127,7 +127,7 @@ for color, q in [("Negro","Jbl Charge 6 Negra"), ("Azul","Jbl Charge 6 Azul"), (
     body = {
 
         "family_name": "JBL Charge 6 Reacondicionada",
-        "sale_terms": [{"id":"WARRANTY_TYPE","value_name":"Garantía del vendedor"},{"id":"WARRANTY_TIME","value_name":"30 días"}],
+        "sale_terms": [{"id":"WARRANTY_TYPE","value_name":"Garantía del vendedor"},{"id":"WARRANTY_TIME","value_name":"90 días"}],
         "category_id": cat_id,
         "price": 399,
         "currency_id": "MXN",
