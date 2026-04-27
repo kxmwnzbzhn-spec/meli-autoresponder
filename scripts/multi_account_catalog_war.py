@@ -17,15 +17,15 @@ ACCOUNTS = [
     ("JUAN", "MELI_REFRESH_TOKEN"),
     ("CLARIBEL", "MELI_REFRESH_TOKEN_CLARIBEL"),
     ("ASVA", "MELI_REFRESH_TOKEN_ASVA"),
-    ("RAYMUNDO", "MELI_REFRESH_TOKEN_RAYMUNDO"),
+    # ("RAYMUNDO", "MELI_REFRESH_TOKEN_RAYMUNDO"),  # FROZEN — bot no toca Raymundo
     ("DILCIE", "MELI_REFRESH_TOKEN_DILCIE"),
     ("MILDRED", "MELI_REFRESH_TOKEN_MILDRED"),
 ]
 
-WINNER_ACCOUNT = "RAYMUNDO"  # Raymundo gana hoy
+WINNER_ACCOUNT = "JUAN"  # Raymundo congelado
 GAP = 10                         # winner = ext_competitor - $10
 STAIRCASE_GAP = 100  # Claribel queda +$500 (5×$100) arriba del winner = NO compite               # cada cuenta sucesiva: winner + N*50
-STAIRCASE_ORDER = ["JUAN", "ASVA", "DILCIE", "MILDRED", "CLARIBEL"]  # Raymundo es winner
+STAIRCASE_ORDER = ["ASVA", "DILCIE", "MILDRED", "CLARIBEL"]  # Sin Raymundo
 DEFAULT_FLOOR_PCT = 0.55
 MIN_FLOOR_PRICE = 299  # piso absoluto: nunca bajar de $299
 DEFAULT_CEIL_PCT  = 1.30
