@@ -155,6 +155,7 @@ for color, q in [("Negro","Jbl Charge 6 Negra"), ("Azul","Jbl Charge 6 Azul"), (
     
     body = {
         "title": title,
+        "family_name": "JBL Charge 6 Reacondicionada",
         "category_id": cat_id,
         "price": 399,
         "currency_id": "MXN",
