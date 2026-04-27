@@ -93,35 +93,6 @@ def build_attrs(color):
         {"id":"LINE","value_name":"Charge"},
         {"id":"COLOR","value_name":color},
         {"id":"ITEM_CONDITION","value_name":"Reacondicionado"},
-        {"id":"MAX_BATTERY_AUTONOMY","value_name":"28 h"},
-        {"id":"POWER_OUTPUT_RMS","value_name":"45 W"},
-        {"id":"MAX_POWER","value_name":"45 W"},
-        {"id":"MIN_FREQUENCY_RESPONSE","value_name":"60 Hz"},
-        {"id":"MAX_FREQUENCY_RESPONSE","value_name":"20 kHz"},
-        {"id":"INPUT_IMPEDANCE","value_name":"4 Ω"},
-        {"id":"DISTORTION","value_name":"0.5 %"},
-        {"id":"BATTERY_VOLTAGE","value_name":"5 V"},
-        {"id":"IS_WATERPROOF","value_name":"Si"},
-        {"id":"IS_PORTABLE","value_name":"Si"},
-        {"id":"IS_WIRELESS","value_name":"Si"},
-        {"id":"IS_RECHARGEABLE","value_name":"Si"},
-        {"id":"WITH_BLUETOOTH","value_name":"Si"},
-        {"id":"HAS_BLUETOOTH","value_name":"Si"},
-        {"id":"HAS_APP_CONTROL","value_name":"No"},
-        {"id":"INCLUDES_CABLE","value_name":"Si"},
-        {"id":"INCLUDES_BATTERY","value_name":"Si"},
-        {"id":"HAS_MICROPHONE","value_name":"Si"},
-        {"id":"IS_DUAL_VOICE_COIL","value_name":"No"},
-        {"id":"IS_DUAL_VOICE_ASSISTANTS","value_name":"No"},
-        {"id":"HAS_FM_RADIO","value_name":"No"},
-        {"id":"HAS_SD_MEMORY_INPUT","value_name":"No"},
-        {"id":"HAS_LED_LIGHTS","value_name":"No"},
-        {"id":"HAS_USB_INPUT","value_name":"Si"},
-        {"id":"WITH_AUX","value_name":"No"},
-        {"id":"WITH_HANDSFREE_FUNCTION","value_name":"Si"},
-        {"id":"SPEAKERS_NUMBER","value_name":"1"},
-        {"id":"PICKUPS_NUMBER","value_name":"1"},
-        {"id":"SPEAKER_FORMAT","value_name":"1.0"},
     ]
     seen={x["id"] for x in a}
     BAD={"EAN","UPC","MPN","SELLER_SKU","IS_SMART","PACKAGE_LENGTH","PACKAGE_WIDTH","PACKAGE_HEIGHT","PACKAGE_WEIGHT","LENGTH","WIDTH","HEIGHT","WEIGHT","ALPHANUMERIC_MODEL","GTIN","FAMILY_NAME"}
@@ -172,7 +143,7 @@ for color, q in [("Negro","Jbl Charge 6 Negra"), ("Azul","Jbl Charge 6 Azul"), (
     rp = requests.post("https://api.mercadolibre.com/items",headers=H,json=body,timeout=60)
     print(f"  POST → {rp.status_code}")
     if rp.status_code not in (200,201):
-        print(f"  ❌ {rp.text[:600]}")
+        print(f"  ❌ {rp.text}")
         continue
     j = rp.json()
     iid = j.get("id")
