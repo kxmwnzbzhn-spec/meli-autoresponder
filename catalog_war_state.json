@@ -12,16 +12,16 @@
       "original_price": 790.0,
       "floor": 434.50000000000006,
       "ceiling": 1027.0,
-      "last_change_at": 1777262428,
-      "role": "winner",
+      "last_change_at": 1777292599,
+      "role": "step_1",
       "label": "Sony Srs-xb100 Altavoz De Viaje Ina"
     },
     "MLM2890856611": {
       "original_price": 723.0,
       "floor": 397.65000000000003,
       "ceiling": 939.9,
-      "last_change_at": 1777262428,
-      "role": "winner",
+      "last_change_at": 1777292599,
+      "role": "step_1",
       "label": "Bocina Port\u00e1til Jbl Go 4 Bluetooth,"
     },
     "MLM2890818973": {
@@ -44,8 +44,8 @@
       "original_price": 719.0,
       "floor": 395.45000000000005,
       "ceiling": 934.7,
-      "last_change_at": 1777262428,
-      "role": "winner",
+      "last_change_at": 1777292599,
+      "role": "step_1",
       "label": "Bocina Jbl Go 4 Jblgo4 Port\u00e1til Con"
     },
     "MLM5241631618": {
@@ -173,7 +173,7 @@
       "original_price": 577.0,
       "floor": 317.35,
       "ceiling": 750.1,
-      "last_change_at": 1777248468,
+      "last_change_at": 1777292599,
       "role": "winner",
       "label": "Bocina Jbl Go 4 Jblgo4 Port\u00e1til Con"
     },
@@ -189,7 +189,7 @@
       "original_price": 992.0,
       "floor": 545.6,
       "ceiling": 1289.6000000000001,
-      "last_change_at": 1777229260,
+      "last_change_at": 1777292599,
       "role": "winner",
       "label": "Bocina Port\u00e1til Jbl Go 4 Bluetooth,"
     },
@@ -205,7 +205,7 @@
       "original_price": 709.0,
       "floor": 389.95000000000005,
       "ceiling": 921.7,
-      "last_change_at": 1777240434,
+      "last_change_at": 1777292599,
       "role": "winner",
       "label": "Altavoz Bluetooth Jbl Go 4 Port\u00e1til"
     },
@@ -213,11 +213,11 @@
       "original_price": 635.0,
       "floor": 349.25,
       "ceiling": 825.5,
-      "last_change_at": 1777229260,
+      "last_change_at": 1777292599,
       "role": "winner",
       "label": "Jbl Go 4 - Altavoz Ultraport\u00e1til Bl"
     }
   },
-  "last_run": 1777288791,
-  "winner_account": "JUAN"
+  "last_run": 1777292599,
+  "winner_account": "RAYMUNDO"
 }
