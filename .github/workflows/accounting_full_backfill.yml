@@ -1,0 +1,33 @@
+name: accounting-full-backfill
+on: { workflow_dispatch: }
+permissions: { contents: write }
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with: { token: '${{ secrets.REPO_PAT }}' }
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests openpyxl -q
+      - run: python scripts/build_accounting_full.py contabilidad_meli.xlsx
+        env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+          MELI_REFRESH_TOKEN_CLARIBEL: ${{ secrets.MELI_REFRESH_TOKEN_CLARIBEL }}
+          MELI_REFRESH_TOKEN_ASVA: ${{ secrets.MELI_REFRESH_TOKEN_ASVA }}
+          MELI_REFRESH_TOKEN_RAYMUNDO: ${{ secrets.MELI_REFRESH_TOKEN_RAYMUNDO }}
+          MELI_REFRESH_TOKEN_DILCIE: ${{ secrets.MELI_REFRESH_TOKEN_DILCIE }}
+          MELI_REFRESH_TOKEN_MILDRED: ${{ secrets.MELI_REFRESH_TOKEN_MILDRED }}
+      - run: |
+          for i in 1 2 3 4 5; do
+            git config user.email b@b.com && git config user.name bot
+            git pull --rebase 2>/dev/null && git add contabilidad_meli.xlsx && (git diff --cached --quiet || git commit -m "Contabilidad backfill desde 2026-01-01") && git push origin main && break
+            sleep $((RANDOM % 8 + 3))
+          done
+      - uses: actions/upload-artifact@v4
+        with:
+          name: contabilidad
+          path: contabilidad_meli.xlsx
