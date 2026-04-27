@@ -1,16 +1,13 @@
 """
 Publicar JBL Charge 6 unificada en cuenta Juan
 - 3 colores: Negro, Azul, Rojo
-- $399 c/u
-- Envío gratis
-- Condición: Reacondicionado
+- $399 c/u, envío gratis, condición Reacondicionado
 - Defecto declarado: NO compatible app JBL Portable
-- Atributos blindados (warranty=Sin garantía, manual=No, original_box=No)
 """
 import os, requests, json, time
 
 APP_ID=os.environ["MELI_APP_ID"]; APP_SECRET=os.environ["MELI_APP_SECRET"]
-RT=os.environ["MELI_REFRESH_TOKEN"]  # JUAN
+RT=os.environ["MELI_REFRESH_TOKEN"]
 
 r=requests.post("https://api.mercadolibre.com/oauth/token",data={"grant_type":"refresh_token","client_id":APP_ID,"client_secret":APP_SECRET,"refresh_token":RT}).json()
 TOKEN=r["access_token"]
@@ -18,38 +15,60 @@ H={"Authorization":f"Bearer {TOKEN}","Content-Type":"application/json"}
 me=requests.get("https://api.mercadolibre.com/users/me",headers=H,timeout=10).json()
 print(f"Cuenta: {me.get('nickname')} ({me.get('id')})")
 
-# 1) Encontrar pictures por color buscando catálogos JBL Charge 6 existentes
-SEARCH_QUERIES = {
-    "Negro": "JBL Charge 6 Negro Negra",
-    "Azul":  "JBL Charge 6 Azul",
-    "Rojo":  "JBL Charge 6 Rojo Roja",
-}
+# Catalog products conocidos (busqueda) — usaremos search de productos
+def search_catalog_pics(query):
+    """Busca catálogo MELI y retorna pics del primer producto encontrado."""
+    rs = requests.get(f"https://api.mercadolibre.com/products/search?status=active&site_id=MLM&q={requests.utils.quote(query)}&limit=5",headers=H,timeout=20)
+    print(f"  catalog search '{query}' → HTTP {rs.status_code}")
+    data = rs.json()
+    results = data.get("results", []) if isinstance(data, dict) else []
+    print(f"  resultados: {len(results)}")
+    pics_out = []
+    for p in results[:3]:
+        pid = p.get("id")
+        if not pid: continue
+        # Get product details
+        prod = requests.get(f"https://api.mercadolibre.com/products/{pid}",headers=H,timeout=10).json()
+        for pic in (prod.get("pictures") or [])[:5]:
+            url = pic.get("url","")
+            # Extract picture ID from URL
+            if url and "/D_" in url:
+                pic_id = url.split("/D_")[1].split("-")[0]
+                if pic_id and pic_id not in pics_out:
+                    pics_out.append(pic_id)
+        if pics_out: break  # Got enough from first product
+    return pics_out
 
-color_pics = {}
-for color, q in SEARCH_QUERIES.items():
-    print(f"\n=== Buscando pics {color} ===")
-    found = []
-    rs = requests.get(f"https://api.mercadolibre.com/sites/MLM/search?q={requests.utils.quote(q)}&limit=20",headers=H,timeout=20).json()
-    for it in rs.get("results",[]):
-        title_l = (it.get("title","") or "").lower()
-        if "charge 6" not in title_l and "charge6" not in title_l: continue
-        # allow any listing
-        # Get item details to extract pics
+# Search by query (as fallback) — search active items
+def search_listing_pics(query):
+    rs = requests.get(f"https://api.mercadolibre.com/sites/MLM/search?q={requests.utils.quote(query)}&limit=20",headers=H,timeout=20).json()
+    print(f"  listing search '{query}' → {len(rs.get('results',[]))} items")
+    pics_out = []
+    for it in rs.get("results", []):
         iid = it.get("id")
+        if not iid: continue
         gd = requests.get(f"https://api.mercadolibre.com/items/{iid}",headers=H,timeout=10).json()
-        pics = [p.get("id") for p in gd.get("pictures",[]) if p.get("id")]
-        if pics:
-            print(f"  {iid} ({gd.get('title','')[:50]}) → {len(pics)} pics")
-            found.extend(pics[:4])
-        if len(found) >= 4: break
-        time.sleep(0.3)
-    color_pics[color] = found[:4]
+        title_l = (gd.get("title","") or "").lower()
+        if "charge" not in title_l: continue
+        for p in (gd.get("pictures") or [])[:5]:
+            pid = p.get("id")
+            if pid and pid not in pics_out:
+                pics_out.append(pid)
+        if len(pics_out) >= 4:
+            return pics_out[:4]
+        time.sleep(0.2)
+    return pics_out[:4]
 
-print(f"\nPics por color:")
-for c,p in color_pics.items():
-    print(f"  {c}: {len(p)} pics")
+color_pics_raw = {}
+for color, q in [("Negro","Jbl Charge 6 Negra"), ("Azul","Jbl Charge 6 Azul"), ("Rojo","Jbl Charge 6 Roja")]:
+    print(f"\n=== {color} ===")
+    pics = search_catalog_pics(q)
+    if not pics:
+        pics = search_listing_pics(q)
+    color_pics_raw[color] = pics
+    print(f"  pics encontradas: {len(pics)}")
 
-# Re-upload pics to Juan account (so they belong to him)
+# Re-upload all pics to Juan account
 def reupload(pid):
     try:
         img=requests.get(f"https://http2.mlstatic.com/D_{pid}-O.jpg",timeout=15).content
@@ -59,20 +78,28 @@ def reupload(pid):
             files={"file":("p.jpg",img,"image/jpeg")},timeout=45)
         return rp.json().get("id") if rp.status_code in (200,201) else None
     except Exception as e:
-        print(f"  upload err {pid}: {e}")
+        print(f"  err {pid}: {e}")
         return None
 
-print("\n=== Re-uploading pics ===")
+print("\n=== Re-uploading pics a cuenta Juan ===")
 juan_pics = {}
-for color, pids in color_pics.items():
+for color, pids in color_pics_raw.items():
     out = []
     for p in pids:
         n = reupload(p)
         if n: out.append(n)
+        time.sleep(0.3)
     juan_pics[color] = out
-    print(f"  {color}: re-uploaded {len(out)}")
+    print(f"  {color}: {len(out)}/{len(pids)} re-uploaded")
 
-# 2) Build attributes para Charge 6
+# Validate
+total_pics = sum(len(v) for v in juan_pics.values())
+if total_pics == 0:
+    print("\n❌ NO HAY PICS — abortando")
+    print("    Sugerencia: subir manualmente fotos al outputs y reintentar.")
+    exit(1)
+
+# Build attributes
 cat_id = "MLM59800"  # bocinas portátiles
 cat_attrs = requests.get(f"https://api.mercadolibre.com/categories/{cat_id}/attributes",headers=H,timeout=15).json()
 
@@ -95,7 +122,7 @@ ATTRS = [
     {"id":"IS_RECHARGEABLE","value_name":"Si"},
     {"id":"WITH_BLUETOOTH","value_name":"Si"},
     {"id":"HAS_BLUETOOTH","value_name":"Si"},
-    {"id":"HAS_APP_CONTROL","value_name":"No"},  # CRÍTICO: declara que NO tiene app
+    {"id":"HAS_APP_CONTROL","value_name":"No"},
     {"id":"INCLUDES_CABLE","value_name":"Si"},
     {"id":"INCLUDES_BATTERY","value_name":"Si"},
     {"id":"HAS_MICROPHONE","value_name":"Si"},
@@ -127,12 +154,17 @@ for ca in cat_attrs:
         ATTRS.append({"id":aid,"value_name":"No aplica"})
     seen.add(aid)
 
-# 3) Build variations
+# Variations
 variations = []
 for c in ["Negro","Azul","Rojo"]:
     if not juan_pics.get(c):
-        print(f"  ⚠️ {c}: 0 pics — saltando")
-        continue
+        # Fallback: si no tiene pics propias, usa pics de otro color
+        for fb in ["Negro","Azul","Rojo"]:
+            if juan_pics.get(fb):
+                juan_pics[c] = juan_pics[fb][:2]
+                print(f"  ⚠️ {c} sin pics → usando fallback de {fb}")
+                break
+    if not juan_pics.get(c): continue
     variations.append({
         "price": 399,
         "available_quantity": 5,
@@ -141,10 +173,9 @@ for c in ["Negro","Azul","Rojo"]:
     })
 
 if not variations:
-    print("❌ No hay variaciones con pics — abortando")
+    print("❌ Sin variaciones — abortando")
     exit(1)
 
-# Pictures generales = todas las pics
 all_pics = []
 for c in ["Negro","Azul","Rojo"]:
     for p in juan_pics.get(c,[]):
@@ -182,7 +213,7 @@ Este producto es REACONDICIONADO. Tiene UN solo defecto:
 📦 EL PAQUETE INCLUYE:
   • 1 x Bocina JBL Charge 6 (color elegido)
   • Cable USB-C de carga
-  • Empaque sellado de seguridad
+  • Empaque de seguridad
 
 🚚 ENVÍO GRATIS — entrega en 1-3 días hábiles
 
@@ -221,6 +252,7 @@ body = {
 }
 
 print("\n=== Creando publicación ===")
+print(f"  pics totales: {len(all_pics)} | variaciones: {len(variations)}")
 rp = requests.post("https://api.mercadolibre.com/items",headers=H,json=body,timeout=60)
 print(f"  status: {rp.status_code}")
 if rp.status_code not in (200,201):
@@ -237,9 +269,7 @@ print(f"   Stock: {resp.get('available_quantity')}")
 print(f"   Status: {resp.get('status')}")
 print(f"   Variations: {len(resp.get('variations',[]))}")
 
-# Add description if needed
 desc_post = requests.post(f"https://api.mercadolibre.com/items/{iid}/description",
     headers=H, json={"plain_text": DESCRIPTION}, timeout=30)
 print(f"   description POST: {desc_post.status_code}")
-
 print(f"\n📋 Publicación creada en cuenta {me.get('nickname')}")
