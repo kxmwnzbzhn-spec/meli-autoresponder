@@ -29,11 +29,11 @@ color_pics = {}
 for color, q in SEARCH_QUERIES.items():
     print(f"\n=== Buscando pics {color} ===")
     found = []
-    rs = requests.get(f"https://api.mercadolibre.com/sites/MLM/search?q={requests.utils.quote(q)}&condition=new&limit=20",headers=H,timeout=20).json()
+    rs = requests.get(f"https://api.mercadolibre.com/sites/MLM/search?q={requests.utils.quote(q)}&limit=20",headers=H,timeout=20).json()
     for it in rs.get("results",[]):
         title_l = (it.get("title","") or "").lower()
         if "charge 6" not in title_l and "charge6" not in title_l: continue
-        if not it.get("catalog_listing"): continue
+        # allow any listing
         # Get item details to extract pics
         iid = it.get("id")
         gd = requests.get(f"https://api.mercadolibre.com/items/{iid}",headers=H,timeout=10).json()
