@@ -94,6 +94,7 @@ cat_attrs = requests.get(f"https://api.mercadolibre.com/categories/{cat_id}/attr
 
 ATTRS = [
     {"id":"BRAND","value_name":"JBL"},
+    {"id":"FAMILY_NAME","value_name":"Charge 6 Reacondicionada"},
     {"id":"MODEL","value_name":"Charge 6"},
     {"id":"LINE","value_name":"Charge"},
     {"id":"ITEM_CONDITION","value_name":"Reacondicionado"},
