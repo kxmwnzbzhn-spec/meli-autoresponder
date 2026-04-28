@@ -44,7 +44,7 @@
       "original_price": 719.0,
       "floor": 395.45000000000005,
       "ceiling": 934.7,
-      "last_change_at": 1777349200,
+      "last_change_at": 1777358651,
       "role": "winner",
       "label": "Bocina Jbl Go 4 Jblgo4 Port\u00e1til Con"
     },
@@ -242,14 +242,14 @@
       "label": "Bocina Jbl Go 4 Jblgo4 Port\u00e1til Con"
     },
     "MLM2894897769": {
-      "original_price": 529.0,
-      "floor": 299,
-      "ceiling": 687.7,
-      "last_change_at": 1777349200,
+      "original_price": 613.0,
+      "floor": 337.15000000000003,
+      "ceiling": 796.9,
+      "last_change_at": 1777358651,
       "role": "step_1",
       "label": "Bocina Jbl Go 4 Jblgo4 Port\u00e1til Con"
     }
   },
-  "last_run": 1777349200,
+  "last_run": 1777358651,
   "winner_account": "JUAN"
 }
