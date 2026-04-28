@@ -225,10 +225,16 @@ for grp in labels_index:
         ws2.cell(row=r, column=8, value=it["ship_status"])
         ws2.cell(row=r, column=9, value=it["title"])
         r += 1
+from openpyxl.utils import get_column_letter
 for ws_x in [ws, ws2]:
-    for col in ws_x.columns:
-        max_len = max((len(str(c.value)) if c.value else 0 for c in col), default=10)
-        ws_x.column_dimensions[col[0].column_letter].width = min(max_len + 2, 60)
+    for ci in range(1, ws_x.max_column+1):
+        max_len = 10
+        for ri in range(1, ws_x.max_row+1):
+            try:
+                v = ws_x.cell(row=ri, column=ci).value
+                if v: max_len = max(max_len, len(str(v)))
+            except: pass
+        ws_x.column_dimensions[get_column_letter(ci)].width = min(max_len + 2, 60)
 wb.save(f"{OUTDIR}/manifest.xlsx")
 
 print(f"\n✅ {len(labels_index)} grupos en {OUTDIR}/")
