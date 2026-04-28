@@ -26,7 +26,7 @@ ACCOUNTS = [
 ]
 
 INCLUDE_STATUSES = {"ready_to_ship"}
-EXCLUDE_SUBSTATUS = {"picked_up","ready_to_print"}  # solo printed
+EXCLUDE_SUBSTATUS = {"picked_up"}  # printed + ready_to_print (excluye solo recolectado)
 
 def categorize(title):
     t = (title or "").lower()
