@@ -25,6 +25,7 @@ ACCOUNTS = [
 ]
 
 INCLUDE_STATUSES = {"ready_to_ship"}
+EXCLUDE_SUBSTATUS = {"picked_up","ready_to_print"}  # solo printed
 
 def categorize(title):
     t = (title or "").lower()
@@ -92,6 +93,7 @@ for label, env_var in ACCOUNTS:
             except: continue
             status_counts[f"{ship_status}/{substatus or '-'}"] += 1
             if ship_status not in INCLUDE_STATUSES: continue
+            if substatus in EXCLUDE_SUBSTATUS: continue
             
             # Compose items per shipment
             buyer = (o.get("buyer") or {}).get("nickname","")
