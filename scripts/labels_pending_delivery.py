@@ -61,7 +61,7 @@ print(f"📅 Corte etiquetas pendientes de entregar: {now_cdmx}\n")
 cdmx = datetime.now(timezone.utc) - timedelta(hours=6)
 yesterday_cdmx = (cdmx - timedelta(days=1)).replace(hour=0,minute=0,second=0,microsecond=0)
 date_from = yesterday_cdmx.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.000Z")
-print(f"Rango: ayer 00:00 → ahora ({yesterday_cdmx.strftime("%Y-%m-%d")} CDMX → hoy)")
+rng = yesterday_cdmx.strftime("%Y-%m-%d"); print(f"Rango: {rng} CDMX → hoy")
 
 groups = defaultdict(list)
 total_shipments = 0; total_units = 0
