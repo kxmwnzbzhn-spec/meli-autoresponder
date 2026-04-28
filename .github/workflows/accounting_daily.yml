@@ -31,7 +31,7 @@ jobs:
           echo "ACCOUNTING_DATE=$DATE" >> $GITHUB_ENV
           echo "Closing day: $DATE"
       - name: Build accounting XLSX
-        run: python scripts/build_accounting.py contabilidad_meli.xlsx
+        run: python scripts/build_accounting_full.py contabilidad_meli.xlsx
         env:
           ACCOUNTING_DATE: ${{ env.ACCOUNTING_DATE }}
           MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
