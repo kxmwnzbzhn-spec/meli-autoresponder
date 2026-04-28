@@ -24,7 +24,7 @@ ACCOUNTS = [
 ]
 
 # Estados de shipping que QUEREMOS (ya impresas, falta entregar):
-INCLUDE_STATUSES = {"ready_to_ship","handling"}  # ya tienen etiqueta, no entregadas aún
+INCLUDE_STATUSES = {"ready_to_ship"}  # SOLO con etiqueta lista, no entregadas, no pending
 # Excluir: "pending" (sin etiqueta), "shipped" (ya en tránsito), "delivered" (ya entregado)
 
 def categorize(title):
@@ -58,7 +58,10 @@ os.makedirs(OUTDIR, exist_ok=True)
 print(f"📅 Corte etiquetas pendientes de entregar: {now_cdmx}\n")
 
 # Pull shipments (últimos 14 días para no perder ninguno antiguo aún en handling)
-date_from = (datetime.now(timezone.utc) - timedelta(days=14)).strftime("%Y-%m-%dT%H:%M:%S.000Z")
+cdmx = datetime.now(timezone.utc) - timedelta(hours=6)
+yesterday_cdmx = (cdmx - timedelta(days=1)).replace(hour=0,minute=0,second=0,microsecond=0)
+date_from = yesterday_cdmx.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.000Z")
+print(f"Rango: ayer 00:00 → ahora ({yesterday_cdmx.strftime("%Y-%m-%d")} CDMX → hoy)")
 
 groups = defaultdict(list)
 total_shipments = 0; total_units = 0
