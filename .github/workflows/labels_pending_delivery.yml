@@ -1,6 +1,12 @@
 name: labels-pending-delivery
-on: { workflow_dispatch: }
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 13 * * *'  # 13:00 UTC = 07:00 CDMX (todos los días)
 permissions: { contents: write }
+concurrency:
+  group: labels-pending
+  cancel-in-progress: false
 jobs:
   run:
     runs-on: ubuntu-latest
@@ -26,11 +32,11 @@ jobs:
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
       - uses: actions/upload-artifact@v4
         with:
-          name: labels-pending
+          name: labels-${{ github.run_id }}
           path: labels_pending_*/
       - run: |
           for i in 1 2 3 4 5; do
             git config user.email b@b.com && git config user.name bot
-            git pull --rebase 2>/dev/null && git add "labels_pending_*/" && (git diff --cached --quiet || git commit -m "Etiquetas pendientes corte manual") && git push origin main && break
+            git pull --rebase 2>/dev/null && git add "labels_pending_*/" && (git diff --cached --quiet || git commit -m "Etiquetas corte 7am") && git push origin main && break
             sleep $((RANDOM % 8 + 3))
           done
