@@ -1,0 +1,21 @@
+name: exchange-new-account
+on:
+  workflow_dispatch:
+    inputs:
+      code:
+        description: OAuth code
+        required: true
+permissions: { contents: read }
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests -q
+      - run: python scripts/exchange_new_account.py
+        env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          NEW_CODE: ${{ inputs.code }}
