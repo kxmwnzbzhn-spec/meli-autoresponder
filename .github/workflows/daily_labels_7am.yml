@@ -1,0 +1,53 @@
+name: daily-labels-7am
+on:
+  workflow_dispatch:
+    inputs:
+      date:
+        description: YYYY-MM-DD CDMX (default ayer)
+        required: false
+        default: ''
+  schedule:
+    - cron: '0 13 * * *'  # 13:00 UTC = 07:00 CDMX
+permissions: { contents: write }
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with: { token: '${{ secrets.REPO_PAT }}' }
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests openpyxl pypdf -q
+      - name: Compute date
+        id: dt
+        run: |
+          if [ -n "${{ inputs.date }}" ]; then
+            DATE="${{ inputs.date }}"
+          else
+            DATE=$(TZ=America/Mexico_City date -d 'yesterday' +%Y-%m-%d)
+          fi
+          echo "LBL_DATE=$DATE" >> $GITHUB_ENV
+      - run: python scripts/build_daily_labels.py "${{ env.LBL_DATE }}"
+        env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+          MELI_REFRESH_TOKEN_CLARIBEL: ${{ secrets.MELI_REFRESH_TOKEN_CLARIBEL }}
+          MELI_REFRESH_TOKEN_ASVA: ${{ secrets.MELI_REFRESH_TOKEN_ASVA }}
+          MELI_REFRESH_TOKEN_RAYMUNDO: ${{ secrets.MELI_REFRESH_TOKEN_RAYMUNDO }}
+          MELI_REFRESH_TOKEN_DILCIE: ${{ secrets.MELI_REFRESH_TOKEN_DILCIE }}
+          MELI_REFRESH_TOKEN_MILDRED: ${{ secrets.MELI_REFRESH_TOKEN_MILDRED }}
+          MELI_REFRESH_TOKEN_YC_NEW: ${{ secrets.MELI_REFRESH_TOKEN_YC_NEW }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: labels-${{ env.LBL_DATE }}
+          path: labels_${{ env.LBL_DATE }}/
+      - run: |
+          for i in 1 2 3 4 5; do
+            git config user.email b@b.com && git config user.name bot
+            git pull --rebase 2>/dev/null && git add "labels_${{ env.LBL_DATE }}/" && (git diff --cached --quiet || git commit -m "Etiquetas ${{ env.LBL_DATE }}") && git push origin main && break
+            sleep $((RANDOM % 8 + 3))
+          done
