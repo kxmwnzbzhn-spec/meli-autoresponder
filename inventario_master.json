@@ -3,7 +3,7 @@
     "snapshot": "2026-04-28",
     "fuente": "Inventario_sin_Ropa_2026-04-28.xlsx + correcciones user",
     "regla_visible_meli": 1,
-    "ultima_actualizacion": "2026-04-28T20:30:00-06:00"
+    "ultima_actualizacion": "2026-04-28T16:15:00-06:00"
   },
   "_categorize_keywords": {
     "JBL Go 4|Aqua": [
@@ -119,6 +119,19 @@
     "Redmi Buds 4 Lite|Negro": [
       "redmi buds 4 lite",
       "buds 4 lite negro"
+    ],
+    "JBL Clip 5|Azul": [
+      "clip 5 azul",
+      "clip5 azul"
+    ],
+    "JBL Clip 5|Squad (mixto)": [
+      "clip 5 squad",
+      "squad clip 5",
+      "clip 5 multicolor"
+    ],
+    "JBL Clip 5|Rosa+Azul (mix)": [
+      "clip 5 rosa+azul",
+      "rosa con azul"
     ]
   },
   "stock": {
@@ -178,9 +191,11 @@
       "total": 246
     },
     "JBL Clip 5|Rosa": {
-      "nuevo": 4,
+      "nuevo": 204,
       "devolucion": 0,
-      "total": 4
+      "total": 204,
+      "nota": "Solo color Rosa",
+      "cajas": 5
     },
     "JBL Clip 7|Rojo": {
       "nuevo": 164,
@@ -246,6 +261,34 @@
       "nuevo": 70,
       "devolucion": 0,
       "total": 70
+    },
+    "JBL Clip 5|Squad (mixto)": {
+      "nuevo": 240,
+      "devolucion": 0,
+      "total": 240,
+      "nota": "Squad Edition mixto",
+      "cajas": 6
+    },
+    "JBL Clip 5|Rosa+Azul (mix)": {
+      "nuevo": 240,
+      "devolucion": 0,
+      "total": 240,
+      "nota": "Pre-pack Rosa con Azul",
+      "cajas": 6
+    },
+    "JBL Clip 5|Azul": {
+      "nuevo": 480,
+      "devolucion": 0,
+      "total": 480,
+      "nota": "Solo color Azul",
+      "cajas": 12
+    },
+    "JBL Clip 5|Mixta-1caja": {
+      "nuevo": 40,
+      "devolucion": 0,
+      "total": 40,
+      "nota": "Caja mixta sin desglose",
+      "cajas": 1
     }
   },
   "stock_perfumes": {
