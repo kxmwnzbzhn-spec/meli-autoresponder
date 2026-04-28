@@ -1,0 +1,31 @@
+name: claims-open-affecting
+on: { workflow_dispatch: }
+permissions: { contents: write }
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with: { token: '${{ secrets.REPO_PAT }}' }
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests -q
+      - run: python scripts/claims_open_affecting_reputation.py
+        env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+          MELI_REFRESH_TOKEN_CLARIBEL: ${{ secrets.MELI_REFRESH_TOKEN_CLARIBEL }}
+          MELI_REFRESH_TOKEN_ASVA: ${{ secrets.MELI_REFRESH_TOKEN_ASVA }}
+          MELI_REFRESH_TOKEN_RAYMUNDO: ${{ secrets.MELI_REFRESH_TOKEN_RAYMUNDO }}
+          MELI_REFRESH_TOKEN_DILCIE: ${{ secrets.MELI_REFRESH_TOKEN_DILCIE }}
+          MELI_REFRESH_TOKEN_MILDRED: ${{ secrets.MELI_REFRESH_TOKEN_MILDRED }}
+          MELI_REFRESH_TOKEN_YC_NEW: ${{ secrets.MELI_REFRESH_TOKEN_YC_NEW }}
+          MELI_REFRESH_TOKEN_BREN: ${{ secrets.MELI_REFRESH_TOKEN_BREN }}
+      - run: |
+          for i in 1 2 3 4 5; do
+            git config user.email b@b.com && git config user.name bot
+            git pull --rebase 2>/dev/null && git add claims_affecting_reputation.json && (git diff --cached --quiet || git commit -m "claims affecting reputation snapshot") && git push origin main && break
+            sleep $((RANDOM % 8 + 3))
+          done
