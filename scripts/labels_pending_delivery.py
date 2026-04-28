@@ -49,9 +49,9 @@ def categorize(title):
     return ("Otros", color)
 
 cdmx = datetime.now(timezone.utc) - timedelta(hours=6)
-yesterday_cdmx = (cdmx - timedelta(days=1)).replace(hour=0,minute=0,second=0,microsecond=0)
-date_from = yesterday_cdmx.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.000Z")
-print(f"📅 Rango: {yesterday_cdmx.strftime('%Y-%m-%d')} CDMX → ahora")
+window_start = (cdmx - timedelta(days=3)).replace(hour=0,minute=0,second=0,microsecond=0)
+date_from = window_start.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.000Z")
+print(f"📅 Rango: {window_start.strftime('%Y-%m-%d')} CDMX → ahora")
 
 now_cdmx = cdmx.strftime("%Y-%m-%d_%H%M")
 OUTDIR = f"labels_pending_{now_cdmx}"
