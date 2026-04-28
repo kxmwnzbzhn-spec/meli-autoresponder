@@ -1,4 +1,4 @@
-"""Ver estructura de fechas en shipments ready_to_ship para entender filtro de 'hoy'."""
+"""Ver fechas en shipments ready_to_ship/printed para entender filtro 'hoy'."""
 import os, requests, json
 from datetime import datetime, timezone, timedelta
 
@@ -9,25 +9,31 @@ H = {"Authorization":f"Bearer {r['access_token']}"}
 me = requests.get("https://api.mercadolibre.com/users/me",headers=H,timeout=10).json()
 USER_ID = me["id"]
 
-cdmx_today = (datetime.now(timezone.utc) - timedelta(hours=6)).strftime("%Y-%m-%d")
-print(f"Hoy CDMX: {cdmx_today}\n")
+print(f"Hoy CDMX: {(datetime.now(timezone.utc) - timedelta(hours=6)).strftime('%Y-%m-%d')}\n")
 
-# Get sample shipments
-date_from = (datetime.now(timezone.utc) - timedelta(days=3)).strftime("%Y-%m-%dT%H:%M:%S.000Z")
-rr = requests.get(f"https://api.mercadolibre.com/orders/search?seller={USER_ID}&order.date_created.from={date_from}&limit=10",headers=H,timeout=20).json()
-for o in rr.get("results",[])[:3]:
-    sh = o.get("shipping",{}) or {}
-    sh_id = sh.get("id")
-    if not sh_id: continue
-    sd = requests.get(f"https://api.mercadolibre.com/shipments/{sh_id}",headers=H,timeout=10).json()
-    if sd.get("status") != "ready_to_ship": continue
-    print(f"=== Shipment {sh_id} ===")
-    print(f"  status: {sd.get('status')} / {sd.get('substatus')}")
-    print(f"  date_created: {sd.get('date_created')}")
-    print(f"  date_first_printed: {sd.get('date_first_printed')}")
-    lt = sd.get("lead_time",{})
-    print(f"  lead_time.estimated_handling_limit: {lt.get('estimated_handling_limit')}")
-    print(f"  lead_time.estimated_delivery_limit: {lt.get('estimated_delivery_limit')}")
-    print(f"  lead_time.estimated_delivery_time: {lt.get('estimated_delivery_time')}")
-    print(f"  shipping_option.estimated_handling_limit: {sd.get('shipping_option',{}).get('estimated_handling_limit')}")
-    print()
+date_from = (datetime.now(timezone.utc) - timedelta(days=4)).strftime("%Y-%m-%dT%H:%M:%S.000Z")
+offset=0; printed_n=0
+while True:
+    rr = requests.get(f"https://api.mercadolibre.com/orders/search?seller={USER_ID}&order.date_created.from={date_from}&limit=50&offset={offset}",headers=H,timeout=20).json()
+    res = rr.get("results",[])
+    if not res: break
+    for o in res:
+        sh = o.get("shipping",{}) or {}
+        sh_id = sh.get("id")
+        if not sh_id: continue
+        sd = requests.get(f"https://api.mercadolibre.com/shipments/{sh_id}",headers=H,timeout=10).json()
+        if sd.get("status") != "ready_to_ship": continue
+        if sd.get("substatus") != "printed": continue
+        printed_n += 1
+        if printed_n <= 5:
+            print(f"=== Shipment {sh_id} (substatus={sd.get('substatus')}) ===")
+            print(f"  date_created: {sd.get('date_created')}")
+            print(f"  date_first_printed: {sd.get('date_first_printed')}")
+            print(f"  lead_time keys: {list((sd.get('lead_time') or {}).keys())}")
+            lt = sd.get('lead_time') or {}
+            for k,v in lt.items():
+                print(f"    lead_time.{k}: {v}")
+            print()
+    offset += 50
+    if offset >= rr.get("paging",{}).get("total",0): break
+print(f"Total printed (Raymundo): {printed_n}")
