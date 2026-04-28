@@ -21,6 +21,7 @@ THROTTLED_ACCOUNTS = [
     # ("RAYMUNDO", "MELI_REFRESH_TOKEN_RAYMUNDO", 60),  # FROZEN — manual control
     ("DILCIE", "MELI_REFRESH_TOKEN_DILCIE", 70),
     ("MILDRED", "MELI_REFRESH_TOKEN_MILDRED", 50),  # Cap 50/dia inicio
+    ("BREN", "MELI_REFRESH_TOKEN_BREN", 50),  # Cap 50/dia inicio
 ]
 
 # Claribel ramp-up: 70 hoy, 80 mañana, 90 después, 100, 150

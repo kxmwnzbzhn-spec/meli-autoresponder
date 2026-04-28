@@ -17,6 +17,7 @@ ACCOUNTS = [
     ("DILCIE",   "MELI_REFRESH_TOKEN_DILCIE",   "Dilcie",             "Cuenta nueva",             "70u/dia"),
     ("MILDRED",  "MELI_REFRESH_TOKEN_MILDRED",  "Mildred",            "Bocinas + perfumes",       "50u/dia inicio"),
     ("YC_NEW",   "MELI_REFRESH_TOKEN_YC_NEW",   "Cuenta nueva (YC)",  "Pendiente configurar",     "sin cap"),
+    ("BREN",     "MELI_REFRESH_TOKEN_BREN",     "Bren Castillo",      "Cuenta nueva",             "50u/dia"),
 ]
 
 now_cdmx = (datetime.now(timezone.utc) - timedelta(hours=6)).strftime("%Y-%m-%d %H:%M CDMX")

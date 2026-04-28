@@ -13,6 +13,7 @@ ACCOUNTS = [
     ("RAYMUNDO", "MELI_REFRESH_TOKEN_RAYMUNDO"),
     ("DILCIE", "MELI_REFRESH_TOKEN_DILCIE"),
     ("MILDRED", "MELI_REFRESH_TOKEN_MILDRED"),
+    ("BREN", "MELI_REFRESH_TOKEN_BREN"),
 ]
 
 cdmx = datetime.now(timezone.utc) - timedelta(hours=6)
