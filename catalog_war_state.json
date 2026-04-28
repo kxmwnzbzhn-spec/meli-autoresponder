@@ -12,24 +12,24 @@
       "original_price": 790.0,
       "floor": 434.50000000000006,
       "ceiling": 1027.0,
-      "last_change_at": 1777334877,
-      "role": "winner",
+      "last_change_at": 1777379361,
+      "role": "step_1",
       "label": "Sony Srs-xb100 Altavoz De Viaje Ina"
     },
     "MLM2890856611": {
       "original_price": 723.0,
       "floor": 397.65000000000003,
       "ceiling": 939.9,
-      "last_change_at": 1777334877,
-      "role": "winner",
+      "last_change_at": 1777379361,
+      "role": "step_1",
       "label": "Bocina Port\u00e1til Jbl Go 4 Bluetooth,"
     },
     "MLM2890818973": {
       "original_price": 667.0,
       "floor": 366.85,
       "ceiling": 867.1,
-      "last_change_at": 1777349200,
-      "role": "winner",
+      "last_change_at": 1777379361,
+      "role": "step_1",
       "label": "Bocina Jbl Go 4 Jblgo4 Port\u00e1til Con"
     },
     "MLM2890793871": {
@@ -44,8 +44,8 @@
       "original_price": 719.0,
       "floor": 395.45000000000005,
       "ceiling": 934.7,
-      "last_change_at": 1777358651,
-      "role": "winner",
+      "last_change_at": 1777379361,
+      "role": "step_1",
       "label": "Bocina Jbl Go 4 Jblgo4 Port\u00e1til Con"
     },
     "MLM5241631618": {
@@ -173,7 +173,7 @@
       "original_price": 577.0,
       "floor": 317.35,
       "ceiling": 750.1,
-      "last_change_at": 1777292599,
+      "last_change_at": 1777379361,
       "role": "winner",
       "label": "Bocina Jbl Go 4 Jblgo4 Port\u00e1til Con"
     },
@@ -181,7 +181,7 @@
       "original_price": 619.0,
       "floor": 340.45000000000005,
       "ceiling": 804.7,
-      "last_change_at": 1777229260,
+      "last_change_at": 1777379361,
       "role": "winner",
       "label": "Bocina Jbl Go 4 Jblgo4 Port\u00e1til Con"
     },
@@ -218,38 +218,182 @@
       "label": "Jbl Go 4 - Altavoz Ultraport\u00e1til Bl"
     },
     "MLM5253055546": {
-      "original_price": 690.0,
-      "floor": 379.50000000000006,
-      "ceiling": 897.0,
-      "last_change_at": 1777349200,
-      "role": "step_1",
+      "original_price": 790.0,
+      "floor": 434.50000000000006,
+      "ceiling": 1027.0,
+      "last_change_at": 1777379361,
+      "role": "step_2",
       "label": "Sony Srs-xb100 Altavoz De Viaje Ina"
     },
     "MLM5253055650": {
-      "original_price": 533.0,
-      "floor": 299,
-      "ceiling": 692.9,
-      "last_change_at": 1777349200,
-      "role": "step_1",
+      "original_price": 633.0,
+      "floor": 348.15000000000003,
+      "ceiling": 822.9,
+      "last_change_at": 1777379361,
+      "role": "step_2",
       "label": "Bocina Port\u00e1til Jbl Go 4 Bluetooth,"
     },
     "MLM5253055656": {
-      "original_price": 453.0,
-      "floor": 299,
-      "ceiling": 588.9,
-      "last_change_at": 1777349200,
-      "role": "step_1",
+      "original_price": 585.0,
+      "floor": 321.75,
+      "ceiling": 760.5,
+      "last_change_at": 1777379361,
+      "role": "step_2",
       "label": "Bocina Jbl Go 4 Jblgo4 Port\u00e1til Con"
     },
     "MLM2894897769": {
       "original_price": 613.0,
       "floor": 337.15000000000003,
       "ceiling": 796.9,
-      "last_change_at": 1777358651,
-      "role": "step_1",
+      "last_change_at": 1777379361,
+      "role": "step_2",
       "label": "Bocina Jbl Go 4 Jblgo4 Port\u00e1til Con"
+    },
+    "MLM2894910327": {
+      "original_price": 575.0,
+      "floor": 316.25,
+      "ceiling": 747.5,
+      "last_change_at": 1777379361,
+      "role": "step_1",
+      "label": "Bocina Port\u00e1til Jbl Go 4 Bluetooth,"
+    },
+    "MLM2894910283": {
+      "original_price": 519.0,
+      "floor": 299,
+      "ceiling": 674.7,
+      "last_change_at": 1777379361,
+      "role": "step_1",
+      "label": "Altavoz Bluetooth Ultraport\u00e1til Imp"
+    },
+    "MLM2894897697": {
+      "original_price": 519.0,
+      "floor": 299,
+      "ceiling": 674.7,
+      "last_change_at": 1777379361,
+      "role": "step_1",
+      "label": "Altavoz Bluetooth Jbl Go 4 Rosa Ros"
+    },
+    "MLM2894897703": {
+      "original_price": 519.0,
+      "floor": 299,
+      "ceiling": 674.7,
+      "last_change_at": 1777379361,
+      "role": "step_1",
+      "label": "Altavoz Port\u00e1til Jbl Go4 Go 4 00000"
+    },
+    "MLM2894897669": {
+      "original_price": 519.0,
+      "floor": 299,
+      "ceiling": 674.7,
+      "last_change_at": 1777379361,
+      "role": "step_1",
+      "label": "Bocina Port\u00e1til Jbl Go 4 Bluetooth,"
+    },
+    "MLM5253055638": {
+      "original_price": 519.0,
+      "floor": 299,
+      "ceiling": 674.7,
+      "last_change_at": 1777379361,
+      "role": "step_1",
+      "label": "Parlante Jbl Go4 Bt Azul Mm906jbl75"
+    },
+    "MLM5253055552": {
+      "original_price": 1019.0,
+      "floor": 560.45,
+      "ceiling": 1324.7,
+      "last_change_at": 1777379361,
+      "role": "step_1",
+      "label": "Altavoz Bluetooth Port\u00e1til Jbl Grip"
+    },
+    "MLM5253055570": {
+      "original_price": 519.0,
+      "floor": 299,
+      "ceiling": 674.7,
+      "last_change_at": 1777379361,
+      "role": "step_1",
+      "label": "Altavoz Bluetooth Azul Impermeable "
+    },
+    "MLM2894910367": {
+      "original_price": 519.0,
+      "floor": 299,
+      "ceiling": 674.7,
+      "last_change_at": 1777379361,
+      "role": "step_1",
+      "label": "Altavoz Port\u00e1til Jbl Go 4 Con Bluet"
+    },
+    "MLM5253150480": {
+      "original_price": 519.0,
+      "floor": 299,
+      "ceiling": 674.7,
+      "last_change_at": 1777379361,
+      "role": "step_1",
+      "label": "Parlante Jbl Go 4 Jblgo4redam Port\u00e1"
+    },
+    "MLM5253150402": {
+      "original_price": 1099.0,
+      "floor": 604.45,
+      "ceiling": 1428.7,
+      "last_change_at": 1777379361,
+      "role": "step_1",
+      "label": "Parlante Jbl Grip Port\u00e1til Con Blue"
+    },
+    "MLM5253150460": {
+      "original_price": 659.0,
+      "floor": 362.45000000000005,
+      "ceiling": 856.7,
+      "last_change_at": 1777379361,
+      "role": "step_1",
+      "label": "Altavoz Bluetooth Jbl Go 4 Port\u00e1til"
+    },
+    "MLM5253055612": {
+      "original_price": 519.0,
+      "floor": 299,
+      "ceiling": 674.7,
+      "last_change_at": 1777379361,
+      "role": "step_1",
+      "label": "Jbl Go4 Speaker Color Azul"
+    },
+    "MLM5253150412": {
+      "original_price": 519.0,
+      "floor": 299,
+      "ceiling": 674.7,
+      "last_change_at": 1777379361,
+      "role": "step_1",
+      "label": "Parlantes Port\u00e1til Jbl Go 4 Speaker"
+    },
+    "MLM5253055616": {
+      "original_price": 519.0,
+      "floor": 299,
+      "ceiling": 674.7,
+      "last_change_at": 1777379361,
+      "role": "step_1",
+      "label": "Altavoz Bluetooth V5.3 Jbl Go 4 Con"
+    },
+    "MLM2894910401": {
+      "original_price": 603.0,
+      "floor": 331.65000000000003,
+      "ceiling": 783.9,
+      "last_change_at": 1777379361,
+      "role": "step_1",
+      "label": "Jbl Go 4 - Altavoz Ultraport\u00e1til Bl"
+    },
+    "MLM2894910335": {
+      "original_price": 519.0,
+      "floor": 299,
+      "ceiling": 674.7,
+      "last_change_at": 1777379361,
+      "role": "step_1",
+      "label": "Parlante Bluetooth Jbl Go 4 Port\u00e1ti"
+    },
+    "MLM2894910317": {
+      "original_price": 519.0,
+      "floor": 299,
+      "ceiling": 674.7,
+      "last_change_at": 1777379361,
+      "role": "step_1",
+      "label": "Jbl Go 4 - Altavoz Bluetooth Ultrap"
     }
   },
-  "last_run": 1777379170,
+  "last_run": 1777379361,
   "winner_account": "RAYMUNDO"
 }
