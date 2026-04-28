@@ -1,17 +1,18 @@
 {
   "questions_seen": [],
   "claims_seen": [
-    "5503514908",
-    "5502854071",
-    "5503293842",
     "5503227787",
-    "5503287582",
-    "5503148321",
-    "5502933251",
-    "5501400150",
+    "5504040334",
     "5502336104",
+    "5503148321",
+    "5503293842",
+    "5501400150",
+    "5502854071",
+    "5502933251",
     "5502636400",
-    "5503096585"
+    "5503096585",
+    "5503287582",
+    "5503514908"
   ],
   "claim_states": {
     "5501400150": {
@@ -130,6 +131,17 @@
       "last_status": "dispute",
       "step": "pending_user_action",
       "urgent_alerted_at": 1777321212
+    },
+    "5504040334": {
+      "type": "otro",
+      "stage": "claim",
+      "reason": "PDD9949",
+      "amount": 299.0,
+      "product_title": "Bocina Bluetooth Jbl Clip 5 Portatil Negra Original Usada",
+      "product_item": "MLM2874537405",
+      "created_at": 1777336642,
+      "last_status": "claim",
+      "step": "pending_user_action"
     }
   },
   "last_telegram_update_id": 0,
@@ -144,7 +156,8 @@
     "alert_5503227787": 1777160383,
     "alert_5503287582": 1777176084,
     "alert_5503293842": 1777178849,
-    "alert_5503514908": 1777244816
+    "alert_5503514908": 1777244816,
+    "alert_5504040334": 1777336642
   },
   "seller_id": 2681696373,
   "seen_returns": {},
