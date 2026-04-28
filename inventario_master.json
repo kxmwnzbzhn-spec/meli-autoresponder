@@ -6,76 +6,297 @@
     "ultima_actualizacion": "2026-04-28T20:30:00-06:00"
   },
   "_categorize_keywords": {
-    "JBL Go 4|Aqua": ["go 4 aqua","go4 aqua","go 4 celeste","aqua go"],
-    "JBL Go 4|Camuflaje": ["go 4 camuflaje","go4 camuflaje","camo","camuflaje go"],
-    "JBL Go 4|Azul Marino": ["go 4 azul marino","go4 azul marino","azul marino"],
-    "JBL Go 4|Azul": ["go 4 azul","go4 azul"],
-    "JBL Go 4|Rojo": ["go 4 rojo","go4 rojo","go 4 roja"],
-    "JBL Go 4|Rosa": ["go 4 rosa","go4 rosa"],
-    "JBL Go 4|Negro": ["go 4 negro","go4 negro","go 4 negra"],
-    "JBL Go 3|Negro": ["go 3 negro","go3 negro"],
-    "JBL Charge 6|Negro": ["charge 6 negro","charge6 negro","charge 6 negra"],
-    "JBL Charge 6|Azul": ["charge 6 azul","charge6 azul"],
-    "JBL Charge 6|Rojo": ["charge 6 rojo","charge6 rojo","charge 6 roja"],
-    "JBL Charge 6|Camuflaje": ["charge 6 camuflaje","charge6 camuflaje"],
-    "JBL Flip 7|Negro": ["flip 7 negro","flip7 negro","flip 7 negra"],
-    "JBL Flip 7|Azul": ["flip 7 azul","flip7 azul"],
-    "JBL Flip 7|Rojo": ["flip 7 rojo","flip7 rojo","flip 7 roja"],
-    "JBL Flip 7|Morado": ["flip 7 morado","flip7 morado","flip 7 violeta"],
-    "JBL Clip 5|Negro": ["clip 5 negro","clip5 negro","clip 5 negra"],
-    "JBL Clip 5|Morado": ["clip 5 morado","clip5 morado","clip 5 violeta"],
-    "JBL Clip 5|Rosa": ["clip 5 rosa","clip5 rosa"],
-    "JBL Clip 7|Rojo": ["clip 7 rojo","clip7 rojo","clip 7 roja"],
-    "JBL Grip|Negro": ["grip negro","grip negra"],
-    "Sony XB100|Negro": ["xb100 negro","sony xb100","srs-xb100"],
-    "Bose|Blanco": ["bose blanco"],
-    "Bose|Negro": ["bose negro"],
-    "Redmi Buds 4 Lite|Negro": ["redmi buds 4 lite","buds 4 lite negro"]
+    "JBL Go 4|Aqua": [
+      "go 4 aqua",
+      "go4 aqua",
+      "go 4 celeste",
+      "aqua go"
+    ],
+    "JBL Go 4|Camuflaje": [
+      "go 4 camuflaje",
+      "go4 camuflaje",
+      "camo",
+      "camuflaje go"
+    ],
+    "JBL Go 4|Azul Marino": [
+      "go 4 azul marino",
+      "go4 azul marino",
+      "azul marino",
+      "go 4 azul",
+      "go4 azul",
+      "azul go 4",
+      "azul go4"
+    ],
+    "JBL Go 4|Rojo": [
+      "go 4 rojo",
+      "go4 rojo",
+      "go 4 roja"
+    ],
+    "JBL Go 4|Rosa": [
+      "go 4 rosa",
+      "go4 rosa"
+    ],
+    "JBL Go 4|Negro": [
+      "go 4 negro",
+      "go4 negro",
+      "go 4 negra"
+    ],
+    "JBL Go 3|Negro": [
+      "go 3 negro",
+      "go3 negro"
+    ],
+    "JBL Charge 6|Negro": [
+      "charge 6 negro",
+      "charge6 negro",
+      "charge 6 negra"
+    ],
+    "JBL Charge 6|Azul": [
+      "charge 6 azul",
+      "charge6 azul"
+    ],
+    "JBL Charge 6|Rojo": [
+      "charge 6 rojo",
+      "charge6 rojo",
+      "charge 6 roja"
+    ],
+    "JBL Charge 6|Camuflaje": [
+      "charge 6 camuflaje",
+      "charge6 camuflaje"
+    ],
+    "JBL Flip 7|Negro": [
+      "flip 7 negro",
+      "flip7 negro",
+      "flip 7 negra"
+    ],
+    "JBL Flip 7|Azul": [
+      "flip 7 azul",
+      "flip7 azul"
+    ],
+    "JBL Flip 7|Rojo": [
+      "flip 7 rojo",
+      "flip7 rojo",
+      "flip 7 roja"
+    ],
+    "JBL Flip 7|Morado": [
+      "flip 7 morado",
+      "flip7 morado",
+      "flip 7 violeta"
+    ],
+    "JBL Clip 5|Negro": [
+      "clip 5 negro",
+      "clip5 negro",
+      "clip 5 negra"
+    ],
+    "JBL Clip 5|Morado": [
+      "clip 5 morado",
+      "clip5 morado",
+      "clip 5 violeta"
+    ],
+    "JBL Clip 5|Rosa": [
+      "clip 5 rosa",
+      "clip5 rosa"
+    ],
+    "JBL Clip 7|Rojo": [
+      "clip 7 rojo",
+      "clip7 rojo",
+      "clip 7 roja"
+    ],
+    "JBL Grip|Negro": [
+      "grip negro",
+      "grip negra"
+    ],
+    "Sony XB100|Negro": [
+      "xb100 negro",
+      "sony xb100",
+      "srs-xb100"
+    ],
+    "Bose|Blanco": [
+      "bose blanco"
+    ],
+    "Bose|Negro": [
+      "bose negro"
+    ],
+    "Redmi Buds 4 Lite|Negro": [
+      "redmi buds 4 lite",
+      "buds 4 lite negro"
+    ]
   },
   "stock": {
-    "JBL Go 4|Aqua":          {"nuevo": 1013, "devolucion": 0,   "total": 1013},
-    "JBL Go 4|Camuflaje":     {"nuevo": 537,  "devolucion": 12,  "total": 549},
-    "JBL Go 4|Azul Marino":   {"nuevo": 457,  "devolucion": 0,   "total": 457},
-    "JBL Go 4|Rojo":          {"nuevo": 393,  "devolucion": 14,  "total": 407},
-    "JBL Go 4|Rosa":          {"nuevo": 124,  "devolucion": 5,   "total": 129},
-    "JBL Go 4|Negro":         {"nuevo": 99,   "devolucion": 31,  "total": 130},
-    "JBL Go 4|Azul":          {"nuevo": 0,    "devolucion": 9,   "total": 9},
-    "JBL Go 3|Negro":         {"nuevo": 936,  "devolucion": 0,   "total": 936},
-    "Sony XB100|Negro":       {"nuevo": 1896, "devolucion": 0,   "total": 1896},
-    "JBL Grip|Negro":         {"nuevo": 241,  "devolucion": 5,   "total": 246},
-    "JBL Clip 5|Morado":      {"nuevo": 240,  "devolucion": 16,  "total": 256},
-    "JBL Clip 5|Negro":       {"nuevo": 217,  "devolucion": 29,  "total": 246},
-    "JBL Clip 5|Rosa":        {"nuevo": 4,    "devolucion": 0,   "total": 4},
-    "JBL Clip 7|Rojo":        {"nuevo": 164,  "devolucion": 0,   "total": 164},
-    "JBL Flip 7|Azul":        {"nuevo": 145,  "devolucion": 0,   "total": 145},
-    "JBL Flip 7|Negro":       {"nuevo": 10,   "devolucion": 182, "total": 192},
-    "JBL Flip 7|Rojo":        {"nuevo": 0,    "devolucion": 40,  "total": 40},
-    "JBL Flip 7|Morado":      {"nuevo": 0,    "devolucion": 64,  "total": 64},
-    "JBL Charge 6|Rojo":      {"nuevo": 28,   "devolucion": 0,   "total": 28},
-    "JBL Charge 6|Negro":     {"nuevo": 11,   "devolucion": 6,   "total": 17},
-    "JBL Charge 6|Azul":      {"nuevo": 6,    "devolucion": 0,   "total": 6},
-    "JBL Charge 6|Camuflaje": {"nuevo": 6,    "devolucion": 0,   "total": 6},
-    "Redmi Buds 4 Lite|Negro":{"nuevo": 210,  "devolucion": 0,   "total": 210},
-    "Bose|Blanco":            {"nuevo": 77,   "devolucion": 0,   "total": 77},
-    "Bose|Negro":             {"nuevo": 73,   "devolucion": 2,   "total": 75},
-    "Dashcam ASV-DC170|-":    {"nuevo": 70,   "devolucion": 0,   "total": 70}
+    "JBL Go 4|Aqua": {
+      "nuevo": 1013,
+      "devolucion": 0,
+      "total": 1013
+    },
+    "JBL Go 4|Camuflaje": {
+      "nuevo": 537,
+      "devolucion": 12,
+      "total": 549
+    },
+    "JBL Go 4|Azul Marino": {
+      "nuevo": 457,
+      "devolucion": 9,
+      "total": 466
+    },
+    "JBL Go 4|Rojo": {
+      "nuevo": 393,
+      "devolucion": 14,
+      "total": 407
+    },
+    "JBL Go 4|Rosa": {
+      "nuevo": 124,
+      "devolucion": 5,
+      "total": 129
+    },
+    "JBL Go 4|Negro": {
+      "nuevo": 99,
+      "devolucion": 31,
+      "total": 130
+    },
+    "JBL Go 3|Negro": {
+      "nuevo": 936,
+      "devolucion": 0,
+      "total": 936
+    },
+    "Sony XB100|Negro": {
+      "nuevo": 1896,
+      "devolucion": 0,
+      "total": 1896
+    },
+    "JBL Grip|Negro": {
+      "nuevo": 241,
+      "devolucion": 5,
+      "total": 246
+    },
+    "JBL Clip 5|Morado": {
+      "nuevo": 240,
+      "devolucion": 16,
+      "total": 256
+    },
+    "JBL Clip 5|Negro": {
+      "nuevo": 217,
+      "devolucion": 29,
+      "total": 246
+    },
+    "JBL Clip 5|Rosa": {
+      "nuevo": 4,
+      "devolucion": 0,
+      "total": 4
+    },
+    "JBL Clip 7|Rojo": {
+      "nuevo": 164,
+      "devolucion": 0,
+      "total": 164
+    },
+    "JBL Flip 7|Azul": {
+      "nuevo": 145,
+      "devolucion": 0,
+      "total": 145
+    },
+    "JBL Flip 7|Negro": {
+      "nuevo": 10,
+      "devolucion": 182,
+      "total": 192
+    },
+    "JBL Flip 7|Rojo": {
+      "nuevo": 0,
+      "devolucion": 40,
+      "total": 40
+    },
+    "JBL Flip 7|Morado": {
+      "nuevo": 0,
+      "devolucion": 64,
+      "total": 64
+    },
+    "JBL Charge 6|Rojo": {
+      "nuevo": 28,
+      "devolucion": 0,
+      "total": 28
+    },
+    "JBL Charge 6|Negro": {
+      "nuevo": 11,
+      "devolucion": 6,
+      "total": 17
+    },
+    "JBL Charge 6|Azul": {
+      "nuevo": 6,
+      "devolucion": 0,
+      "total": 6
+    },
+    "JBL Charge 6|Camuflaje": {
+      "nuevo": 6,
+      "devolucion": 0,
+      "total": 6
+    },
+    "Redmi Buds 4 Lite|Negro": {
+      "nuevo": 210,
+      "devolucion": 0,
+      "total": 210
+    },
+    "Bose|Blanco": {
+      "nuevo": 77,
+      "devolucion": 0,
+      "total": 77
+    },
+    "Bose|Negro": {
+      "nuevo": 73,
+      "devolucion": 2,
+      "total": 75
+    },
+    "Dashcam ASV-DC170|-": {
+      "nuevo": 70,
+      "devolucion": 0,
+      "total": 70
+    }
   },
   "stock_perfumes": {
-    "Eilish Billie Eilish 100ml":   {"total": 48},
-    "Vainilla Mist 250ml":          {"total": 40},
-    "Million Gold 100ml":           {"total": 53},
-    "Set Valentino 30ml":           {"total": 48},
-    "Le Male Elixir 125ml":         {"total": 36},
-    "Million Royal 100ml":          {"total": 31},
-    "Armaf Delight Island Bliss 100ml":{"total": 29},
-    "Sauvage Elixir Dior 100ml":    {"total": 24},
-    "Sauvage Eau de Parfum 100ml":  {"total": 14},
-    "Sauvage Dior 100ml":           {"total": 12},
-    "Mandarin Sky 100ml":           {"total": 11},
-    "Khamrah Dukhan Lattafa 100ml": {"total": 12},
-    "Miss Dior Blooming Bouquet 100ml": {"total": 12},
-    "Gucci Flora Gorgeous Gardenia 100ml": {"total": 12},
-    "Miss Dior eau de parfum 100ml": {"total": 5},
-    "Yum Yum Armaf Delight 100ml":  {"total": 0}
-  }
+    "Eilish Billie Eilish 100ml": {
+      "total": 48
+    },
+    "Vainilla Mist 250ml": {
+      "total": 40
+    },
+    "Million Gold 100ml": {
+      "total": 53
+    },
+    "Set Valentino 30ml": {
+      "total": 48
+    },
+    "Le Male Elixir 125ml": {
+      "total": 36
+    },
+    "Million Royal 100ml": {
+      "total": 31
+    },
+    "Armaf Delight Island Bliss 100ml": {
+      "total": 29
+    },
+    "Sauvage Elixir Dior 100ml": {
+      "total": 24
+    },
+    "Sauvage Eau de Parfum 100ml": {
+      "total": 14
+    },
+    "Sauvage Dior 100ml": {
+      "total": 12
+    },
+    "Mandarin Sky 100ml": {
+      "total": 11
+    },
+    "Khamrah Dukhan Lattafa 100ml": {
+      "total": 12
+    },
+    "Miss Dior Blooming Bouquet 100ml": {
+      "total": 12
+    },
+    "Gucci Flora Gorgeous Gardenia 100ml": {
+      "total": 12
+    },
+    "Miss Dior eau de parfum 100ml": {
+      "total": 5
+    },
+    "Yum Yum Armaf Delight 100ml": {
+      "total": 0
+    }
+  },
+  "_last_sync": null
 }
