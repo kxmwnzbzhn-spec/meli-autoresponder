@@ -168,11 +168,17 @@ for key, items in sorted(groups.items()):
             from io import BytesIO
             writer = PdfWriter()
             for pdf_bytes in all_pdf_bytes:
-                reader = PdfReader(BytesIO(pdf_bytes))
-                for p in reader.pages: writer.add_page(p)
+                try:
+                    reader = PdfReader(BytesIO(pdf_bytes))
+                    for p in reader.pages: writer.add_page(p)
+                except Exception as e:
+                    print(f"  pdf concat err: {e}")
             with open(out_pdf, "wb") as f: writer.write(f)
-        except ImportError:
-            with open(out_pdf, "wb") as f: f.write(all_pdf_bytes[0])
+        except Exception as e:
+            print(f"  fallback save first PDF only: {e}")
+            try:
+                with open(out_pdf, "wb") as f: f.write(all_pdf_bytes[0])
+            except: pass
         labels_index.append({
             "key": key, "model": model, "color": color,
             "envios": len(items), "unidades": sum(i["qty"] for i in items),
