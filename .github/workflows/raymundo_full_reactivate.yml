@@ -1,0 +1,180 @@
+name: raymundo-full-reactivate
+on:
+  workflow_dispatch:
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions: { contents: write }
+    steps:
+      - uses: actions/checkout@v4
+        with: { token: '${{ secrets.REPO_PAT }}' }
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests -q
+      - run: |
+          python3 - <<'PY'
+          import os, json, time, requests
+          APP_ID = os.environ["MELI_APP_ID"]
+          APP_SECRET = os.environ["MELI_APP_SECRET"]
+          REFRESH = os.environ["MELI_REFRESH_TOKEN_RAYMUNDO"]
+          API = "https://api.mercadolibre.com"
+
+          # 1. Refresh access token
+          r = requests.post(f"{API}/oauth/token", data={
+              "grant_type":"refresh_token","client_id":APP_ID,
+              "client_secret":APP_SECRET,"refresh_token":REFRESH
+          }, timeout=20).json()
+          tok = r["access_token"]
+          uid = r["user_id"]
+          new_refresh = r.get("refresh_token", REFRESH)
+          h = {"Authorization": f"Bearer {tok}"}
+          print(f"OK refresh — user_id={uid}")
+
+          # 2. Get ALL items (active + paused)
+          all_ids = []
+          for status in ["active","paused"]:
+              offset = 0
+              while True:
+                  s = requests.get(f"{API}/users/{uid}/items/search?status={status}&limit=50&offset={offset}", headers=h, timeout=15).json()
+                  ids = s.get("results", [])
+                  all_ids.extend(ids)
+                  if len(ids) < 50: break
+                  offset += 50
+                  if offset > 5000: break
+          print(f"Total items en Raymundo: {len(all_ids)}")
+
+          # 3. Get details in batches of 20
+          paused_items = []
+          all_details = []
+          for i in range(0, len(all_ids), 20):
+              chunk = all_ids[i:i+20]
+              ids = ",".join(chunk)
+              j = requests.get(f"{API}/items?ids={ids}&attributes=id,status,available_quantity,price,title,catalog_listing,catalog_product_id", headers=h, timeout=20).json()
+              for it in j:
+                  if it.get("code") == 200:
+                      b = it["body"]
+                      all_details.append(b)
+                      if b.get("status") == "paused":
+                          paused_items.append(b)
+          print(f"  {len(paused_items)} paused, {len(all_details)-len(paused_items)} active")
+
+          # 4. Reactivate paused + set available_quantity=1
+          activated = []
+          errors = []
+          for it in paused_items:
+              iid = it["id"]
+              # First reactivate
+              r1 = requests.put(f"{API}/items/{iid}", headers=h, json={"status":"active","available_quantity":1}, timeout=20)
+              if r1.status_code == 200:
+                  activated.append(iid)
+              else:
+                  errors.append((iid, r1.status_code, r1.text[:120]))
+              time.sleep(0.15)
+          print(f"\nReactivados: {len(activated)}")
+          print(f"Errores: {len(errors)}")
+          for e in errors[:8]:
+              print(f"  {e}")
+
+          # 5. Set available_quantity=1 on already active items too (forzar 1 visible)
+          forced = 0
+          for it in all_details:
+              if it.get("status") == "active" and it.get("available_quantity", 0) != 1:
+                  iid = it["id"]
+                  r2 = requests.put(f"{API}/items/{iid}", headers=h, json={"available_quantity": 1}, timeout=20)
+                  if r2.status_code == 200:
+                      forced += 1
+                  time.sleep(0.12)
+          print(f"Forzados qty=1 en activos: {forced}")
+
+          # 6. Update multi_throttle_state.json
+          with open("multi_throttle_state.json") as f:
+              state = json.load(f)
+          state["accounts"]["RAYMUNDO"] = {
+              "date": time.strftime("%Y-%m-%d"),
+              "throttled": False,
+              "items_paused": [],
+              "sales_count": 0
+          }
+          with open("multi_throttle_state.json","w") as f:
+              json.dump(state, f, indent=2)
+          print("multi_throttle_state.json: RAYMUNDO reset")
+
+          # 7. Update stock_config_raymundo.json — auto_replenish para todos los items reactivados
+          try:
+              with open("stock_config_raymundo.json") as f:
+                  cfg = json.load(f)
+          except:
+              cfg = {}
+          for it in all_details:
+              iid = it["id"]
+              if iid not in cfg:
+                  cfg[iid] = {
+                      "line": "Raymundo",
+                      "auto_replenish": True,
+                      "min_visible": 1,
+                      "active": True,
+                      "title": (it.get("title") or "")[:60]
+                  }
+              else:
+                  cfg[iid]["auto_replenish"] = True
+                  cfg[iid]["min_visible"] = 1
+                  cfg[iid]["active"] = True
+          with open("stock_config_raymundo.json","w") as f:
+              json.dump(cfg, f, indent=2, ensure_ascii=False)
+          print(f"stock_config_raymundo.json: {len(cfg)} items con auto_replenish=true, min_visible=1")
+
+          # 8. Add catalog items to catalog_war_state.json
+          with open("catalog_war_state.json") as f:
+              war = json.load(f)
+          added_war = 0
+          for it in all_details:
+              iid = it["id"]
+              if it.get("catalog_listing") or it.get("catalog_product_id"):
+                  if iid not in war.get("items", {}):
+                      war.setdefault("items", {})[iid] = {
+                          "original_price": it.get("price", 0),
+                          "floor": max(299, round(it.get("price", 0) * 0.55, 2)),
+                          "ceiling": round(it.get("price", 0) * 1.30, 2),
+                          "last_change_at": int(time.time()),
+                          "role": "winner",
+                          "label": (it.get("title") or "")[:40]
+                      }
+                      added_war += 1
+          with open("catalog_war_state.json","w") as f:
+              json.dump(war, f, indent=2, ensure_ascii=False)
+          print(f"catalog_war_state.json: +{added_war} items de Raymundo agregados como winner")
+
+          # 9. Telegram
+          tg_t = os.environ.get("TELEGRAM_BOT_TOKEN")
+          tg_c = os.environ.get("TELEGRAM_CHAT_ID")
+          if tg_t and tg_c:
+              msg = (
+                  f"✅ <b>Raymundo Santa Cruz reactivado</b>\n\n"
+                  f"📦 Items totales: {len(all_details)}\n"
+                  f"🟢 Reactivados (paused→active): {len(activated)}\n"
+                  f"🔢 Qty forzado a 1: {forced + len(activated)}\n"
+                  f"🤖 Auto-stock: {len(cfg)} items\n"
+                  f"⚔️ Catalog war: +{added_war} winners\n"
+                  f"❌ Errores: {len(errors)}"
+              )
+              requests.post(f"https://api.telegram.org/bot{tg_t}/sendMessage", data={
+                  "chat_id": tg_c, "text": msg, "parse_mode":"HTML"
+              }, timeout=10)
+          PY
+        env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_RAYMUNDO: ${{ secrets.MELI_REFRESH_TOKEN_RAYMUNDO }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+      - run: |
+          git config user.email b@b.com
+          git config user.name bot
+          for i in 1 2 3 4 5; do
+            git pull --rebase 2>/dev/null || true
+            git add multi_throttle_state.json stock_config_raymundo.json catalog_war_state.json
+            if git diff --cached --quiet; then break; fi
+            git commit -m "raymundo: full reactivate (1 visible + autostock + war)" && git push origin main && break
+            sleep $((RANDOM % 8 + 3))
+          done
