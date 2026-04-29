@@ -1,0 +1,78 @@
+name: raymundo-sales-now
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - run: pip install requests -q
+      - run: |
+          python3 - <<'PY'
+          import os, requests, time
+          from datetime import datetime, timedelta, timezone
+          API="https://api.mercadolibre.com"
+          r = requests.post(f"{API}/oauth/token", data={
+              "grant_type":"refresh_token",
+              "client_id":os.environ["MELI_APP_ID"],
+              "client_secret":os.environ["MELI_APP_SECRET"],
+              "refresh_token":os.environ["MELI_REFRESH_TOKEN_RAYMUNDO"]
+          }, timeout=15).json()
+          tok=r.get("access_token"); uid=r.get("user_id")
+          h={"Authorization":f"Bearer {tok}"}
+          print(f"uid={uid}")
+
+          # Items count
+          counts={}
+          for s in ["active","paused","closed"]:
+              total=0; off=0
+              while True:
+                  j=requests.get(f"{API}/users/{uid}/items/search?status={s}&limit=50&offset={off}",headers=h,timeout=15).json()
+                  res=j.get("results",[])
+                  total+=len(res)
+                  if len(res)<50: break
+                  off+=50
+                  if off>3000: break
+              counts[s]=total
+          print(f"Items: {counts}")
+
+          # Orders en últimas 24h y 7 días
+          now = datetime.now(timezone.utc)
+          windows = [("últimas 24h", 1), ("últimos 7 días", 7), ("últimos 30 días", 30)]
+          for label, days in windows:
+              since = (now - timedelta(days=days)).strftime("%Y-%m-%dT%H:%M:%S.000-00:00")
+              total_orders = 0
+              total_revenue = 0
+              total_units = 0
+              by_item = {}
+              off=0
+              while True:
+                  url=f"{API}/orders/search?seller={uid}&order.date_created.from={since}&offset={off}&limit=50&sort=date_desc"
+                  j=requests.get(url, headers=h, timeout=15).json()
+                  results = j.get("results", [])
+                  if not results: break
+                  for o in results:
+                      total_orders += 1
+                      total_revenue += o.get("total_amount", 0)
+                      for it in o.get("order_items", []):
+                          q = it.get("quantity", 0)
+                          total_units += q
+                          item = it.get("item", {})
+                          title = item.get("title", "?")[:50]
+                          key = title
+                          by_item[key] = by_item.get(key, 0) + q
+                  if len(results) < 50: break
+                  off += 50
+                  if off > 1000: break
+              print(f"\n=== {label} ===")
+              print(f"  órdenes: {total_orders}")
+              print(f"  unidades: {total_units}")
+              print(f"  revenue: ${total_revenue:.2f}")
+              if by_item:
+                  print(f"  Top items:")
+                  for t, q in sorted(by_item.items(), key=lambda x:-x[1])[:5]:
+                      print(f"    {q}u  {t}")
+          PY
+        env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_RAYMUNDO: ${{ secrets.MELI_REFRESH_TOKEN_RAYMUNDO }}
