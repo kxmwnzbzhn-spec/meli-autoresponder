@@ -2,7 +2,7 @@ name: labels-pending-delivery
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 13 * * *'  # 13:00 UTC = 07:00 CDMX (todos los días)
+    - cron: '0 12 * * *'  # 12:00 UTC = 06:00 CDMX (todos los días)
 permissions: { contents: write }
 concurrency:
   group: labels-pending
@@ -31,13 +31,62 @@ jobs:
           MELI_REFRESH_TOKEN_YC_NEW: ${{ secrets.MELI_REFRESH_TOKEN_YC_NEW }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+      - name: Build merged PDF + send to Telegram
+        run: |
+          python3 - <<'PY'
+          import glob, os, requests
+          from pypdf import PdfWriter
+          dirs = sorted(glob.glob("labels_pending_*"), reverse=True)
+          if not dirs:
+              print("No labels folder")
+              raise SystemExit(0)
+          d = dirs[0]
+          out = f"TODAS_{d}.pdf"
+          w = PdfWriter()
+          pdfs = sorted(glob.glob(f"{d}/*.pdf"))
+          unicos = [p for p in pdfs if "MIXTO" not in p]
+          mixtos = [p for p in pdfs if "MIXTO" in p]
+          for p in unicos + mixtos:
+              w.append(p)
+          if len(unicos + mixtos) == 0:
+              print("No PDFs to merge")
+              raise SystemExit(0)
+          with open(out, "wb") as f:
+              w.write(f)
+          print(f"Merged {len(unicos+mixtos)} PDFs into {out}")
+
+          tg_token = os.environ.get("TELEGRAM_BOT_TOKEN")
+          tg_chat = os.environ.get("TELEGRAM_CHAT_ID")
+          if tg_token and tg_chat:
+              with open(out, "rb") as f:
+                  r = requests.post(
+                      f"https://api.telegram.org/bot{tg_token}/sendDocument",
+                      data={"chat_id": tg_chat, "caption": f"📦 Etiquetas {d}\n{len(unicos+mixtos)} envíos"},
+                      files={"document": (out, f, "application/pdf")},
+                      timeout=60,
+                  )
+                  print("TG:", r.status_code, r.text[:200])
+          PY
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
       - uses: actions/upload-artifact@v4
         with:
           name: labels-${{ github.run_id }}
-          path: labels_pending_*/
-      - run: |
+          path: |
+            labels_pending_*/
+            TODAS_labels_pending_*.pdf
+      - name: Commit labels to repo
+        run: |
+          git config user.email b@b.com
+          git config user.name bot
           for i in 1 2 3 4 5; do
-            git config user.email b@b.com && git config user.name bot
-            git pull --rebase 2>/dev/null && git add "labels_pending_*/" && (git diff --cached --quiet || git commit -m "Etiquetas corte 7am") && git push origin main && break
+            git pull --rebase 2>/dev/null || true
+            git add -A labels_pending_* TODAS_labels_pending_*.pdf 2>/dev/null || true
+            if git diff --cached --quiet; then
+              echo "Nothing to commit"
+              break
+            fi
+            git commit -m "Etiquetas corte 6am" && git push origin main && break
             sleep $((RANDOM % 8 + 3))
           done
