@@ -1,0 +1,52 @@
+name: meli-addr-explore
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - run: pip install requests -q
+      - run: |
+          python3 - <<'PY'
+          import os, json, requests
+          API="https://api.mercadolibre.com"
+          r = requests.post(f"{API}/oauth/token", data={
+              "grant_type":"refresh_token",
+              "client_id":os.environ["MELI_APP_ID"],
+              "client_secret":os.environ["MELI_APP_SECRET"],
+              "refresh_token":os.environ["MELI_REFRESH_TOKEN"]
+          }, timeout=15).json()
+          tok=r.get("access_token"); uid=r.get("user_id")
+          print(f"Auth OK: uid={uid}")
+          h={"Authorization":f"Bearer {tok}"}
+
+          ADDR_ID = "1538883121"
+          tries = [
+              f"{API}/addresses/v3/address?address-id={ADDR_ID}",
+              f"{API}/addresses/v3/address/{ADDR_ID}",
+              f"{API}/addresses/{ADDR_ID}",
+              f"{API}/users/{uid}/addresses",
+              f"{API}/users/{uid}/addresses?app=MY_ML",
+              f"{API}/users/{uid}/addresses?status=active",
+              f"{API}/users/me/addresses",
+              f"{API}/myml/addresses",
+              f"{API}/myml/addresses/v3",
+              f"{API}/addresses/v3/hub/actionable?app-id=MY_ML",
+              f"{API}/addresses?user_id={uid}",
+              f"{API}/users/{uid}/billing_info",
+              f"{API}/users/{uid}/profile",
+          ]
+          for url in tries:
+              try:
+                  rr = requests.get(url, headers=h, timeout=10)
+                  print(f"\n[{rr.status_code}] {url}")
+                  if rr.status_code == 200:
+                      txt = rr.text[:500]
+                      print(f"  → {txt}")
+              except Exception as e:
+                  print(f"[ERR] {url}: {e}")
+          PY
+        env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
