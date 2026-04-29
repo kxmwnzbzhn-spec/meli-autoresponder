@@ -1,0 +1,93 @@
+name: meli-addresses-dry-run
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - run: pip install requests -q
+      - run: |
+          python3 - <<'PY'
+          import os, json, requests, time
+          API = "https://api.mercadolibre.com"
+          APP_ID = os.environ["MELI_APP_ID"]
+          APP_SECRET = os.environ["MELI_APP_SECRET"]
+
+          ACCOUNTS = {
+              "JUAN":     "MELI_REFRESH_TOKEN",
+              "CLARIBEL": "MELI_REFRESH_TOKEN_CLARIBEL",
+              "ASVA":     "MELI_REFRESH_TOKEN_ASVA",
+              "RAYMUNDO": "MELI_REFRESH_TOKEN_RAYMUNDO",
+              "DILCIE":   "MELI_REFRESH_TOKEN_DILCIE",
+              "MILDRED":  "MELI_REFRESH_TOKEN_MILDRED",
+              "YC_NEW":   "MELI_REFRESH_TOKEN_YC_NEW",
+              "BREN":     "MELI_REFRESH_TOKEN_BREN",
+              "WILBERT":  "MELI_REFRESH_TOKEN_WILBERT",
+          }
+
+          report = {}
+          for acc, env_key in ACCOUNTS.items():
+              rt = os.environ.get(env_key)
+              if not rt:
+                  print(f"\n=== {acc}: SIN refresh_token (SKIP) ===")
+                  report[acc] = {"error": "no token"}
+                  continue
+              try:
+                  r = requests.post(f"{API}/oauth/token", data={
+                      "grant_type":"refresh_token","client_id":APP_ID,
+                      "client_secret":APP_SECRET,"refresh_token":rt
+                  }, timeout=15).json()
+                  tok = r.get("access_token")
+                  uid = r.get("user_id")
+                  if not tok:
+                      print(f"\n=== {acc}: oauth fail ===")
+                      report[acc] = {"error":"oauth fail", "resp":r}
+                      continue
+                  h = {"Authorization": f"Bearer {tok}"}
+                  # Get user info (incluye phone)
+                  user = requests.get(f"{API}/users/{uid}", headers=h, timeout=10).json()
+                  phone = user.get("phone", {})
+                  alt_phone = user.get("alternative_phone", {})
+
+                  # Get addresses
+                  addrs = requests.get(f"{API}/users/{uid}/addresses", headers=h, timeout=10).json()
+
+                  print(f"\n=== {acc} (uid={uid}) ===")
+                  print(f"  user.phone:             {phone}")
+                  print(f"  user.alternative_phone: {alt_phone}")
+                  print(f"  addresses count: {len(addrs) if isinstance(addrs, list) else 'N/A'}")
+                  if isinstance(addrs, list):
+                      for a in addrs:
+                          print(f"    - id={a.get('id')} type={a.get('types', a.get('address_type'))} street={a.get('street_name','')[:30]}, phone={a.get('phone','')!r}, contact={a.get('contact','')!r}")
+
+                  report[acc] = {
+                      "user_id": uid,
+                      "phone": phone,
+                      "alt_phone": alt_phone,
+                      "addresses": addrs if isinstance(addrs, list) else None,
+                  }
+              except Exception as e:
+                  print(f"\n=== {acc}: ERROR {e} ===")
+                  report[acc] = {"error": str(e)}
+
+          # Save full report
+          with open("addresses_dry_run.json","w") as f:
+              json.dump(report, f, indent=2, default=str)
+          print(f"\n\nFull report saved to addresses_dry_run.json")
+          PY
+        env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+          MELI_REFRESH_TOKEN_CLARIBEL: ${{ secrets.MELI_REFRESH_TOKEN_CLARIBEL }}
+          MELI_REFRESH_TOKEN_ASVA: ${{ secrets.MELI_REFRESH_TOKEN_ASVA }}
+          MELI_REFRESH_TOKEN_RAYMUNDO: ${{ secrets.MELI_REFRESH_TOKEN_RAYMUNDO }}
+          MELI_REFRESH_TOKEN_DILCIE: ${{ secrets.MELI_REFRESH_TOKEN_DILCIE }}
+          MELI_REFRESH_TOKEN_MILDRED: ${{ secrets.MELI_REFRESH_TOKEN_MILDRED }}
+          MELI_REFRESH_TOKEN_BREN: ${{ secrets.MELI_REFRESH_TOKEN_BREN }}
+          MELI_REFRESH_TOKEN_YC_NEW: ${{ secrets.MELI_REFRESH_TOKEN_YC_NEW }}
+          MELI_REFRESH_TOKEN_WILBERT: ${{ secrets.MELI_REFRESH_TOKEN_WILBERT }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: addresses_dry_run
+          path: addresses_dry_run.json
