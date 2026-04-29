@@ -33,10 +33,10 @@
       "label": "Bocina Jbl Go 4 Jblgo4 Port\u00e1til Con"
     },
     "MLM2890793871": {
-      "original_price": 529.0,
-      "floor": 299,
-      "ceiling": 687.7,
-      "last_change_at": 1777349200,
+      "original_price": 688.0,
+      "floor": 378.40000000000003,
+      "ceiling": 894.4,
+      "last_change_at": 1777438719,
       "role": "winner",
       "label": "Bocina Jbl Go 4 Jblgo4 Port\u00e1til Con"
     },
@@ -426,6 +426,6 @@
       "label": "Armaf Club De Nuit Maleka Edp Mujer"
     }
   },
-  "last_run": 1777425964,
+  "last_run": 1777438719,
   "winner_account": "RAYMUNDO"
 }
