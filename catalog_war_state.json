@@ -20,7 +20,7 @@
       "original_price": 723.0,
       "floor": 397.65000000000003,
       "ceiling": 939.9,
-      "last_change_at": 1777493186,
+      "last_change_at": 1777497516,
       "role": "step_1",
       "label": "Bocina Port\u00e1til Jbl Go 4 Bluetooth,"
     },
@@ -165,7 +165,7 @@
       "original_price": 623.0,
       "floor": 342.65000000000003,
       "ceiling": 809.9,
-      "last_change_at": 1777493186,
+      "last_change_at": 1777497516,
       "role": "winner",
       "label": "Bocina Port\u00e1til Jbl Go 4 Bluetooth,"
     },
@@ -538,6 +538,6 @@
       "label": "Jbl Go 4 - Altavoz Bluetooth Ultraport\u00e1t"
     }
   },
-  "last_run": 1777493186,
+  "last_run": 1777497516,
   "winner_account": "RAYMUNDO"
 }
