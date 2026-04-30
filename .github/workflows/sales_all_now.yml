@@ -1,0 +1,117 @@
+name: sales-all-accounts-now
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - run: pip install requests -q
+      - run: |
+          python3 - <<'PY'
+          import os, requests
+          from datetime import datetime, timedelta, timezone
+          API="https://api.mercadolibre.com"
+
+          ACCOUNTS = {
+              "JUAN":     "MELI_REFRESH_TOKEN",
+              "CLARIBEL": "MELI_REFRESH_TOKEN_CLARIBEL",
+              "ASVA":     "MELI_REFRESH_TOKEN_ASVA",
+              "RAYMUNDO": "MELI_REFRESH_TOKEN_RAYMUNDO",
+              "DILCIE":   "MELI_REFRESH_TOKEN_DILCIE",
+              "MILDRED":  "MELI_REFRESH_TOKEN_MILDRED",
+              "YC_NEW":   "MELI_REFRESH_TOKEN_YC_NEW",
+              "BREN":     "MELI_REFRESH_TOKEN_BREN",
+          }
+
+          now = datetime.now(timezone.utc)
+          since_24h = (now - timedelta(days=1)).strftime("%Y-%m-%dT%H:%M:%S.000-00:00")
+          since_7d = (now - timedelta(days=7)).strftime("%Y-%m-%dT%H:%M:%S.000-00:00")
+
+          totals_24h = {"orders":0, "units":0, "revenue":0}
+          totals_7d = {"orders":0, "units":0, "revenue":0}
+
+          per_account = {}
+
+          for acc, env_key in ACCOUNTS.items():
+              rt = os.environ.get(env_key)
+              if not rt:
+                  print(f"\n=== {acc}: SIN TOKEN ===")
+                  continue
+              try:
+                  r = requests.post(f"{API}/oauth/token", data={
+                      "grant_type":"refresh_token",
+                      "client_id":os.environ["MELI_APP_ID"],
+                      "client_secret":os.environ["MELI_APP_SECRET"],
+                      "refresh_token":rt
+                  }, timeout=15).json()
+                  tok=r.get("access_token"); uid=r.get("user_id")
+                  if not tok:
+                      print(f"\n=== {acc}: oauth fail ===")
+                      continue
+                  h={"Authorization":f"Bearer {tok}"}
+                  account_data = {}
+                  for label, since in [("24h", since_24h), ("7d", since_7d)]:
+                      total_orders = total_revenue = total_units = 0
+                      off=0
+                      while True:
+                          j=requests.get(f"{API}/orders/search?seller={uid}&order.date_created.from={since}&offset={off}&limit=50&sort=date_desc", headers=h, timeout=20).json()
+                          results = j.get("results", [])
+                          if not results: break
+                          for o in results:
+                              total_orders += 1
+                              total_revenue += o.get("total_amount", 0) or 0
+                              for it in o.get("order_items", []):
+                                  total_units += it.get("quantity", 0) or 0
+                          if len(results) < 50: break
+                          off += 50
+                          if off > 1000: break
+                      account_data[label] = {"orders":total_orders, "units":total_units, "revenue":total_revenue}
+                      if label == "24h":
+                          totals_24h["orders"] += total_orders
+                          totals_24h["units"] += total_units
+                          totals_24h["revenue"] += total_revenue
+                      else:
+                          totals_7d["orders"] += total_orders
+                          totals_7d["units"] += total_units
+                          totals_7d["revenue"] += total_revenue
+                  per_account[acc] = account_data
+                  print(f"\n=== {acc} ===")
+                  print(f"  24h: {account_data['24h']['orders']} ord / {account_data['24h']['units']} u / ${account_data['24h']['revenue']:.0f}")
+                  print(f"  7d:  {account_data['7d']['orders']} ord / {account_data['7d']['units']} u / ${account_data['7d']['revenue']:.0f}")
+              except Exception as e:
+                  print(f"\n=== {acc}: ERROR {e} ===")
+
+          print("\n\n========== TOTAL CONSOLIDADO ==========")
+          print(f"24h:  {totals_24h['orders']} órdenes | {totals_24h['units']} unidades | ${totals_24h['revenue']:.0f}")
+          print(f"7d:   {totals_7d['orders']} órdenes | {totals_7d['units']} unidades | ${totals_7d['revenue']:.0f}")
+
+          # Mandar resumen a Telegram
+          tg_t = os.environ.get("TELEGRAM_BOT_TOKEN")
+          tg_c = os.environ.get("TELEGRAM_CHAT_ID")
+          if tg_t and tg_c:
+              lines = ["📊 <b>Ventas hoy — todas las cuentas</b>\n"]
+              lines.append("<b>Últimas 24h:</b>")
+              for acc, d in sorted(per_account.items(), key=lambda x:-x[1]['24h']['revenue']):
+                  if d['24h']['orders']>0:
+                      lines.append(f"• {acc}: {d['24h']['orders']} ord / {d['24h']['units']} u / <b>${d['24h']['revenue']:.0f}</b>")
+              lines.append(f"\n<b>TOTAL 24h:</b> {totals_24h['orders']} órdenes / {totals_24h['units']} u / <b>${totals_24h['revenue']:.0f}</b>")
+              lines.append(f"\n<b>TOTAL 7d:</b> {totals_7d['orders']} órdenes / {totals_7d['units']} u / <b>${totals_7d['revenue']:.0f}</b>")
+              msg = "\n".join(lines)
+              requests.post(f"https://api.telegram.org/bot{tg_t}/sendMessage", data={
+                  "chat_id":tg_c, "text":msg, "parse_mode":"HTML"
+              }, timeout=10)
+              print("TG sent")
+          PY
+        env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+          MELI_REFRESH_TOKEN_CLARIBEL: ${{ secrets.MELI_REFRESH_TOKEN_CLARIBEL }}
+          MELI_REFRESH_TOKEN_ASVA: ${{ secrets.MELI_REFRESH_TOKEN_ASVA }}
+          MELI_REFRESH_TOKEN_RAYMUNDO: ${{ secrets.MELI_REFRESH_TOKEN_RAYMUNDO }}
+          MELI_REFRESH_TOKEN_DILCIE: ${{ secrets.MELI_REFRESH_TOKEN_DILCIE }}
+          MELI_REFRESH_TOKEN_MILDRED: ${{ secrets.MELI_REFRESH_TOKEN_MILDRED }}
+          MELI_REFRESH_TOKEN_YC_NEW: ${{ secrets.MELI_REFRESH_TOKEN_YC_NEW }}
+          MELI_REFRESH_TOKEN_BREN: ${{ secrets.MELI_REFRESH_TOKEN_BREN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
