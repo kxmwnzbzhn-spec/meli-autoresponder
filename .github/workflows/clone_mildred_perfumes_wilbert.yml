@@ -1,0 +1,185 @@
+name: clone-mildred-perfumes-to-wilbert
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with: { token: '${{ secrets.REPO_PAT }}' }
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests -q
+      - run: |
+          python3 - <<'PY'
+          import os, json, time, requests
+          API="https://api.mercadolibre.com"
+          APP_ID = os.environ["MELI_APP_ID"]
+          APP_SECRET = os.environ["MELI_APP_SECRET"]
+
+          # 1. Refresh tokens for both
+          def refresh(rt):
+              r = requests.post(f"{API}/oauth/token", data={
+                  "grant_type":"refresh_token","client_id":APP_ID,
+                  "client_secret":APP_SECRET,"refresh_token":rt
+              }, timeout=15).json()
+              return r["access_token"], r["user_id"]
+
+          tok_m, uid_m = refresh(os.environ["MELI_REFRESH_TOKEN_MILDRED"])
+          tok_w, uid_w = refresh(os.environ["MELI_REFRESH_TOKEN_WILBERT"])
+          print(f"Mildred uid={uid_m}, Wilbert uid={uid_w}")
+          h_m = {"Authorization": f"Bearer {tok_m}"}
+          h_w = {"Authorization": f"Bearer {tok_w}", "Content-Type":"application/json"}
+
+          # 2. Get all of Mildred's items (active + paused)
+          ids = []
+          for status in ["active","paused"]:
+              off=0
+              while True:
+                  r = requests.get(f"{API}/users/{uid_m}/items/search?status={status}&limit=50&offset={off}", headers=h_m, timeout=15).json()
+                  results = r.get("results",[])
+                  ids.extend(results)
+                  if len(results)<50: break
+                  off+=50
+                  if off>5000: break
+          print(f"Mildred total items: {len(ids)}")
+
+          # 3. Get details — filter for catalog perfumes
+          catalog_perfumes = []
+          for i in range(0, len(ids), 20):
+              chunk = ",".join(ids[i:i+20])
+              r = requests.get(f"{API}/items?ids={chunk}", headers=h_m, timeout=20).json()
+              for it in r:
+                  if it.get("code")!=200: continue
+                  b = it["body"]
+                  cpid = b.get("catalog_product_id")
+                  cat = b.get("category_id","")
+                  title = (b.get("title") or "").lower()
+                  # Filtro: tiene catalog_product_id Y categoría perfume O título contiene "perfume", "edt", "edp", "eau"
+                  is_perfume = (
+                      cat in ("MLM439552","MLM5726","MLM440005") or  # categorías comunes de perfumes
+                      "perfume" in title or "fragancia" in title or
+                      " edp" in title or " edt" in title or "eau de" in title
+                  )
+                  if cpid and is_perfume:
+                      catalog_perfumes.append(b)
+          print(f"Catálogo perfumes en Mildred: {len(catalog_perfumes)}")
+
+          # 4. Get Wilbert's existing catalog_product_ids para no duplicar
+          wilbert_existing = set()
+          for status in ["active","paused"]:
+              off=0
+              while True:
+                  r = requests.get(f"{API}/users/{uid_w}/items/search?status={status}&limit=50&offset={off}", headers={"Authorization": f"Bearer {tok_w}"}, timeout=15).json()
+                  results = r.get("results",[])
+                  for ii in range(0, len(results), 20):
+                      chunk2 = ",".join(results[ii:ii+20])
+                      rr = requests.get(f"{API}/items?ids={chunk2}&attributes=id,catalog_product_id", headers={"Authorization": f"Bearer {tok_w}"}, timeout=20).json()
+                      for x in rr:
+                          if x.get("code")==200 and x["body"].get("catalog_product_id"):
+                              wilbert_existing.add(x["body"]["catalog_product_id"])
+                  if len(results)<50: break
+                  off+=50
+                  if off>5000: break
+          print(f"Wilbert ya tiene: {len(wilbert_existing)} catálogos")
+
+          # 5. Para cada perfume catálogo de Mildred, crearlo en Wilbert
+          created = []
+          skipped = []
+          errors = []
+          for src in catalog_perfumes:
+              cpid = src["catalog_product_id"]
+              if cpid in wilbert_existing:
+                  skipped.append((src["id"], src["title"][:40], "ya existe en Wilbert"))
+                  continue
+
+              # Build item payload con catalog listing + qty=1
+              payload = {
+                  "catalog_product_id": cpid,
+                  "catalog_listing": True,
+                  "category_id": src.get("category_id"),
+                  "price": src.get("price"),
+                  "currency_id": src.get("currency_id","MXN"),
+                  "available_quantity": 1,  # ← 1 pieza visible
+                  "buying_mode": "buy_it_now",
+                  "listing_type_id": src.get("listing_type_id","gold_pro"),
+                  "condition": src.get("condition","new"),
+                  "shipping": src.get("shipping",{"mode":"me2","local_pick_up":False,"free_shipping":False}),
+              }
+              if src.get("sale_terms"):
+                  payload["sale_terms"] = src["sale_terms"]
+
+              r = requests.post(f"{API}/items", headers=h_w, data=json.dumps(payload), timeout=30)
+              if r.status_code in (200,201):
+                  new_id = r.json().get("id")
+                  created.append((new_id, src["title"][:50]))
+                  print(f"  ✅ {new_id} ← {src['id']}: {src['title'][:60]}")
+              else:
+                  errors.append((src["id"], src["title"][:40], r.status_code, r.text[:200]))
+                  print(f"  ❌ {src['id']} {src['title'][:40]}: {r.status_code} {r.text[:160]}")
+              time.sleep(0.4)
+
+          print(f"\n=== RESUMEN ===")
+          print(f"  Creados: {len(created)}")
+          print(f"  Skipped (ya existían): {len(skipped)}")
+          print(f"  Errores: {len(errors)}")
+
+          # 6. Update stock_config_wilbert.json para auto_replenish
+          cfg = {}
+          for new_id, title in created:
+              cfg[new_id] = {
+                  "line": "Wilbert-Perfumes",
+                  "auto_replenish": True,
+                  "min_visible": 1,
+                  "active": True,
+                  "title": title
+              }
+          if cfg:
+              try:
+                  with open("stock_config_wilbert.json") as f:
+                      existing = json.load(f)
+                  existing.update(cfg)
+                  cfg = existing
+              except FileNotFoundError:
+                  pass
+              with open("stock_config_wilbert.json","w") as f:
+                  json.dump(cfg, f, indent=2, ensure_ascii=False)
+              print(f"\nstock_config_wilbert.json actualizado con {len(cfg)} items")
+
+          # 7. Telegram
+          tg_t = os.environ.get("TELEGRAM_BOT_TOKEN")
+          tg_c = os.environ.get("TELEGRAM_CHAT_ID")
+          if tg_t and tg_c:
+              msg = (
+                  f"🌸 <b>Clon perfumes Mildred → Wilbert</b>\n\n"
+                  f"📦 Catálogo perfumes encontrados en Mildred: {len(catalog_perfumes)}\n"
+                  f"✅ Publicados en Wilbert: {len(created)}\n"
+                  f"⏭️ Ya existían: {len(skipped)}\n"
+                  f"❌ Errores: {len(errors)}\n"
+                  f"\n🔢 Cada uno con <b>qty=1 visible</b> + auto-stock"
+              )
+              if errors:
+                  msg += f"\n\n<b>Errores ejemplo:</b>\n"
+                  for e in errors[:3]:
+                      msg += f"• {e[1]}: {e[2]} {e[3][:80]}\n"
+              requests.post(f"https://api.telegram.org/bot{tg_t}/sendMessage", data={
+                  "chat_id":tg_c,"text":msg,"parse_mode":"HTML"
+              }, timeout=10)
+          PY
+        env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_MILDRED: ${{ secrets.MELI_REFRESH_TOKEN_MILDRED }}
+          MELI_REFRESH_TOKEN_WILBERT: ${{ secrets.MELI_REFRESH_TOKEN_WILBERT }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+      - run: |
+          git config user.email b@b.com
+          git config user.name bot
+          for i in 1 2 3 4 5; do
+            git pull --rebase 2>/dev/null || true
+            git add stock_config_wilbert.json 2>/dev/null || true
+            if git diff --cached --quiet; then break; fi
+            git commit -m "wilbert: stock_config tras clon Mildred perfumes" && git push origin main && break
+            sleep $((RANDOM % 8 + 3))
+          done
