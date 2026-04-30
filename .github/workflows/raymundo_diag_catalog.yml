@@ -1,0 +1,41 @@
+name: raymundo-diag-catalog
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    steps:
+      - run: pip install requests -q
+      - run: |
+          python3 - <<'PY'
+          import os, requests, json
+          API="https://api.mercadolibre.com"
+          r=requests.post(f"{API}/oauth/token",data={
+              "grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],
+              "client_secret":os.environ["MELI_APP_SECRET"],"refresh_token":os.environ["MELI_REFRESH_TOKEN_RAYMUNDO"]
+          },timeout=15).json()
+          tok=r["access_token"]; uid=r["user_id"]
+          h={"Authorization":f"Bearer {tok}"}
+          ids=[]
+          off=0
+          while True:
+              j=requests.get(f"{API}/users/{uid}/items/search?status=active&limit=50&offset={off}",headers=h,timeout=15).json()
+              res=j.get("results",[])
+              ids.extend(res)
+              if len(res)<50: break
+              off+=50
+              if off>3000: break
+          print(f"Total active: {len(ids)}")
+
+          # Get full details of all 22
+          for i in range(0,len(ids),20):
+              chunk=",".join(ids[i:i+20])
+              rr=requests.get(f"{API}/items?ids={chunk}",headers=h,timeout=20).json()
+              for it in rr:
+                  if it.get("code")!=200: continue
+                  b=it["body"]
+                  print(f"  {b['id']}: cpid={b.get('catalog_product_id')} cl={b.get('catalog_listing')} price=${b.get('price')} status={b.get('status')} title={b.get('title','')[:50]}")
+          PY
+        env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_RAYMUNDO: ${{ secrets.MELI_REFRESH_TOKEN_RAYMUNDO }}
