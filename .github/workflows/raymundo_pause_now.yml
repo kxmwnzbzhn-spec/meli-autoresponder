@@ -1,0 +1,96 @@
+name: raymundo-pause-NOW
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions: { contents: write }
+    steps:
+      - uses: actions/checkout@v4
+        with: { token: '${{ secrets.REPO_PAT }}' }
+      - run: pip install requests -q
+      - run: |
+          python3 - <<'PY'
+          import os, json, time, requests
+          API="https://api.mercadolibre.com"
+          r = requests.post(f"{API}/oauth/token", data={
+              "grant_type":"refresh_token",
+              "client_id":os.environ["MELI_APP_ID"],
+              "client_secret":os.environ["MELI_APP_SECRET"],
+              "refresh_token":os.environ["MELI_REFRESH_TOKEN_RAYMUNDO"]
+          }, timeout=15).json()
+          tok=r["access_token"]; uid=r["user_id"]
+          h={"Authorization":f"Bearer {tok}"}
+          print(f"uid={uid}")
+
+          # Get ALL active items
+          ids=[]
+          off=0
+          while True:
+              j=requests.get(f"{API}/users/{uid}/items/search?status=active&limit=50&offset={off}",headers=h,timeout=15).json()
+              res=j.get("results",[])
+              ids.extend(res)
+              if len(res)<50: break
+              off+=50
+              if off>5000: break
+          print(f"Items ACTIVOS encontrados: {len(ids)}")
+
+          # Pause ALL of them
+          paused=[]
+          errors=[]
+          for iid in ids:
+              r2 = requests.put(f"{API}/items/{iid}", headers=h, json={"status":"paused"}, timeout=20)
+              if r2.status_code==200:
+                  paused.append(iid)
+                  if len(paused)%10==0:
+                      print(f"  pausados: {len(paused)}")
+              else:
+                  errors.append((iid, r2.status_code, r2.text[:100]))
+              time.sleep(0.15)
+
+          print(f"\n✅ PAUSADOS: {len(paused)}")
+          print(f"❌ Errores: {len(errors)}")
+          for e in errors[:5]:
+              print(f"  {e}")
+
+          # Update multi_throttle_state.json
+          try:
+              with open("multi_throttle_state.json") as f:
+                  state = json.load(f)
+          except:
+              state = {"accounts":{}}
+          state["accounts"]["RAYMUNDO"] = {
+              "date": time.strftime("%Y-%m-%d"),
+              "throttled": True,
+              "items_paused": paused,
+              "sales_count": 0,
+              "throttled_at": int(time.time())
+          }
+          with open("multi_throttle_state.json","w") as f:
+              json.dump(state, f, indent=2)
+
+          # Telegram
+          tg_t=os.environ.get("TELEGRAM_BOT_TOKEN"); tg_c=os.environ.get("TELEGRAM_CHAT_ID")
+          if tg_t and tg_c:
+              requests.post(f"https://api.telegram.org/bot{tg_t}/sendMessage", data={
+                  "chat_id":tg_c,
+                  "text":f"⏸️ <b>RAYMUNDO PAUSADO</b>\n\nItems pausados: {len(paused)}\nErrores: {len(errors)}",
+                  "parse_mode":"HTML"
+              }, timeout=10)
+          PY
+        env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_RAYMUNDO: ${{ secrets.MELI_REFRESH_TOKEN_RAYMUNDO }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+      - run: |
+          git config user.email b@b.com
+          git config user.name bot
+          for i in 1 2 3; do
+            git pull --rebase 2>/dev/null || true
+            git add multi_throttle_state.json
+            if git diff --cached --quiet; then break; fi
+            git commit -m "raymundo: pause NOW" && git push origin main && break
+            sleep 5
+          done
