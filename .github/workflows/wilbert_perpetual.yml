@@ -1,0 +1,52 @@
+name: wilbert-perpetual-replenish
+on:
+  workflow_dispatch:
+    inputs:
+      generation:
+        description: 'gen counter'
+        required: false
+        default: '0'
+  schedule:
+    - cron: '*/5 * * * *'
+permissions:
+  contents: write
+  actions: write
+concurrency:
+  group: wilbert-perpetual
+  cancel-in-progress: false
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.REPO_PAT }}
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests -q
+      - name: Run replenish loop (5 min, 30s polling)
+        run: python scripts/wilbert_replenish.py
+        env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_WILBERT: ${{ secrets.MELI_REFRESH_TOKEN_WILBERT }}
+          LOOP_ITERATIONS: "10"
+          LOOP_SLEEP: "30"
+      - name: Commit state
+        continue-on-error: true
+        run: |
+          for i in 1 2 3 4 5; do
+            git config user.email b@b.com && git config user.name bot
+            git pull --rebase 2>/dev/null && git add stock_config_wilbert.json && (git diff --cached --quiet || git commit -m "wilbert perpetual replenish state") && git push origin main && break
+            sleep $((RANDOM % 8 + 3))
+          done
+      - name: Re-trigger SELF
+        run: |
+          GEN=${{ inputs.generation || '0' }}
+          NEXT=$((GEN+1))
+          curl -s -X POST \
+            -H "Authorization: token ${{ secrets.REPO_PAT }}" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/kxmwnzbzhn-spec/meli-autoresponder/actions/workflows/wilbert_perpetual.yml/dispatches" \
+            -d "{\"ref\":\"main\",\"inputs\":{\"generation\":\"$NEXT\"}}" -w "\nHTTP %{http_code}\n"
