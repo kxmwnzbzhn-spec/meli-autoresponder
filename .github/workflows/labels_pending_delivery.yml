@@ -16,7 +16,7 @@ jobs:
         with: { token: '${{ secrets.REPO_PAT }}' }
       - uses: actions/setup-python@v5
         with: { python-version: '3.11' }
-      - run: pip install requests openpyxl pypdf -q
+      - run: pip install requests openpyxl pypdf reportlab -q
       - run: python scripts/labels_pending_delivery.py
         env:
           MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
@@ -28,6 +28,7 @@ jobs:
           MELI_REFRESH_TOKEN_DILCIE: ${{ secrets.MELI_REFRESH_TOKEN_DILCIE }}
           MELI_REFRESH_TOKEN_MILDRED: ${{ secrets.MELI_REFRESH_TOKEN_MILDRED }}
           MELI_REFRESH_TOKEN_BREN: ${{ secrets.MELI_REFRESH_TOKEN_BREN }}
+          MELI_REFRESH_TOKEN_WILBERT: ${{ secrets.MELI_REFRESH_TOKEN_WILBERT }}
           MELI_REFRESH_TOKEN_YC_NEW: ${{ secrets.MELI_REFRESH_TOKEN_YC_NEW }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
