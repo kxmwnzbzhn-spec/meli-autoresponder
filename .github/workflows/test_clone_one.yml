@@ -1,0 +1,49 @@
+name: test-clone-one
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    steps:
+      - run: pip install requests -q
+      - run: |
+          python3 - <<'PY'
+          import os, json, requests
+          API="https://api.mercadolibre.com"
+          def refresh(rt):
+              r=requests.post(f"{API}/oauth/token",data={
+                  "grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],
+                  "client_secret":os.environ["MELI_APP_SECRET"],"refresh_token":rt
+              },timeout=15).json()
+              return r["access_token"], r["user_id"]
+          tok_w,uid_w=refresh(os.environ["MELI_REFRESH_TOKEN_WILBERT"])
+          tok_c,uid_c=refresh(os.environ["MELI_REFRESH_TOKEN_CLARIBEL"])
+          h_c={"Authorization":f"Bearer {tok_c}"}
+          h_w={"Authorization":f"Bearer {tok_w}","Content-Type":"application/json"}
+
+          # Get full src item
+          src=requests.get(f"{API}/items/MLM5245546756",headers=h_c,timeout=15).json()
+          print("=== SOURCE ITEM ===")
+          print(json.dumps({k:v for k,v in src.items() if k not in ('descriptions','pictures','geolocation')}, indent=2)[:3000])
+
+          # Try minimal payload first
+          payload={
+              "catalog_product_id":src["catalog_product_id"],
+              "catalog_listing":True,
+              "price":src["price"],
+              "currency_id":"MXN",
+              "available_quantity":1,
+              "listing_type_id":"gold_pro",
+              "condition":"new",
+              "sale_terms":src.get("sale_terms",[]),
+          }
+          print("\n=== TRY 1: payload minimo ===")
+          print(json.dumps(payload,indent=2))
+          r=requests.post(f"{API}/items",headers=h_w,data=json.dumps(payload),timeout=30)
+          print(f"\nResp [{r.status_code}]:")
+          print(json.dumps(r.json(),indent=2))
+          PY
+        env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_CLARIBEL: ${{ secrets.MELI_REFRESH_TOKEN_CLARIBEL }}
+          MELI_REFRESH_TOKEN_WILBERT: ${{ secrets.MELI_REFRESH_TOKEN_WILBERT }}
