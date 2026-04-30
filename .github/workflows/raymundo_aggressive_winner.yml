@@ -25,13 +25,11 @@ jobs:
           h={"Authorization":f"Bearer {tok}","Content-Type":"application/json"}
           print(f"uid={uid}")
 
-          # Cargar catalog_war_state para floor
           try:
               with open("catalog_war_state.json") as f:
                   war=json.load(f)
           except: war={"items":{}}
 
-          # Get all active catalog items
           ids=[]
           off=0
           while True:
@@ -41,120 +39,115 @@ jobs:
               if len(res)<50: break
               off+=50
               if off>5000: break
-          print(f"Items activos Raymundo: {len(ids)}")
 
-          # Check each catalog item for winner status
-          losing=[]
-          tied=[]
-          winning=[]
+          # Get my item details
+          my_items={}
           for i in range(0,len(ids),20):
               chunk=",".join(ids[i:i+20])
-              rr=requests.get(f"{API}/items?ids={chunk}&attributes=id,catalog_listing,catalog_product_id,price,title,status",headers=h,timeout=20).json()
+              rr=requests.get(f"{API}/items?ids={chunk}",headers=h,timeout=20).json()
               for it in rr:
                   if it.get("code")!=200: continue
                   b=it["body"]
                   cpid=b.get("catalog_product_id")
                   if not cpid or not b.get("catalog_listing"): continue
-                  iid=b["id"]
-                  my_price=b.get("price",0) or 0
+                  my_items[b["id"]]={"cpid":cpid,"price":b.get("price",0),"title":b.get("title","")[:60]}
+          print(f"Mis items catalogo: {len(my_items)}")
 
-                  # Get product winner
-                  try:
-                      pp=requests.get(f"{API}/products/{cpid}/items?limit=10", headers=h, timeout=10).json()
-                  except: continue
+          losing=[]; tied=[]; winning=[]
+          for iid, info in my_items.items():
+              cpid = info["cpid"]
+              try:
+                  prod = requests.get(f"{API}/products/{cpid}", headers=h, timeout=10).json()
+              except Exception as e:
+                  print(f"  err product {cpid}: {e}")
+                  continue
+              bbw = prod.get("buy_box_winner") or {}
+              winner_item_id = bbw.get("item_id")
+              winner_price = bbw.get("price",0) or 0
+              winner_seller = bbw.get("seller_id")
 
-                  competitors=[]
-                  for c in pp.get("results",[]):
-                      cprice=c.get("price",0) or 0
-                      cseller=c.get("seller_id")
-                      cstatus=c.get("status","")
-                      if cstatus!="active" or not cprice: continue
-                      competitors.append((cprice, cseller, c.get("id")))
+              # Check tied: si MELI tiene multiple items al mismo precio
+              # Usamos /products/{cpid}/items para ver lista
+              try:
+                  items_list = requests.get(f"{API}/products/{cpid}/items?limit=20",headers=h,timeout=10).json()
+                  comps = items_list.get("results",[])
+              except: comps = []
+              same_price = [c for c in comps if abs((c.get("price") or 0) - winner_price) < 0.5 and (c.get("status")=="active")]
+              tied_with_others = len(same_price) > 1
 
-                  if not competitors: continue
-                  competitors.sort(key=lambda x:x[0])
-                  winner_price=competitors[0][0]
-                  # Quien gana
-                  is_winner = my_price <= winner_price + 0.01 and any(c[1]==uid for c in competitors if abs(c[0]-winner_price)<0.5)
-                  tied_with_others = sum(1 for c in competitors if abs(c[0]-winner_price)<0.5) > 1
-
-                  info = {
-                      "id":iid, "cpid":cpid, "my_price":my_price,
-                      "winner_price":winner_price, "title":b.get("title","")[:60],
-                      "competitors": len(competitors)
-                  }
-                  if my_price > winner_price + 0.5:
-                      info["delta"] = my_price - winner_price
-                      losing.append(info)
-                  elif tied_with_others and is_winner:
-                      tied.append(info)
-                  else:
-                      winning.append(info)
+              record = {
+                  "id":iid,"cpid":cpid,"my_price":info["price"],
+                  "winner_price":winner_price,"winner_id":winner_item_id,
+                  "winner_seller":winner_seller,
+                  "is_me_winner": winner_item_id==iid or winner_seller==uid,
+                  "tied":tied_with_others,
+                  "title":info["title"],
+              }
+              if record["is_me_winner"] and tied_with_others:
+                  tied.append(record)
+              elif record["is_me_winner"]:
+                  winning.append(record)
+              elif winner_price > 0 and info["price"] > winner_price + 0.5:
+                  record["delta"] = info["price"] - winner_price
+                  losing.append(record)
+              else:
+                  winning.append(record)  # may be unable to determine
 
           print(f"\n📊 Resultado:")
           print(f"  🥇 Solo winner: {len(winning)}")
-          print(f"  🤝 Tied (compartiendo 1er): {len(tied)}")
+          print(f"  🤝 Tied: {len(tied)}")
           print(f"  ❌ Perdiendo: {len(losing)}")
 
-          # AGGRESSIVE: bajar precio para ganar solo
           adjustments = []
           for info in losing + tied:
               iid = info["id"]
-              cpid = info["cpid"]
-              # Floor del catalog_war_state
               war_item = war.get("items",{}).get(iid,{})
               floor = war_item.get("floor", 299)
 
-              # Target: $1 menos que el current winner (o $0.5 si tied)
-              if iid in [t["id"] for t in tied]:
-                  target = round(info["winner_price"] - 0.5, 2)  # solo 0.5 menos para tied
+              if info in tied:
+                  target = round(info["winner_price"] - 1, 2)
                   reason = "tied"
               else:
-                  target = round(info["winner_price"] - 1.0, 2)  # 1 peso menos para perdiendo
+                  target = round(info["winner_price"] - 1, 2)
                   reason = "perdiendo"
 
               if target < floor:
-                  print(f"  ⚠️  {iid} target ${target} < floor ${floor} → quedo en floor")
+                  print(f"  ⚠️  {iid} target ${target} < floor ${floor}")
                   target = floor
 
               if target >= info["my_price"]:
-                  continue  # no subir precio
-              # Update price
+                  continue
+
               rp=requests.put(f"{API}/items/{iid}", headers=h, json={"price":target}, timeout=15)
               if rp.status_code==200:
                   adjustments.append((iid, info["my_price"], target, info["winner_price"], reason, info["title"]))
-                  print(f"  💰 {iid}: ${info['my_price']} → ${target} (winner ${info['winner_price']}, {reason}) — {info['title'][:50]}")
-                  # update war state last_change
+                  print(f"  💰 {iid}: ${info['my_price']:.0f} → ${target:.0f} (winner ${info['winner_price']:.0f}, {reason}) — {info['title'][:50]}")
                   war.setdefault("items",{}).setdefault(iid,{}).update({
                       "last_change_at": int(time.time()),
                       "last_action":"down","last_ref":target
                   })
               else:
-                  print(f"  ❌ {iid}: HTTP {rp.status_code} {rp.text[:120]}")
+                  print(f"  ❌ {iid}: {rp.status_code} {rp.text[:120]}")
               time.sleep(0.3)
 
-          # Save state
           with open("catalog_war_state.json","w") as f:
               json.dump(war,f,indent=2,ensure_ascii=False)
 
-          # Telegram
           tg_t=os.environ.get("TELEGRAM_BOT_TOKEN")
           tg_c=os.environ.get("TELEGRAM_CHAT_ID")
           if tg_t and tg_c:
-              msg=(
-                  f"⚔️ <b>Raymundo Catalog War</b>\n\n"
-                  f"🥇 Winner solo: {len(winning)}\n"
-                  f"🤝 Tied: {len(tied)}\n"
-                  f"❌ Perdiendo: {len(losing)}\n\n"
-                  f"💰 Precios bajados: {len(adjustments)}"
-              )
+              msg=(f"⚔️ <b>Raymundo Catalog War</b>\n\n"
+                   f"🥇 Winner: {len(winning)}\n"
+                   f"🤝 Tied: {len(tied)}\n"
+                   f"❌ Perdiendo: {len(losing)}\n"
+                   f"💰 Bajadas: {len(adjustments)}")
               if adjustments:
-                  msg += "\n\nTop ajustes:\n"
-                  for adj in adjustments[:6]:
-                      msg += f"• {adj[5][:35]}: ${adj[1]:.0f}→${adj[2]:.0f} (vs ${adj[3]:.0f})\n"
+                  msg += "\n\nAjustes:\n"
+                  for adj in adjustments[:10]:
+                      msg += f"• {adj[5][:30]}: ${adj[1]:.0f}→${adj[2]:.0f} (vs ${adj[3]:.0f})\n"
               requests.post(f"https://api.telegram.org/bot{tg_t}/sendMessage", data={
                   "chat_id":tg_c,"text":msg,"parse_mode":"HTML"
-              }, timeout=10)
+              },timeout=10)
           PY
         env:
           MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
@@ -169,6 +162,6 @@ jobs:
             git pull --rebase 2>/dev/null || true
             git add catalog_war_state.json 2>/dev/null
             if git diff --cached --quiet; then break; fi
-            git commit -m "raymundo war: ajustar precios" && git push origin main && break
+            git commit -m "raymundo war v2: ajustar" && git push origin main && break
             sleep 5
           done
