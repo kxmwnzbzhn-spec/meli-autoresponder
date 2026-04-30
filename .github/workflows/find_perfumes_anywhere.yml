@@ -1,0 +1,75 @@
+name: find-perfumes-anywhere
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - run: pip install requests -q
+      - run: |
+          python3 - <<'PY'
+          import os, requests
+          API="https://api.mercadolibre.com"
+          ACCS = {
+              "JUAN":"MELI_REFRESH_TOKEN",
+              "CLARIBEL":"MELI_REFRESH_TOKEN_CLARIBEL",
+              "ASVA":"MELI_REFRESH_TOKEN_ASVA",
+              "RAYMUNDO":"MELI_REFRESH_TOKEN_RAYMUNDO",
+              "DILCIE":"MELI_REFRESH_TOKEN_DILCIE",
+              "MILDRED":"MELI_REFRESH_TOKEN_MILDRED",
+              "YC_NEW":"MELI_REFRESH_TOKEN_YC_NEW",
+              "BREN":"MELI_REFRESH_TOKEN_BREN",
+              "WILBERT":"MELI_REFRESH_TOKEN_WILBERT",
+          }
+          for acc, env_key in ACCS.items():
+              rt = os.environ.get(env_key)
+              if not rt:
+                  continue
+              try:
+                  r = requests.post(f"{API}/oauth/token", data={
+                      "grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],
+                      "client_secret":os.environ["MELI_APP_SECRET"],"refresh_token":rt
+                  }, timeout=15).json()
+                  tok=r.get("access_token"); uid=r.get("user_id")
+                  if not tok: continue
+                  h={"Authorization":f"Bearer {tok}"}
+                  ids=[]
+                  for s in ["active","paused"]:
+                      off=0
+                      while True:
+                          j=requests.get(f"{API}/users/{uid}/items/search?status={s}&limit=50&offset={off}",headers=h,timeout=15).json()
+                          ids.extend(j.get("results",[]))
+                          if len(j.get("results",[]))<50: break
+                          off+=50
+                          if off>3000: break
+                  perfumes_cat=0
+                  perfumes_total=0
+                  total = len(ids)
+                  for i in range(0,len(ids),20):
+                      chunk=",".join(ids[i:i+20])
+                      rr=requests.get(f"{API}/items?ids={chunk}&attributes=id,catalog_listing,catalog_product_id,category_id,title,status",headers=h,timeout=20).json()
+                      for it in rr:
+                          if it.get("code")!=200: continue
+                          b=it["body"]
+                          t=(b.get("title") or "").lower()
+                          cat=b.get("category_id","")
+                          if any(k in t for k in ["perfume","fragancia","edt","edp","eau"]) or cat in ("MLM439552","MLM5726","MLM440005"):
+                              perfumes_total+=1
+                              if b.get("catalog_listing") or b.get("catalog_product_id"):
+                                  perfumes_cat+=1
+                  print(f"{acc:10} total={total:4}  perfumes={perfumes_total:4}  perfumes_catalogo={perfumes_cat:4}")
+              except Exception as e:
+                  print(f"{acc}: {e}")
+          PY
+        env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+          MELI_REFRESH_TOKEN_CLARIBEL: ${{ secrets.MELI_REFRESH_TOKEN_CLARIBEL }}
+          MELI_REFRESH_TOKEN_ASVA: ${{ secrets.MELI_REFRESH_TOKEN_ASVA }}
+          MELI_REFRESH_TOKEN_RAYMUNDO: ${{ secrets.MELI_REFRESH_TOKEN_RAYMUNDO }}
+          MELI_REFRESH_TOKEN_DILCIE: ${{ secrets.MELI_REFRESH_TOKEN_DILCIE }}
+          MELI_REFRESH_TOKEN_MILDRED: ${{ secrets.MELI_REFRESH_TOKEN_MILDRED }}
+          MELI_REFRESH_TOKEN_YC_NEW: ${{ secrets.MELI_REFRESH_TOKEN_YC_NEW }}
+          MELI_REFRESH_TOKEN_BREN: ${{ secrets.MELI_REFRESH_TOKEN_BREN }}
+          MELI_REFRESH_TOKEN_WILBERT: ${{ secrets.MELI_REFRESH_TOKEN_WILBERT }}
