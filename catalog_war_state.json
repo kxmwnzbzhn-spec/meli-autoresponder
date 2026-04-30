@@ -197,25 +197,31 @@
       "original_price": 1118.96,
       "floor": 615.4280000000001,
       "ceiling": 1454.6480000000001,
-      "last_change_at": 1777302980,
+      "last_change_at": 1777581662,
       "role": "winner",
-      "label": "Parlante Jbl Grip Portátil Con Blue"
+      "label": "Parlante Jbl Grip Portátil Con Blue",
+      "last_action": "down",
+      "last_ref": 1076
     },
     "MLM2891178603": {
       "original_price": 709.0,
       "floor": 389.95000000000005,
       "ceiling": 921.7,
-      "last_change_at": 1777302980,
+      "last_change_at": 1777581661,
       "role": "winner",
-      "label": "Altavoz Bluetooth Jbl Go 4 Portátil"
+      "label": "Altavoz Bluetooth Jbl Go 4 Portátil",
+      "last_action": "down",
+      "last_ref": 652
     },
     "MLM2891178563": {
       "original_price": 635.0,
       "floor": 349.25,
       "ceiling": 825.5,
-      "last_change_at": 1777493186,
+      "last_change_at": 1777581660,
       "role": "winner",
-      "label": "Jbl Go 4 - Altavoz Ultraportátil Bl"
+      "label": "Jbl Go 4 - Altavoz Ultraportátil Bl",
+      "last_action": "down",
+      "last_ref": 583
     },
     "MLM5253055546": {
       "original_price": 890.0,
