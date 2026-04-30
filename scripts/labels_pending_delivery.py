@@ -1,8 +1,8 @@
 """
 Etiquetas pendientes de entregar (ready_to_ship, incluye delayed/printed/ready_to_print).
 Cada PDF se ANOTA con el contenido del paquete (modelo + color + cantidad) bien grande
-en la parte superior para que el empacador sepa qué meter.
-Ventana: 7 días para no perderse atrasadas.
+en la parte superior para que el empacador sepa que meter.
+Ventana: 7 dias para no perderse atrasadas.
 """
 import os, requests, re
 from datetime import datetime, timezone, timedelta
@@ -29,8 +29,6 @@ ACCOUNTS = [
 ]
 
 INCLUDE_STATUSES = {"ready_to_ship"}
-# NO excluimos sub-status — incluimos printed, ready_to_print, delayed, etc
-# Solo excluimos picked_up (ya recolectado por mensajeria)
 EXCLUDE_SUBSTATUS = {"picked_up"}
 
 def categorize(title):
@@ -56,10 +54,9 @@ def categorize(title):
     return ("Otros", color)
 
 cdmx = datetime.now(timezone.utc) - timedelta(hours=6)
-# Ventana de 7 días para capturar atrasadas
 window_start = (cdmx - timedelta(days=7)).replace(hour=0,minute=0,second=0,microsecond=0)
 date_from = window_start.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.000Z")
-print(f"📅 Rango: {window_start.strftime('%Y-%m-%d')} CDMX → ahora (7 días)")
+print(f"Rango: {window_start.strftime('%Y-%m-%d')} CDMX -> ahora (7 dias)")
 
 now_cdmx = cdmx.strftime("%Y-%m-%d_%H%M")
 OUTDIR = f"labels_pending_{now_cdmx}"
@@ -71,7 +68,7 @@ status_counts = defaultdict(int)
 for label, env_var in ACCOUNTS:
     RT = os.environ.get(env_var, "")
     if not RT:
-        print(f"[{label}] sin token — skip"); continue
+        print(f"[{label}] sin token - skip"); continue
     try:
         r = requests.post("https://api.mercadolibre.com/oauth/token",
             data={"grant_type":"refresh_token","client_id":APP_ID,"client_secret":APP_SECRET,"refresh_token":RT},
@@ -89,7 +86,7 @@ for label, env_var in ACCOUNTS:
         if not results: break
         for o in results:
             if o.get("status") not in ("paid","shipped","partially_paid","cancelled"):
-                continue  # incluye cancelled por si MELI deja shipment activo
+                continue
             sh = o.get("shipping",{}) or {}
             sh_id = sh.get("id")
             if not sh_id: continue
@@ -122,12 +119,11 @@ for label, env_var in ACCOUNTS:
             account_count += 1
         offset += 50
         if offset >= rr.get("paging",{}).get("total",0): break
-    print(f"  → {account_count} envíos pendientes")
+    print(f"  -> {account_count} envios pendientes")
 
-print(f"
-=== Status (top 15) ===")
+print("\n=== Status (top 15) ===")
 for s, c in sorted(status_counts.items(), key=lambda x: -x[1])[:15]:
-    mark = "✓" if s.split("/")[0] in INCLUDE_STATUSES and s.split("/")[1] not in EXCLUDE_SUBSTATUS else "✗"
+    mark = "OK" if s.split("/")[0] in INCLUDE_STATUSES and s.split("/")[1] not in EXCLUDE_SUBSTATUS else "no"
     print(f"  {mark} {s}: {c}")
 
 def composition_signature(items):
@@ -140,7 +136,6 @@ def composition_signature(items):
     return "+".join(parts)
 
 def composition_pretty(items):
-    """Texto legible para anotar en el PDF: 'JBL Go 4 Azul x1 + JBL Go 4 Rojo x2'"""
     consol = defaultdict(int)
     for it in items:
         k = f"{it['model']} {it['color']}"
@@ -162,14 +157,12 @@ for sh in shipments.values():
 
 total_shipments = len(shipments)
 total_units = sum(sum(i["qty"] for i in s["items"]) for s in shipments.values())
-print(f"
-📦 INCLUIDOS: {total_shipments} envíos / {total_units} unidades / {len(groups)} grupos ({len(mixed_shipments)} MIXTOS)\n")
+print(f"\nINCLUIDOS: {total_shipments} envios / {total_units} unidades / {len(groups)} grupos ({len(mixed_shipments)} MIXTOS)\n")
 
 def annotate_pdf(pdf_bytes, shipment_info):
-    """Sobrepone texto grande en la parte superior con composición + cuenta + buyer."""
+    """Sobrepone texto grande arriba con composicion + cuenta + buyer."""
     from pypdf import PdfReader, PdfWriter
     from reportlab.pdfgen import canvas
-    from reportlab.lib.pagesizes import letter
 
     pretty = shipment_info.get("pretty","?")
     account = shipment_info.get("account","?")
@@ -177,34 +170,36 @@ def annotate_pdf(pdf_bytes, shipment_info):
     sub = shipment_info.get("substatus","")
     ship_id = shipment_info.get("shipment_id","")
 
-    overlay_buf = BytesIO()
     base = PdfReader(BytesIO(pdf_bytes))
     writer = PdfWriter()
     for page in base.pages:
         media = page.mediabox
         w = float(media.width); h = float(media.height)
+        overlay_buf = BytesIO()
         c = canvas.Canvas(overlay_buf, pagesize=(w, h))
-        # Caja blanca arriba
-        c.setFillColorRGB(1,1,0.85)  # amarillo claro
-        c.rect(0, h-90, w, 90, fill=1, stroke=0)
-        # Texto grande con composicion
+        # Caja amarilla arriba
+        c.setFillColorRGB(1, 1, 0.7)
+        c.rect(0, h-95, w, 95, fill=1, stroke=0)
+        # Borde negro
+        c.setStrokeColorRGB(0,0,0)
+        c.setLineWidth(2)
+        c.rect(0, h-95, w, 95, fill=0, stroke=1)
+        # Texto composicion
         c.setFillColorRGB(0,0,0)
         c.setFont("Helvetica-Bold", 18)
-        # Truncar si muy largo
-        text_pretty = pretty[:55] + "..." if len(pretty) > 55 else pretty
-        c.drawString(10, h-30, text_pretty)
-        c.setFont("Helvetica", 11)
-        line2 = f"[{account}] {buyer} | shipment {ship_id} | {sub}"
-        c.drawString(10, h-55, line2[:90])
-        if len(pretty) > 55:
-            c.setFont("Helvetica-Bold", 12)
-            c.drawString(10, h-77, pretty[55:120])
+        line1 = pretty[:60]
+        c.drawString(8, h-30, line1)
+        if len(pretty) > 60:
+            c.setFont("Helvetica-Bold", 14)
+            c.drawString(8, h-52, pretty[60:120])
+        c.setFont("Helvetica", 10)
+        line_meta = f"[{account}] Buyer: {buyer} | Ship: {ship_id} | Sub: {sub}"
+        c.drawString(8, h-85, line_meta[:95])
         c.save()
         overlay_buf.seek(0)
         overlay = PdfReader(overlay_buf)
         page.merge_page(overlay.pages[0])
         writer.add_page(page)
-        overlay_buf = BytesIO()  # reset
     out = BytesIO()
     writer.write(out)
     return out.getvalue()
@@ -214,8 +209,8 @@ for sig, ships in sorted(groups.items()):
     if not ships: continue
     safe_key = re.sub(r'[^A-Za-z0-9_+]+','_', sig).strip("_")[:80]
     is_mixed = sig.startswith("MIXTO__")
-    icon = "⚠️ MIXTO" if is_mixed else "📦"
-    print(f"{icon} {sig} ({len(ships)} envíos)")
+    icon = "MIXTO" if is_mixed else "PKG"
+    print(f"{icon} {sig} ({len(ships)} envios)")
 
     annotated_pdfs = []
     for sh in ships:
@@ -223,12 +218,16 @@ for sig, ships in sorted(groups.items()):
             r = requests.get(f"https://api.mercadolibre.com/shipment_labels?shipment_ids={sh['shipment_id']}&response_type=pdf",
                 headers={"Authorization": sh["_token"]}, timeout=60)
             if r.status_code == 200 and r.headers.get("content-type","").startswith("application/pdf"):
-                ann = annotate_pdf(r.content, sh)
-                annotated_pdfs.append(ann)
+                try:
+                    ann = annotate_pdf(r.content, sh)
+                    annotated_pdfs.append(ann)
+                except Exception as e:
+                    print(f"  annot err {sh['shipment_id']}: {e} (uso PDF crudo)")
+                    annotated_pdfs.append(r.content)
             else:
-                print(f"  ❌ shipment {sh['shipment_id']}: HTTP {r.status_code}")
+                print(f"  ERR shipment {sh['shipment_id']}: HTTP {r.status_code}")
         except Exception as e:
-            print(f"  ❌ shipment {sh['shipment_id']}: {e}")
+            print(f"  ERR shipment {sh['shipment_id']}: {e}")
 
     if annotated_pdfs:
         out_pdf = f"{OUTDIR}/{safe_key}.pdf"
@@ -239,7 +238,7 @@ for sig, ships in sorted(groups.items()):
                 reader = PdfReader(BytesIO(pdf_bytes))
                 for p in reader.pages: writer.add_page(p)
             with open(out_pdf, "wb") as f: writer.write(f)
-            print(f"  ✓ {len(annotated_pdfs)} envíos → {out_pdf}")
+            print(f"  OK {len(annotated_pdfs)} envios -> {out_pdf}")
         except Exception as e:
             print(f"  fallback: {e}")
             try:
@@ -254,9 +253,9 @@ for sig, ships in sorted(groups.items()):
 # Manifest XLSX
 wb = Workbook(); wb.remove(wb.active)
 ws = wb.create_sheet("Resumen")
-ws["A1"] = f"📋 Pendientes — {now_cdmx} (ventana 7d)"
+ws["A1"] = f"Pendientes - {now_cdmx} (ventana 7d)"
 ws["A1"].font = Font(bold=True, size=16, color="1F4E78"); ws.merge_cells("A1:F1")
-HEADER = ["Composición","Envíos","Unidades","Tipo","Archivo","Cuentas"]
+HEADER = ["Composicion","Envios","Unidades","Tipo","Archivo","Cuentas"]
 for i, h in enumerate(HEADER, 1):
     c = ws.cell(row=3, column=i, value=h)
     c.font = Font(bold=True, color="FFFFFF")
@@ -275,8 +274,8 @@ for grp in sorted(labels_index, key=lambda x: -x["envios"]):
     ws.cell(row=r, column=6, value=", ".join(cuentas))
     r += 1
 
-ws2 = wb.create_sheet("Detalle envíos")
-HEADER2 = ["Cuenta","Order ID","Shipment","Composición","# items","Comprador","Status","Substatus","Detalle items"]
+ws2 = wb.create_sheet("Detalle envios")
+HEADER2 = ["Cuenta","Order ID","Shipment","Composicion","# items","Comprador","Status","Substatus","Detalle items"]
 for i, h in enumerate(HEADER2, 1):
     c = ws2.cell(row=1, column=i, value=h)
     c.font = Font(bold=True, color="FFFFFF")
@@ -310,19 +309,15 @@ for ws_x in [ws, ws2]:
         ws_x.column_dimensions[get_column_letter(ci)].width = min(max_len + 2, 80)
 
 wb.save(f"{OUTDIR}/manifest.xlsx")
-
-print(f"\n✅ {len(labels_index)} grupos en {OUTDIR}/")
-if mixed_shipments:
-    print(f"⚠️  {len(mixed_shipments)} envíos MIXTOS — revisar manifest.xlsx")
+print(f"\n{len(labels_index)} grupos en {OUTDIR}/")
 
 if TG_TOKEN and TG_CHAT and total_shipments > 0:
-    text = f"📦 *Etiquetas — {now_cdmx}*\n{total_shipments} envíos / {total_units} unid / {len(labels_index)} grupos"
+    text = f"Etiquetas - {now_cdmx}\n{total_shipments} envios / {total_units} unid / {len(labels_index)} grupos"
     if mixed_shipments:
-        text += f"\n⚠️ {len(mixed_shipments)} envíos MIXTOS"
+        text += f"\n{len(mixed_shipments)} envios MIXTOS"
     text += "\n\nTop:\n"
     for grp in sorted(labels_index, key=lambda x: -x["envios"])[:8]:
-        pretty = grp["sig"].replace("MIXTO__","⚠️ MIXTO ").replace("_x"," x").replace("+"," + ").replace("_"," ")
-        text += f"• {pretty}: {grp['envios']}\n"
+        pretty = grp["sig"].replace("MIXTO__","MIXTO ").replace("_x"," x").replace("+"," + ").replace("_"," ")
+        text += f"- {pretty}: {grp['envios']}\n"
     requests.post(f"https://api.telegram.org/bot{TG_TOKEN}/sendMessage",
-        json={"chat_id":TG_CHAT,"text":text,"parse_mode":"Markdown"})
-
+        json={"chat_id":TG_CHAT,"text":text})
