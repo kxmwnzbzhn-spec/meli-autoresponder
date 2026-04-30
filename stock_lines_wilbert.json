@@ -1,0 +1,18 @@
+{
+  "_meta": {
+    "description": "Stock real fisico por línea de producto. Multiple items pueden compartir la misma línea (ej: 7 publicaciones Mandarin Sky comparten 11 piezas).",
+    "last_updated": "2026-04-30",
+    "policy": "Cuando un item vende (qty 1→0), bot decrementa lines[item.line]. Cuando un item necesita reposición, bot solo lo sube a 1 si lines[item.line] >= 1 (y entonces decrementa la línea)."
+  },
+  "lines": {
+    "Mandarin-Sky-shared": 11,
+    "Mandarin-Sky-60ml": 1,
+    "Armaf-Delight-Island": 29,
+    "Armaf-Spectra": 2,
+    "Lattafa-His-Confession": 2,
+    "Armaf-Maleka": 2,
+    "Angel-Nova": 1,
+    "Armaf-Aqua": 2,
+    "Armaf-Club-Iconic": 2
+  }
+}
