@@ -4,7 +4,7 @@
       "date": "2026-04-29",
       "throttled": false,
       "items_paused": [],
-      "sales_count": 20
+      "sales_count": 26
     },
     "CLARIBEL": {
       "date": "2026-04-29",
@@ -57,7 +57,7 @@
       "sales_count": 0
     }
   },
-  "last_run": 1777507764,
+  "last_run": 1777521846,
   "last_run_date": "2026-04-29",
   "last_reactivation": 1777480981
 }
