@@ -1,0 +1,60 @@
+name: claribel-real-status
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    steps:
+      - run: pip install requests -q
+      - run: |
+          python3 - <<'PY'
+          import os, requests, json
+          API="https://api.mercadolibre.com"
+          r = requests.post(f"{API}/oauth/token", data={
+              "grant_type":"refresh_token",
+              "client_id":os.environ["MELI_APP_ID"],
+              "client_secret":os.environ["MELI_APP_SECRET"],
+              "refresh_token":os.environ["MELI_REFRESH_TOKEN_CLARIBEL"]
+          }, timeout=15).json()
+          tok=r["access_token"]; uid=r["user_id"]
+          h={"Authorization":f"Bearer {tok}"}
+
+          # Get items WITHOUT status filter
+          all_ids=[]
+          off=0
+          while True:
+              j=requests.get(f"{API}/users/{uid}/items/search?limit=50&offset={off}",headers=h,timeout=15).json()
+              res=j.get("results",[])
+              all_ids.extend(res)
+              if len(res)<50: break
+              off+=50
+              if off>5000: break
+          print(f"Total items SIN filtro: {len(all_ids)}")
+
+          # Get full detail of all items
+          status_counts = {}
+          catalog_perfumes_active = []
+          for i in range(0,len(all_ids),20):
+              chunk = ",".join(all_ids[i:i+20])
+              rr = requests.get(f"{API}/items?ids={chunk}", headers=h, timeout=20).json()
+              for it in rr:
+                  if it.get("code")!=200: continue
+                  b=it["body"]
+                  st = b.get("status","unknown")
+                  status_counts[st] = status_counts.get(st,0) + 1
+                  cpid = b.get("catalog_product_id")
+                  cl = b.get("catalog_listing")
+                  cat = b.get("category_id","")
+                  title = (b.get("title") or "").lower()
+                  is_perfume = ("perfume" in title or "fragancia" in title or " edp" in title or " edt" in title or "eau de" in title)
+                  if is_perfume and cpid and cl and st=="active":
+                      catalog_perfumes_active.append(b)
+
+          print(f"\nStatus distribution: {json.dumps(status_counts, indent=2)}")
+          print(f"\nCatalog perfumes ACTIVE: {len(catalog_perfumes_active)}")
+          for p in catalog_perfumes_active[:10]:
+              print(f"  {p['id']} cpid={p['catalog_product_id']} ${p.get('price')} stock={p.get('available_quantity')} {p['title'][:60]}")
+          PY
+        env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_CLARIBEL: ${{ secrets.MELI_REFRESH_TOKEN_CLARIBEL }}
