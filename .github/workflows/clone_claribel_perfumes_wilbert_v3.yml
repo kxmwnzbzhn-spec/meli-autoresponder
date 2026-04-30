@@ -100,7 +100,7 @@ jobs:
                   "condition": src.get("condition","new"),
               }
               if src.get("sale_terms"):
-                  payload["sale_terms"]=src["sale_terms"]
+                  payload["sale_terms"]=[t for t in src["sale_terms"] if t.get("id")!="PURCHASE_MAX_QUANTITY"]
               if src.get("shipping"):
                   payload["shipping"]=src["shipping"]
               r=requests.post(f"{API}/items",headers=h_wp,data=json.dumps(payload),timeout=30)
