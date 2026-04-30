@@ -1,0 +1,43 @@
+name: diag-mildred-items
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    steps:
+      - run: pip install requests -q
+      - run: |
+          python3 - <<'PY'
+          import os, requests
+          API="https://api.mercadolibre.com"
+          r = requests.post(f"{API}/oauth/token", data={
+              "grant_type":"refresh_token",
+              "client_id":os.environ["MELI_APP_ID"],
+              "client_secret":os.environ["MELI_APP_SECRET"],
+              "refresh_token":os.environ["MELI_REFRESH_TOKEN_MILDRED"]
+          }, timeout=15).json()
+          tok=r.get("access_token"); uid=r.get("user_id")
+          print(f"OAuth: tok={'ok' if tok else 'FAIL'} | uid={uid}")
+          print(f"Full response: {r}")
+          if not tok: raise SystemExit(1)
+          h={"Authorization":f"Bearer {tok}"}
+          # Try all statuses + variants
+          for s in ["active","paused","closed","under_review"]:
+              j=requests.get(f"{API}/users/{uid}/items/search?status={s}&limit=50",headers=h,timeout=15).json()
+              print(f"  status={s}: {len(j.get('results',[]))} (paging.total={j.get('paging',{}).get('total')})")
+          # Try without status (default active)
+          j=requests.get(f"{API}/users/{uid}/items/search?limit=50",headers=h,timeout=15).json()
+          print(f"  no status filter: {len(j.get('results',[]))} (paging.total={j.get('paging',{}).get('total')})")
+          # Get first 3 items details
+          first3 = j.get('results',[])[:3]
+          if first3:
+              ids=",".join(first3)
+              rr=requests.get(f"{API}/items?ids={ids}",headers=h,timeout=15).json()
+              for it in rr:
+                  if it.get("code")==200:
+                      b=it["body"]
+                      print(f"    sample: {b['id']} status={b.get('status')} catalog_listing={b.get('catalog_listing')} cpid={b.get('catalog_product_id')} title={b.get('title','')[:60]}")
+          PY
+        env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_MILDRED: ${{ secrets.MELI_REFRESH_TOKEN_MILDRED }}
