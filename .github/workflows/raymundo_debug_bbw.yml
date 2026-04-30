@@ -1,0 +1,42 @@
+name: raymundo-debug-bbw
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    steps:
+      - run: pip install requests -q
+      - run: |
+          python3 - <<'PY'
+          import os, json, requests
+          API="https://api.mercadolibre.com"
+          r=requests.post(f"{API}/oauth/token",data={
+              "grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],
+              "client_secret":os.environ["MELI_APP_SECRET"],"refresh_token":os.environ["MELI_REFRESH_TOKEN_RAYMUNDO"]
+          },timeout=15).json()
+          tok=r["access_token"]; uid=r["user_id"]
+          h={"Authorization":f"Bearer {tok}"}
+          # Probar 5 items de Raymundo
+          test_items = ["MLM2891178545","MLM5246077488","MLM2891178603","MLM2891178657","MLM2891178511"]
+          for iid in test_items:
+              item = requests.get(f"{API}/items/{iid}",headers=h,timeout=10).json()
+              cpid = item.get("catalog_product_id")
+              my_price = item.get("price")
+              print(f"\n=== {iid} ===")
+              print(f"  cpid={cpid} my_price=${my_price} title={item.get('title','')[:60]}")
+              if not cpid: continue
+
+              prod = requests.get(f"{API}/products/{cpid}",headers=h,timeout=10).json()
+              bbw = prod.get("buy_box_winner") or {}
+              print(f"  bbw: item_id={bbw.get('item_id')} seller={bbw.get('seller_id')} price=${bbw.get('price')}")
+
+              # /products/{cpid}/items - ver lista de competidores
+              items_list = requests.get(f"{API}/products/{cpid}/items?limit=10",headers=h,timeout=10).json()
+              comps = items_list.get("results",[])
+              print(f"  Top competidores:")
+              for c in sorted(comps, key=lambda x: x.get("price") or 999999)[:5]:
+                  print(f"    item={c.get('id')} seller={c.get('seller_id')} ${c.get('price')} status={c.get('status')}")
+          PY
+        env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_RAYMUNDO: ${{ secrets.MELI_REFRESH_TOKEN_RAYMUNDO }}
