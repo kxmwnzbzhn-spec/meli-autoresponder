@@ -15,12 +15,12 @@ jobs:
           python3 - <<'PY'
           import os, json, time, requests
           API="https://api.mercadolibre.com"
-          r=requests.post(f"{API}/oauth/token", data={
+          r=requests.post(f"{API}/oauth/token",data={
               "grant_type":"refresh_token",
               "client_id":os.environ["MELI_APP_ID"],
               "client_secret":os.environ["MELI_APP_SECRET"],
               "refresh_token":os.environ["MELI_REFRESH_TOKEN_RAYMUNDO"]
-          }, timeout=15).json()
+          },timeout=15).json()
           tok=r["access_token"]; uid=r["user_id"]
           h={"Authorization":f"Bearer {tok}","Content-Type":"application/json"}
           print(f"uid={uid}")
@@ -38,9 +38,7 @@ jobs:
               ids.extend(res)
               if len(res)<50: break
               off+=50
-              if off>5000: break
 
-          # Get my item details
           my_items={}
           for i in range(0,len(ids),20):
               chunk=",".join(ids[i:i+20])
@@ -53,78 +51,55 @@ jobs:
                   my_items[b["id"]]={"cpid":cpid,"price":b.get("price",0),"title":b.get("title","")[:60]}
           print(f"Mis items catalogo: {len(my_items)}")
 
-          losing=[]; tied=[]; winning=[]
+          winning=[]; sharing=[]; competing=[]
           for iid, info in my_items.items():
-              cpid = info["cpid"]
               try:
-                  prod = requests.get(f"{API}/products/{cpid}", headers=h, timeout=10).json()
+                  ptw_resp = requests.get(f"{API}/items/{iid}/price_to_win",headers=h,timeout=10)
+                  if ptw_resp.status_code != 200:
+                      print(f"  ptw {iid}: {ptw_resp.status_code} {ptw_resp.text[:100]}")
+                      continue
+                  ptw = ptw_resp.json()
               except Exception as e:
-                  print(f"  err product {cpid}: {e}")
+                  print(f"  err {iid}: {e}")
                   continue
-              bbw = prod.get("buy_box_winner") or {}
-              winner_item_id = bbw.get("item_id")
-              winner_price = bbw.get("price",0) or 0
-              winner_seller = bbw.get("seller_id")
-
-              # Check tied: si MELI tiene multiple items al mismo precio
-              # Usamos /products/{cpid}/items para ver lista
-              try:
-                  items_list = requests.get(f"{API}/products/{cpid}/items?limit=20",headers=h,timeout=10).json()
-                  comps = items_list.get("results",[])
-              except: comps = []
-              same_price = [c for c in comps if abs((c.get("price") or 0) - winner_price) < 0.5 and (c.get("status")=="active")]
-              tied_with_others = len(same_price) > 1
-
+              status = ptw.get("status","")
+              ptw_price = ptw.get("price_to_win", info["price"])
               record = {
-                  "id":iid,"cpid":cpid,"my_price":info["price"],
-                  "winner_price":winner_price,"winner_id":winner_item_id,
-                  "winner_seller":winner_seller,
-                  "is_me_winner": winner_item_id==iid or winner_seller==uid,
-                  "tied":tied_with_others,
-                  "title":info["title"],
+                  "id":iid,"cpid":info["cpid"],"my_price":info["price"],
+                  "ptw":ptw_price,"status":status,"title":info["title"]
               }
-              if record["is_me_winner"] and tied_with_others:
-                  tied.append(record)
-              elif record["is_me_winner"]:
+              if status == "winning":
                   winning.append(record)
-              elif winner_price > 0 and info["price"] > winner_price + 0.5:
-                  record["delta"] = info["price"] - winner_price
-                  losing.append(record)
+              elif status == "sharing_first_place":
+                  sharing.append(record)
               else:
-                  winning.append(record)  # may be unable to determine
+                  competing.append(record)
 
-          print(f"\n📊 Resultado:")
-          print(f"  🥇 Solo winner: {len(winning)}")
-          print(f"  🤝 Tied: {len(tied)}")
-          print(f"  ❌ Perdiendo: {len(losing)}")
+          print(f"\n📊 Estado actual:")
+          print(f"  🥇 Winning: {len(winning)}")
+          print(f"  🤝 Sharing: {len(sharing)}")
+          print(f"  ❌ Competing: {len(competing)}")
+          for r in sharing:
+              print(f"    SHARING {r['id']} mi=${r['my_price']:.0f} ptw=${r['ptw']:.0f} — {r['title'][:40]}")
+          for r in competing:
+              print(f"    COMPETING {r['id']} mi=${r['my_price']:.0f} ptw=${r['ptw']:.0f} status={r['status']} — {r['title'][:40]}")
 
           adjustments = []
-          for info in losing + tied:
-              iid = info["id"]
+          for r in sharing + competing:
+              iid = r["id"]
               war_item = war.get("items",{}).get(iid,{})
               floor = war_item.get("floor", 299)
-
-              if info in tied:
-                  target = round(info["winner_price"] - 1, 2)
-                  reason = "tied"
-              else:
-                  target = round(info["winner_price"] - 1, 2)
-                  reason = "perdiendo"
-
-              if target < floor:
-                  print(f"  ⚠️  {iid} target ${target} < floor ${floor}")
-                  target = floor
-
-              if target >= info["my_price"]:
+              target = r["ptw"] - 1 if r["status"]=="sharing_first_place" else r["ptw"]
+              target = round(max(floor, target), 2)
+              if target >= r["my_price"]:
+                  print(f"  ⚠️ {iid} target ${target} >= mi ${r['my_price']:.0f} — skip")
                   continue
-
-              rp=requests.put(f"{API}/items/{iid}", headers=h, json={"price":target}, timeout=15)
+              rp=requests.put(f"{API}/items/{iid}",headers=h,json={"price":target},timeout=15)
               if rp.status_code==200:
-                  adjustments.append((iid, info["my_price"], target, info["winner_price"], reason, info["title"]))
-                  print(f"  💰 {iid}: ${info['my_price']:.0f} → ${target:.0f} (winner ${info['winner_price']:.0f}, {reason}) — {info['title'][:50]}")
+                  adjustments.append((iid, r["my_price"], target, r["ptw"], r["status"], r["title"]))
+                  print(f"  💰 {iid}: ${r['my_price']:.0f} -> ${target:.0f} (ptw ${r['ptw']:.0f}, {r['status']}) — {r['title'][:50]}")
                   war.setdefault("items",{}).setdefault(iid,{}).update({
-                      "last_change_at": int(time.time()),
-                      "last_action":"down","last_ref":target
+                      "last_change_at":int(time.time()),"last_action":"down","last_ref":target
                   })
               else:
                   print(f"  ❌ {iid}: {rp.status_code} {rp.text[:120]}")
@@ -136,17 +111,17 @@ jobs:
           tg_t=os.environ.get("TELEGRAM_BOT_TOKEN")
           tg_c=os.environ.get("TELEGRAM_CHAT_ID")
           if tg_t and tg_c:
-              msg=(f"⚔️ <b>Raymundo Catalog War</b>\n\n"
-                   f"🥇 Winner: {len(winning)}\n"
-                   f"🤝 Tied: {len(tied)}\n"
-                   f"❌ Perdiendo: {len(losing)}\n"
+              msg=(f"⚔️ Raymundo Catalog War\n\n"
+                   f"🥇 Winning: {len(winning)}\n"
+                   f"🤝 Sharing: {len(sharing)}\n"
+                   f"❌ Competing: {len(competing)}\n"
                    f"💰 Bajadas: {len(adjustments)}")
               if adjustments:
-                  msg += "\n\nAjustes:\n"
+                  msg += "\n\n"
                   for adj in adjustments[:10]:
-                      msg += f"• {adj[5][:30]}: ${adj[1]:.0f}→${adj[2]:.0f} (vs ${adj[3]:.0f})\n"
-              requests.post(f"https://api.telegram.org/bot{tg_t}/sendMessage", data={
-                  "chat_id":tg_c,"text":msg,"parse_mode":"HTML"
+                      msg += f"• {adj[5][:30]}: ${adj[1]:.0f}->${adj[2]:.0f}\n"
+              requests.post(f"https://api.telegram.org/bot{tg_t}/sendMessage",data={
+                  "chat_id":tg_c,"text":msg
               },timeout=10)
           PY
         env:
@@ -162,6 +137,6 @@ jobs:
             git pull --rebase 2>/dev/null || true
             git add catalog_war_state.json 2>/dev/null
             if git diff --cached --quiet; then break; fi
-            git commit -m "raymundo war v2: ajustar" && git push origin main && break
+            git commit -m "raymundo war v4: ptw" && git push origin main && break
             sleep 5
           done
