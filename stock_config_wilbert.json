@@ -1,122 +1,182 @@
 {
   "MLM5266045796": {
-    "line": "Wilbert-Perfumes",
+    "line": "Mandarin-Sky-shared",
     "auto_replenish": true,
     "min_visible": 1,
     "active": true,
     "title": "Perfume Armaf Odyssey Mandarin Sky Limited Edition",
-    "catalog_product_id": "MLM63357676"
+    "catalog_product_id": "MLM63357676",
+    "real_stock": 1,
+    "daily_reset_to": 1,
+    "type": "catalog_no_variations",
+    "condition": "new"
   },
   "MLM5265867982": {
-    "line": "Wilbert-Perfumes",
+    "line": "Mandarin-Sky-shared",
     "auto_replenish": true,
     "min_visible": 1,
     "active": true,
     "title": "Perfume Hombre Armaf Odyssey Mandarin Sky Edp 100m",
-    "catalog_product_id": "MLM53673404"
+    "catalog_product_id": "MLM53673404",
+    "real_stock": 1,
+    "daily_reset_to": 1,
+    "type": "catalog_no_variations",
+    "condition": "new"
   },
   "MLM5266045802": {
-    "line": "Wilbert-Perfumes",
+    "line": "Mandarin-Sky-shared",
     "auto_replenish": true,
     "min_visible": 1,
     "active": true,
     "title": "Perfume Armaf Odyssey Mandarin Sky Limited Arabes ",
-    "catalog_product_id": "MLM65066279"
+    "catalog_product_id": "MLM65066279",
+    "real_stock": 1,
+    "daily_reset_to": 1,
+    "type": "catalog_no_variations",
+    "condition": "new"
   },
   "MLM5266006752": {
-    "line": "Wilbert-Perfumes",
+    "line": "Mandarin-Sky-shared",
     "auto_replenish": true,
     "min_visible": 1,
     "active": true,
     "title": "Perfume Armaf Odyssey Mandarin Sky Elixir Para Hom",
-    "catalog_product_id": "MLM66233752"
+    "catalog_product_id": "MLM66233752",
+    "real_stock": 1,
+    "daily_reset_to": 1,
+    "type": "catalog_no_variations",
+    "condition": "new"
   },
   "MLM5265893628": {
-    "line": "Wilbert-Perfumes",
+    "line": "Mandarin-Sky-shared",
     "auto_replenish": true,
     "min_visible": 1,
     "active": true,
     "title": "Perfume Armaf Odyssey Mandarin Sky Limited Edition",
-    "catalog_product_id": "MLM22299658"
+    "catalog_product_id": "MLM22299658",
+    "real_stock": 1,
+    "daily_reset_to": 1,
+    "type": "catalog_no_variations",
+    "condition": "new"
   },
   "MLM5266045818": {
-    "line": "Wilbert-Perfumes",
+    "line": "Mandarin-Sky-60ml",
     "auto_replenish": true,
     "min_visible": 1,
     "active": true,
     "title": "Perfume Armaf Odyssey Mandarin Sky 60ml Para Cabal",
-    "catalog_product_id": "MLM46926154"
+    "catalog_product_id": "MLM46926154",
+    "real_stock": 1,
+    "daily_reset_to": 1,
+    "type": "catalog_no_variations",
+    "condition": "new"
   },
   "MLM5265868092": {
-    "line": "Wilbert-Perfumes",
+    "line": "Lattafa-His-Confession",
     "auto_replenish": true,
     "min_visible": 1,
     "active": true,
     "title": "Perfume Lattafa His Confession 100ml Edp Para Caba",
-    "catalog_product_id": "MLM41302004"
+    "catalog_product_id": "MLM41302004",
+    "real_stock": 2,
+    "daily_reset_to": 2,
+    "type": "catalog_no_variations",
+    "condition": "new"
   },
   "MLM5265880848": {
-    "line": "Wilbert-Perfumes",
+    "line": "Armaf-Spectra",
     "auto_replenish": true,
     "min_visible": 1,
     "active": true,
     "title": "Perfume Armaf Odyssey Spectra Hombre 100ml Eau De ",
-    "catalog_product_id": "MLM42520269"
+    "catalog_product_id": "MLM42520269",
+    "real_stock": 2,
+    "daily_reset_to": 2,
+    "type": "catalog_no_variations",
+    "condition": "new"
   },
   "MLM5266020058": {
-    "line": "Wilbert-Perfumes",
+    "line": "Mandarin-Sky-shared",
     "auto_replenish": true,
     "min_visible": 1,
     "active": true,
     "title": "Perfume Armaf Odyssey Mandarin Sky Edp 100ml",
-    "catalog_product_id": "MLM56232246"
+    "catalog_product_id": "MLM56232246",
+    "real_stock": 1,
+    "daily_reset_to": 1,
+    "type": "catalog_no_variations",
+    "condition": "new"
   },
   "MLM5265893746": {
-    "line": "Wilbert-Perfumes",
+    "line": "Armaf-Club-Iconic",
     "auto_replenish": true,
     "min_visible": 1,
     "active": true,
     "title": "Perfume Armaf Club De Nuit Iconic Eau De Parfum 10",
-    "catalog_product_id": "MLM28067123"
+    "catalog_product_id": "MLM28067123",
+    "real_stock": 2,
+    "daily_reset_to": 2,
+    "type": "catalog_no_variations",
+    "condition": "new"
   },
   "MLM5265906396": {
-    "line": "Wilbert-Perfumes",
+    "line": "Armaf-Aqua",
     "auto_replenish": true,
     "min_visible": 1,
     "active": true,
     "title": "Armaf Odyssey Aqua Men 100ml Edp",
-    "catalog_product_id": "MLM23633415"
+    "catalog_product_id": "MLM23633415",
+    "real_stock": 2,
+    "daily_reset_to": 2,
+    "type": "catalog_no_variations",
+    "condition": "new"
   },
   "MLM5266032976": {
-    "line": "Wilbert-Perfumes",
+    "line": "Armaf-Maleka",
     "auto_replenish": true,
     "min_visible": 1,
     "active": true,
     "title": "Armaf Club De Nuit Maleka Edp Mujer 105ml",
-    "catalog_product_id": "MLM50661134"
+    "catalog_product_id": "MLM50661134",
+    "real_stock": 2,
+    "daily_reset_to": 2,
+    "type": "catalog_no_variations",
+    "condition": "new"
   },
   "MLM5266046030": {
-    "line": "Wilbert-Perfumes",
+    "line": "Angel-Nova",
     "auto_replenish": true,
     "min_visible": 1,
     "active": true,
     "title": "Angel Nova Fruitté Edp Para Mujer",
-    "catalog_product_id": "MLM18209912"
+    "catalog_product_id": "MLM18209912",
+    "real_stock": 1,
+    "daily_reset_to": 1,
+    "type": "catalog_no_variations",
+    "condition": "new"
   },
   "MLM5265893750": {
-    "line": "Wilbert-Perfumes",
+    "line": "Armaf-Delight-Island",
     "auto_replenish": true,
     "min_visible": 1,
     "active": true,
     "title": "Armaf Delight Island Bliss Edp 100 Ml Para Mujer",
-    "catalog_product_id": "MLM45594561"
+    "catalog_product_id": "MLM45594561",
+    "real_stock": 29,
+    "daily_reset_to": 29,
+    "type": "catalog_no_variations",
+    "condition": "new"
   },
   "MLM5265893752": {
-    "line": "Wilbert-Perfumes",
+    "line": "Mandarin-Sky-shared",
     "auto_replenish": true,
     "min_visible": 1,
     "active": true,
     "title": "Armaf Odyssey Mega Man Edición Limitada Edp 100 Ml",
-    "catalog_product_id": "MLM21765262"
+    "catalog_product_id": "MLM21765262",
+    "real_stock": 1,
+    "daily_reset_to": 1,
+    "type": "catalog_no_variations",
+    "condition": "new"
   }
 }
