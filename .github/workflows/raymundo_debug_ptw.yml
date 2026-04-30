@@ -1,0 +1,36 @@
+name: raymundo-debug-ptw
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    steps:
+      - run: pip install requests -q
+      - run: |
+          python3 - <<'PY'
+          import os, requests, json
+          API="https://api.mercadolibre.com"
+          r=requests.post(f"{API}/oauth/token",data={
+              "grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],
+              "client_secret":os.environ["MELI_APP_SECRET"],"refresh_token":os.environ["MELI_REFRESH_TOKEN_RAYMUNDO"]
+          },timeout=15).json()
+          tok=r["access_token"]; uid=r["user_id"]
+          h={"Authorization":f"Bearer {tok}"}
+          # Probar endpoints alternativos
+          test_items = ["MLM2891178545","MLM5246077488","MLM2891178603","MLM2891178511"]
+          for iid in test_items:
+              print(f"\n=== {iid} ===")
+              # /items/{id}/price_to_win
+              try:
+                  r1 = requests.get(f"{API}/items/{iid}/price_to_win",headers=h,timeout=10)
+                  print(f"  price_to_win [{r1.status_code}]: {r1.text[:300]}")
+              except Exception as e: print(f"  ptw err: {e}")
+              # /catalog_listings/recommendation
+              try:
+                  r2 = requests.get(f"{API}/catalog_listings/{iid}/recommendation",headers=h,timeout=10)
+                  print(f"  recommendation [{r2.status_code}]: {r2.text[:300]}")
+              except Exception as e: print(f"  rec err: {e}")
+          PY
+        env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_RAYMUNDO: ${{ secrets.MELI_REFRESH_TOKEN_RAYMUNDO }}
