@@ -1,8 +1,8 @@
 """
-Etiquetas pendientes de entregar (ready_to_ship, incluye delayed/printed/ready_to_print).
-Cada PDF se ANOTA con el contenido del paquete (modelo + color + cantidad) bien grande
-en la parte superior para que el empacador sepa que meter.
-Ventana: 7 dias para no perderse atrasadas.
+Etiquetas pendientes de entregar (ready_to_ship, todos substatus excepto picked_up).
+- Anota cada PDF con composicion REAL (color desde variation_attributes/item.attributes).
+- Texto pequeno con wrapping para que entre completo.
+- Ventana 7 dias.
 """
 import os, requests, re
 from datetime import datetime, timezone, timedelta
@@ -31,27 +31,78 @@ ACCOUNTS = [
 INCLUDE_STATUSES = {"ready_to_ship"}
 EXCLUDE_SUBSTATUS = {"picked_up"}
 
-def categorize(title):
-    t = (title or "").lower()
-    color = "S/Color"
-    for c in ["azul","rojo","roja","negro","negra","blanco","blanca","rosa","camuflaje","camo","aqua","celeste","morado","morada","violeta","verde","amarillo"]:
-        if c in t: color = c.capitalize(); break
-    if "go 4" in t or "go4" in t: return ("JBL Go 4", color)
-    if "go 3" in t or "go3" in t: return ("JBL Go 3", color)
-    if "go essential" in t: return ("JBL Go Essential", color)
-    if "flip 7" in t or "flip7" in t: return ("JBL Flip 7", color)
-    if "flip 6" in t: return ("JBL Flip 6", color)
-    if "charge 6" in t: return ("JBL Charge 6", color)
-    if "charge 5" in t: return ("JBL Charge 5", color)
-    if "grip" in t and "jbl" in t: return ("JBL Grip", color)
-    if "clip 5" in t: return ("JBL Clip 5", color)
-    if "xb100" in t: return ("Sony XB100", color)
-    if "armaf" in t: return ("Armaf", color)
-    if "lattafa" in t: return ("Lattafa", color)
-    if "angel" in t: return ("Angel/Mugler", color)
-    if "perfume" in t or "edp" in t or "edt" in t: return ("Perfume", color)
-    if "buds" in t: return ("Auriculares", color)
-    return ("Otros", color)
+# Cache items para no pegar a la API muchas veces
+ITEM_CACHE = {}
+
+def get_item_full(item_id, headers):
+    if item_id in ITEM_CACHE:
+        return ITEM_CACHE[item_id]
+    try:
+        r = requests.get(f"https://api.mercadolibre.com/items/{item_id}", headers=headers, timeout=10).json()
+        ITEM_CACHE[item_id] = r
+        return r
+    except:
+        return {}
+
+def extract_color(order_item, item_full):
+    """Busca el color en variation_attributes -> attributes -> title (en ese orden)."""
+    # 1. variation_attributes del order_item
+    for va in order_item.get("item",{}).get("variation_attributes",[]) or []:
+        if va.get("id","").upper() in ("COLOR","COLOR_NAME","MAIN_COLOR"):
+            v = va.get("value_name") or va.get("value_id") or ""
+            if v: return v
+    # 2. variations del item completo si hay variation_id
+    var_id = (order_item.get("item") or {}).get("variation_id")
+    if var_id and item_full.get("variations"):
+        for v in item_full["variations"]:
+            if v.get("id") == var_id:
+                for a in v.get("attribute_combinations",[]) or []:
+                    if a.get("id","").upper() in ("COLOR","COLOR_NAME","MAIN_COLOR"):
+                        nv = a.get("value_name") or ""
+                        if nv: return nv
+    # 3. attributes del item completo
+    for a in item_full.get("attributes",[]) or []:
+        if a.get("id","").upper() in ("COLOR","COLOR_NAME","MAIN_COLOR"):
+            v = a.get("value_name") or ""
+            if v: return v
+    # 4. fallback: buscar en title
+    t = (order_item.get("item",{}).get("title","") or "").lower()
+    for c in ["azul marino","azul","celeste","aqua","rojo","roja","negro","negra","blanco","blanca","rosa","camuflaje","camo","morado","morada","violeta","verde","amarillo","gris","plateado","dorado","beige","cafe","marron"]:
+        if c in t:
+            return c.title()
+    return ""
+
+def extract_model_short(order_item, item_full):
+    """Modelo+tamano corto para mostrar. Para perfumes: marca+nombre+ml. Para bocinas: marca+modelo."""
+    t = (order_item.get("item",{}).get("title","") or "")
+    tl = t.lower()
+    # Bocinas conocidas
+    if "go 4" in tl or "go4" in tl: return "JBL Go 4"
+    if "go 3" in tl or "go3" in tl: return "JBL Go 3"
+    if "go essential" in tl: return "JBL Go Essential"
+    if "flip 7" in tl or "flip7" in tl: return "JBL Flip 7"
+    if "flip 6" in tl: return "JBL Flip 6"
+    if "charge 6" in tl: return "JBL Charge 6"
+    if "charge 5" in tl: return "JBL Charge 5"
+    if "grip" in tl and "jbl" in tl: return "JBL Grip"
+    if "clip 5" in tl: return "JBL Clip 5"
+    if "clip 4" in tl: return "JBL Clip 4"
+    if "xb100" in tl: return "Sony XB100"
+    if "buds" in tl and "redmi" in tl: return "Redmi Buds"
+    # Perfumes: extraer marca + nombre principal + ml si esta en titulo
+    if "perfume" in tl or "edp" in tl or "edt" in tl or " ml " in tl or "fragancia" in tl:
+        # Sacar primeras palabras significativas
+        # Eliminar prefijos comunes
+        clean = re.sub(r'^(perfume\s+(original\s+)?|original\s+|fragancia\s+)', '', t, flags=re.IGNORECASE)
+        # Tomar primeras 5-7 palabras + ml si lo encuentra
+        ml_match = re.search(r'(\d+\s*ml)', t, re.IGNORECASE)
+        words = clean.split()[:6]
+        result = " ".join(words)
+        if ml_match and ml_match.group(1).lower() not in result.lower():
+            result += f" {ml_match.group(1)}"
+        return result[:55]
+    # Default: primeras 6 palabras
+    return " ".join(t.split()[:6])[:55]
 
 cdmx = datetime.now(timezone.utc) - timedelta(hours=6)
 window_start = (cdmx - timedelta(days=7)).replace(hour=0,minute=0,second=0,microsecond=0)
@@ -103,8 +154,11 @@ for label, env_var in ACCOUNTS:
             for oi in o.get("order_items",[]):
                 title = (oi.get("item") or {}).get("title","")
                 qty = oi.get("quantity",0)
-                model, color = categorize(title)
-                items_in_order.append({"model":model,"color":color,"qty":qty,"title":title[:60]})
+                item_id = (oi.get("item") or {}).get("id","")
+                full = get_item_full(item_id, H) if item_id else {}
+                color = extract_color(oi, full)
+                model = extract_model_short(oi, full)
+                items_in_order.append({"model":model,"color":color,"qty":qty,"title":title})
             key = (label, sh_id)
             if key in shipments:
                 shipments[key]["items"].extend(items_in_order)
@@ -129,27 +183,29 @@ for s, c in sorted(status_counts.items(), key=lambda x: -x[1])[:15]:
 def composition_signature(items):
     consol = defaultdict(int)
     for it in items:
-        k = f"{it['model']}_{it['color']}"
+        color = it["color"] or "S/Color"
+        k = f"{it['model']}_{color}"
         k = re.sub(r'[^A-Za-z0-9_]+','_', k).strip("_")
         consol[k] += it["qty"]
     parts = sorted(f"{k}_x{v}" for k,v in consol.items())
     return "+".join(parts)
 
-def composition_pretty(items):
+def composition_lines(items):
+    """Lista de strings: 'JBL Go 4 Azul x1', uno por modelo+color para anotar."""
     consol = defaultdict(int)
     for it in items:
-        k = f"{it['model']} {it['color']}"
+        color = it["color"] or "S/Color"
+        k = f"{it['model']} {color}"
         consol[k] += it["qty"]
-    parts = sorted(f"{k} x{v}" for k,v in consol.items())
-    return " + ".join(parts)
+    return sorted(f"{k} x{v}" for k,v in consol.items())
 
 groups = defaultdict(list)
 mixed_shipments = []
 for sh in shipments.values():
     sig = composition_signature(sh["items"])
     sh["composition"] = sig
-    sh["pretty"] = composition_pretty(sh["items"])
-    is_mixed = len({(it["model"],it["color"]) for it in sh["items"]}) > 1
+    sh["lines"] = composition_lines(sh["items"])
+    is_mixed = len({(it["model"],it["color"] or "S/Color") for it in sh["items"]}) > 1
     if is_mixed:
         sh["composition"] = "MIXTO__" + sig
         mixed_shipments.append(sh)
@@ -160,11 +216,11 @@ total_units = sum(sum(i["qty"] for i in s["items"]) for s in shipments.values())
 print(f"\nINCLUIDOS: {total_shipments} envios / {total_units} unidades / {len(groups)} grupos ({len(mixed_shipments)} MIXTOS)\n")
 
 def annotate_pdf(pdf_bytes, shipment_info):
-    """Sobrepone texto grande arriba con composicion + cuenta + buyer."""
+    """Sobrepone caja amarilla arriba con composicion (multiple lineas si hace falta)."""
     from pypdf import PdfReader, PdfWriter
     from reportlab.pdfgen import canvas
 
-    pretty = shipment_info.get("pretty","?")
+    lines = shipment_info.get("lines", [])
     account = shipment_info.get("account","?")
     buyer = shipment_info.get("buyer","")
     sub = shipment_info.get("substatus","")
@@ -175,26 +231,39 @@ def annotate_pdf(pdf_bytes, shipment_info):
     for page in base.pages:
         media = page.mediabox
         w = float(media.width); h = float(media.height)
+        # Calcular alto necesario
+        n_lines = max(1, len(lines))
+        box_h = 28 + (n_lines * 17) + 14  # padding + lineas + meta line
         overlay_buf = BytesIO()
         c = canvas.Canvas(overlay_buf, pagesize=(w, h))
-        # Caja amarilla arriba
+        # Caja amarilla
         c.setFillColorRGB(1, 1, 0.7)
-        c.rect(0, h-95, w, 95, fill=1, stroke=0)
-        # Borde negro
+        c.rect(0, h-box_h, w, box_h, fill=1, stroke=0)
         c.setStrokeColorRGB(0,0,0)
-        c.setLineWidth(2)
-        c.rect(0, h-95, w, 95, fill=0, stroke=1)
-        # Texto composicion
+        c.setLineWidth(1.5)
+        c.rect(0, h-box_h, w, box_h, fill=0, stroke=1)
+        # Meta line arriba (account, buyer, ship)
         c.setFillColorRGB(0,0,0)
-        c.setFont("Helvetica-Bold", 18)
-        line1 = pretty[:60]
-        c.drawString(8, h-30, line1)
-        if len(pretty) > 60:
-            c.setFont("Helvetica-Bold", 14)
-            c.drawString(8, h-52, pretty[60:120])
-        c.setFont("Helvetica", 10)
-        line_meta = f"[{account}] Buyer: {buyer} | Ship: {ship_id} | Sub: {sub}"
-        c.drawString(8, h-85, line_meta[:95])
+        c.setFont("Helvetica-Bold", 10)
+        meta = f"[{account}] {buyer} | Ship:{ship_id} | {sub}"
+        c.drawString(8, h-15, meta[:110])
+        # Lineas de composicion
+        c.setFont("Helvetica-Bold", 13)
+        y = h - 35
+        for line in lines:
+            # Wrap si > 80 chars
+            if len(line) <= 80:
+                c.drawString(8, y, line)
+                y -= 17
+            else:
+                # split en 2
+                c.drawString(8, y, line[:80])
+                y -= 17
+                if y > h - box_h + 5:
+                    c.setFont("Helvetica-Bold", 11)
+                    c.drawString(8, y, line[80:160])
+                    c.setFont("Helvetica-Bold", 13)
+                    y -= 17
         c.save()
         overlay_buf.seek(0)
         overlay = PdfReader(overlay_buf)
@@ -222,7 +291,7 @@ for sig, ships in sorted(groups.items()):
                     ann = annotate_pdf(r.content, sh)
                     annotated_pdfs.append(ann)
                 except Exception as e:
-                    print(f"  annot err {sh['shipment_id']}: {e} (uso PDF crudo)")
+                    print(f"  annot err {sh['shipment_id']}: {e}")
                     annotated_pdfs.append(r.content)
             else:
                 print(f"  ERR shipment {sh['shipment_id']}: HTTP {r.status_code}")
@@ -241,9 +310,6 @@ for sig, ships in sorted(groups.items()):
             print(f"  OK {len(annotated_pdfs)} envios -> {out_pdf}")
         except Exception as e:
             print(f"  fallback: {e}")
-            try:
-                with open(out_pdf, "wb") as f: f.write(annotated_pdfs[0])
-            except: pass
         labels_index.append({
             "sig": sig, "file": f"{safe_key}.pdf", "is_mixed": is_mixed,
             "envios": len(ships), "unidades": sum(sum(i["qty"] for i in s["items"]) for s in ships),
@@ -283,8 +349,8 @@ for i, h in enumerate(HEADER2, 1):
 r = 2
 for grp in labels_index:
     for s in grp["ships"]:
-        items_str = "; ".join(f"{i['model']} {i['color']} x{i['qty']}" for i in s["items"])
-        is_mixed = len({(i["model"],i["color"]) for i in s["items"]}) > 1
+        items_str = "; ".join(f"{i['model']} {i['color'] or 'S/Color'} x{i['qty']}" for i in s["items"])
+        is_mixed = len({(i["model"],i["color"] or "S/Color") for i in s["items"]}) > 1
         ws2.cell(row=r, column=1, value=s["account"])
         ws2.cell(row=r, column=2, value=", ".join(str(o) for o in s["orders"]))
         ws2.cell(row=r, column=3, value=str(s["shipment_id"]))
@@ -293,7 +359,7 @@ for grp in labels_index:
         ws2.cell(row=r, column=6, value=s["buyer"])
         ws2.cell(row=r, column=7, value=s["ship_status"])
         ws2.cell(row=r, column=8, value=s.get("substatus",""))
-        cell_d = ws2.cell(row=r, column=9, value=items_str)
+        ws2.cell(row=r, column=9, value=items_str)
         if is_mixed:
             for c_idx in range(1, 10): ws2.cell(row=r, column=c_idx).fill = RED
         r += 1
