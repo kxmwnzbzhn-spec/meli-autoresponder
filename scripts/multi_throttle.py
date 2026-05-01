@@ -18,7 +18,7 @@ TG_CHAT = os.environ.get("TELEGRAM_CHAT_ID","")
 THROTTLED_ACCOUNTS = [
     ("JUAN", "MELI_REFRESH_TOKEN", 70),
     ("CLARIBEL", "MELI_REFRESH_TOKEN_CLARIBEL", 70),  # base, override por ramp_day
-    # ("RAYMUNDO", "MELI_REFRESH_TOKEN_RAYMUNDO", 60),  # FROZEN — manual control
+    ("RAYMUNDO", "MELI_REFRESH_TOKEN_RAYMUNDO", 150),  # Cap 150u/día
     ("DILCIE", "MELI_REFRESH_TOKEN_DILCIE", 70),
     ("MILDRED", "MELI_REFRESH_TOKEN_MILDRED", 50),  # Cap 50/dia inicio
     ("BREN", "MELI_REFRESH_TOKEN_BREN", 50),  # Cap 50/dia inicio
