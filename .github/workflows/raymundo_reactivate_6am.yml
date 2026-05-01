@@ -1,0 +1,33 @@
+name: raymundo-reactivate-6am
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 12 * * *"  # 12:00 UTC = 6:00 AM CDMX
+permissions: { contents: write }
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with: { token: "${{ secrets.REPO_PAT }}" }
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - run: pip install requests -q
+      - run: python scripts/raymundo_reactivate_6am.py
+        env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_RAYMUNDO: ${{ secrets.MELI_REFRESH_TOKEN_RAYMUNDO }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+      - run: |
+          git config user.email b@b.com && git config user.name bot
+          for i in 1 2 3; do
+            git pull --rebase 2>/dev/null || true
+            git add multi_throttle_state.json
+            if git diff --cached --quiet; then break; fi
+            git commit -m "raymundo 6am reactivate state" && git push origin main && break
+            sleep 5
+          done
+
