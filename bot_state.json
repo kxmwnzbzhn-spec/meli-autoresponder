@@ -1,26 +1,27 @@
 {
   "questions_seen": [],
   "claims_seen": [
-    "5503148321",
-    "5504061029",
-    "5503227787",
-    "5504305919",
-    "5502636400",
-    "5504849644",
-    "5502336104",
-    "5504058668",
-    "5505490427",
-    "5503096585",
-    "5503514908",
-    "5505745784",
     "5502854071",
-    "5504303598",
     "5502933251",
+    "5504303598",
+    "5503227787",
+    "5505745784",
+    "5504305919",
+    "5503148321",
+    "5503287582",
+    "5504849644",
+    "5502636400",
+    "5505490427",
+    "5504058668",
     "5503293842",
     "5504093465",
-    "5504040334",
     "5501400150",
-    "5503287582"
+    "5502336104",
+    "5505763196",
+    "5504040334",
+    "5503514908",
+    "5503096585",
+    "5504061029"
   ],
   "claim_states": {
     "5501400150": {
@@ -233,7 +234,8 @@
       "product_item": "MLM5244765752",
       "created_at": 1777596145,
       "last_status": "dispute",
-      "step": "pending_user_action"
+      "step": "pending_user_action",
+      "urgent_alerted_at": 1777668160
     },
     "5505745784": {
       "type": "otro",
@@ -243,6 +245,17 @@
       "product_title": "Bocina Jbl Flip 7 Bluetooth Ip67 Portatil Reacondicionada Morado",
       "product_item": "MLM2894623799",
       "created_at": 1777664473,
+      "last_status": "dispute",
+      "step": "pending_user_action"
+    },
+    "5505763196": {
+      "type": "otro",
+      "stage": "dispute",
+      "reason": "PDD9949",
+      "amount": 599.0,
+      "product_title": "Bocina Jbl Go 4 Bluetooth Portatil Ip67 Nueva Original Color",
+      "product_item": "MLM2883448187",
+      "created_at": 1777668088,
       "last_status": "dispute",
       "step": "pending_user_action"
     }
@@ -271,7 +284,8 @@
     "alert_5505490427": 1777596145,
     "status_5504303598_dispute": 1777653528,
     "status_5504305919_dispute": 1777653529,
-    "alert_5505745784": 1777664473
+    "alert_5505745784": 1777664473,
+    "alert_5505763196": 1777668088
   },
   "seller_id": 2681696373,
   "seen_returns": {},
