@@ -4,7 +4,7 @@
       "date": "2026-05-01",
       "throttled": false,
       "items_paused": [],
-      "sales_count": 1
+      "sales_count": 5
     },
     "CLARIBEL": {
       "date": "2026-05-01",
@@ -16,7 +16,7 @@
       "date": "2026-05-01",
       "throttled": false,
       "items_paused": [],
-      "sales_count": 0
+      "sales_count": 20
     },
     "DILCIE": {
       "date": "2026-05-01",
@@ -37,7 +37,7 @@
       "sales_count": 0
     }
   },
-  "last_run": 1777639448,
+  "last_run": 1777643435,
   "last_run_date": "2026-05-01",
   "last_reactivation": 1777566099
 }
