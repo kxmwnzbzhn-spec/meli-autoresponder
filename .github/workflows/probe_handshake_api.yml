@@ -1,0 +1,61 @@
+name: probe-handshake-api
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    steps:
+      - run: pip install requests -q
+      - run: |
+          python3 - <<'PY'
+          import os, requests, json
+          API="https://api.mercadolibre.com"
+          # Probar con cada cuenta el endpoint del handshake
+          accounts = [
+              ("JUAN","MELI_REFRESH_TOKEN"),
+              ("RAYMUNDO","MELI_REFRESH_TOKEN_RAYMUNDO"),
+              ("CLARIBEL","MELI_REFRESH_TOKEN_CLARIBEL"),
+          ]
+          PREREFERRAL = "7435550327"
+
+          for acc, env_key in accounts:
+              rt = os.environ.get(env_key)
+              if not rt: continue
+              try:
+                  r = requests.post(f"{API}/oauth/token",data={
+                      "grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],
+                      "client_secret":os.environ["MELI_APP_SECRET"],"refresh_token":rt
+                  },timeout=15).json()
+                  tok = r.get("access_token")
+                  if not tok: continue
+              except: continue
+              h = {"Authorization": f"Bearer {tok}"}
+              print(f"\n=========== {acc} ===========")
+
+              # Probar endpoints candidatos
+              urls = [
+                  f"{API}/handshake/token?prereferral={PREREFERRAL}",
+                  f"{API}/handshake/{PREREFERRAL}",
+                  f"{API}/returns/handshake/{PREREFERRAL}",
+                  f"{API}/shipments/{PREREFERRAL}/handshake",
+                  f"{API}/shipments/{PREREFERRAL}",
+                  f"{API}/post-purchase/v1/returns/{PREREFERRAL}",
+                  f"{API}/post-purchase/v1/returns?seller_id=me&shipment_id={PREREFERRAL}",
+                  f"{API}/handshakes/{PREREFERRAL}",
+                  f"https://www.mercadolibre.com.mx/handshake/token?prereferral={PREREFERRAL}&logistic=FF_RETURN",
+              ]
+              for url in urls:
+                  try:
+                      rr = requests.get(url, headers=h, timeout=10)
+                      print(f"  [{rr.status_code}] {url}")
+                      if rr.status_code in (200,400):
+                          txt = rr.text[:300]
+                          print(f"    body: {txt}")
+                  except Exception as e:
+                      print(f"  [ERR] {url}: {e}")
+          PY
+        env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+          MELI_REFRESH_TOKEN_RAYMUNDO: ${{ secrets.MELI_REFRESH_TOKEN_RAYMUNDO }}
+          MELI_REFRESH_TOKEN_CLARIBEL: ${{ secrets.MELI_REFRESH_TOKEN_CLARIBEL }}
