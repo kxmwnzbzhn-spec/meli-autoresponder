@@ -1,25 +1,25 @@
 {
   "questions_seen": [],
   "claims_seen": [
-    "5504040334",
-    "5503227787",
+    "5503148321",
+    "5501400150",
     "5504303598",
     "5504093465",
-    "5503514908",
-    "5504058668",
-    "5503148321",
-    "5504305919",
-    "5502933251",
-    "5502336104",
-    "5503293842",
-    "5503096585",
-    "5505490427",
-    "5502854071",
     "5502636400",
-    "5501400150",
-    "5504061029",
+    "5504040334",
+    "5503514908",
     "5503287582",
-    "5504849644"
+    "5503096585",
+    "5502933251",
+    "5502854071",
+    "5504061029",
+    "5505490427",
+    "5504058668",
+    "5504849644",
+    "5502336104",
+    "5504305919",
+    "5503227787",
+    "5503293842"
   ],
   "claim_states": {
     "5501400150": {
@@ -195,7 +195,7 @@
       "product_title": "Bocina Bluetooth Jbl Charge 6 Portatil Roja Original Usada",
       "product_item": "MLM2876026339",
       "created_at": 1777395941,
-      "last_status": "claim",
+      "last_status": "dispute",
       "step": "pending_user_action",
       "urgent_alerted_at": 1777468518
     },
@@ -207,7 +207,7 @@
       "product_title": "Bocina Bluetooth Jbl Grip Portatil Negra Original Usada",
       "product_item": "MLM5213159650",
       "created_at": 1777401304,
-      "last_status": "claim",
+      "last_status": "dispute",
       "step": "pending_user_action",
       "urgent_alerted_at": 1777473325
     },
@@ -256,7 +256,9 @@
     "alert_5504305919": 1777401304,
     "alert_5504849644": 1777488930,
     "status_5502636400_dispute": 1777518727,
-    "alert_5505490427": 1777596145
+    "alert_5505490427": 1777596145,
+    "status_5504303598_dispute": 1777653528,
+    "status_5504305919_dispute": 1777653529
   },
   "seller_id": 2681696373,
   "seen_returns": {},
