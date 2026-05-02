@@ -1,0 +1,70 @@
+name: debug-raymundo-orders-today
+on:
+  workflow_dispatch:
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    steps:
+      - run: pip install requests -q
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          RT: ${{ secrets.MELI_REFRESH_TOKEN_RAYMUNDO }}
+        run: |
+          python3 - <<'PY'
+          import os, requests, json
+          API = "https://api.mercadolibre.com"
+          r = requests.post(f"{API}/oauth/token", data={
+              "grant_type":"refresh_token",
+              "client_id":os.environ["MELI_APP_ID"],
+              "client_secret":os.environ["MELI_APP_SECRET"],
+              "refresh_token":os.environ["RT"]
+          }).json()
+          tok = r["access_token"]; uid = r["user_id"]
+          h = {"Authorization": f"Bearer {tok}"}
+          frm = "2026-05-01T07:00:00.000-06:00"
+          to  = "2026-05-01T20:00:00.000-06:00"
+          all_orders = []
+          off = 0
+          while True:
+              j = requests.get(f"{API}/orders/search?seller={uid}&order.date_created.from={frm}&order.date_created.to={to}&offset={off}&limit=50&sort=date_desc", headers=h).json()
+              res = j.get("results", [])
+              if not res: break
+              all_orders.extend(res)
+              if len(res) < 50: break
+              off += 50
+              if off > 2000: break
+          print(f"Total órdenes encontradas: {len(all_orders)}")
+          # Análisis: status, tags
+          from collections import Counter
+          st_counter = Counter()
+          tag_counter = Counter()
+          dates = []
+          buyers = Counter()
+          item_ids = Counter()
+          for o in all_orders:
+              st_counter[o.get("status","?")] += 1
+              for t in o.get("tags",[]):
+                  tag_counter[t] += 1
+              dates.append(o.get("date_created","")[:16])
+              buyers[o.get("buyer",{}).get("id")] += 1
+              for it in o.get("order_items",[]):
+                  item_ids[it.get("item",{}).get("id")] += 1
+          print("\nStatus distribution:")
+          for s,n in st_counter.most_common(): print(f"  {s}: {n}")
+          print("\nTags más comunes:")
+          for t,n in tag_counter.most_common(8): print(f"  {t}: {n}")
+          print("\nFechas (primeras 5 y últimas 5):")
+          for d in dates[:5]: print(f"  {d}")
+          print("  ...")
+          for d in dates[-5:]: print(f"  {d}")
+          print("\nTop compradores (buyer_id: count):")
+          for b,n in buyers.most_common(5): print(f"  {b}: {n}")
+          print("\nTop items vendidos:")
+          for i,n in item_ids.most_common(8): print(f"  {i}: {n}")
+          print("\nPrimeras 3 órdenes raw:")
+          for o in all_orders[:3]:
+              print(f"  ID={o['id']} status={o.get('status')} amt=${o.get('total_amount')} date={o.get('date_created')[:19]} tags={o.get('tags')}")
+              for it in o.get("order_items",[]):
+                  print(f"    item={it.get('item',{}).get('id')} qty={it.get('quantity')} price=${it.get('unit_price')}")
+          PY
