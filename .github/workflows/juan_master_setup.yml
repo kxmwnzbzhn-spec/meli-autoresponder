@@ -1,0 +1,24 @@
+name: juan-master-setup
+on: { workflow_dispatch: {} }
+permissions: { contents: write }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests -q
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python scripts/juan_master_setup.py
+      - run: |
+          git config user.email b@b.com
+          git config user.name bot
+          git add stock_config_juan.json
+          git diff --cached --quiet || git commit -m "Juan master stock + visible=1 setup (Charge +15, Flip +20)"
+          git push || true
