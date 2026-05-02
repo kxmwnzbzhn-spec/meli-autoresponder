@@ -1308,14 +1308,16 @@ def check_and_replenish_stock(token, state):
                     continue
                 meta["real_stock"] = real - qty
                 changed = True
-                _log(f"  {item_id}: reactivado qty={qty}, real restante={meta['real_stock']}")
-                tg_send(
-                    f"🔁 *Reposicion automatica (reactivar)*\n\n"
-                    f"📦 {meta.get('label', item_id)}\n"
-                    f"🆔 `{item_id}`\n"
-                    f"Stock MELI: {qty}\n"
-                    f"Inventario real restante: {meta['real_stock']}"
-                )
+                _log(f"  {item_id}: reactivado qty={qty}, real restante={meta['real_stock']} — TG silenciado")
+                # SILENCIADO 2026-05-02 por user: era spam cada reposicion.
+                # Solo alertar si inventario real cae <=5 (inventario bajo).
+                if meta['real_stock'] <= 5:
+                    tg_send(
+                        f"⚠️ *Inventario bajo (reactivar)*\n\n"
+                        f"📦 {meta.get('label', item_id)}\n"
+                        f"🆔 `{item_id}`\n"
+                        f"Quedan *{meta['real_stock']}* unidades reales. Considera reponer."
+                    )
         except Exception as e:
             _log(f"  {item_id} auto-replenish err: {e}")
     if changed:
