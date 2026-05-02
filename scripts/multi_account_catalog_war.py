@@ -194,6 +194,28 @@ for cpid, items in by_cpid.items():
         winner_target = round(winner_target, 0)
         if has_full:
             print(f"    ⚡ FULL competitor detected — GAP agresivo $80 (vs estándar $10)")
+
+        # 🔧 FIX: Consultar price_to_win directo de MELI (considera FULL/promos/reputación)
+        # Si MELI dice "tienes que estar en X para ganar", obedecer ese X (usar -1 para asegurar)
+        try:
+            ptw_resp = requests.get(
+                f"https://api.mercadolibre.com/items/{winner_item['iid']}/price_to_win?version=v2",
+                headers=winner_item["H"], timeout=10
+            ).json()
+            ptw = ptw_resp.get("price_to_win")
+            cur = ptw_resp.get("current_price")
+            status_w = ptw_resp.get("status")
+            if ptw is not None and cur is not None:
+                ptw = float(ptw); cur = float(cur)
+                # Si MELI nos dice que NO ganamos (price_to_win < current_price)
+                if ptw < cur:
+                    forced_target = round(ptw - 1, 0)  # -1 para meternos abajo
+                    forced_target = max(floor, min(ceiling, forced_target))
+                    if forced_target < winner_target:
+                        print(f"    🎯 MELI price_to_win=${ptw} < current=${cur} (status={status_w}) — override target ${winner_target}→${forced_target}")
+                        winner_target = forced_target
+        except Exception as e:
+            print(f"    ⚠️  price_to_win fetch err {winner_item['iid']}: {e}")
     else:
         # No winner item — choose cheapest external as reference for staircase
         winner_target = ext_price - GAP if ext_price else None
