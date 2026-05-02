@@ -5,41 +5,35 @@ r = requests.post("https://api.mercadolibre.com/oauth/token", data={
 }).json()
 H = {"Authorization": f"Bearer {r['access_token']}", "Content-Type":"application/json"}
 IID = "MLM2890818973"
+UP = "MLMU3928750610"
+SELLER = 2681696373
 
-# Buscar el value_id correcto para "JBLGO4" o "Go 4" en el atributo DETAILED_MODEL de la categoría
-# 1. Get attribute spec
-print("=== GET MLM59800 attributes ===")
-attrs = requests.get(f"https://api.mercadolibre.com/categories/MLM59800/attributes", headers=H).json()
-dm_attr = next((a for a in attrs if a.get("id") == "DETAILED_MODEL"), None)
-if dm_attr:
-    print(f"  DETAILED_MODEL: {dm_attr.get('value_type')}")
-    vals = dm_attr.get("values", [])
-    print(f"  values count: {len(vals)}")
-    # Buscar JBLGO4 o relacionados
-    for v in vals:
-        if "GO4" in (v.get("name","") or "").upper() or "GO 4" in (v.get("name","") or "").upper() or "JBL" in (v.get("name","") or "").upper():
-            print(f"    id={v.get('id')} name={v.get('name')}")
+# Probar varios endpoints para user_product
+for path in [
+    f"/users/{SELLER}/user_products/{UP}",
+    f"/users/{SELLER}/user-products/{UP}",
+    f"/sites/MLM/user_products/{UP}",
+    f"/user_products/{UP}",  # underscore not dash
+]:
+    r = requests.get(f"https://api.mercadolibre.com{path}", headers=H, timeout=10)
+    print(f"GET {path[-60:]} → {r.status_code} {r.text[:150]}")
 
-# 2. Si DETAILED_MODEL es value_type 'string' open, pasar value_name solo
-# 3. Probar sin id solo name
-print("\n=== Approach: send DETAILED_MODEL como only-name (sin id) ===")
-r1 = requests.put(f"https://api.mercadolibre.com/items/{IID}", headers=H,
-    json={"attributes":[{"id":"DETAILED_MODEL", "value_name":"JBLGO4"}]}, timeout=15)
-print(f"  HTTP {r1.status_code}: {r1.text[:200]}")
+# Probar detach: set user_product_id=null en el item
+print("\n=== Approach: PUT item con user_product_id=null ===")
+r = requests.put(f"https://api.mercadolibre.com/items/{IID}", headers=H,
+                  json={"user_product_id": None}, timeout=15)
+print(f"  HTTP {r.status_code}: {r.text[:300]}")
 
 import time; time.sleep(3)
+# Si se detached, ahora actualizar attributes
 item = requests.get(f"https://api.mercadolibre.com/items/{IID}", headers=H).json()
-for a in item.get("attributes", []):
-    if a.get("id") == "DETAILED_MODEL":
-        print(f"  DESPUÉS: {a.get('value_name')} (id={a.get('value_id')})")
-
-# 4. Como último intento: enviar attribute con values=[] para borrar
-if "Anker" in str(item):
-    print("\n=== Approach: deletar attribute via 'values':[] ===")
-    r3 = requests.put(f"https://api.mercadolibre.com/items/{IID}", headers=H,
-        json={"attributes":[{"id":"DETAILED_MODEL", "values":[{"name":"JBLGO4"}]}]}, timeout=15)
-    print(f"  HTTP {r3.status_code}: {r3.text[:200]}")
-    item2 = requests.get(f"https://api.mercadolibre.com/items/{IID}", headers=H).json()
-    for a in item2.get("attributes", []):
-        if a.get("id") == "DETAILED_MODEL":
-            print(f"  DESPUÉS v2: {a.get('value_name')} (id={a.get('value_id')})")
+print(f"\n  user_product_id ahora: {item.get('user_product_id')}")
+if not item.get('user_product_id'):
+    print("\n=== Detached! Ahora actualizando DETAILED_MODEL ===")
+    r2 = requests.put(f"https://api.mercadolibre.com/items/{IID}", headers=H,
+        json={"attributes":[{"id":"DETAILED_MODEL", "value_name":"JBLGO4"}]}, timeout=15)
+    print(f"  HTTP {r2.status_code}: {r2.text[:200]}")
+    item3 = requests.get(f"https://api.mercadolibre.com/items/{IID}", headers=H).json()
+    for a in item3.get("attributes", []):
+        if a.get("id") in ("DETAILED_MODEL","BRAND","MODEL"):
+            print(f"  {a.get('id'):20} = {a.get('value_name')} (id={a.get('value_id')})")
