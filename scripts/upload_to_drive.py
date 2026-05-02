@@ -81,7 +81,8 @@ def main():
         try:
             r = upload_file(svc, fp, date_folder_id)
             uploaded.append(r)
-            print(f"  ✅ {r[\"name\"]}")
+            _name = r["name"]
+            print(f"  ✅ {_name}")
         except Exception as e:
             print(f"  ❌ {fp}: {e}")
 
