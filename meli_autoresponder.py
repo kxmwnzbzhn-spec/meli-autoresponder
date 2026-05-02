@@ -1464,14 +1464,10 @@ def handle_questions(token, state):
                 _log(f"  Q&A answer err {code_a}: {resp}")
         else:
             seen_q[qid] = {"answered": False, "template": None, "ts": int(time.time())}
-            # Notificar a Telegram con botones para responder manual
-            tg_send(
-                f"❓ *Pregunta sin template*\n\n"
-                f"Item: `{item_id}`\n"
-                f"Comprador: `{qu.get('from',{}).get('id')}`\n"
-                f"Q: _{qtext[:250]}_\n\n"
-                f"No hay template que aplique. Responde manualmente en MELI."
-            )
+            # SILENCIADO: ya no se notifica TG por preguntas sin template (era spam).
+            # Solo se loggea localmente. Si quieres reactivar, descomenta abajo.
+            _log(f"  Q&A sin template [{qid}] item={item_id} buyer={qu.get('from',{}).get('id')} — solo logged, sin TG")
+            # tg_send(...)  # silenciado por user request 2026-05-02
 
 
 def send_review_summary_if_due(token, state):
