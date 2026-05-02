@@ -1,4 +1,3 @@
-"""Cerrar MLM5280672472 + crear nuevo con catalog MLM44731712 (sin Anker)."""
 import os, requests, json, time
 r = requests.post("https://api.mercadolibre.com/oauth/token", data={
     "grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],
@@ -6,26 +5,26 @@ r = requests.post("https://api.mercadolibre.com/oauth/token", data={
 }).json()
 H = {"Authorization": f"Bearer {r['access_token']}", "Content-Type":"application/json"}
 
-# 1. Cerrar el nuevo erróneo
-BAD = "MLM5280672472"
-print(f"=== Cerrando {BAD} (también con Anker) ===")
-r1 = requests.put(f"https://api.mercadolibre.com/items/{BAD}", headers=H, json={"status":"closed"}, timeout=15)
-print(f"  CLOSE: HTTP {r1.status_code}")
+# 1. Cerrar el AZUL erróneo
+WRONG = "MLM5280697078"
+print(f"=== Cerrando {WRONG} (era AZUL no ROJO) ===")
+requests.put(f"https://api.mercadolibre.com/items/{WRONG}", headers=H, json={"status":"closed"}, timeout=15)
 
-# 2. Get viejo (MLM2890818973) para copiar fotos/precio/etc
+# 2. Verificar catálogo Rojo correcto
+NEW_CPID = "MLM64389753"
+prod = requests.get(f"https://api.mercadolibre.com/products/{NEW_CPID}", headers=H).json()
+print(f"\n=== Catalog {NEW_CPID} ===")
+print(f"  name: {prod.get('name')}")
+print(f"  status: {prod.get('status')}")
+for a in prod.get("attributes", []):
+    if a.get("id") in ("BRAND","MODEL","DETAILED_MODEL","MANUFACTURER","COLOR","MAIN_COLOR"):
+        print(f"  {a.get('id'):20} = {a.get('value_name')}")
+
+# 3. Get viejo
 OLD = "MLM2890818973"
 old = requests.get(f"https://api.mercadolibre.com/items/{OLD}", headers=H).json()
 
-# 3. Crear con catalog NUEVO MLM44731712 (DM vacío - limpio)
-NEW_CPID = "MLM44731712"
-print(f"\n=== Verificando catalog destino {NEW_CPID} ===")
-prod = requests.get(f"https://api.mercadolibre.com/products/{NEW_CPID}", headers=H).json()
-print(f"  name: {prod.get('name','')[:80]}")
-print(f"  status: {prod.get('status')}")
-for a in prod.get("attributes", []):
-    if a.get("id") in ("BRAND","MODEL","DETAILED_MODEL","MANUFACTURER","COLOR"):
-        print(f"  {a.get('id'):20} = {a.get('value_name')}")
-
+# 4. Crear con catalog Rojo correcto
 new_item = {
     "category_id": old.get("category_id"),
     "price": old.get("price"),
@@ -41,17 +40,15 @@ new_item = {
     "catalog_listing": True,
 }
 
-print(f"\n=== Creando con CPID {NEW_CPID} ===")
+print(f"\n=== Creando con CPID {NEW_CPID} (ROJO) ===")
 r2 = requests.post("https://api.mercadolibre.com/items", headers=H, json=new_item, timeout=30)
 print(f"POST /items: HTTP {r2.status_code}")
 if r2.status_code in (200,201):
-    new_data = r2.json()
-    new_id = new_data.get("id")
+    new_id = r2.json().get("id")
     print(f"  ✅ Nuevo: {new_id}")
     time.sleep(3)
-    # Verificar atributos
     nv = requests.get(f"https://api.mercadolibre.com/items/{new_id}", headers=H).json()
-    print(f"\n=== ATRIBUTOS del nuevo {new_id} ===")
+    print(f"\n=== ATRIBUTOS {new_id} ===")
     for a in nv.get("attributes", []):
         if a.get("id") in ("BRAND","MODEL","DETAILED_MODEL","MANUFACTURER","MODEL_NAME","LINE","COLOR","MAIN_COLOR"):
             print(f"  {a.get('id'):20} = {a.get('value_name')}")
@@ -59,4 +56,4 @@ if r2.status_code in (200,201):
     print(f"  permalink: {nv.get('permalink')}")
     print(f"  status: {nv.get('status')}")
 else:
-    print(f"  body: {r2.text[:600]}")
+    print(f"  body: {r2.text[:500]}")
