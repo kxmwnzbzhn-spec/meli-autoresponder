@@ -17,6 +17,6 @@ jobs:
       - run: |
           git config user.email b@b.com
           git config user.name bot
-          git add data/catalog_war_state.json
+          git add catalog_war_state.json
           git diff --cached --quiet || git commit -m "fix state with original_price for Raymundo items"
           git push || true
