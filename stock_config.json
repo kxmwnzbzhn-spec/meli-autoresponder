@@ -2441,7 +2441,7 @@
     "_auto_discovered": true
   },
   "MLM2894631211": {
-    "real_stock": 21,
+    "real_stock": 20,
     "sku": "AUTO-631211",
     "label": "Bocina Jbl Charge 6 Bluetooth Ip67 Portatil Reacondicionada  - $399",
     "auto_replenish": true,
@@ -2467,6 +2467,16 @@
     "auto_replenish": true,
     "replenish_quantity": 1,
     "seo_title": "Bocina Jbl Charge 6 Bluetooth Ip67 Portatil Reacondicionada Rojo",
+    "previous_ids": [],
+    "_auto_discovered": true
+  },
+  "MLM5280635546": {
+    "real_stock": 30,
+    "sku": "AUTO-635546",
+    "label": "Jbl Go 4 - Altavoz Ultraportátil Bluetooth Color Rojo - $649.0",
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "seo_title": "Jbl Go 4 - Altavoz Ultraportátil Bluetooth Color Rojo",
     "previous_ids": [],
     "_auto_discovered": true
   }
