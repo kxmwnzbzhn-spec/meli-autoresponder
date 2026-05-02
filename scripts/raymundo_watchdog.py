@@ -1,49 +1,43 @@
-"""
-RAYMUNDO WATCHDOG — corre cada 1 min, repausa cualquier item activo.
-Loop interno 5×30s para coverage continuo.
-"""
+"""Watchdog: pausa todo lo activo de Raymundo cada 60s durante 30 min."""
 import os, requests, time
-APP_ID=os.environ["MELI_APP_ID"]; APP_SECRET=os.environ["MELI_APP_SECRET"]
-RT=os.environ["MELI_REFRESH_TOKEN_RAYMUNDO"]
 
 def get_token():
-    r=requests.post("https://api.mercadolibre.com/oauth/token",data={"grant_type":"refresh_token","client_id":APP_ID,"client_secret":APP_SECRET,"refresh_token":RT}).json()
+    r = requests.post("https://api.mercadolibre.com/oauth/token", data={
+        "grant_type":"refresh_token",
+        "client_id":os.environ["MELI_APP_ID"],
+        "client_secret":os.environ["MELI_APP_SECRET"],
+        "refresh_token":os.environ["MELI_REFRESH_TOKEN_RAYMUNDO"]
+    }).json()
     return r["access_token"]
 
-def pause_pass(H, USER_ID):
-    ids = []; offset = 0
-    while True:
-        rr = requests.get(f"https://api.mercadolibre.com/users/{USER_ID}/items/search?status=active&limit=50&offset={offset}",headers=H,timeout=15).json()
-        b = rr.get("results",[])
-        if not b: break
-        ids.extend(b); offset += 50
-        if offset >= rr.get("paging",{}).get("total",0): break
-    if not ids: return 0
-    n = 0
-    for iid in ids:
-        rp = requests.put(f"https://api.mercadolibre.com/items/{iid}",headers=H,json={"status":"paused"},timeout=10)
-        if rp.status_code == 200:
-            n += 1
-            print(f"  [WATCHDOG] PAUSADO {iid}")
-    return n
-
-TOKEN = get_token()
-H = {"Authorization":f"Bearer {TOKEN}","Content-Type":"application/json"}
-me = requests.get("https://api.mercadolibre.com/users/me",headers=H,timeout=10).json()
-USER_ID = me["id"]
-print(f"Watchdog Raymundo ({me.get('nickname')}) — loop 10×30s")
-
-total = 0
-for i in range(10):
-    print(f"\n=== Iter {i+1}/10 ({time.strftime('%H:%M:%S')}) ===")
+iters = 30  # 30 ciclos x 60s = 30 min
+for i in range(iters):
     try:
-        n = pause_pass(H, USER_ID)
-        total += n
-        if n == 0: print(f"  todo pausado ✓")
+        tok = get_token()
+        H = {"Authorization": f"Bearer {tok}", "Content-Type":"application/json"}
+        me = requests.get("https://api.mercadolibre.com/users/me", headers=H).json()
+        sid = me["id"]
+        # Buscar items activos
+        ids = []
+        s = 0
+        while True:
+            d = requests.get(f"https://api.mercadolibre.com/users/{sid}/items/search?status=active&limit=100&offset={s}", headers=H, timeout=15).json()
+            got = d.get("results", [])
+            if not got: break
+            ids.extend(got)
+            s += 100
+            if s >= d.get("paging",{}).get("total",0): break
+        paused = 0
+        for iid in ids:
+            r = requests.put(f"https://api.mercadolibre.com/items/{iid}", headers=H, json={"status":"paused"}, timeout=10)
+            if r.status_code in (200,201): paused += 1
+        print(f"[{i+1}/{iters}] activos={len(ids)} pausados={paused}")
     except Exception as e:
-        print(f"  err: {e}")
-        try: TOKEN = get_token(); H["Authorization"] = f"Bearer {TOKEN}"
-        except: pass
-    if i < 9: time.sleep(30)
+        print(f"[{i+1}/{iters}] err: {e}")
+    time.sleep(55)
 
-print(f"\nTotal pausados en este run: {total}")
+# Telegram al final
+tg_t = os.environ.get("TELEGRAM_BOT_TOKEN"); tg_c = os.environ.get("TELEGRAM_CHAT_ID")
+if tg_t and tg_c:
+    requests.post(f"https://api.telegram.org/bot{tg_t}/sendMessage",
+        data={"chat_id":tg_c, "text":f"🛑 Raymundo watchdog completado: {iters} ciclos / 30 min"}, timeout=10)
