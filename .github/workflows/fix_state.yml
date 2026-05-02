@@ -1,0 +1,22 @@
+name: fix-state-raymundo
+on: { workflow_dispatch: {} }
+permissions: { contents: write }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests -q
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_RAYMUNDO: ${{ secrets.MELI_REFRESH_TOKEN_RAYMUNDO }}
+        run: python scripts/fix_state.py
+      - run: |
+          git config user.email b@b.com
+          git config user.name bot
+          git add data/catalog_war_state.json
+          git diff --cached --quiet || git commit -m "fix state with original_price for Raymundo items"
+          git push || true
