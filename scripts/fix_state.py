@@ -19,7 +19,7 @@ while True:
     if s >= d.get("paging",{}).get("total",0): break
 
 # Cargar state existente
-state_path = "data/catalog_war_state.json"
+state_path = "catalog_war_state.json"
 state = {"items": {}}
 try:
     with open(state_path) as f: state = json.load(f)
