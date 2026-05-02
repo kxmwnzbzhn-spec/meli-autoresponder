@@ -214,6 +214,41 @@ total_shipments = len(shipments)
 total_units = sum(sum(i["qty"] for i in s["items"]) for s in shipments.values())
 print(f"\nINCLUIDOS: {total_shipments} envios / {total_units} unidades / {len(groups)} grupos ({len(mixed_shipments)} MIXTOS)\n")
 
+
+def to_4x6_pdf(pdf_bytes):
+    """Convierte cualquier PDF a 4x6 inches por pagina, centrando el contenido (sin distorsion)."""
+    from pypdf import PdfReader, PdfWriter, Transformation
+    from pypdf.generic import RectangleObject
+    TARGET_W = 4 * 72   # 288 pt
+    TARGET_H = 6 * 72   # 432 pt
+    reader = PdfReader(BytesIO(pdf_bytes))
+    writer = PdfWriter()
+    for page in reader.pages:
+        media = page.mediabox
+        src_w = float(media.width); src_h = float(media.height)
+        # MELI a veces da landscape: si w > h, asumimos rotada y la giramos
+        if src_w > src_h:
+            page.rotate(90)
+            src_w, src_h = src_h, src_w
+        # Calcular escala para que entre en 4x6 manteniendo aspect ratio
+        scale = min(TARGET_W / src_w, TARGET_H / src_h)
+        new_w = src_w * scale
+        new_h = src_h * scale
+        # Centrar
+        tx = (TARGET_W - new_w) / 2
+        ty = (TARGET_H - new_h) / 2
+        # Aplicar transformacion
+        op = Transformation().scale(sx=scale, sy=scale).translate(tx=tx, ty=ty)
+        page.add_transformation(op)
+        # Re-set mediabox a 4x6
+        page.mediabox = RectangleObject((0, 0, TARGET_W, TARGET_H))
+        page.cropbox = RectangleObject((0, 0, TARGET_W, TARGET_H))
+        writer.add_page(page)
+    out = BytesIO()
+    writer.write(out)
+    return out.getvalue()
+
+
 def annotate_pdf(pdf_bytes, shipment_info):
     """Sobrepone caja amarilla arriba con composicion (multiple lineas si hace falta)."""
     from pypdf import PdfReader, PdfWriter
@@ -303,6 +338,11 @@ for sig, ships in sorted(groups.items()):
             from pypdf import PdfWriter, PdfReader
             writer = PdfWriter()
             for pdf_bytes in annotated_pdfs:
+                # Convertir a 4x6 antes de mergear
+                try:
+                    pdf_bytes = to_4x6_pdf(pdf_bytes)
+                except Exception as e:
+                    print(f"  4x6 err: {e}")
                 reader = PdfReader(BytesIO(pdf_bytes))
                 for p in reader.pages: writer.add_page(p)
             with open(out_pdf, "wb") as f: writer.write(f)
