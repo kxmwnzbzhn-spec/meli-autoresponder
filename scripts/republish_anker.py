@@ -46,7 +46,7 @@ ensure_attr(new_attrs, "DETAILED_MODEL", "JBLGO4")
 ensure_attr(new_attrs, "LINE", "Go")
 
 new_item = {
-    "title": old.get("title"),
+    # title omitido — MELI lo genera desde catalog
     "category_id": old.get("category_id"),
     "price": old.get("price"),
     "currency_id": "MXN",
