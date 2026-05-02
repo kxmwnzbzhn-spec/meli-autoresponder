@@ -1,8 +1,8 @@
-name: probe2
+name: probe-allow-return-2
 on:
   workflow_dispatch:
 jobs:
-  run:
+  go:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -12,5 +12,5 @@ jobs:
       - env:
           MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
           MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
-          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+          MELI_REFRESH_TOKEN_CLARIBEL: ${{ secrets.MELI_REFRESH_TOKEN_CLARIBEL }}
         run: python scripts/probe2.py
