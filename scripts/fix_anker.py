@@ -4,39 +4,42 @@ r = requests.post("https://api.mercadolibre.com/oauth/token", data={
     "client_secret":os.environ["MELI_APP_SECRET"],"refresh_token":os.environ["MELI_REFRESH_TOKEN"]
 }).json()
 H = {"Authorization": f"Bearer {r['access_token']}", "Content-Type":"application/json"}
-UP_ID = "MLMU3928750610"
+IID = "MLM2890818973"
 
-# 1. GET el user_product
-print("=== GET user_product ===")
-up = requests.get(f"https://api.mercadolibre.com/user-products/{UP_ID}", headers=H, timeout=10).json()
-print(f"  status: {up.get('status','?')}")
-print(f"  attrs (DETAILED_MODEL):")
-for a in up.get("attributes", []):
-    if a.get("id") == "DETAILED_MODEL":
-        print(f"    value_name={a.get('value_name')} value_id={a.get('value_id')}")
+# Buscar el value_id correcto para "JBLGO4" o "Go 4" en el atributo DETAILED_MODEL de la categoría
+# 1. Get attribute spec
+print("=== GET MLM59800 attributes ===")
+attrs = requests.get(f"https://api.mercadolibre.com/categories/MLM59800/attributes", headers=H).json()
+dm_attr = next((a for a in attrs if a.get("id") == "DETAILED_MODEL"), None)
+if dm_attr:
+    print(f"  DETAILED_MODEL: {dm_attr.get('value_type')}")
+    vals = dm_attr.get("values", [])
+    print(f"  values count: {len(vals)}")
+    # Buscar JBLGO4 o relacionados
+    for v in vals:
+        if "GO4" in (v.get("name","") or "").upper() or "GO 4" in (v.get("name","") or "").upper() or "JBL" in (v.get("name","") or "").upper():
+            print(f"    id={v.get('id')} name={v.get('name')}")
 
-# 2. PUT con DETAILED_MODEL corregido
-print("\n=== PUT user_product DETAILED_MODEL=JBLGO4 ===")
-new_attrs = []
-for a in up.get("attributes", []):
-    if a.get("id") == "DETAILED_MODEL":
-        new_attrs.append({"id":"DETAILED_MODEL", "value_name":"JBLGO4", "value_id": None})
-    else:
-        new_attrs.append(a)
-r1 = requests.put(f"https://api.mercadolibre.com/user-products/{UP_ID}", headers=H,
-                  json={"attributes": new_attrs}, timeout=20)
-print(f"  HTTP {r1.status_code}: {r1.text[:400]}")
+# 2. Si DETAILED_MODEL es value_type 'string' open, pasar value_name solo
+# 3. Probar sin id solo name
+print("\n=== Approach: send DETAILED_MODEL como only-name (sin id) ===")
+r1 = requests.put(f"https://api.mercadolibre.com/items/{IID}", headers=H,
+    json={"attributes":[{"id":"DETAILED_MODEL", "value_name":"JBLGO4"}]}, timeout=15)
+print(f"  HTTP {r1.status_code}: {r1.text[:200]}")
 
-# 3. Verificar
-up2 = requests.get(f"https://api.mercadolibre.com/user-products/{UP_ID}", headers=H, timeout=10).json()
-for a in up2.get("attributes", []):
-    if a.get("id") in ("BRAND","MODEL","DETAILED_MODEL","MANUFACTURER","LINE","MODEL_NAME"):
-        print(f"  {a.get('id'):20} = {a.get('value_name')} (id={a.get('value_id')})")
-
-# 4. Esperar 5s y check item
-import time; time.sleep(5)
-print("\n=== Item después ===")
-item = requests.get(f"https://api.mercadolibre.com/items/MLM2890818973", headers=H).json()
+import time; time.sleep(3)
+item = requests.get(f"https://api.mercadolibre.com/items/{IID}", headers=H).json()
 for a in item.get("attributes", []):
-    if a.get("id") in ("BRAND","MODEL","DETAILED_MODEL","MANUFACTURER","LINE","MODEL_NAME"):
-        print(f"  {a.get('id'):20} = {a.get('value_name')} (id={a.get('value_id')})")
+    if a.get("id") == "DETAILED_MODEL":
+        print(f"  DESPUÉS: {a.get('value_name')} (id={a.get('value_id')})")
+
+# 4. Como último intento: enviar attribute con values=[] para borrar
+if "Anker" in str(item):
+    print("\n=== Approach: deletar attribute via 'values':[] ===")
+    r3 = requests.put(f"https://api.mercadolibre.com/items/{IID}", headers=H,
+        json={"attributes":[{"id":"DETAILED_MODEL", "values":[{"name":"JBLGO4"}]}]}, timeout=15)
+    print(f"  HTTP {r3.status_code}: {r3.text[:200]}")
+    item2 = requests.get(f"https://api.mercadolibre.com/items/{IID}", headers=H).json()
+    for a in item2.get("attributes", []):
+        if a.get("id") == "DETAILED_MODEL":
+            print(f"  DESPUÉS v2: {a.get('value_name')} (id={a.get('value_id')})")
