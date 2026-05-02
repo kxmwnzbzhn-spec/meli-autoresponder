@@ -671,8 +671,16 @@
       "role": "winner",
       "label": "Armaf Odyssey Mega Man Edici\u00f3n Limitada ",
       "catalog_product_id": "MLM21765262"
+    },
+    "MLM5280635546": {
+      "original_price": 572.0,
+      "floor": 314.6,
+      "ceiling": 743.6,
+      "last_change_at": 1777762807,
+      "role": "step_1",
+      "label": "Jbl Go 4 - Altavoz Ultraport\u00e1til Bl"
     }
   },
-  "last_run": 1777759274,
+  "last_run": 1777762807,
   "winner_account": "RAYMUNDO"
 }
