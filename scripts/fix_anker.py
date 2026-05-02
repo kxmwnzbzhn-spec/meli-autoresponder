@@ -6,38 +6,33 @@ r = requests.post("https://api.mercadolibre.com/oauth/token", data={
 H = {"Authorization": f"Bearer {r['access_token']}", "Content-Type":"application/json"}
 IID = "MLM2890818973"
 
-# 1. GET attributes actuales
+# Ver el detalle completo del attribute Anker
 item = requests.get(f"https://api.mercadolibre.com/items/{IID}", headers=H).json()
-print(f"=== {IID} ===")
-print(f"Title: {item.get('title')}")
-print(f"\nATRIBUTOS ACTUALES:")
 for a in item.get("attributes", []):
-    aid = a.get("id"); name = a.get("name",""); val = a.get("value_name","") or a.get("value_id","")
-    if aid in ("BRAND","MODEL","DETAILED_MODEL","LINE","MANUFACTURER","ITEM_CONDITION","COLOR","MAIN_COLOR","MODEL_NAME"):
-        print(f"  {aid:20} ({name[:30]:30}) = {val}")
+    if a.get("id") == "DETAILED_MODEL":
+        print(f"DETAILED_MODEL completo: {json.dumps(a, indent=2, ensure_ascii=False)}")
+        break
 
-# 2. Identificar cuáles necesitan fix
-print("\n=== APLICANDO CORRECCIONES ===")
-new_attrs = [
-    {"id": "BRAND", "value_name": "JBL"},
-    {"id": "MODEL", "value_name": "Go 4"},
-    {"id": "DETAILED_MODEL", "value_name": "JBLGO4"},
-    {"id": "LINE", "value_name": "Go"},
-    {"id": "MANUFACTURER", "value_name": "JBL"},
-    {"id": "MODEL_NAME", "value_name": "Go 4"},
-]
-rr = requests.put(f"https://api.mercadolibre.com/items/{IID}", headers=H,
-                  json={"attributes": new_attrs}, timeout=20)
-print(f"PUT attributes: HTTP {rr.status_code}")
-if rr.status_code in (200,201):
-    print("✅ OK")
-else:
-    print(f"  body: {rr.text[:500]}")
-
-# 3. Verificar después
+# Probar varios approaches para borrar/cambiar
+print("\n=== Approach 1: value_id=None + value_name=JBLGO4 ===")
+r1 = requests.put(f"https://api.mercadolibre.com/items/{IID}", headers=H,
+    json={"attributes":[{"id":"DETAILED_MODEL", "value_id": None, "value_name": "JBLGO4"}]}, timeout=15)
+print(f"  HTTP {r1.status_code}: {r1.text[:300]}")
 item2 = requests.get(f"https://api.mercadolibre.com/items/{IID}", headers=H).json()
-print(f"\nATRIBUTOS DESPUÉS:")
 for a in item2.get("attributes", []):
-    aid = a.get("id"); val = a.get("value_name","") or a.get("value_id","")
+    if a.get("id") == "DETAILED_MODEL":
+        print(f"  AHORA: value_name={a.get('value_name')} value_id={a.get('value_id')}")
+
+if "Anker" in str(item2):
+    print("\n=== Approach 2: value_id explícito '' (string vacío) ===")
+    r2 = requests.put(f"https://api.mercadolibre.com/items/{IID}", headers=H,
+        json={"attributes":[{"id":"DETAILED_MODEL", "value_id": "", "value_name": "JBLGO4"}]}, timeout=15)
+    print(f"  HTTP {r2.status_code}: {r2.text[:300]}")
+
+# Final check
+item3 = requests.get(f"https://api.mercadolibre.com/items/{IID}", headers=H).json()
+print(f"\n=== ESTADO FINAL ===")
+for a in item3.get("attributes", []):
+    aid = a.get("id")
     if aid in ("BRAND","MODEL","DETAILED_MODEL","LINE","MANUFACTURER","MODEL_NAME"):
-        print(f"  {aid:20} = {val}")
+        print(f"  {aid:20} = {a.get('value_name')} (id={a.get('value_id')})")
