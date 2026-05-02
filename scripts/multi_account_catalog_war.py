@@ -207,9 +207,15 @@ for cpid, items in by_cpid.items():
             status_w = ptw_resp.get("status")
             if ptw is not None and cur is not None:
                 ptw = float(ptw); cur = float(cur)
-                # Si MELI nos dice que NO ganamos (price_to_win < current_price)
+                # CAP: nunca subir arriba de price_to_win - 1 (perderiamos buy box)
+                ceiling_ptw = round(ptw - 1, 0)
+                ceiling_ptw = max(floor, ceiling_ptw)  # respetar floor
+                if winner_target > ceiling_ptw:
+                    print(f"    🛡️  CAP a price_to_win-1: ${winner_target}→${ceiling_ptw} (MELI ptw=${ptw}, status={status_w})")
+                    winner_target = ceiling_ptw
+                # FORCE DOWN: si MELI dice que perdemos (ptw < cur), bajar a ptw - 1
                 if ptw < cur:
-                    forced_target = round(ptw - 1, 0)  # -1 para meternos abajo
+                    forced_target = round(ptw - 1, 0)
                     forced_target = max(floor, min(ceiling, forced_target))
                     if forced_target < winner_target:
                         print(f"    🎯 MELI price_to_win=${ptw} < current=${cur} (status={status_w}) — override target ${winner_target}→${forced_target}")
