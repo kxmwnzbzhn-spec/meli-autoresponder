@@ -36,7 +36,7 @@
       "original_price": 755.0,
       "floor": 415.25000000000006,
       "ceiling": 981.5,
-      "last_change_at": 1777790290,
+      "last_change_at": 1777805636,
       "role": "step_1",
       "label": "Bocina Jbl Go 4 Jblgo4 Port\u00e1til Con"
     },
@@ -44,8 +44,8 @@
       "original_price": 719.0,
       "floor": 395.45000000000005,
       "ceiling": 934.7,
-      "last_change_at": 1777781054,
-      "role": "step_1",
+      "last_change_at": 1777805636,
+      "role": "winner",
       "label": "Bocina Jbl Go 4 Jblgo4 Port\u00e1til Con"
     },
     "MLM5241631618": {
@@ -165,7 +165,7 @@
       "original_price": 749.0,
       "floor": 411.95000000000005,
       "ceiling": 973.7,
-      "last_change_at": 1777801894,
+      "last_change_at": 1777805636,
       "role": "winner",
       "label": "Bocina Port\u00e1til Jbl Go 4 Bluetooth,"
     },
@@ -173,7 +173,7 @@
       "original_price": 596.0,
       "floor": 327.8,
       "ceiling": 774.8000000000001,
-      "last_change_at": 1777801894,
+      "last_change_at": 1777805636,
       "role": "winner",
       "label": "Bocina Jbl Go 4 Jblgo4 Port\u00e1til Con"
     },
@@ -181,15 +181,15 @@
       "original_price": 619.0,
       "floor": 340.45000000000005,
       "ceiling": 804.7,
-      "last_change_at": 1777801894,
-      "role": "winner",
+      "last_change_at": 1777805636,
+      "role": "step_1",
       "label": "Bocina Jbl Go 4 Jblgo4 Port\u00e1til Con"
     },
     "MLM5246077488": {
       "original_price": 992.0,
       "floor": 545.6,
       "ceiling": 1289.6000000000001,
-      "last_change_at": 1777781054,
+      "last_change_at": 1777805636,
       "role": "winner",
       "label": "Bocina Port\u00e1til Jbl Go 4 Bluetooth,"
     },
@@ -820,8 +820,8 @@
       "original_price": 999.0,
       "floor": 549.45,
       "ceiling": 1298.7,
-      "last_change_at": 1777778078,
-      "role": "winner",
+      "last_change_at": 1777805636,
+      "role": "step_2",
       "label": "Bocina Jbl Go 4 Jblgo4 Port\u00e1til Con"
     },
     "MLM2904710475": {
@@ -841,6 +841,6 @@
       "label": "Bocina Jbl Audio Clip 5 Clip 5 Port"
     }
   },
-  "last_run": 1777801894,
+  "last_run": 1777805636,
   "winner_account": "RAYMUNDO"
 }
