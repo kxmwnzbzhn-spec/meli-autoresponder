@@ -1,0 +1,21 @@
+name: oauth-watchdog
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 14 * * *'   # diario 8am CDMX (14 UTC)
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - run: pip install requests -q
+      - env:
+          GOOGLE_OAUTH_CLIENT_ID:     ${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}
+          GOOGLE_OAUTH_CLIENT_SECRET: ${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}
+          GOOGLE_OAUTH_REFRESH_TOKEN: ${{ secrets.GOOGLE_OAUTH_REFRESH_TOKEN }}
+          TELEGRAM_BOT_TOKEN:         ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID:           ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          curl -s -o scripts/check_oauth_token.py "https://raw.githubusercontent.com/$GITHUB_REPOSITORY/main/scripts/check_oauth_token.py"
+          python scripts/check_oauth_token.py
