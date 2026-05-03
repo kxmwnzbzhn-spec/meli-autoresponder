@@ -12,7 +12,7 @@ TG = os.environ.get("TELEGRAM_BOT_TOKEN", "")
 TGCID = os.environ.get("TELEGRAM_CHAT_ID", "")
 
 FLOORS = {
-    "Go 4":   599,
+    "Go 4":   449,
     "Go 3":   349,
     "Clip 5": 799,
 }
