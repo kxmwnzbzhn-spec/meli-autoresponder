@@ -180,5 +180,65 @@
     "min_visible": 1,
     "active": true,
     "title": "Sony Srs-xb100 Altavoz De Viaje Inalámbrico Bluetooth Port C"
+  },
+  "MLM5281123238": {
+    "label": "Clip 5 Morado",
+    "real_stock": 255,
+    "min_visible": 1,
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "catalog_war": true,
+    "floor_price": 799,
+    "ceiling_price": 1499,
+    "color": "Morado",
+    "model": "Clip 5"
+  },
+  "MLM2904687737": {
+    "label": "Clip 5 Rojo",
+    "real_stock": 163,
+    "min_visible": 1,
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "catalog_war": true,
+    "floor_price": 799,
+    "ceiling_price": 1499,
+    "color": "Rojo",
+    "model": "Clip 5"
+  },
+  "MLM5281123246": {
+    "label": "Clip 5 Negro",
+    "real_stock": 245,
+    "min_visible": 1,
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "catalog_war": true,
+    "floor_price": 799,
+    "ceiling_price": 1499,
+    "color": "Negro",
+    "model": "Clip 5"
+  },
+  "MLM2904687747": {
+    "label": "Clip 5 Azul",
+    "real_stock": 479,
+    "min_visible": 1,
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "catalog_war": true,
+    "floor_price": 799,
+    "ceiling_price": 1499,
+    "color": "Azul",
+    "model": "Clip 5"
+  },
+  "MLM2904674811": {
+    "label": "Clip 5 Camuflaje",
+    "real_stock": 239,
+    "min_visible": 1,
+    "auto_replenish": true,
+    "replenish_quantity": 1,
+    "catalog_war": true,
+    "floor_price": 799,
+    "ceiling_price": 1499,
+    "color": "Camuflaje",
+    "model": "Clip 5"
   }
 }
