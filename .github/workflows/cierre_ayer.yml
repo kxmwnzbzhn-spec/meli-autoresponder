@@ -1,0 +1,19 @@
+name: cierre-ayer
+on: { workflow_dispatch: }
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests -q
+      - env:
+          MELI_APP_SECRET:              ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_RAYMUNDO:  ${{ secrets.MELI_REFRESH_TOKEN_RAYMUNDO }}
+          MELI_REFRESH_TOKEN_JUAN:      ${{ secrets.MELI_REFRESH_TOKEN_JUAN }}
+          MELI_REFRESH_TOKEN:           ${{ secrets.MELI_REFRESH_TOKEN }}
+          TELEGRAM_BOT_TOKEN:           ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID:             ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python scripts/cierre_ayer.py
