@@ -196,7 +196,7 @@
   },
   "MLM2904687737": {
     "label": "Clip 5 Rojo",
-    "real_stock": 163,
+    "real_stock": 82,
     "min_visible": 1,
     "auto_replenish": true,
     "replenish_quantity": 1,
@@ -205,11 +205,13 @@
     "ceiling_price": 1499,
     "color": "Rojo",
     "model": "Clip 5",
-    "catalog_product_id": "MLM37361046"
+    "catalog_product_id": "MLM37361046",
+    "shares_with": "MLM2904700925",
+    "stock_note": "Rojo (comparte fisico con cover)"
   },
   "MLM5281123246": {
     "label": "Clip 5 Negro",
-    "real_stock": 245,
+    "real_stock": 123,
     "min_visible": 1,
     "auto_replenish": true,
     "replenish_quantity": 1,
@@ -218,7 +220,9 @@
     "ceiling_price": 1499,
     "color": "Negro",
     "model": "Clip 5",
-    "catalog_product_id": "MLM37110181"
+    "catalog_product_id": "MLM37110181",
+    "shares_with": "MLM2904676579",
+    "stock_note": "Negro (comparte fisico con 7W)"
   },
   "MLM2904687747": {
     "label": "Clip 5 Azul",
@@ -248,7 +252,7 @@
   },
   "MLM2904700925": {
     "label": "Clip 5 Rojo (cover)",
-    "real_stock": 100,
+    "real_stock": 82,
     "min_visible": 1,
     "auto_replenish": true,
     "replenish_quantity": 1,
@@ -257,11 +261,13 @@
     "ceiling_price": 1499,
     "color": "Rojo",
     "model": "Clip 5",
-    "catalog_product_id": "MLM46022592"
+    "catalog_product_id": "MLM46022592",
+    "shares_with": "MLM2904687737",
+    "stock_note": "Rojo cover (comparte fisico con orig)"
   },
   "MLM2904676579": {
     "label": "Clip 5 Negro 7W",
-    "real_stock": 100,
+    "real_stock": 123,
     "min_visible": 1,
     "auto_replenish": true,
     "replenish_quantity": 1,
@@ -270,6 +276,8 @@
     "ceiling_price": 1499,
     "color": "Negro",
     "model": "Clip 5",
-    "catalog_product_id": "MLM46042650"
+    "catalog_product_id": "MLM46042650",
+    "shares_with": "MLM5281123246",
+    "stock_note": "Negro 7W (comparte fisico con orig)"
   }
 }
