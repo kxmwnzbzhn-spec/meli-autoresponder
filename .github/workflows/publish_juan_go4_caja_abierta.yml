@@ -1,0 +1,33 @@
+name: publish-juan-go4-caja-abierta
+on: { workflow_dispatch: }
+concurrency:
+  group: stock-cfg-juan
+  cancel-in-progress: false
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+        with: { token: '${{ secrets.PUSH_PAT || secrets.GITHUB_TOKEN }}' }
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests -q
+      - env:
+          MELI_APP_SECRET:     ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN:  ${{ secrets.MELI_REFRESH_TOKEN }}
+          TELEGRAM_BOT_TOKEN:  ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID:    ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python scripts/publish_juan_go4_caja_abierta.py
+      - if: always()
+        run: |
+          git config user.name "publish-bot"
+          git config user.email "publish@elitemarket"
+          git add stock_config_juan.json 2>/dev/null || true
+          if ! git diff --staged --quiet; then
+            git commit -m "publish: JUAN Go 4 caja abierta color aleatorio \$299"
+            for i in 1 2 3; do
+              git pull --rebase --autostash origin main && git push origin main && break
+              sleep 5
+            done
+          fi
