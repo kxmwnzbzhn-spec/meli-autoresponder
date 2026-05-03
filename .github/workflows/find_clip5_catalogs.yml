@@ -1,0 +1,32 @@
+name: find-clip5-catalogs
+on:
+  workflow_dispatch:
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PUSH_PAT || secrets.GITHUB_TOKEN }}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - run: pip install requests -q
+      - env:
+          MELI_APP_SECRET:              ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_RAYMUNDO:  ${{ secrets.MELI_REFRESH_TOKEN_RAYMUNDO }}
+          TELEGRAM_BOT_TOKEN:           ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID:             ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python scripts/find_clip5_catalogs.py
+      - name: Commit audit report
+        if: always()
+        run: |
+          git config user.name "audit-bot"
+          git config user.email "audit@elitemarket"
+          git add clip5_catalogs_audit.json 2>/dev/null || true
+          if git diff --staged --quiet; then echo "no changes"; else
+            git commit -m "audit: clip5 catalogs disponibles"
+            for i in 1 2 3; do
+              git pull --rebase --autostash origin main && git push origin main && break
+              sleep 5
+            done
+          fi
