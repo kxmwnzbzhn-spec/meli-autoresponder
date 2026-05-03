@@ -94,7 +94,7 @@
         "MLM2904676579",
         "MLM2904674811"
       ],
-      "sales_count": 209,
+      "sales_count": 228,
       "throttled_at": 1777841944
     },
     "DILCIE": {
@@ -116,7 +116,7 @@
       "sales_count": 0
     }
   },
-  "last_run": 1777841946,
+  "last_run": 1777845283,
   "last_run_date": "2026-05-03",
   "last_reactivation": 1777823147,
   "last_raymundo_6am_reactivate": 1777813335
