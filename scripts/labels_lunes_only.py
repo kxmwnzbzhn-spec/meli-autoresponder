@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
-"""ETIQUETAS LUNES: filtra shipments cuyo handling_limit (deadline MELI para
-despachar) cae en lunes 4 mayo 2026 o antes (overdue). Genera CSV + manifest
-y opcionalmente regenera el PDF unificado solo con esos.
+"""ETIQUETAS LUNES — filtra shipments que MELI requiere despachar HOY/LUNES.
 
 Lógica:
-- Recorre todas las cuentas
-- Lista órdenes paid recientes (7 dias)
-- Para cada shipment: GET shipment detail
-- Toma estimated_handling_limit.date (CDMX)
-- Filtra <= LIMIT_DAY (lunes 4 mayo)
+1. Lista órdenes paid (últimos 7 días)
+2. Para cada shipment status=ready_to_ship (etiqueta lista pero no entregada al carrier):
+   - Calcula handover_deadline = date_handling + handling_hours_default (48h)
+   - O usa /shipments/{id}/sla → expected_date como deadline
+3. Filtra los que tengan deadline <= LIMIT_DAY (lunes 4 mayo)
+   = OVERDUE (ya pasó deadline) + due-on-Monday
+4. Genera CSV agrupado por cuenta con shipment_id, comp, deadline, urgency
 """
-import os, requests, time, json
+import os, requests, time, csv, json
 from datetime import datetime, timedelta, timezone
 from collections import defaultdict
 
@@ -29,11 +29,10 @@ ACCS = {
     "Bren":     os.environ.get("MELI_REFRESH_TOKEN_BREN"),
 }
 
-# Día límite: lunes 4 mayo 2026 (incluye overdue)
 TZ_CDMX = timezone(timedelta(hours=-6))
 LIMIT_DAY_STR = os.environ.get("LIMIT_DAY", "2026-05-04")
-LIMIT_DAY = datetime.fromisoformat(LIMIT_DAY_STR).date()
-print(f"Límite handling: {LIMIT_DAY} (incluye overdue anteriores)")
+LIMIT_DAY = datetime.fromisoformat(LIMIT_DAY_STR).replace(hour=23, minute=59, tzinfo=TZ_CDMX)
+print(f"Límite handover: {LIMIT_DAY.isoformat()}")
 
 def tok(rt):
     r = requests.post("https://api.mercadolibre.com/oauth/token", data={
@@ -41,8 +40,7 @@ def tok(rt):
         "client_secret":APP_SECRET,"refresh_token":rt}).json()
     return r.get("access_token")
 
-
-WINDOW_DAYS = 7
+WINDOW_DAYS = 10
 NOW = datetime.now(timezone.utc)
 START = NOW - timedelta(days=WINDOW_DAYS)
 
@@ -51,26 +49,22 @@ errors = []
 
 for acc, rt in ACCS.items():
     if not rt:
-        print(f"\n{acc}: sin token, skip")
-        continue
+        print(f"\n{acc}: skip"); continue
     print(f"\n=== {acc} ===")
     at = tok(rt)
-    if not at:
-        print(f"  {acc}: token refresh fallo")
-        continue
+    if not at: continue
     H = {"Authorization": f"Bearer {at}"}
     me = requests.get("https://api.mercadolibre.com/users/me", headers=H, timeout=15).json()
     uid = me.get("id")
     if not uid: continue
 
-    # Listar orders paid de ultima semana
+    # Listar orders paid
     orders = []
     offset = 0
     while True:
         r = requests.get("https://api.mercadolibre.com/orders/search",
             headers=H, timeout=20,
-            params={"seller":uid,
-                    "order.status":"paid",
+            params={"seller":uid, "order.status":"paid",
                     "order.date_created.from":START.strftime("%Y-%m-%dT%H:%M:%S.000Z"),
                     "order.date_created.to":NOW.strftime("%Y-%m-%dT%H:%M:%S.000Z"),
                     "limit":50,"offset":offset}).json()
@@ -80,18 +74,16 @@ for acc, rt in ACCS.items():
         offset += len(res)
         if offset >= r.get("paging",{}).get("total",0): break
 
-    # Extraer shipment ids
     ship_ids = set()
     order_by_ship = {}
     for o in orders:
-        sh = (o.get("shipping") or {}).get("id")
-        if sh:
-            ship_ids.add(sh)
-            order_by_ship[sh] = o
+        sid = (o.get("shipping") or {}).get("id")
+        if sid:
+            ship_ids.add(sid)
+            order_by_ship[sid] = o
 
-    print(f"  orders paid 7d: {len(orders)} | shipments: {len(ship_ids)}")
+    print(f"  orders paid: {len(orders)} | shipments: {len(ship_ids)}")
 
-    # Para cada shipment ver handling_limit y status
     matches = 0
     for sid in ship_ids:
         try:
@@ -99,84 +91,108 @@ for acc, rt in ACCS.items():
                               headers=H, timeout=10).json()
             status = sh.get("status")
             substatus = sh.get("substatus")
-            # ignorar shipments ya enviados
-            if status in ("delivered","shipped","not_delivered","cancelled"):
+            # Solo los que aun no se han despachado
+            if status not in ("ready_to_ship", "handling"):
                 continue
-            # ignorar handling_unit ya cerrado
-            if substatus in ("delivered","shipped"):
+            # Si ya esta shipped substatus, skip
+            if substatus in ("shipped","ready_to_pickup"):
                 continue
 
-            # estimated_handling_limit
-            ehl = (sh.get("lead_time") or {}).get("estimated_handling_limit") or {}
-            limit_date_str = ehl.get("date") or sh.get("estimated_handling_limit") or ""
-            if not limit_date_str:
-                # intentar otro path
-                limit_date_str = (sh.get("shipping_option") or {}).get("estimated_handling_limit",{}).get("date","")
-            limit_date = None
-            if limit_date_str:
-                try:
-                    # ISO format with TZ
-                    dt = datetime.fromisoformat(limit_date_str.replace("Z","+00:00"))
-                    limit_date = dt.astimezone(TZ_CDMX).date()
-                except Exception:
-                    pass
+            # Deadline: usar SLA endpoint (expected_date)
+            deadline = None
+            try:
+                sla = requests.get(f"https://api.mercadolibre.com/shipments/{sid}/sla",
+                                   headers=H, timeout=8).json()
+                ed = sla.get("expected_date")
+                if ed:
+                    deadline = datetime.fromisoformat(ed.replace("Z","+00:00")).astimezone(TZ_CDMX)
+            except Exception:
+                pass
 
-            if limit_date and limit_date <= LIMIT_DAY:
-                # Match
+            # Fallback: date_handling + 48h
+            if not deadline:
+                hist = sh.get("status_history") or {}
+                dh = hist.get("date_handling")
+                if dh:
+                    dh_dt = datetime.fromisoformat(dh.replace("Z","+00:00"))
+                    deadline = (dh_dt + timedelta(hours=48)).astimezone(TZ_CDMX)
+
+            if not deadline:
+                continue
+
+            if deadline <= LIMIT_DAY:
                 ord_o = order_by_ship.get(sid, {})
                 items = ord_o.get("order_items",[])
-                comp = "+".join(f"{(it.get('item') or {}).get('title','')[:30]} x{it.get('quantity',1)}" for it in items)
+                comp = " + ".join(f"{(it.get('item') or {}).get('title','')[:40]} x{it.get('quantity',1)}"
+                                  for it in items)
                 buyer = (ord_o.get("buyer") or {}).get("nickname","?")
+                # urgency
+                today = datetime.now(TZ_CDMX)
+                if deadline.date() < today.date():
+                    urgency = "OVERDUE"
+                elif deadline.date() == today.date():
+                    urgency = "HOY"
+                else:
+                    urgency = "LUNES"
+
                 results[acc].append({
                     "shipment_id": sid,
                     "order_id": ord_o.get("id"),
                     "buyer": buyer,
                     "composition": comp,
-                    "handling_limit": str(limit_date),
+                    "deadline": deadline.strftime("%Y-%m-%d %H:%M"),
+                    "deadline_date": deadline.date().isoformat(),
+                    "urgency": urgency,
                     "status": status,
                     "substatus": substatus,
+                    "tracking": sh.get("tracking_number",""),
+                    "logistic": sh.get("logistic_type",""),
                 })
                 matches += 1
             time.sleep(0.05)
         except Exception as e:
             errors.append({"acc":acc,"sid":sid,"err":str(e)[:80]})
 
-    print(f"  ✅ {acc}: {matches} shipments con limit <= {LIMIT_DAY}")
+    print(f"  ✅ {acc}: {matches} match")
 
 # Reporte
-print(f"\n{'='*60}\n=== TOTAL ===")
 total = sum(len(v) for v in results.values())
-print(f"Total shipments para despachar lunes (limit <= {LIMIT_DAY}): {total}")
-for acc, lst in results.items():
-    print(f"  {acc}: {len(lst)}")
+overdue = sum(1 for lst in results.values() for s in lst if s["urgency"]=="OVERDUE")
+hoy = sum(1 for lst in results.values() for s in lst if s["urgency"]=="HOY")
+lunes = sum(1 for lst in results.values() for s in lst if s["urgency"]=="LUNES")
+print(f"\n{'='*60}\n=== TOTAL: {total} ===")
+print(f"  OVERDUE (ya vencidos): {overdue}")
+print(f"  HOY (deadline hoy): {hoy}")
+print(f"  LUNES (deadline lunes): {lunes}")
+for acc, lst in sorted(results.items(), key=lambda x: -len(x[1])):
+    if lst: print(f"  {acc}: {len(lst)}")
 
-# Guardar CSV
-import csv
-out = "lunes_shipments.csv"
-with open(out,"w",newline="",encoding="utf-8") as f:
+# CSV
+with open("lunes_shipments.csv","w",newline="",encoding="utf-8") as f:
     w = csv.writer(f)
-    w.writerow(["account","shipment_id","order_id","buyer","composition","handling_limit","status","substatus"])
+    w.writerow(["urgency","account","shipment_id","order_id","buyer","composition",
+                "deadline","status","substatus","tracking","logistic"])
+    rows = []
     for acc, lst in results.items():
         for s in lst:
-            w.writerow([acc, s["shipment_id"], s["order_id"], s["buyer"],
-                        s["composition"], s["handling_limit"], s["status"], s["substatus"]])
-print(f"\nCSV: {out}")
+            rows.append([s["urgency"], acc, s["shipment_id"], s["order_id"], s["buyer"],
+                         s["composition"], s["deadline"], s["status"], s["substatus"],
+                         s["tracking"], s["logistic"]])
+    # Sort: OVERDUE first, then HOY, then LUNES
+    rank = {"OVERDUE":0,"HOY":1,"LUNES":2}
+    rows.sort(key=lambda r: (rank.get(r[0],9), r[6]))
+    for r in rows: w.writerow(r)
+print(f"\nCSV: lunes_shipments.csv")
 
 # Telegram
 if TG and TGCID:
-    msg = f"📅 *Despacho lunes {LIMIT_DAY_STR}*\n\n"
-    msg += f"Total shipments con handling_limit ≤ {LIMIT_DAY_STR}: *{total}*\n\n"
+    msg = f"📅 *Despacho hasta {LIMIT_DAY_STR}*\n\n"
+    msg += f"*Total: {total}*\n"
+    msg += f"⚠️ OVERDUE: *{overdue}*\n"
+    msg += f"⏰ HOY: *{hoy}*\n"
+    msg += f"📦 LUNES: *{lunes}*\n\n*Por cuenta:*\n"
     for acc, lst in sorted(results.items(), key=lambda x: -len(x[1])):
         if lst: msg += f"• {acc}: *{len(lst)}*\n"
-    # Group by handling_limit date
-    by_date = defaultdict(int)
-    for lst in results.values():
-        for s in lst:
-            by_date[s["handling_limit"]] += 1
-    msg += f"\n*Por fecha límite:*\n"
-    for d in sorted(by_date.keys()):
-        marker = "⚠️ OVERDUE" if d < LIMIT_DAY_STR else "📅"
-        msg += f"  {marker} {d}: {by_date[d]}\n"
-    if errors: msg += f"\n❌ Errores: {len(errors)}\n"
+    if errors: msg += f"\n❌ Errores: {len(errors)}"
     requests.post(f"https://api.telegram.org/bot{TG}/sendMessage", data={
         "chat_id":TGCID,"parse_mode":"Markdown","text":msg[:4000]}, timeout=20)
