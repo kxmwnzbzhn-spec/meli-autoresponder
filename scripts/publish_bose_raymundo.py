@@ -96,8 +96,14 @@ for p in PUBS:
             print(f"  ⏸️  Pausado")
         published.append({"iid":new_iid, "cpid":cpid, "color":p["color"], "price":p["price"]})
     else:
-        print(f"  ❌ {rp.status_code}: {rp.text[:300]}")
-        errors.append({"cpid":cpid,"err":rp.text[:200]})
+        print(f"  ❌ {rp.status_code}:")
+        try:
+            err_data = rp.json()
+            for cause in err_data.get("cause", [])[:10]:
+                print(f"    [{cause.get('type','?')}] {cause.get('code','?')}: {cause.get('message','')}")
+        except Exception:
+            print(f"    {rp.text[:600]}")
+        errors.append({"cpid":cpid,"err":rp.text[:500]})
     time.sleep(1)
 
 # Update config
