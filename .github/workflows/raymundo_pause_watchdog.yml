@@ -1,0 +1,37 @@
+name: raymundo-pause-watchdog
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '*/2 * * * *'   # cada 2 min hasta mañana 6am cuando se desactiva manualmente
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests -q
+      - env:
+          MELI_APP_SECRET:                ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_RAYMUNDO:    ${{ secrets.MELI_REFRESH_TOKEN_RAYMUNDO }}
+        run: |
+          python3 - <<'PY'
+          import os, requests
+          APP_ID="5211907102822632"
+          r=requests.post("https://api.mercadolibre.com/oauth/token",data={"grant_type":"refresh_token","client_id":APP_ID,"client_secret":os.environ["MELI_APP_SECRET"],"refresh_token":os.environ["MELI_REFRESH_TOKEN_RAYMUNDO"]}).json()
+          H={"Authorization":f"Bearer {r['access_token']}"}
+          me=requests.get("https://api.mercadolibre.com/users/me",headers=H).json()
+          uid=me["id"]
+          ids=[]; offset=0
+          while True:
+              rr=requests.get(f"https://api.mercadolibre.com/users/{uid}/items/search?status=active&limit=50&offset={offset}",headers=H).json()
+              b=rr.get("results",[])
+              if not b: break
+              ids.extend(b); offset+=50
+              if offset >= rr.get("paging",{}).get("total",0): break
+          print(f"active: {len(ids)}")
+          for iid in ids:
+              requests.put(f"https://api.mercadolibre.com/items/{iid}",headers=H,json={"status":"paused"})
+              print(f"paused {iid}")
+          PY
