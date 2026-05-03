@@ -22,8 +22,9 @@ TG = os.environ.get("TELEGRAM_BOT_TOKEN", "")
 TGCID = os.environ.get("TELEGRAM_CHAT_ID", "")
 
 FLOORS   = {"Go 4": 449, "Go 3": 399, "Clip 5": 699}
-CEILINGS = {"Go 4": 1499, "Go 3": 599, "Clip 5": 899}
+CEILINGS = {"Go 4": 699,  "Go 3": 599, "Clip 5": 899}
 GO3_FORCE_PRICE = 499
+GO4_CEILING = 699  # explicito: any Go 4 > $699 se baja a $699
 
 POOL_SIZE = {
     ("Clip 5","Morado"):256,("Clip 5","Rojo"):164,("Clip 5","Negro"):246,
@@ -52,8 +53,8 @@ except Exception:
     cfg = {}
 
 
-# === BORRAR MLM2904767887 (no nos corresponde) ===
-DELETE_IIDS = ["MLM2904767887"]
+# === BORRAR items que no nos corresponden ===
+DELETE_IIDS = ["MLM2904767887", "MLM2904680457"]
 for d_iid in DELETE_IIDS:
     pr = requests.put(f"https://api.mercadolibre.com/items/{d_iid}",
                       headers=H, json={"status": "closed"})
