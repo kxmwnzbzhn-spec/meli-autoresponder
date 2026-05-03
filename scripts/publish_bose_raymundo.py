@@ -57,15 +57,9 @@ for p in PUBS:
     # MELI migrated category to MLM179229 (Audio > Speakers)
     cat_id = "MLM179229"
     title = (name or f"Bose SoundLink Home {p['color']}")[:60]
-    # Predict category de MELI segun el titulo del producto
-    pred_title = name or f"Bose SoundLink Home {p['color']}"
-    try:
-        cat_pred = requests.get("https://api.mercadolibre.com/sites/MLM/category_predictor/predict",
-                                params={"title": pred_title}, timeout=10).json()
-        cat_id = cat_pred.get("id")
-    except Exception:
-        cat_id = "MLM176544"
-    print(f"  category predicted: {cat_id}")
+    # Categoria correcta para Bocinas Portatiles MLM
+    cat_id = "MLM176544"
+    print(f"  category: {cat_id}")
 
     title = (name or f"Bose SoundLink Home {p['color']}")[:60]
     # Catalog listing condicion=new (MELI exige new o used).
