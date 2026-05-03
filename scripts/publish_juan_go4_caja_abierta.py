@@ -134,13 +134,9 @@ payload = {
         {"id": "BRAND",         "value_name": "JBL"},
         {"id": "MODEL",         "value_name": "Go 4"},
         {"id": "LINE",          "value_name": "Go"},
-        {"id": "FAMILY_NAME",   "value_name": "JBL Go 4 Bocina Bluetooth Caja Abierta Color Sorpresa"},
         {"id": "COLOR",         "value_name": "Color Sorpresa"},
-        # ITEM_CONDITION quitado — colisionaba con condition=used.
-        # Concepto "caja abierta" queda explicito en titulo + description.
-        {"id": "WIRELESS_TECHNOLOGIES", "value_name": "Bluetooth"},
+        {"id": "GTIN",          "value_name": "No aplica"},
         {"id": "WITH_BLUETOOTH","value_name": "Sí"},
-        {"id": "WATERPROOFING_GRADE",   "value_name": "IP67"},
         {"id": "BATTERY_LIFE",  "value_name": "7 h"},
     ],
     "shipping": {
