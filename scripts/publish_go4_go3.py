@@ -44,11 +44,42 @@ H = {"Authorization": f"Bearer {r.json()['access_token']}",
 me = requests.get("https://api.mercadolibre.com/users/me", headers=H).json()
 print(f"Cuenta: {me.get('nickname')} ({me.get('id')})\n")
 
-# Cargar audit y config
-with open("go4_go3_audit.json") as f:
-    audit = json.load(f)
-clean_list = audit.get("to_publish", [])
-print(f"Audit: {len(clean_list)} clean candidates\n")
+# Lista hardcoded validada (53 catálogos, todos con stock)
+CLEAN_ITEMS = [
+    ("MLM44731712","Go 4","Azul"), ("MLM44731940","Go 4","Negro"), ("MLM44731934","Go 4","Negro"),
+    ("MLM68969359","Go 4","Negro"), ("MLM68963849","Go 4","Azul"), ("MLM44831552","Go 4","Azul"),
+    ("MLM65831856","Go 4","Rosa"), ("MLM45700101","Go 4","Rosa"),
+    ("MLM44710397","Go 4","Azul"), ("MLM44710399","Go 4","Azul"),
+    ("MLM50967958","Go 4","Negro"), ("MLM64389753","Go 4","Rojo"),
+    ("MLM64277118","Go 4","Azul"), ("MLM65836568","Go 4","Negro"),
+    ("MLM59314557","Go 4","Azul"), ("MLM62020842","Go 4","Azul"),
+    ("MLM37361021","Go 4","Camuflaje"),
+    ("MLM48666693","Go 4","Rojo"), ("MLM48670481","Go 4","Azul"),
+    ("MLM50218388","Go 4","Negro"), ("MLM45829435","Go 4","Azul"),
+    ("MLM37922010","Go 4","Azul"), ("MLM46140333","Go 4","Azul"),
+    ("MLM44710246","Go 4","Negro"),
+    ("MLM63258207","Go 4","Azul Marino"),
+    ("MLM37926169","Go 4","Negro"), ("MLM44713972","Go 4","Negro"),
+    ("MLM44715070","Go 4","Negro"), ("MLM37986357","Go 4","Azul"),
+    ("MLM59907169","Go 4","Negro"),
+    ("MLM45577570","Go 4","Rojo"), ("MLM44710367","Go 4","Azul"),
+    ("MLM61262890","Go 4","Aqua"),
+    ("MLM44710421","Go 4","Azul Marino"),
+    ("MLM44710240","Go 4","Negro"), ("MLM44710313","Go 4","Rojo"),
+    ("MLM54696427","Go 4","Aqua"),
+    ("MLM48498701","Go 4","Negro"),
+    ("MLM46998439","Go 4","Rojo"), ("MLM47001347","Go 4","Negro"),
+    ("MLM58850976","Go 4","Rojo"),
+    # Go 3 Negro
+    ("MLM44799641","Go 3","Negro"), ("MLM29147620","Go 3","Negro"),
+    ("MLM44744958","Go 3","Negro"), ("MLM48255554","Go 3","Negro"),
+    ("MLM44709179","Go 3","Negro"), ("MLM37158857","Go 3","Negro"),
+    ("MLM25843273","Go 3","Negro"), ("MLM46039390","Go 3","Negro"),
+    ("MLM44710730","Go 3","Negro"), ("MLM44709174","Go 3","Negro"),
+    ("MLM44728420","Go 3","Negro"), ("MLM37197513","Go 3","Negro"),
+]
+clean_list = [{"cpid": c, "model_target": m, "title_color": co} for c, m, co in CLEAN_ITEMS]
+print(f"Lista embebida: {len(clean_list)} candidatos\n")
 
 with open("stock_config_raymundo.json") as f:
     cfg = json.load(f)
