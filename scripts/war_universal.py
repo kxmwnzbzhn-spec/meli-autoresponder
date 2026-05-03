@@ -28,6 +28,20 @@ FLOORS   = {"Go 4": 449, "Go 3": 399, "Clip 5": 699}
 CEILINGS = {"Go 4": 699, "Go 3": 599, "Clip 5": 899}
 GO3_FORCE = 499
 
+# Cargar floors per-item del config (override del modelo)
+ITEM_FLOORS = {}
+try:
+    import json as _json
+    with open("stock_config_raymundo.json") as _f:
+        _cfg = _json.load(_f)
+    for _iid, _meta in _cfg.items():
+        if _meta.get("floor_locked_by_user") and _meta.get("floor_price"):
+            ITEM_FLOORS[_iid] = _meta["floor_price"]
+    if ITEM_FLOORS:
+        print(f"[CFG] Item-level floors locked: {ITEM_FLOORS}")
+except Exception as _e:
+    print(f"[CFG] no item floors loaded: {_e}")
+
 r = requests.post("https://api.mercadolibre.com/oauth/token", data={
     "grant_type":"refresh_token","client_id":APP_ID,
     "client_secret":APP_SECRET,"refresh_token":RT,
@@ -95,7 +109,7 @@ for it in catalog_items:
         print(f"  ❓ SKIP {iid} (modelo desconocido): {title[:50]}")
         continue
 
-    floor = FLOORS[model]
+    floor = ITEM_FLOORS.get(iid, FLOORS[model])
     ceiling = CEILINGS[model]
 
     try:
