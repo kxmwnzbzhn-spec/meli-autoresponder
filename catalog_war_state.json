@@ -44,7 +44,7 @@
       "original_price": 719.0,
       "floor": 395.45000000000005,
       "ceiling": 934.7,
-      "last_change_at": 1777770087,
+      "last_change_at": 1777778078,
       "role": "step_1",
       "label": "Bocina Jbl Go 4 Jblgo4 Port\u00e1til Con"
     },
@@ -756,7 +756,7 @@
       "original_price": 999.0,
       "floor": 549.45,
       "ceiling": 1298.7,
-      "last_change_at": 1777774251,
+      "last_change_at": 1777778078,
       "role": "winner",
       "label": "Bocina Jbl Go 3 Jblgo3 Port\u00e1til Con"
     },
@@ -788,7 +788,7 @@
       "original_price": 999.0,
       "floor": 549.45,
       "ceiling": 1298.7,
-      "last_change_at": 1777774251,
+      "last_change_at": 1777778078,
       "role": "winner",
       "label": "Jbl Go3 Black Negro"
     },
@@ -815,8 +815,16 @@
       "last_change_at": 1777774251,
       "role": "winner",
       "label": "Parlante Jbl Go 4 Port\u00e1til Bluetoot"
+    },
+    "MLM2904767845": {
+      "original_price": 999.0,
+      "floor": 549.45,
+      "ceiling": 1298.7,
+      "last_change_at": 1777778078,
+      "role": "winner",
+      "label": "Bocina Jbl Go 4 Jblgo4 Port\u00e1til Con"
     }
   },
-  "last_run": 1777774251,
+  "last_run": 1777778078,
   "winner_account": "RAYMUNDO"
 }
