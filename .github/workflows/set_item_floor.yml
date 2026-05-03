@@ -1,0 +1,19 @@
+name: set-item-floor
+on: { workflow_dispatch: }
+permissions: { contents: write }
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with: { token: '${{ secrets.REPO_PAT }}' }
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: python scripts/set_item_floor.py
+      - run: |
+          git config user.email b@b.com && git config user.name bot
+          for i in 1 2 3 4 5; do
+            git pull --rebase 2>/dev/null && git add stock_config_raymundo.json && (git diff --cached --quiet || git commit -m "Lock floor=\$449 en MLM2891189883 + MLM5246052014") && git push origin main && break
+            sleep 5
+          done
