@@ -185,7 +185,7 @@ for cpid, items in by_cpid.items():
         floor = max(FLOOR_OVERRIDES.get(winner_item["iid"], original * DEFAULT_FLOOR_PCT), MIN_FLOOR_PRICE)
         ceiling = CEIL_OVERRIDES.get(winner_item["iid"], original * DEFAULT_CEIL_PCT)
         # GAP agresivo cuando hay competidor en FULL ($80 abajo) para vencer ventaja logística
-        effective_gap = 150 if has_full else GAP  # FULL agresivo
+        effective_gap = 250 if has_full else GAP  # FULL super agresivo (era 150, sube a 250 para vencer ventaja envío)
         if ext_price is not None:
             winner_target = ext_price - effective_gap
         else:
@@ -193,7 +193,7 @@ for cpid, items in by_cpid.items():
         winner_target = max(floor, min(ceiling, winner_target))
         winner_target = round(winner_target, 0)
         if has_full:
-            print(f"    ⚡ FULL competitor detected — GAP agresivo $80 (vs estándar $10)")
+            print(f"    ⚡ FULL competitor detected — GAP $250 (vs estándar $10)")
 
         # 🔧 FIX: Consultar price_to_win directo de MELI (considera FULL/promos/reputación)
         # Si MELI dice "tienes que estar en X para ganar", obedecer ese X (usar -1 para asegurar)
