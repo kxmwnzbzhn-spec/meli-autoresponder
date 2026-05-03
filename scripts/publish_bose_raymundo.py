@@ -54,24 +54,23 @@ for p in PUBS:
         f"Envio gratis. Stock real 20 unidades."
     )
 
+    cat_id = prod.get("category_id") or "MLM176544"  # MLM-SPEAKERS default
     body = {
         "catalog_product_id": cpid,
-        "category_id": prod.get("category_id"),
+        "category_id": cat_id,
         "site_id": "MLM",
-        "title": name[:60],
         "price": p["price"],
         "currency_id": "MXN",
-        "available_quantity": 1,  # visible 1, auto-replenish maneja el resto
+        "available_quantity": 1,
         "buying_mode": "buy_it_now",
-        "condition": "not_specified",  # reacondicionado mapping varia
+        "condition": "not_specified",
         "listing_type_id": "gold_pro",
         "catalog_listing": True,
+        "sale_terms": [{"id":"WARRANTY_TYPE","value_name":"Garantía del vendedor"},
+                        {"id":"WARRANTY_TIME","value_name":"30 días"}],
         "shipping": {"mode":"me2","local_pick_up":False,"free_shipping":True,"logistic_type":"xd_drop_off"},
         "pictures": pictures,
     }
-
-    # Try with condition reacondicionado
-    body["condition"] = "not_specified"
 
     rp = requests.post("https://api.mercadolibre.com/items", headers=H,
                       json=body, timeout=30)
