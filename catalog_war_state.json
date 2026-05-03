@@ -165,7 +165,7 @@
       "original_price": 749.0,
       "floor": 411.95000000000005,
       "ceiling": 973.7,
-      "last_change_at": 1777808940,
+      "last_change_at": 1777812529,
       "role": "winner",
       "label": "Bocina Port\u00e1til Jbl Go 4 Bluetooth,"
     },
@@ -173,7 +173,7 @@
       "original_price": 596.0,
       "floor": 327.8,
       "ceiling": 774.8000000000001,
-      "last_change_at": 1777808940,
+      "last_change_at": 1777812529,
       "role": "winner",
       "label": "Bocina Jbl Go 4 Jblgo4 Port\u00e1til Con"
     },
@@ -181,7 +181,7 @@
       "original_price": 619.0,
       "floor": 340.45000000000005,
       "ceiling": 804.7,
-      "last_change_at": 1777808940,
+      "last_change_at": 1777812529,
       "role": "winner",
       "label": "Bocina Jbl Go 4 Jblgo4 Port\u00e1til Con"
     },
@@ -841,6 +841,6 @@
       "label": "Bocina Jbl Audio Clip 5 Clip 5 Port"
     }
   },
-  "last_run": 1777808940,
+  "last_run": 1777812529,
   "winner_account": "RAYMUNDO"
 }
