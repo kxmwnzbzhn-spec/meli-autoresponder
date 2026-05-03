@@ -115,6 +115,7 @@ photos = sorted(photos, key=lambda p: 0 if p['_color'] == "Negro" else 1)
 
 payload = {
     "title": TITLE,
+    "family_name": "JBL Go 4 Caja Abierta",
     "category_id": CATEGORY,
     "price": PRICE,
     "available_quantity": VISIBLE_QTY,
@@ -130,6 +131,7 @@ payload = {
         {"id": "BRAND",         "value_name": "JBL"},
         {"id": "MODEL",         "value_name": "Go 4"},
         {"id": "LINE",          "value_name": "Go"},
+        {"id": "FAMILY_NAME",   "value_name": "JBL Go 4 Caja Abierta"},
         {"id": "COLOR",         "value_name": "Color Sorpresa"},
         {"id": "ITEM_CONDITION","value_name": "Caja abierta"},
         {"id": "WIRELESS_TECHNOLOGIES", "value_name": "Bluetooth"},
