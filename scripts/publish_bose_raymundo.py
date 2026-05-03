@@ -55,7 +55,9 @@ for p in PUBS:
     )
 
     cat_id = prod.get("category_id") or "MLM176544"  # MLM-SPEAKERS default
+    title = (name or f"Bose SoundLink Home {p['color']}")[:60]
     body = {
+        "title": title,
         "catalog_product_id": cpid,
         "category_id": cat_id,
         "site_id": "MLM",
