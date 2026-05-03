@@ -149,6 +149,59 @@ def main():
 
     print(f"\n✅ {len(uploaded)} archivos subidos a Drive/{PARENT_NAME}/{today_cdmx}/")
 
+    # === LIMPIEZA: borrar carpetas de fechas anteriores ===
+    # El bot regenera todas las etiquetas pendientes cada día, así que las
+    # carpetas de días previos son obsoletas (sus shipments o ya se enviaron
+    # o están regenerados en la nueva carpeta).
+    try:
+        import re as _re
+        _DATE_RE = _re.compile(r"^\d{4}-\d{2}-\d{2}$")
+        old_folders = svc.files().list(
+            q=f"'{parent_id}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false",
+            fields="files(id,name,owners(emailAddress))",
+            pageSize=1000,
+            supportsAllDrives=True, includeItemsFromAllDrives=True,
+        ).execute().get("files", [])
+        cleanup_targets = [f for f in old_folders
+                           if _DATE_RE.match(f["name"]) and f["name"] != today_cdmx]
+        if cleanup_targets:
+            print(f"\n🧹 Limpiando {len(cleanup_targets)} carpetas viejas...")
+            # SA fallback para carpetas owned por SA
+            sa_svc_local = None
+            sa_json_local = os.environ.get("GOOGLE_SERVICE_ACCOUNT_JSON")
+            if sa_json_local:
+                try:
+                    info_l = json.loads(sa_json_local)
+                    sa_creds_l = service_account.Credentials.from_service_account_info(info_l, scopes=SCOPES)
+                    sa_svc_local = build("drive","v3",credentials=sa_creds_l,cache_discovery=False)
+                except Exception:
+                    pass
+            for cf in cleanup_targets:
+                try:
+                    svc.files().update(fileId=cf["id"], body={"trashed":True},
+                                       supportsAllDrives=True).execute()
+                    print(f"  🗑️ {cf['name']} (OAuth)")
+                except Exception:
+                    if sa_svc_local:
+                        try:
+                            # SA debe borrar children primero
+                            kids = sa_svc_local.files().list(
+                                q=f"'{cf['id']}' in parents and trashed=false",
+                                fields="files(id)", pageSize=1000,
+                                supportsAllDrives=True, includeItemsFromAllDrives=True,
+                            ).execute().get("files",[])
+                            for k in kids:
+                                try: sa_svc_local.files().delete(fileId=k["id"], supportsAllDrives=True).execute()
+                                except Exception: pass
+                            sa_svc_local.files().delete(fileId=cf["id"], supportsAllDrives=True).execute()
+                            print(f"  🗑️ {cf['name']} (SA)")
+                        except Exception as e2:
+                            print(f"  ⚠️ {cf['name']}: {str(e2)[:80]}")
+                    else:
+                        print(f"  ⚠️ {cf['name']}: sin SA fallback")
+    except Exception as e:
+        print(f"  cleanup err: {e}")
+
     # Telegram opcional
     tg_token = os.environ.get("TELEGRAM_BOT_TOKEN")
     tg_chat = os.environ.get("TELEGRAM_CHAT_ID")
