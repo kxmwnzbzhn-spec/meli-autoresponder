@@ -36,7 +36,7 @@
       "original_price": 755.0,
       "floor": 415.25000000000006,
       "ceiling": 981.5,
-      "last_change_at": 1777805636,
+      "last_change_at": 1777827856,
       "role": "step_1",
       "label": "Bocina Jbl Go 4 Jblgo4 Port\u00e1til Con"
     },
@@ -165,7 +165,7 @@
       "original_price": 749.0,
       "floor": 411.95000000000005,
       "ceiling": 973.7,
-      "last_change_at": 1777820720,
+      "last_change_at": 1777827856,
       "role": "winner",
       "label": "Bocina Port\u00e1til Jbl Go 4 Bluetooth,"
     },
@@ -173,7 +173,7 @@
       "original_price": 596.0,
       "floor": 327.8,
       "ceiling": 774.8000000000001,
-      "last_change_at": 1777820720,
+      "last_change_at": 1777827856,
       "role": "winner",
       "label": "Bocina Jbl Go 4 Jblgo4 Port\u00e1til Con"
     },
@@ -181,7 +181,7 @@
       "original_price": 619.0,
       "floor": 340.45000000000005,
       "ceiling": 804.7,
-      "last_change_at": 1777820720,
+      "last_change_at": 1777827856,
       "role": "winner",
       "label": "Bocina Jbl Go 4 Jblgo4 Port\u00e1til Con"
     },
@@ -189,7 +189,7 @@
       "original_price": 992.0,
       "floor": 545.6,
       "ceiling": 1289.6000000000001,
-      "last_change_at": 1777805636,
+      "last_change_at": 1777827856,
       "role": "winner",
       "label": "Bocina Port\u00e1til Jbl Go 4 Bluetooth,"
     },
@@ -756,7 +756,7 @@
       "original_price": 999.0,
       "floor": 549.45,
       "ceiling": 1298.7,
-      "last_change_at": 1777820720,
+      "last_change_at": 1777827856,
       "role": "winner",
       "label": "Bocina Jbl Go 3 Jblgo3 Port\u00e1til Con"
     },
@@ -788,7 +788,7 @@
       "original_price": 999.0,
       "floor": 549.45,
       "ceiling": 1298.7,
-      "last_change_at": 1777820720,
+      "last_change_at": 1777827856,
       "role": "winner",
       "label": "Jbl Go3 Black Negro"
     },
@@ -839,8 +839,16 @@
       "last_change_at": 1777790290,
       "role": "winner",
       "label": "Bocina Jbl Audio Clip 5 Clip 5 Port"
+    },
+    "MLM2904676579": {
+      "original_price": 887.0,
+      "floor": 487.85,
+      "ceiling": 1153.1000000000001,
+      "last_change_at": 1777827856,
+      "role": "winner",
+      "label": "Bocina Port\u00e1til Jbl Clip 5 Potencia"
     }
   },
-  "last_run": 1777824001,
+  "last_run": 1777827856,
   "winner_account": "RAYMUNDO"
 }
