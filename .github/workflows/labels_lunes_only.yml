@@ -1,0 +1,34 @@
+name: labels-lunes-only
+on:
+  workflow_dispatch:
+    inputs:
+      limit_day:
+        description: "YYYY-MM-DD límite handling"
+        default: "2026-05-04"
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests -q
+      - env:
+          MELI_APP_SECRET:                ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN:             ${{ secrets.MELI_REFRESH_TOKEN }}
+          MELI_REFRESH_TOKEN_JUAN:        ${{ secrets.MELI_REFRESH_TOKEN_JUAN }}
+          MELI_REFRESH_TOKEN_CLARIBEL:    ${{ secrets.MELI_REFRESH_TOKEN_CLARIBEL }}
+          MELI_REFRESH_TOKEN_ASVA:        ${{ secrets.MELI_REFRESH_TOKEN_ASVA }}
+          MELI_REFRESH_TOKEN_RAYMUNDO:    ${{ secrets.MELI_REFRESH_TOKEN_RAYMUNDO }}
+          MELI_REFRESH_TOKEN_DILCIE:      ${{ secrets.MELI_REFRESH_TOKEN_DILCIE }}
+          MELI_REFRESH_TOKEN_MILDRED:     ${{ secrets.MELI_REFRESH_TOKEN_MILDRED }}
+          MELI_REFRESH_TOKEN_BREN:        ${{ secrets.MELI_REFRESH_TOKEN_BREN }}
+          TELEGRAM_BOT_TOKEN:             ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID:               ${{ secrets.TELEGRAM_CHAT_ID }}
+          LIMIT_DAY:                      ${{ github.event.inputs.limit_day }}
+        run: python scripts/labels_lunes_only.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: lunes-shipments
+          path: lunes_shipments.csv
