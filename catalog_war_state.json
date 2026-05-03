@@ -679,8 +679,48 @@
       "last_change_at": 1777762807,
       "role": "step_1",
       "label": "Jbl Go 4 - Altavoz Ultraport\u00e1til Bl"
+    },
+    "MLM5281123246": {
+      "original_price": 999.0,
+      "floor": 549.45,
+      "ceiling": 1298.7,
+      "last_change_at": 1777769805,
+      "role": "winner",
+      "label": "Bocina Port\u00e1til Jbl Clip 5 Bluetoot"
+    },
+    "MLM5281123238": {
+      "original_price": 999.0,
+      "floor": 549.45,
+      "ceiling": 1298.7,
+      "last_change_at": 1777769805,
+      "role": "winner",
+      "label": "Parlante Jbl Audio Clip 5 Clip 5 Po"
+    },
+    "MLM2904687747": {
+      "original_price": 999.0,
+      "floor": 549.45,
+      "ceiling": 1298.7,
+      "last_change_at": 1777769805,
+      "role": "winner",
+      "label": "Bocina Port\u00e1til Jbl Clip 5 Bluetoot"
+    },
+    "MLM2904687737": {
+      "original_price": 999.0,
+      "floor": 549.45,
+      "ceiling": 1298.7,
+      "last_change_at": 1777769805,
+      "role": "winner",
+      "label": "Bocina Port\u00e1til Jbl Clip 5 Bluetoot"
+    },
+    "MLM2904674811": {
+      "original_price": 999.0,
+      "floor": 549.45,
+      "ceiling": 1298.7,
+      "last_change_at": 1777769805,
+      "role": "winner",
+      "label": "Bocina Jbl Audio Clip 5 Clip 5 Port"
     }
   },
-  "last_run": 1777766228,
+  "last_run": 1777769805,
   "winner_account": "RAYMUNDO"
 }
