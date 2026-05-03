@@ -114,8 +114,11 @@ print(f"\nFotos recolectadas: {len(photos)}")
 photos = sorted(photos, key=lambda p: 0 if p['_color'] == "Negro" else 1)
 
 payload = {
-    "title": TITLE,
-    "family_name": "JBL Go 4 Caja Abierta",
+    # NOTA: MELI no acepta `title` cuando family_name esta presente
+    # (lo auto-genera). Si quieres custom title, hay que quitar family_name
+    # y atributo FAMILY_NAME pero entonces pide otro required field.
+    # Esta es la aproximación mas segura: family_name auto-genera titulo SEO.
+    "family_name": "JBL Go 4 Bocina Bluetooth Caja Abierta Color Sorpresa",
     "category_id": CATEGORY,
     "price": PRICE,
     "available_quantity": VISIBLE_QTY,
@@ -131,7 +134,7 @@ payload = {
         {"id": "BRAND",         "value_name": "JBL"},
         {"id": "MODEL",         "value_name": "Go 4"},
         {"id": "LINE",          "value_name": "Go"},
-        {"id": "FAMILY_NAME",   "value_name": "JBL Go 4 Caja Abierta"},
+        {"id": "FAMILY_NAME",   "value_name": "JBL Go 4 Bocina Bluetooth Caja Abierta Color Sorpresa"},
         {"id": "COLOR",         "value_name": "Color Sorpresa"},
         {"id": "ITEM_CONDITION","value_name": "Caja abierta"},
         {"id": "WIRELESS_TECHNOLOGIES", "value_name": "Bluetooth"},
