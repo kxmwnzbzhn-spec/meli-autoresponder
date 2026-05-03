@@ -4,7 +4,7 @@
       "date": "2026-05-03",
       "throttled": false,
       "items_paused": [],
-      "sales_count": 18
+      "sales_count": 19
     },
     "CLARIBEL": {
       "date": "2026-05-03",
@@ -16,7 +16,7 @@
       "date": "2026-05-03",
       "throttled": false,
       "items_paused": [],
-      "sales_count": 156
+      "sales_count": 186
     },
     "DILCIE": {
       "date": "2026-05-03",
@@ -37,7 +37,7 @@
       "sales_count": 0
     }
   },
-  "last_run": 1777836010,
+  "last_run": 1777838628,
   "last_run_date": "2026-05-03",
   "last_reactivation": 1777823147,
   "last_raymundo_6am_reactivate": 1777813335
