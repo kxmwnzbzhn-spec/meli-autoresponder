@@ -57,27 +57,21 @@ for p in PUBS:
     # MELI migrated category to MLM179229 (Audio > Speakers)
     cat_id = "MLM179229"
     title = (name or f"Bose SoundLink Home {p['color']}")[:60]
-    # Tradicional listing (no catalog) - Raymundo no es eligible para catalog en MLM179229
-    title_full = f"Bocina Bose SoundLink Home Bluetooth Reacondicionado {p['color']}"[:60]
+    # Catalog listing condicion=new (MELI exige new o used). Sin category_id, MELI lo infiere del cpid.
     body = {
-        "title": title_full,
-        "category_id": cat_id,
+        "catalog_product_id": cpid,
         "site_id": "MLM",
         "price": p["price"],
         "currency_id": "MXN",
         "available_quantity": 1,
         "buying_mode": "buy_it_now",
-        "condition": "used",  # Reacondicionado se mapea a used en MLM179229
+        "condition": "new",
         "listing_type_id": "gold_pro",
+        "catalog_listing": True,
         "sale_terms": [{"id":"WARRANTY_TYPE","value_name":"Garantía del vendedor"},
                         {"id":"WARRANTY_TIME","value_name":"30 días"}],
-        "shipping": {"mode":"me2","local_pick_up":False,"free_shipping":True,"logistic_type":"xd_drop_off"},
+        "shipping": {"mode":"me2","local_pick_up":False,"free_shipping":True},
         "pictures": pictures,
-        "attributes": [
-            {"id":"BRAND","value_name":"Bose"},
-            {"id":"MODEL","value_name":"SoundLink Home"},
-            {"id":"COLOR","value_name":p["color"]},
-        ],
     }
 
     rp = requests.post("https://api.mercadolibre.com/items", headers=H,
