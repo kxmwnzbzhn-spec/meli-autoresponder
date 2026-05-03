@@ -262,13 +262,6 @@
       "devolucion": 0,
       "total": 70
     },
-    "JBL Clip 5|Squad (mixto)": {
-      "nuevo": 240,
-      "devolucion": 0,
-      "total": 240,
-      "nota": "Squad Edition mixto",
-      "cajas": 6
-    },
     "JBL Clip 5|Rosa+Azul (mix)": {
       "nuevo": 240,
       "devolucion": 0,
@@ -289,6 +282,13 @@
       "total": 40,
       "nota": "Caja mixta sin desglose",
       "cajas": 1
+    },
+    "JBL Clip 5|Camuflaje": {
+      "nuevo": 240,
+      "devolucion": 0,
+      "total": 240,
+      "nota": "Squad Edition mixto",
+      "cajas": 6
     }
   },
   "stock_perfumes": {
