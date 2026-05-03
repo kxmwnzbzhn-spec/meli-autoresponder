@@ -22,9 +22,10 @@ RT = os.environ["MELI_REFRESH_TOKEN_RAYMUNDO"]
 TG = os.environ.get("TELEGRAM_BOT_TOKEN", "")
 TGCID = os.environ.get("TELEGRAM_CHAT_ID", "")
 
-FLOORS = {"Go 4": 449, "Go 3": 349, "Clip 5": 799}
+FLOORS = {"Go 4": 449, "Go 3": 349, "Clip 5": 699}
 GO3_FORCE_PRICE = 499  # user pidio: toda Go 3 = $499
-CEILING = 1499
+CEILINGS = {"Clip 5": 899, "Go 4": 1499, "Go 3": 599}
+DEFAULT_CEILING = 1499
 
 r = requests.post("https://api.mercadolibre.com/oauth/token", data={
     "grant_type": "refresh_token", "client_id": APP_ID,
@@ -89,7 +90,7 @@ for iid in war_iids:
         model = meta.get("model")
         floor = FLOORS.get(model, meta.get("floor_price", 199))
         meta["floor_price"] = floor
-        meta["ceiling_price"] = CEILING
+        meta["ceiling_price"] = CEILINGS.get(model, DEFAULT_CEILING)
 
         # === GO 3 = $499 fijo ===
         if model == "Go 3":
