@@ -20,7 +20,7 @@
       "original_price": 849.0,
       "floor": 466.95000000000005,
       "ceiling": 1103.7,
-      "last_change_at": 1777723759,
+      "last_change_at": 1777770087,
       "role": "step_1",
       "label": "Bocina Port\u00e1til Jbl Go 4 Bluetooth,"
     },
@@ -44,7 +44,7 @@
       "original_price": 719.0,
       "floor": 395.45000000000005,
       "ceiling": 934.7,
-      "last_change_at": 1777732695,
+      "last_change_at": 1777770087,
       "role": "step_1",
       "label": "Bocina Jbl Go 4 Jblgo4 Port\u00e1til Con"
     },
@@ -165,7 +165,7 @@
       "original_price": 749.0,
       "floor": 411.95000000000005,
       "ceiling": 973.7,
-      "last_change_at": 1777609158,
+      "last_change_at": 1777770087,
       "role": "winner",
       "label": "Bocina Port\u00e1til Jbl Go 4 Bluetooth,"
     },
@@ -173,7 +173,7 @@
       "original_price": 577.0,
       "floor": 317.35,
       "ceiling": 750.1,
-      "last_change_at": 1777568130,
+      "last_change_at": 1777770087,
       "role": "winner",
       "label": "Bocina Jbl Go 4 Jblgo4 Port\u00e1til Con"
     },
@@ -181,7 +181,7 @@
       "original_price": 619.0,
       "floor": 340.45000000000005,
       "ceiling": 804.7,
-      "last_change_at": 1777568130,
+      "last_change_at": 1777770087,
       "role": "winner",
       "label": "Bocina Jbl Go 4 Jblgo4 Port\u00e1til Con"
     },
@@ -189,7 +189,7 @@
       "original_price": 992.0,
       "floor": 545.6,
       "ceiling": 1289.6000000000001,
-      "last_change_at": 1777568130,
+      "last_change_at": 1777770087,
       "role": "winner",
       "label": "Bocina Port\u00e1til Jbl Go 4 Bluetooth,"
     },
@@ -197,7 +197,7 @@
       "original_price": 1118.96,
       "floor": 615.4280000000001,
       "ceiling": 1454.6480000000001,
-      "last_change_at": 1777737410,
+      "last_change_at": 1777770087,
       "role": "winner",
       "label": "Parlante Jbl Grip Port\u00e1til Con Blue"
     },
@@ -692,15 +692,15 @@
       "original_price": 999.0,
       "floor": 549.45,
       "ceiling": 1298.7,
-      "last_change_at": 1777769805,
+      "last_change_at": 1777770087,
       "role": "winner",
       "label": "Parlante Jbl Audio Clip 5 Clip 5 Po"
     },
     "MLM2904687747": {
-      "original_price": 999.0,
-      "floor": 549.45,
-      "ceiling": 1298.7,
-      "last_change_at": 1777769805,
+      "original_price": 1049.0,
+      "floor": 576.95,
+      "ceiling": 1363.7,
+      "last_change_at": 1777770087,
       "role": "winner",
       "label": "Bocina Port\u00e1til Jbl Clip 5 Bluetoot"
     },
@@ -708,7 +708,7 @@
       "original_price": 999.0,
       "floor": 549.45,
       "ceiling": 1298.7,
-      "last_change_at": 1777769805,
+      "last_change_at": 1777770087,
       "role": "winner",
       "label": "Bocina Port\u00e1til Jbl Clip 5 Bluetoot"
     },
@@ -716,11 +716,11 @@
       "original_price": 999.0,
       "floor": 549.45,
       "ceiling": 1298.7,
-      "last_change_at": 1777769805,
+      "last_change_at": 1777770087,
       "role": "winner",
       "label": "Bocina Jbl Audio Clip 5 Clip 5 Port"
     }
   },
-  "last_run": 1777769805,
+  "last_run": 1777770087,
   "winner_account": "RAYMUNDO"
 }
