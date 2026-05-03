@@ -76,18 +76,22 @@ print(f"  Go 3 negro encontrados: {sum(1 for v in found.values() if v['model']==
 
 # Validar contradicciones
 def detect_color_in_title(title):
-    nl = normalize(title)
+    # Eliminar "bluetooth" para evitar que "blue" matchee
+    nl = normalize(title).replace("bluetooth", " ")
+    # Específicos primero
     if any(x in nl for x in ["camuflaj","camo","camuflad"]): return "Camuflaje"
     if any(x in nl for x in ["aqua","celeste"]): return "Aqua"
-    if "azul marino" in nl: return "Azul Marino"
-    if "azul" in nl or "blue" in nl: return "Azul"
+    if "azul marino" in nl or "azul acero" in nl: return "Azul Marino"
     if "negr" in nl or "black" in nl: return "Negro"
-    if "roj" in nl or "red" in nl: return "Rojo"
+    if "roj" in nl or " red" in nl: return "Rojo"
     if "rosa" in nl or "pink" in nl: return "Rosa"
     if any(x in nl for x in ["morado","violeta","purple","violet","purpura","púrpura"]): return "Morado"
     if "amarillo" in nl or "yellow" in nl: return "Amarillo"
     if "verde" in nl or "green" in nl: return "Verde"
     if "blanc" in nl or "white" in nl: return "Blanco"
+    if "naranja" in nl or "orange" in nl: return "Naranja"
+    # Azul al final para evitar overlap con "Azul Marino" (manejado arriba)
+    if " azul" in (" " + nl) or " blue" in (" " + nl): return "Azul"
     return None
 
 def validate(cpid, model_target):
