@@ -156,6 +156,14 @@ for iid, model, color, cur, floor, ceiling in catalog_items:
                     print(f"  📌 GO3 ${cur}→$499 {iid}")
             time.sleep(0.15); continue
 
+        # CEILING ENFORCEMENT — si cur > ceiling, bajar a ceiling siempre
+        if cur > ceiling:
+            pr = requests.put(f"https://api.mercadolibre.com/items/{iid}",
+                              headers=H, json={"price": ceiling})
+            if pr.status_code == 200:
+                print(f"  ⬇️ CEILING {model} {iid}: ${cur}→${ceiling}")
+                cur = ceiling  # actualizar para lógica subsecuente
+
         # PTW lookup
         ptw_resp = requests.get(
             f"https://api.mercadolibre.com/items/{iid}/price_to_win?version=v2",
