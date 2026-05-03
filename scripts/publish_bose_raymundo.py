@@ -54,7 +54,8 @@ for p in PUBS:
         f"Envio gratis. Stock real 20 unidades."
     )
 
-    cat_id = prod.get("category_id") or "MLM176544"  # MLM-SPEAKERS default
+    # MELI migrated category to MLM179229 (Audio > Speakers)
+    cat_id = "MLM179229"
     title = (name or f"Bose SoundLink Home {p['color']}")[:60]
     body = {
         "title": title,
