@@ -50,6 +50,24 @@ for o in r.get("results",[])[:3]:
     for k in ["estimated_delivery","handling_time","delay","tracking_number","tracking_method"]:
         if k in sh_data:
             print(f"{k}: {json.dumps(sh_data[k]) if isinstance(sh_data[k],(dict,list)) else sh_data[k]}")
-    # full dump truncado de lead_time
-    print(f"\n--- FULL lead_time JSON ---")
-    print(json.dumps(lt, indent=2, default=str)[:1500])
+    # FULL JSON dump para encontrar deadline
+    print(f"\n--- FULL shipment JSON keys ---")
+    print(json.dumps(list(sh_data.keys()), indent=2))
+    print(f"\n--- status_history ---")
+    print(json.dumps(sh_hist, indent=2, default=str))
+    # Probar endpoint SLA
+    try:
+        sla = requests.get(f"https://api.mercadolibre.com/shipments/{sh}/sla",
+                           headers=H, timeout=10).json()
+        print(f"\n--- /sla endpoint ---")
+        print(json.dumps(sla, indent=2, default=str)[:1500])
+    except Exception as e:
+        print(f"sla err: {e}")
+    # endpoint alternativo: leadtime endpoint
+    try:
+        lt2 = requests.get(f"https://api.mercadolibre.com/shipments/{sh}/lead_time",
+                           headers=H, timeout=10).json()
+        print(f"\n--- /lead_time endpoint ---")
+        print(json.dumps(lt2, indent=2, default=str)[:1500])
+    except Exception as e:
+        print(f"lead_time err: {e}")
