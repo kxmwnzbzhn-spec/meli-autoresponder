@@ -1,0 +1,21 @@
+name: upload-alchemia
+on: { workflow_dispatch: }
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install google-api-python-client google-auth openpyxl -q
+      - run: python scripts/build_alchemia_catalog.py
+      - env:
+          GOOGLE_OAUTH_CLIENT_ID:       ${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}
+          GOOGLE_OAUTH_CLIENT_SECRET:   ${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}
+          GOOGLE_OAUTH_REFRESH_TOKEN:   ${{ secrets.GOOGLE_OAUTH_REFRESH_TOKEN }}
+        run: python scripts/upload_alchemia.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: alchemia-catalog
+          path: alchemia_lab_catalog.xlsx
