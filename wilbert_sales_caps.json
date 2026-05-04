@@ -1,0 +1,12 @@
+{
+  "tz": "America/Mexico_City",
+  "caps_by_date": {
+    "2026-05-04": 50,
+    "2026-05-05": 60,
+    "2026-05-06": 70
+  },
+  "default_cap": 999999,
+  "paused_today_at": null,
+  "auto_pause_enabled": true,
+  "notes": "Cuando units_sold (paid+shipped) del día CDMX >= cap → dispatch pause_wilbert + bloquear war_wilbert"
+}
