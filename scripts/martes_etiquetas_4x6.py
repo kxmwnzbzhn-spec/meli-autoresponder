@@ -129,18 +129,14 @@ for acc, rt in ACCS.items():
 print(f"\nTotal MARTES: {len(shipments)}")
 shipments.sort(key=lambda s: ("/".join(s["comp_lines"]), s["account"]))
 if LIMIT > 0:
-    shipments = shipments[:LIMIT]
-    print(f"   PREVIEW MODE: limitado a {LIMIT}")
+    print(f"   PREVIEW MODE: detener tras {LIMIT} páginas OK")
 
 
 # === FASE 2: PDF 4x6 con header integrado + etiqueta escalada ===
 print("\n=== Generando PDF 4x6 MARTES ===")
-by_acc=defaultdict(list)
-for s in shipments:
-    by_acc[s["account"]].append(s)
-
 writer=PdfWriter()
 fail=[]
+ok_pages=0
 
 def render_header(s, header_h):
     """Devuelve un PdfPage 4x6 con la franja amarilla en el header. Texto centrado."""
@@ -173,49 +169,47 @@ def render_header(s, header_h):
     buf.seek(0)
     return PdfReader(buf).pages[0]
 
-for acc, ships in by_acc.items():
-    if not ships: continue
-    token=ships[0]["token"]
-    H={"Authorization":f"Bearer {token}"}
-    print(f"  {acc}: {len(ships)}")
-    for s in ships:
-        try:
-            r=requests.get("https://api.mercadolibre.com/shipment_labels",
-                          headers=H, params={"shipment_ids":s["sid"],"response_type":"pdf"},
-                          timeout=30)
-            if r.status_code!=200 or not r.headers.get("content-type","").lower().startswith("application/pdf"):
-                fail.append(s["sid"]); continue
-            lbl_pdf=PdfReader(io.BytesIO(r.content))
-            for label_page in lbl_pdf.pages:
-                # Usar cropbox si es más chico que mediabox (descarta padding del PDF)
-                box = label_page.cropbox if label_page.cropbox else label_page.mediabox
-                lbl_x0=float(box.left); lbl_y0=float(box.bottom)
-                lbl_w=float(box.width); lbl_h=float(box.height)
-                n_lines=min(len(s["comp_lines"]), 4)
-                header_h = 22 + n_lines*16  # 38-86 pt
-                label_area_h = PAGE_H - header_h
-
-                # Página 4x6 en blanco
-                new_page=PageObject.create_blank_page(width=PAGE_W, height=PAGE_H)
-
-                # STRETCH-FILL: rellenar TODO el área de etiqueta sin dejar espacio en blanco
-                sx = PAGE_W / lbl_w
-                sy = label_area_h / lbl_h
-                # Translate cropbox origin a (0,0) y luego escalar para llenar
-                op = (Transformation()
-                      .translate(-lbl_x0, -lbl_y0)
-                      .scale(sx, sy))
-                new_page.merge_transformed_page(label_page, op)
-
-                # Header amarillo encima
-                hdr_page=render_header(s, header_h)
-                new_page.merge_page(hdr_page)
-
-                writer.add_page(new_page)
-        except Exception as e:
+stop_render=False
+for s in shipments:
+    if stop_render: break
+    H={"Authorization":f"Bearer {s['token']}"}
+    try:
+        r=requests.get("https://api.mercadolibre.com/shipment_labels",
+                      headers=H, params={"shipment_ids":s["sid"],"response_type":"pdf"},
+                      timeout=30)
+        if r.status_code!=200 or not r.headers.get("content-type","").lower().startswith("application/pdf"):
             fail.append(s["sid"])
-            print(f"    err {s['sid']}: {str(e)[:80]}")
-        time.sleep(0.08)
+            print(f"    err {s['account']}/{s['sid']}: HTTP {r.status_code} ct={r.headers.get('content-type','?')[:40]} body={r.text[:120]}")
+            continue
+        lbl_pdf=PdfReader(io.BytesIO(r.content))
+        for label_page in lbl_pdf.pages:
+            box = label_page.cropbox if label_page.cropbox else label_page.mediabox
+            lbl_x0=float(box.left); lbl_y0=float(box.bottom)
+            lbl_w=float(box.width); lbl_h=float(box.height)
+            n_lines=min(len(s["comp_lines"]), 4)
+            header_h = 22 + n_lines*16
+            label_area_h = PAGE_H - header_h
+
+            new_page=PageObject.create_blank_page(width=PAGE_W, height=PAGE_H)
+            sx = PAGE_W / lbl_w
+            sy = label_area_h / lbl_h
+            op = (Transformation()
+                  .translate(-lbl_x0, -lbl_y0)
+                  .scale(sx, sy))
+            new_page.merge_transformed_page(label_page, op)
+
+            hdr_page=render_header(s, header_h)
+            new_page.merge_page(hdr_page)
+
+            writer.add_page(new_page)
+            ok_pages+=1
+            if LIMIT>0 and ok_pages>=LIMIT:
+                stop_render=True
+                break
+    except Exception as e:
+        fail.append(s["sid"])
+        print(f"    err {s['account']}/{s['sid']}: {type(e).__name__}: {str(e)[:140]}")
+    time.sleep(0.08)
 
 pdf_out="ETIQUETAS_MARTES_5_MAYO_4x6.pdf"
 with open(pdf_out,"wb") as f: writer.write(f)
