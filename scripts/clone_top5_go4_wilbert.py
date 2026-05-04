@@ -12,13 +12,13 @@ RT_WILBERT=os.environ["MELI_REFRESH_TOKEN_WILBERT"]
 TG=os.environ.get("TELEGRAM_BOT_TOKEN","")
 TGCID=os.environ.get("TELEGRAM_CHAT_ID","")
 
-# Top 5 Go 4 de Raymundo
+# Siguientes 5 Go 4 de Raymundo (posiciones 6-10)
 SOURCES = [
-    "MLM2891189883",  # 258 sold
-    "MLM5246052014",  # 249 sold
-    "MLM5246077386",  # 116 sold
-    "MLM2891178553",  # 93 sold
-    "MLM2891189773",  # 30 sold
+    "MLM5246052070",  # 25 sold (Azul)
+    "MLM5246077470",  # 17 sold (Azul)
+    "MLM2891189859",  # 16 sold (Azul)
+    "MLM2904704679",  # 14 sold (Negro)
+    "MLM2891178577",  # 14 sold (Azul)
 ]
 PRICE = 449
 VISIBLE_QTY = 1
