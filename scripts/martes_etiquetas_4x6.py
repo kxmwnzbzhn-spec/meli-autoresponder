@@ -30,6 +30,9 @@ END_MARTES   = datetime.fromisoformat("2026-05-05").replace(hour=23, minute=59, 
 PAGE_W = 4 * 72   # 288 pt
 PAGE_H = 6 * 72   # 432 pt
 
+# 0 = todas. >0 = limitar (modo preview)
+LIMIT = int(os.environ.get("LIMIT") or "0")
+
 
 def tok(rt):
     r=requests.post("https://api.mercadolibre.com/oauth/token",data={
@@ -125,6 +128,9 @@ for acc, rt in ACCS.items():
 
 print(f"\nTotal MARTES: {len(shipments)}")
 shipments.sort(key=lambda s: ("/".join(s["comp_lines"]), s["account"]))
+if LIMIT > 0:
+    shipments = shipments[:LIMIT]
+    print(f"   PREVIEW MODE: limitado a {LIMIT}")
 
 
 # === FASE 2: PDF 4x6 con header integrado + etiqueta escalada ===
@@ -137,23 +143,32 @@ writer=PdfWriter()
 fail=[]
 
 def render_header(s, header_h):
-    """Devuelve un PdfPage 4x6 con la franja amarilla solo en el header."""
+    """Devuelve un PdfPage 4x6 con la franja amarilla en el header. Texto centrado."""
     buf=io.BytesIO()
     c=canvas.Canvas(buf, pagesize=(PAGE_W, PAGE_H))
     c.setFillColor(Color(1, 0.96, 0.74))
-    # Banda amarilla solo en la zona del header (parte superior)
     c.rect(0, PAGE_H-header_h, PAGE_W, header_h, fill=1, stroke=0)
     c.setFillColorRGB(0,0,0)
-    # Linea 1 pequeña
-    c.setFont("Helvetica-Bold", 7)
-    line1=f"[{s['account'].upper()}] {s['buyer'][:28]} | Ship:{s['sid']}"
-    c.drawString(4, PAGE_H-10, line1)
-    # Lineas grandes con productos
-    c.setFont("Helvetica-Bold", 13)
-    y = PAGE_H - 24
-    for line in s["comp_lines"][:4]:
-        c.drawString(4, y, line[:32])
-        y -= 15
+    cx = PAGE_W / 2.0
+    # Linea 1 pequeña - centrada
+    c.setFont("Helvetica-Bold", 7.5)
+    line1=f"[{s['account'].upper()}] {s['buyer'][:30]} | Ship:{s['sid']}"
+    c.drawCentredString(cx, PAGE_H-11, line1)
+    # Lineas grandes con productos - centradas y centradas verticalmente en el bloque restante
+    big_lines = s["comp_lines"][:4]
+    n = len(big_lines)
+    line_h = 16
+    block_top = PAGE_H - 18                # espacio reservado para line1
+    block_bot = PAGE_H - header_h + 4
+    block_h = block_top - block_bot
+    text_h = n * line_h
+    # baseline de la primera línea
+    first_y = block_top - (block_h - text_h)/2.0 - 12
+    c.setFont("Helvetica-Bold", 14)
+    y = first_y
+    for line in big_lines:
+        c.drawCentredString(cx, y, line[:30])
+        y -= line_h
     c.showPage(); c.save()
     buf.seek(0)
     return PdfReader(buf).pages[0]
@@ -172,25 +187,24 @@ for acc, ships in by_acc.items():
                 fail.append(s["sid"]); continue
             lbl_pdf=PdfReader(io.BytesIO(r.content))
             for label_page in lbl_pdf.pages:
-                lbl_w=float(label_page.mediabox.width); lbl_h=float(label_page.mediabox.height)
-                # Header dinámico según número de líneas (3 base + 15pt por línea, máx 4 líneas)
+                # Usar cropbox si es más chico que mediabox (descarta padding del PDF)
+                box = label_page.cropbox if label_page.cropbox else label_page.mediabox
+                lbl_x0=float(box.left); lbl_y0=float(box.bottom)
+                lbl_w=float(box.width); lbl_h=float(box.height)
                 n_lines=min(len(s["comp_lines"]), 4)
-                header_h = 18 + n_lines*15  # 33-78 pt
+                header_h = 22 + n_lines*16  # 38-86 pt
                 label_area_h = PAGE_H - header_h
 
                 # Página 4x6 en blanco
                 new_page=PageObject.create_blank_page(width=PAGE_W, height=PAGE_H)
 
-                # Escalar la etiqueta MELI para caber en (PAGE_W, label_area_h)
+                # STRETCH-FILL: rellenar TODO el área de etiqueta sin dejar espacio en blanco
                 sx = PAGE_W / lbl_w
                 sy = label_area_h / lbl_h
-                scale = min(sx, sy)
-                new_w = lbl_w * scale
-                new_h = lbl_h * scale
-                # Centrar horizontalmente, alinear arriba del área de etiqueta
-                tx = (PAGE_W - new_w) / 2.0
-                ty = label_area_h - new_h  # pega la etiqueta al borde superior del área de etiqueta
-                op = Transformation().scale(scale, scale).translate(tx, ty)
+                # Translate cropbox origin a (0,0) y luego escalar para llenar
+                op = (Transformation()
+                      .translate(-lbl_x0, -lbl_y0)
+                      .scale(sx, sy))
                 new_page.merge_transformed_page(label_page, op)
 
                 # Header amarillo encima
