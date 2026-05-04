@@ -26,8 +26,8 @@ RULES = {
     "bose":     {"floor": 3499, "ceiling": 3499,"rx": r"bose|soundlink"},
 }
 PERFUME_RX = re.compile(r"perfume|fragrance|edp|eau de|cologne|alchemia|armaf|odyssey", re.I)
-UP_STEP_PCT = 0.10  # +10% por corrida cuando solos
-MAX_UP = 50         # tope de subida por corrida ($)
+UP_STEP_PCT = 0.05  # +10% por corrida cuando solos
+MAX_UP = 30         # tope de subida por corrida ($)
 
 def refresh():
     r = requests.post(f"{API}/oauth/token", data={
