@@ -98,7 +98,9 @@
     "active": true,
     "real_stock": 30,
     "color": "Negro",
-    "user_product_id": "MLMU3920529895"
+    "user_product_id": "MLMU3920529895",
+    "family_id": "1599970057545363",
+    "sibling_of": "MLM2907632461"
   },
   "MLM2894631211": {
     "auto_replenish": true,
@@ -123,5 +125,18 @@
     "line": "Juan-Charge6-Reacond",
     "title": "Bocina Jbl Charge 6 Bluetooth Ip67 Portatil Reacondicionada Rojo",
     "active": true
+  },
+  "MLM2907632461": {
+    "auto_replenish": true,
+    "min_visible": 1,
+    "real_stock": 20,
+    "master_stock": 20,
+    "color": "Camuflaje",
+    "line": "Juan-Charge6",
+    "title": "Bocina Jbl Charge 6 Bluetooth Ip67 Portatil Reacondicionada Camuflaje",
+    "active": true,
+    "family_name": "Bocina Jbl Charge 6 Bluetooth Ip67 Portatil Reacondicionada",
+    "family_id": "1599970057545363",
+    "sibling_of": "MLM2894654315"
   }
 }
