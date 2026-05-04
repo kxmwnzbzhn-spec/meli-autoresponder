@@ -62,6 +62,7 @@ for src_iid in SOURCES:
 
     # Build publish body
     body = {
+        "title": title[:60],
         "catalog_product_id": cpid,
         "category_id": cat_id,
         "site_id": "MLM",
