@@ -12,13 +12,14 @@ RT_WILBERT=os.environ["MELI_REFRESH_TOKEN_WILBERT"]
 TG=os.environ.get("TELEGRAM_BOT_TOKEN","")
 TGCID=os.environ.get("TELEGRAM_CHAT_ID","")
 
-# Batch CLIP 5 top 1-5
+# Batch CLIP 5 #2: posiciones 6-11 (6 publicaciones)
 SOURCES = [
-    "MLM2904687737",  # 11 sold (Rojo)
-    "MLM2904674811",  # 10 sold
-    "MLM5281123238",  # 8 sold
-    "MLM5281123246",  # 4 sold (Negro)
-    "MLM2904687747",  # 4 sold (Azul)
+    "MLM2904691267",  # 2 sold (Negro)
+    "MLM2904678377",  # 2 sold
+    "MLM2904765841",  # 1 sold
+    "MLM2904691291",  # 1 sold
+    "MLM2904765913",  # 0 sold
+    "MLM2904765865",  # 0 sold
 ]
 PRICE = 699   # Clip 5 floor
 VISIBLE_QTY = 1
