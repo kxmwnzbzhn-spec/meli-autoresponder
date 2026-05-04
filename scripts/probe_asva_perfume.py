@@ -10,8 +10,26 @@ me=requests.get("https://api.mercadolibre.com/users/me",headers=H,timeout=10).js
 uid=me["id"]
 print(f"Cuenta: {me['nickname']} ({uid})\n")
 
+# 0) probar varios formatos de domain
+for d in ["MLM-PERFUMES","MLM-PERFUMERY","MLM-FRAGRANCES","MLM-PERFUMES_AND_FRAGRANCES"]:
+    rr=requests.post("https://api.mercadolibre.com/catalog_suggestions",headers=H,
+        json={"site_id":"MLM","domain_id":d,"attributes":[{"id":"BRAND","value_name":"x"}]},timeout=10)
+    print(f"  domain {d}: {rr.status_code} {rr.text[:200]}")
+
+# Categoria perfumes nivel hojas
+print("\n--- categorias perfumes ---")
+def find_perf(cat_id, depth=0):
+    r=requests.get(f"https://api.mercadolibre.com/categories/{cat_id}",timeout=10).json()
+    name=r.get("name","")
+    if "perfu" in name.lower() or "fragancia" in name.lower():
+        print(f"  {'  '*depth}{cat_id} {name}")
+    for ch in r.get("children_categories",[])[:30]:
+        if depth < 3:
+            find_perf(ch["id"], depth+1)
+find_perf("MLM1246")  # Belleza
+
 # 1) Test POST con perfume placeholder para ver validación
-print("--- POST /catalog_suggestions test PERFUMES_AND_FRAGRANCES ---")
+print("\n--- POST /catalog_suggestions test PERFUMES_AND_FRAGRANCES ---")
 test_body = {
     "site_id":"MLM",
     "domain_id":"PERFUMES_AND_FRAGRANCES",
