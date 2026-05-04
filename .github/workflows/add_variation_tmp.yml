@@ -1,0 +1,70 @@
+name: add-variation-tmp
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - run: pip install requests -q
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+        run: |
+          python3 - <<'PY'
+          import os, requests, json
+          API="https://api.mercadolibre.com"
+          tok=requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token",
+              "client_id":os.environ["MELI_APP_ID"],
+              "client_secret":os.environ["MELI_APP_SECRET"],
+              "refresh_token":os.environ["MELI_REFRESH_TOKEN"]},timeout=20).json()["access_token"]
+          h={"Authorization":f"Bearer {tok}"}
+          hj={**h,"Content-Type":"application/json"}
+          IID="MLM2894654315"
+
+          it=requests.get(f"{API}/items/{IID}",headers=h).json()
+          print("=== Estado actual ===")
+          print(f"status={it.get('status')} qty={it.get('available_quantity')} price={it.get('price')} catalog_listing={it.get('catalog_listing')}")
+          print(f"category={it.get('category_id')}")
+          # Ver atributos relevantes (COLOR)
+          for a in it.get("attributes",[]):
+              if a.get("id") in ("COLOR","ITEM_CONDITION","BRAND","MODEL"):
+                  print(f"  attr {a.get('id')} = {a.get('value_name')}")
+          # Picture IDs
+          pic_ids=[p.get("id") for p in it.get("pictures",[])]
+          print(f"Pictures: {len(pic_ids)}")
+          price=it.get("price",399)
+
+          # Construir variations
+          payload={
+            "variations":[
+              {"attribute_combinations":[{"id":"COLOR","value_name":"Negro"}],
+               "available_quantity":1,"price":price,"picture_ids":pic_ids},
+              {"attribute_combinations":[{"id":"COLOR","value_name":"Camuflaje"}],
+               "available_quantity":1,"price":price,"picture_ids":pic_ids},
+            ]
+          }
+          # Si COLOR está en attributes principales puede causar conflicto: quitarlo
+          # Lo intentamos primero sin tocar attributes
+          r=requests.put(f"{API}/items/{IID}",headers=hj,json=payload,timeout=20)
+          print(f"\nPUT variations [Negro,Camuflaje]: {r.status_code}")
+          print(r.text[:600])
+
+          if r.status_code not in (200,201):
+              # Reintentar quitando COLOR de attributes globales
+              print("\n=== Reintento removiendo COLOR de attributes ===")
+              attrs=[a for a in it.get("attributes",[]) if a.get("id")!="COLOR"]
+              payload2={**payload,"attributes":attrs}
+              r2=requests.put(f"{API}/items/{IID}",headers=hj,json=payload2,timeout=20)
+              print(f"PUT v2: {r2.status_code}")
+              print(r2.text[:600])
+
+          # Verificar
+          it2=requests.get(f"{API}/items/{IID}",headers=h).json()
+          print("\n=== Despues ===")
+          print(f"status={it2.get('status')} qty={it2.get('available_quantity')}")
+          for v in it2.get("variations",[]):
+              attrs=v.get("attribute_combinations",[])
+              color=next((a.get("value_name","") for a in attrs if a.get("name","").lower()=="color"),"?")
+              print(f"  var={v.get('id')} color={color} qty={v.get('available_quantity')} price={v.get('price')}")
+          PY
