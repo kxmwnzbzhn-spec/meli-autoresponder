@@ -10,6 +10,8 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.colors import Color
 from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+from pdf2image import convert_from_bytes
+from PIL import Image
 
 APP_ID="5211907102822632"
 APP_SECRET=os.environ["MELI_APP_SECRET"]
@@ -32,6 +34,37 @@ PAGE_H = 6 * 72   # 432 pt
 
 # 0 = todas. >0 = limitar (modo preview)
 LIMIT = int(os.environ.get("LIMIT") or "0")
+
+
+def detect_content_bbox(pdf_bytes, page_idx=0):
+    """Rasteriza la página y devuelve (x0, y0, w, h) en puntos PDF
+    correspondientes al recuadro de pixeles no-blancos. Si falla, None."""
+    try:
+        imgs = convert_from_bytes(pdf_bytes, dpi=72,
+                                  first_page=page_idx+1, last_page=page_idx+1)
+        if not imgs: return None
+        img = imgs[0].convert("L")
+        # threshold: <245 => content
+        bw = img.point(lambda p: 0 if p < 245 else 255, mode="L")
+        # bbox of black pixels (content)
+        # PIL.getbbox returns bbox of non-zero, but we want non-255.
+        # Invert: now content=255.
+        from PIL import ImageOps
+        inv = ImageOps.invert(bw)
+        bbox = inv.getbbox()
+        if not bbox: return None
+        x0, y0_top, x1, y1_top = bbox  # PIL coords: y=0 top
+        img_w, img_h = img.size
+        # PDF coords: y=0 bottom
+        pdf_y0 = img_h - y1_top
+        pdf_y1 = img_h - y0_top
+        # margen pequeño
+        m = 2
+        return (max(0, x0-m), max(0, pdf_y0-m),
+                min(img_w, x1-x0+2*m), min(img_h, pdf_y1-pdf_y0+2*m))
+    except Exception as e:
+        print(f"   detect_bbox warn: {type(e).__name__}: {str(e)[:80]}")
+        return None
 
 
 def tok(rt):
@@ -181,11 +214,22 @@ for s in shipments:
             fail.append(s["sid"])
             print(f"    err {s['account']}/{s['sid']}: HTTP {r.status_code} ct={r.headers.get('content-type','?')[:40]} body={r.text[:120]}")
             continue
-        lbl_pdf=PdfReader(io.BytesIO(r.content))
-        for label_page in lbl_pdf.pages:
+        raw_pdf_bytes = r.content
+        lbl_pdf=PdfReader(io.BytesIO(raw_pdf_bytes))
+        for pidx, label_page in enumerate(lbl_pdf.pages):
             box = label_page.cropbox if label_page.cropbox else label_page.mediabox
             lbl_x0=float(box.left); lbl_y0=float(box.bottom)
             lbl_w=float(box.width); lbl_h=float(box.height)
+            # Auto-detectar contenido para eliminar espacio en blanco intrínseco del PDF
+            cb = detect_content_bbox(raw_pdf_bytes, pidx)
+            if cb:
+                cx0, cy0, cw, ch = cb
+                # ajustar por offset original del cropbox
+                lbl_x0 = float(box.left) + float(cx0)
+                lbl_y0 = float(box.bottom) + float(cy0)
+                lbl_w = float(cw)
+                lbl_h = float(ch)
+                print(f"   bbox {s['sid']}: ({lbl_x0:.0f},{lbl_y0:.0f}) {lbl_w:.0f}x{lbl_h:.0f} pt")
             n_lines=min(len(s["comp_lines"]), 4)
             header_h = 22 + n_lines*16
             label_area_h = PAGE_H - header_h
