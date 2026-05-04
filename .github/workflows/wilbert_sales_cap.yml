@@ -1,0 +1,36 @@
+name: wilbert-sales-cap
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '*/5 * * * *'
+concurrency:
+  group: wilbert-sales-cap
+  cancel-in-progress: false
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+      actions: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests -q
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_WILBERT: ${{ secrets.MELI_REFRESH_TOKEN_WILBERT }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          GH_TOKEN_OPS: ${{ secrets.GITHUB_TOKEN }}
+          REPO_OWNER: ${{ github.repository_owner }}
+        run: python scripts/wilbert_sales_cap_check.py
+      - name: Commit cap state if changed
+        run: |
+          git config user.email "bot@local"; git config user.name "bot"
+          git pull --rebase 2>/dev/null || true
+          git add wilbert_sales_caps.json
+          git diff --cached --quiet || git commit -m "wilbert-sales-cap: state update"
+          git push origin main 2>/dev/null || true
