@@ -1,5 +1,11 @@
 name: martes-etiquetas-4x6
-on: { workflow_dispatch: }
+on:
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: 'Max etiquetas (0 = todas, 1 = preview)'
+        type: string
+        default: '0'
 jobs:
   run:
     runs-on: ubuntu-latest
@@ -10,6 +16,7 @@ jobs:
         with: { python-version: '3.11' }
       - run: pip install requests pypdf reportlab openpyxl -q
       - env:
+          LIMIT:                          ${{ inputs.limit }}
           MELI_APP_SECRET:                ${{ secrets.MELI_APP_SECRET }}
           MELI_REFRESH_TOKEN:             ${{ secrets.MELI_REFRESH_TOKEN }}
           MELI_REFRESH_TOKEN_JUAN:        ${{ secrets.MELI_REFRESH_TOKEN_JUAN }}
