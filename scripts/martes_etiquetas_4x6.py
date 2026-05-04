@@ -1,6 +1,7 @@
-"""ETIQUETAS MARTES 5/MAY — formato 4x6 in (288x432 pt).
+"""ETIQUETAS LUNES+MARTES — formato 4x6 in (288x432 pt).
 Header amarillo integrado arriba + etiqueta MELI escalada para caber en 4x6.
-Filtra: status ready_to_ship/handling, deadline en martes (00:00–23:59 CDMX).
+Filtra: status ready_to_ship/handling, deadline <= martes 23:59 CDMX.
+Incluye todo lo atrasado de lunes y todo lo de martes.
 """
 import os, io, time, requests
 from datetime import datetime, timedelta, timezone
@@ -25,7 +26,7 @@ ACCS={
     "Bren":     os.environ.get("MELI_REFRESH_TOKEN_BREN"),
 }
 TZ=timezone(timedelta(hours=-6))
-START_MARTES = datetime.fromisoformat("2026-05-05").replace(hour=0,  minute=0,  tzinfo=TZ)
+# Cota superior: hasta martes 23:59 CDMX (incluye atrasados de lunes + martes)
 END_MARTES   = datetime.fromisoformat("2026-05-05").replace(hour=23, minute=59, tzinfo=TZ)
 
 # Tamaño impresora 4x6 in
@@ -145,7 +146,8 @@ for acc, rt in ACCS.items():
                 dh=hist.get("date_handling")
                 if dh: deadline=(datetime.fromisoformat(dh.replace("Z","+00:00"))+timedelta(hours=48)).astimezone(TZ)
             if not deadline: continue
-            if deadline < START_MARTES or deadline > END_MARTES: continue
+            # Incluye todos los atrasados (deadline pasado) + martes; excluye lo de miércoles+
+            if deadline > END_MARTES: continue
             items=ord_o.get("order_items",[])
             comp_lines=[f"{clean_title((it.get('item') or {}).get('title',''))} x{it.get('quantity',1)}" for it in items]
             buyer=(ord_o.get("buyer") or {}).get("nickname","?")
@@ -159,7 +161,7 @@ for acc, rt in ACCS.items():
             print(f"  err {sid}: {str(e)[:60]}")
     print(f"  matches: {matches}")
 
-print(f"\nTotal MARTES: {len(shipments)}")
+print(f"\nTotal LUNES+MARTES: {len(shipments)}")
 shipments.sort(key=lambda s: ("/".join(s["comp_lines"]), s["account"]))
 if LIMIT > 0:
     print(f"   PREVIEW MODE: detener tras {LIMIT} páginas OK")
@@ -255,7 +257,7 @@ for s in shipments:
         print(f"    err {s['account']}/{s['sid']}: {type(e).__name__}: {str(e)[:140]}")
     time.sleep(0.08)
 
-pdf_out="ETIQUETAS_MARTES_5_MAYO_4x6.pdf"
+pdf_out="ETIQUETAS_LUNES_MARTES_5_MAYO_4x6.pdf"
 with open(pdf_out,"wb") as f: writer.write(f)
 print(f"\n✅ PDF: {pdf_out} ({len(writer.pages)} páginas) | Fallidas: {len(fail)}")
 
@@ -263,7 +265,7 @@ print(f"\n✅ PDF: {pdf_out} ({len(writer.pages)} páginas) | Fallidas: {len(fai
 # === FASE 3: XLSX organizado por producto ===
 wb=Workbook()
 ws=wb.active
-ws.title="Despacho Martes 5 Mayo"
+ws.title="Despacho Lunes+Martes 5 May"
 hf=PatternFill("solid", fgColor="2C3E50")
 hF=Font(bold=True, color="FFFFFF", size=11)
 center=Alignment(horizontal="center", vertical="center", wrap_text=True)
@@ -309,11 +311,11 @@ ws2.column_dimensions["A"].width=60
 ws2.column_dimensions["B"].width=12
 ws2.column_dimensions["C"].width=25
 
-xlsx_out="DESPACHO_MARTES_5_MAYO.xlsx"
+xlsx_out="DESPACHO_LUNES_MARTES_5_MAYO.xlsx"
 wb.save(xlsx_out)
 print(f"✅ XLSX: {xlsx_out}")
 
-print(f"\n=== RESUMEN MARTES (4x6) ===")
+print(f"\n=== RESUMEN LUNES+MARTES (4x6) ===")
 print(f"Total shipments: {len(shipments)}")
 acc_count=defaultdict(int)
 for s in shipments: acc_count[s["account"]]+=1
