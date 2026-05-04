@@ -18,10 +18,20 @@
   "MLM5244765752": {
     "auto_replenish": true,
     "min_visible": 1,
-    "master_stock": 2321,
+    "master_stock": 120,
     "line": "Juan-Go4",
     "title": "Bocina Jbl Go 4 Bluetooth Ip67 Reacondicionada Excelente",
-    "active": true
+    "active": true,
+    "variations_real_stock": {
+      "Rosa": 20,
+      "Rojo": 20,
+      "Azul": 20,
+      "Camuflaje": 20,
+      "Negro": 20,
+      "Aqua": 20
+    },
+    "real_stock_per_color": 20,
+    "total_real_stock": 120
   },
   "MLM5244431296": {
     "auto_replenish": true,
