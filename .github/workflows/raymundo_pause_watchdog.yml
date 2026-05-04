@@ -2,7 +2,7 @@ name: raymundo-pause-watchdog
 on:
   workflow_dispatch:
   schedule:
-    - cron: '*/2 * * * *'   # cada 2 min hasta mañana 6am cuando se desactiva manualmente
+    - cron: '*/2 * * * *'
 jobs:
   run:
     runs-on: ubuntu-latest
@@ -18,6 +18,8 @@ jobs:
         run: |
           python3 - <<'PY'
           import os, requests
+          # Whitelist - estos NO se pausan (deben quedar activos)
+          WHITELIST = {"MLM2906041435","MLM2906016765"}
           APP_ID="5211907102822632"
           r=requests.post("https://api.mercadolibre.com/oauth/token",data={"grant_type":"refresh_token","client_id":APP_ID,"client_secret":os.environ["MELI_APP_SECRET"],"refresh_token":os.environ["MELI_REFRESH_TOKEN_RAYMUNDO"]}).json()
           H={"Authorization":f"Bearer {r['access_token']}"}
@@ -30,8 +32,14 @@ jobs:
               if not b: break
               ids.extend(b); offset+=50
               if offset >= rr.get("paging",{}).get("total",0): break
-          print(f"active: {len(ids)}")
+          print(f"active: {len(ids)} | whitelist: {WHITELIST}")
+          paused=0
           for iid in ids:
+              if iid in WHITELIST:
+                  print(f"  ⚪ skip {iid} (whitelist)")
+                  continue
               requests.put(f"https://api.mercadolibre.com/items/{iid}",headers=H,json={"status":"paused"})
-              print(f"paused {iid}")
+              paused+=1
+              print(f"  paused {iid}")
+          print(f"paused {paused}, kept active {len(ids)-paused}")
           PY
