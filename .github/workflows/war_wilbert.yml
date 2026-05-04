@@ -2,7 +2,7 @@ name: war-wilbert
 on:
   workflow_dispatch:
   schedule:
-    - cron: '*/3 * * * *'
+    - cron: '* * * * *'
 concurrency:
   group: war-wilbert
   cancel-in-progress: false
