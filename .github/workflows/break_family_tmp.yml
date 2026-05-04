@@ -1,0 +1,73 @@
+name: break-family-tmp
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - run: pip install requests -q
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+        run: |
+          python3 - <<'PY'
+          import os, requests, json
+          API="https://api.mercadolibre.com"
+          tok=requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token",
+              "client_id":os.environ["MELI_APP_ID"],
+              "client_secret":os.environ["MELI_APP_SECRET"],
+              "refresh_token":os.environ["MELI_REFRESH_TOKEN"]},timeout=20).json()["access_token"]
+          h={"Authorization":f"Bearer {tok}"}
+          hj={**h,"Content-Type":"application/json"}
+          IID="MLM2894654315"
+          it=requests.get(f"{API}/items/{IID}?include_attributes=all",headers=h).json()
+          pic_ids=[p.get("id") for p in it.get("pictures",[]) if p.get("id")]
+          price=it.get("price",399)
+          attrs=[a for a in it.get("attributes",[]) if a.get("id")!="COLOR"]
+
+          # === Strategy 1: nullear user_product_id + family_name ===
+          print("=== S1: PUT con user_product_id=null + variations ===")
+          body1={
+            "user_product_id": None,
+            "family_name": None,
+            "attributes": attrs,
+            "variations":[
+              {"attribute_combinations":[{"id":"COLOR","value_name":"Negro"}],
+               "available_quantity":1,"price":price,"picture_ids":pic_ids},
+              {"attribute_combinations":[{"id":"COLOR","value_name":"Camuflaje"}],
+               "available_quantity":1,"price":price,"picture_ids":pic_ids},
+            ]
+          }
+          r=requests.put(f"{API}/items/{IID}",headers=hj,json=body1,timeout=30)
+          print(f"S1: {r.status_code}")
+          print(r.text[:600])
+          if r.status_code in (200,201):
+              print("*** ÉXITO ***")
+              raise SystemExit(0)
+
+          # === Strategy 2: solo user_product_id=null ===
+          print("\n=== S2: PUT solo user_product_id=null primero ===")
+          r2=requests.put(f"{API}/items/{IID}",headers=hj,json={"user_product_id":None},timeout=20)
+          print(f"S2: {r2.status_code} {r2.text[:300]}")
+          if r2.status_code in (200,201):
+              # ahora agregar variations
+              r3=requests.put(f"{API}/items/{IID}",headers=hj,json={
+                  "attributes":attrs,
+                  "variations":[
+                    {"attribute_combinations":[{"id":"COLOR","value_name":"Negro"}],
+                     "available_quantity":1,"price":price,"picture_ids":pic_ids},
+                    {"attribute_combinations":[{"id":"COLOR","value_name":"Camuflaje"}],
+                     "available_quantity":1,"price":price,"picture_ids":pic_ids},
+                  ]
+              },timeout=30)
+              print(f"S2b variations: {r3.status_code}")
+              print(r3.text[:600])
+              raise SystemExit(0)
+
+          # === Strategy 3: empty string ===
+          print("\n=== S3: family_name='' user_product_id='' ===")
+          body3={**body1,"user_product_id":"","family_name":""}
+          r4=requests.put(f"{API}/items/{IID}",headers=hj,json=body3,timeout=30)
+          print(f"S3: {r4.status_code} {r4.text[:600]}")
+          PY
