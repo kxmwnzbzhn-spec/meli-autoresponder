@@ -1,0 +1,91 @@
+name: find-id-tmp
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - run: pip install requests -q
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+          MELI_REFRESH_TOKEN_RAYMUNDO: ${{ secrets.MELI_REFRESH_TOKEN_RAYMUNDO }}
+          MELI_REFRESH_TOKEN_CLARIBEL: ${{ secrets.MELI_REFRESH_TOKEN_CLARIBEL }}
+          MELI_REFRESH_TOKEN_ASVA: ${{ secrets.MELI_REFRESH_TOKEN_ASVA }}
+          MELI_REFRESH_TOKEN_DILCIE: ${{ secrets.MELI_REFRESH_TOKEN_DILCIE }}
+          MELI_REFRESH_TOKEN_MILDRED: ${{ secrets.MELI_REFRESH_TOKEN_MILDRED }}
+          MELI_REFRESH_TOKEN_BREN: ${{ secrets.MELI_REFRESH_TOKEN_BREN }}
+          MELI_REFRESH_TOKEN_WILBERT: ${{ secrets.MELI_REFRESH_TOKEN_WILBERT }}
+          MELI_REFRESH_TOKEN_YC_NEW: ${{ secrets.MELI_REFRESH_TOKEN_YC_NEW }}
+        run: |
+          python3 - <<'PY'
+          import os, requests, json
+          API="https://api.mercadolibre.com"
+          A=os.environ["MELI_APP_ID"]; S=os.environ["MELI_APP_SECRET"]
+          ID="1599970057545363"
+          ACCS={"JUAN":"MELI_REFRESH_TOKEN","RAYMUNDO":"MELI_REFRESH_TOKEN_RAYMUNDO",
+            "CLARIBEL":"MELI_REFRESH_TOKEN_CLARIBEL","ASVA":"MELI_REFRESH_TOKEN_ASVA",
+            "DILCIE":"MELI_REFRESH_TOKEN_DILCIE","MILDRED":"MELI_REFRESH_TOKEN_MILDRED",
+            "BREN":"MELI_REFRESH_TOKEN_BREN","WILBERT":"MELI_REFRESH_TOKEN_WILBERT",
+            "YC_NEW":"MELI_REFRESH_TOKEN_YC_NEW"}
+          for acc,ek in ACCS.items():
+              rt=os.environ.get(ek)
+              if not rt: continue
+              r=requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token",
+                  "client_id":A,"client_secret":S,"refresh_token":rt},timeout=20)
+              tok=r.json().get("access_token")
+              if not tok: 
+                  print(f"{acc}: refresh_failed {r.status_code}")
+                  continue
+              h={"Authorization":f"Bearer {tok}"}
+              me=requests.get(f"{API}/users/me",headers=h).json()
+              uid=me.get("id"); nick=me.get("nickname")
+              # Probar como user_product
+              up=requests.get(f"{API}/user-products/{ID}",headers=h)
+              if up.status_code==200:
+                  jb=up.json()
+                  if jb.get("user_id")==uid or jb.get("seller_id")==uid:
+                      print(f"\n[{acc}/{nick}] user_product MATCH:")
+                      print(json.dumps(jb,indent=2,ensure_ascii=False)[:1500])
+                      # buscar items asociados
+                      items=requests.get(f"{API}/users/{uid}/items/search?user_product_id={ID}",headers=h).json()
+                      print("items asociados:", items.get("results",[])[:5])
+                      break
+              # Probar listar variations buscando este id en items recientes (lento)
+          else:
+              # Buscar en items recientes con variations.id = ID en cada cuenta
+              print("\nNo match en /user-products. Probando como variation_id...")
+              for acc,ek in ACCS.items():
+                  rt=os.environ.get(ek)
+                  if not rt: continue
+                  r=requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token",
+                      "client_id":A,"client_secret":S,"refresh_token":rt},timeout=20)
+                  tok=r.json().get("access_token")
+                  if not tok: continue
+                  h={"Authorization":f"Bearer {tok}"}
+                  me=requests.get(f"{API}/users/me",headers=h).json()
+                  uid=me.get("id")
+                  off=0; found=None
+                  while off<200:
+                      j=requests.get(f"{API}/users/{uid}/items/search?status=active&limit=50&offset={off}",headers=h).json()
+                      ids=j.get("results",[])
+                      if not ids: break
+                      r2=requests.get(f"{API}/items?ids={','.join(ids)}&attributes=id,title,variations",headers=h).json()
+                      for it in r2:
+                          if it.get("code")==200:
+                              b=it["body"]
+                              for v in b.get("variations",[]):
+                                  if str(v.get("id"))==ID:
+                                      found=(b["id"],b.get("title"),v)
+                                      break
+                          if found: break
+                      if found: break
+                      off+=50
+                  if found:
+                      print(f"\n[{acc}] variation MATCH item={found[0]} '{found[1]}'")
+                      print(json.dumps(found[2],indent=2,ensure_ascii=False))
+                      break
+              else:
+                  print("\nNO ENCONTRADO en variations tampoco")
+          PY
