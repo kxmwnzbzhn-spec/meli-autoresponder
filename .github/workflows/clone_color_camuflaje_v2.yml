@@ -1,0 +1,73 @@
+name: clone-color-camuflaje-v2
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - run: pip install requests -q
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+        run: |
+          python3 - <<'PY'
+          import os, requests, json
+          API="https://api.mercadolibre.com"
+          tok=requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token",
+              "client_id":os.environ["MELI_APP_ID"],
+              "client_secret":os.environ["MELI_APP_SECRET"],
+              "refresh_token":os.environ["MELI_REFRESH_TOKEN"]},timeout=20).json()["access_token"]
+          h={"Authorization":f"Bearer {tok}"}
+          hj={**h,"Content-Type":"application/json"}
+          SRC="MLM2894654315"
+          it=requests.get(f"{API}/items/{SRC}?include_attributes=all",headers=h).json()
+          family_name = it.get("family_name")
+          attrs=[]
+          for a in it.get("attributes",[]):
+              if a.get("id")=="COLOR":
+                  attrs.append({"id":"COLOR","value_name":"Camuflaje"})
+              elif a.get("id") in ("BRAND","MODEL","ITEM_CONDITION","LINE","MODEL_NAME","DETAILED_MODEL"):
+                  v={"id":a.get("id")}
+                  if a.get("value_id"): v["value_id"]=a["value_id"]
+                  if a.get("value_name"): v["value_name"]=a["value_name"]
+                  attrs.append(v)
+          attrs.append({"id":"GTIN","value_name":"No aplica"})
+          if not any(x.get("id")=="COLOR" for x in attrs):
+              attrs.append({"id":"COLOR","value_name":"Camuflaje"})
+
+          title=it.get("title","")
+          if "Negro" in title: title=title.replace("Negro","Camuflaje")
+          if "Camuflaje" not in title: title=(title+" Camuflaje")
+          title=title[:60]
+
+          pictures=[{"id":p["id"]} for p in it.get("pictures",[]) if p.get("id")]
+
+          body={
+            "site_id":"MLM",
+            "title": title,
+            "family_name": family_name,
+            "category_id": it.get("category_id"),
+            "price": it.get("price",399),
+            "currency_id":"MXN",
+            "available_quantity": 1,
+            "buying_mode":"buy_it_now",
+            "listing_type_id": it.get("listing_type_id","gold_pro"),
+            "condition": it.get("condition","used"),
+            "shipping": it.get("shipping",{"mode":"me2","free_shipping":True,"logistic_type":"xd_drop_off","local_pick_up":False}),
+            "pictures": pictures,
+            "attributes": attrs,
+            "user_product_id": "MLMU3920529895",
+          }
+          print(f"family_name: {family_name}")
+          print(f"title: {title}")
+          r=requests.post(f"{API}/items",headers=hj,json=body,timeout=45)
+          print(f"POST: {r.status_code}")
+          print(r.text[:1500])
+          if r.status_code in (200,201):
+              new_id=r.json().get("id")
+              print(f"*** NUEVO ITEM: {new_id} ***")
+              dr=requests.post(f"{API}/items/{new_id}/description",headers=hj,
+                json={"plain_text":"Bocina JBL Charge 6 reacondicionada en color camuflaje. Bluetooth 5.1, IP67, hasta 20h de reproduccion. Garantia."},timeout=15)
+              print(f"description: {dr.status_code}")
+          PY
