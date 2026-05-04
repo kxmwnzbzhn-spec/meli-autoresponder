@@ -1,0 +1,50 @@
+name: apply-charge6-stock
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - run: pip install requests -q
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+        run: |
+          python3 - <<'PY'
+          import os, requests, json
+          API="https://api.mercadolibre.com"
+          tok=requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token",
+              "client_id":os.environ["MELI_APP_ID"],
+              "client_secret":os.environ["MELI_APP_SECRET"],
+              "refresh_token":os.environ["MELI_REFRESH_TOKEN"]},timeout=20).json()["access_token"]
+          h={"Authorization":f"Bearer {tok}","Content-Type":"application/json"}
+          IID="MLM2894654315"
+          # Get current state
+          it=requests.get(f"{API}/items/{IID}",headers={"Authorization":f"Bearer {tok}"}).json()
+          print(f"Antes: status={it.get('status')} qty={it.get('available_quantity')} price={it.get('price')}")
+          print(f"Variations: {len(it.get('variations',[]))}")
+          for v in it.get("variations",[]):
+              attrs=v.get("attribute_combinations",[])
+              color=next((a.get("value_name","") for a in attrs if a.get("name","").lower()=="color"),"?")
+              print(f"  var={v.get('id')} color={color} qty={v.get('available_quantity')}")
+          # Apply
+          if it.get("variations"):
+              # buscar variation negro
+              for v in it["variations"]:
+                  attrs=v.get("attribute_combinations",[])
+                  color=next((a.get("value_name","") for a in attrs if a.get("name","").lower()=="color"),"")
+                  if color.lower()=="negro":
+                      payload={"variations":[{"id":v["id"],"available_quantity":1}]}
+                      r=requests.put(f"{API}/items/{IID}",headers=h,json=payload,timeout=15)
+                      print(f"PUT variation negro qty=1: {r.status_code}")
+                      print(r.text[:300])
+          else:
+              payload={"available_quantity":1,"status":"active"}
+              r=requests.put(f"{API}/items/{IID}",headers=h,json=payload,timeout=15)
+              print(f"PUT qty=1 active: {r.status_code}")
+              print(r.text[:300])
+          # Verify
+          it2=requests.get(f"{API}/items/{IID}",headers={"Authorization":f"Bearer {tok}"}).json()
+          print(f"Despues: status={it2.get('status')} qty={it2.get('available_quantity')}")
+          PY
