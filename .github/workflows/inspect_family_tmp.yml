@@ -1,0 +1,32 @@
+name: inspect-family-tmp
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - run: pip install requests -q
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+        run: |
+          python3 - <<'PY'
+          import os, requests, json
+          API="https://api.mercadolibre.com"
+          tok=requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token",
+              "client_id":os.environ["MELI_APP_ID"],
+              "client_secret":os.environ["MELI_APP_SECRET"],
+              "refresh_token":os.environ["MELI_REFRESH_TOKEN"]},timeout=20).json()["access_token"]
+          h={"Authorization":f"Bearer {tok}"}
+          IID="MLM2894654315"
+          # Full body
+          it=requests.get(f"{API}/items/{IID}?include_attributes=all",headers=h).json()
+          # Print key family-related fields
+          for k in ("family_name","user_product_id","catalog_listing","catalog_product_id","domain_id","category_id","listing_type_id"):
+              print(f"{k}: {it.get(k)}")
+          # Attributes related
+          for a in it.get("attributes",[]):
+              if "FAMILY" in a.get("id","") or a.get("id") in ("MODEL","BRAND","MODEL_NAME","SELLER_SKU","COLOR"):
+                  print(f"attr {a.get('id')}={a.get('value_name')}")
+          PY
