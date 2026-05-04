@@ -1,0 +1,15 @@
+name: top-raymundo-go4-clip5
+on: { workflow_dispatch: }
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests -q
+      - env:
+          MELI_APP_SECRET:                ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_RAYMUNDO:    ${{ secrets.MELI_REFRESH_TOKEN_RAYMUNDO }}
+        run: python scripts/top_raymundo_go4_clip5.py
