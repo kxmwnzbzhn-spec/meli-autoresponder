@@ -54,8 +54,31 @@ for acc, rt in ACCS.items():
     except Exception as e:
         print(f"    err: {e}")
 
-    # Solo probar Raymundo en detalle (ya alcanza para ver el patron)
     if acc != "Raymundo": continue
+
+    # POST de prueba para ver mensaje real
+    print(f"\n  --- POST /catalog_suggestions (test) ---")
+    body = {"site_id":"MLM","domain_id":"MLM-SPEAKERS","attributes":[
+        {"id":"BRAND","value_name":"TestBrand"},
+        {"id":"MODEL","value_name":"TestModel"},
+        {"id":"COLOR","value_name":"Negro"},
+    ]}
+    try:
+        r=requests.post("https://api.mercadolibre.com/catalog_suggestions",
+            headers={**H,"Content-Type":"application/json"}, json=body, timeout=10)
+        print(f"    {r.status_code}: {r.text[:600]}")
+    except Exception as e:
+        print(f"    err: {e}")
+
+    # Probar con /products/items/{id} como hint
+    print(f"\n  --- /products/{{cpid}}/items vs /products/search ---")
+    r=requests.get("https://api.mercadolibre.com/products/search?status=active&site_id=MLM&q=bose",headers=H,timeout=10)
+    print(f"    products search: {r.status_code} body[:200]={r.text[:200]}")
+
+    # Permissions endpoint
+    print(f"\n  --- /users/me/permissions ---")
+    r=requests.get(f"https://api.mercadolibre.com/users/{uid}/brands",headers=H,timeout=10)
+    print(f"    /users/{uid}/brands: {r.status_code}: {r.text[:400]}")
 
     # 4) Topic notifications
     print(f"\n  --- /catalog_suggestions topic info ---")
