@@ -1,0 +1,27 @@
+name: lunes-overlay-v3
+on: { workflow_dispatch: }
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests pypdf reportlab -q
+      - env:
+          MELI_APP_SECRET:                ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN:             ${{ secrets.MELI_REFRESH_TOKEN }}
+          MELI_REFRESH_TOKEN_JUAN:        ${{ secrets.MELI_REFRESH_TOKEN_JUAN }}
+          MELI_REFRESH_TOKEN_CLARIBEL:    ${{ secrets.MELI_REFRESH_TOKEN_CLARIBEL }}
+          MELI_REFRESH_TOKEN_ASVA:        ${{ secrets.MELI_REFRESH_TOKEN_ASVA }}
+          MELI_REFRESH_TOKEN_RAYMUNDO:    ${{ secrets.MELI_REFRESH_TOKEN_RAYMUNDO }}
+          MELI_REFRESH_TOKEN_DILCIE:      ${{ secrets.MELI_REFRESH_TOKEN_DILCIE }}
+          MELI_REFRESH_TOKEN_MILDRED:     ${{ secrets.MELI_REFRESH_TOKEN_MILDRED }}
+          MELI_REFRESH_TOKEN_BREN:        ${{ secrets.MELI_REFRESH_TOKEN_BREN }}
+        run: python scripts/lunes_overlay_v3.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lunes-v3
+          path: ETIQUETAS_LUNES_V3.pdf
