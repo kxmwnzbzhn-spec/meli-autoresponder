@@ -1,0 +1,67 @@
+name: lunes-etiquetas-con-productos
+on: { workflow_dispatch: }
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests pypdf reportlab openpyxl google-api-python-client google-auth -q
+      - env:
+          MELI_APP_SECRET:                ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN:             ${{ secrets.MELI_REFRESH_TOKEN }}
+          MELI_REFRESH_TOKEN_JUAN:        ${{ secrets.MELI_REFRESH_TOKEN_JUAN }}
+          MELI_REFRESH_TOKEN_CLARIBEL:    ${{ secrets.MELI_REFRESH_TOKEN_CLARIBEL }}
+          MELI_REFRESH_TOKEN_ASVA:        ${{ secrets.MELI_REFRESH_TOKEN_ASVA }}
+          MELI_REFRESH_TOKEN_RAYMUNDO:    ${{ secrets.MELI_REFRESH_TOKEN_RAYMUNDO }}
+          MELI_REFRESH_TOKEN_DILCIE:      ${{ secrets.MELI_REFRESH_TOKEN_DILCIE }}
+          MELI_REFRESH_TOKEN_MILDRED:     ${{ secrets.MELI_REFRESH_TOKEN_MILDRED }}
+          MELI_REFRESH_TOKEN_BREN:        ${{ secrets.MELI_REFRESH_TOKEN_BREN }}
+        run: python scripts/lunes_etiquetas_con_productos.py
+      - env:
+          GOOGLE_OAUTH_CLIENT_ID:       ${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}
+          GOOGLE_OAUTH_CLIENT_SECRET:   ${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}
+          GOOGLE_OAUTH_REFRESH_TOKEN:   ${{ secrets.GOOGLE_OAUTH_REFRESH_TOKEN }}
+        run: |
+          python3 - <<'PY'
+          import os
+          from google.oauth2.credentials import Credentials as UC
+          from googleapiclient.discovery import build
+          from googleapiclient.http import MediaFileUpload
+          creds=UC(token=None,refresh_token=os.environ["GOOGLE_OAUTH_REFRESH_TOKEN"],
+              token_uri="https://oauth2.googleapis.com/token",
+              client_id=os.environ["GOOGLE_OAUTH_CLIENT_ID"],
+              client_secret=os.environ["GOOGLE_OAUTH_CLIENT_SECRET"],
+              scopes=["https://www.googleapis.com/auth/drive"])
+          svc=build("drive","v3",credentials=creds,cache_discovery=False)
+          def find_or_create(name,parent=None):
+              q=f"name='{name}' and mimeType='application/vnd.google-apps.folder' and trashed=false"
+              if parent: q+=f" and '{parent}' in parents"
+              r=svc.files().list(q=q,fields="files(id,name)").execute().get("files",[])
+              if r: return r[0]["id"]
+              body={"name":name,"mimeType":"application/vnd.google-apps.folder"}
+              if parent: body["parents"]=[parent]
+              return svc.files().create(body=body,fields="id").execute()["id"]
+          parent=find_or_create("ETIQUETAS")
+          folder=find_or_create("LUNES_4_MAYO",parent)
+          # delete previous versions
+          for fname in ["ETIQUETAS_LUNES_CON_PRODUCTOS.pdf","etiquetas_lunes_con_productos.xlsx"]:
+              prev=svc.files().list(q=f"name='{fname}' and '{folder}' in parents and trashed=false",fields="files(id)").execute().get("files",[])
+              for f in prev: svc.files().update(fileId=f["id"],body={"trashed":True}).execute()
+          # upload
+          for fname,mime in [("ETIQUETAS_LUNES_CON_PRODUCTOS.pdf","application/pdf"),
+                              ("etiquetas_lunes_con_productos.xlsx","application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")]:
+              if not os.path.exists(fname): continue
+              media=MediaFileUpload(fname,mimetype=mime,resumable=True)
+              f=svc.files().create(body={"name":fname,"parents":[folder]},media_body=media,fields="id,webViewLink").execute()
+              print(f"  ✅ {fname} → {f['webViewLink']}")
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lunes-with-products
+          path: |
+            ETIQUETAS_LUNES_CON_PRODUCTOS.pdf
+            etiquetas_lunes_con_productos.xlsx
