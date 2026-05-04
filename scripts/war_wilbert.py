@@ -22,8 +22,8 @@ RULES = {
     "charge6":  {"floor": 399, "ceiling": 999,  "rx": r"\bcharge\s*6\b"},
     "flip7":    {"floor": 399, "ceiling": 999,  "rx": r"\bflip\s*7\b"},
     "grip":     {"floor": 399, "ceiling": 799,  "rx": r"\bgrip\b"},
-    "xb100":    {"floor": 299, "ceiling": 599,  "rx": r"xb[\s\-]*100"},
-    "bose":     {"floor": 3499, "ceiling": 3499,"rx": r"bose|soundlink"},
+    "xb100":    {"floor": 499, "ceiling": 699,  "rx": r"xb[\s\-]*100"},
+    "bose":     {"floor": 1999, "ceiling": 3999,"rx": r"bose|soundlink"},
 }
 PERFUME_RX = re.compile(r"perfume|fragrance|edp|eau de|cologne|alchemia|armaf|odyssey", re.I)
 UP_STEP_PCT = 0.05  # +10% por corrida cuando solos
