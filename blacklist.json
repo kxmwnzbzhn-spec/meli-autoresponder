@@ -1,0 +1,20 @@
+{
+  "_doc": "Items que JAMÁS deben publicarse, reactivarse, ni clonarse en ninguna cuenta. Los workflows war_*, clone_*, reactivate_* deben filtrar por esta lista. Si encuentran un item active aquí, lo pausan en automático.",
+  "version": 1,
+  "items": [
+    {
+      "item_id": "MLM5287381526",
+      "reason": "Siempre genera problemas",
+      "added": "2026-05-04",
+      "added_by": "Sr. Luis"
+    },
+    {
+      "item_id": "MLM5266045802",
+      "reason": "Nunca activar — listada explícitamente",
+      "added": "2026-05-04",
+      "added_by": "Sr. Luis"
+    }
+  ],
+  "user_product_ids": [],
+  "catalog_product_ids": []
+}
