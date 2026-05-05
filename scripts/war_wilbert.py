@@ -177,12 +177,12 @@ def main():
         tag = ""
 
         if status == "winning" and sharing_n == 0:
-            # Solos ganando — subir hacia ceiling
+            # Solos ganando — MANTENER precio (anti-oscilación)
             A["winning_alone"]+=1
-            step = min(MAX_UP, max(1, int(cur * UP_STEP_PCT)))
-            target = min(rule["ceiling"], cur + step)
-            tag = "UP_ALONE"
-            if target == cur:
+            # Si cur < floor (config nuevo), subir a floor
+            if cur < rule["floor"]:
+                target = rule["floor"]; tag = "UP_TO_FLOOR"
+            else:
                 A["no_change"]+=1
                 continue
         elif status == "sharing" or (status=="winning" and sharing_n>0):
