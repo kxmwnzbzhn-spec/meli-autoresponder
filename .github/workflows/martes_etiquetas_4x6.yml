@@ -24,14 +24,17 @@ jobs:
           MELI_REFRESH_TOKEN_CLARIBEL:    ${{ secrets.MELI_REFRESH_TOKEN_CLARIBEL }}
           MELI_REFRESH_TOKEN_ASVA:        ${{ secrets.MELI_REFRESH_TOKEN_ASVA }}
           MELI_REFRESH_TOKEN_RAYMUNDO:    ${{ secrets.MELI_REFRESH_TOKEN_RAYMUNDO }}
+          MELI_REFRESH_TOKEN_WILBERT:     ${{ secrets.MELI_REFRESH_TOKEN_WILBERT }}
           MELI_REFRESH_TOKEN_DILCIE:      ${{ secrets.MELI_REFRESH_TOKEN_DILCIE }}
           MELI_REFRESH_TOKEN_MILDRED:     ${{ secrets.MELI_REFRESH_TOKEN_MILDRED }}
           MELI_REFRESH_TOKEN_BREN:        ${{ secrets.MELI_REFRESH_TOKEN_BREN }}
+          MELI_REFRESH_TOKEN_YC_NEW:      ${{ secrets.MELI_REFRESH_TOKEN_YC_NEW }}
         run: python scripts/martes_etiquetas_4x6.py
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: martes-4x6
           path: |
-            ETIQUETAS_TODAS_PENDIENTES_4x6.pdf
+            ETIQUETAS_HOY_4x6.pdf
+            ETIQUETAS_FUTURO_4x6.pdf
             DESPACHO_TODAS_PENDIENTES.xlsx
