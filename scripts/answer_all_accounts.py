@@ -5,6 +5,11 @@ ACCOUNTS={
     "CLARIBEL":os.environ.get("MELI_REFRESH_TOKEN_CLARIBEL"),
     "ASVA":os.environ.get("MELI_REFRESH_TOKEN_ASVA"),
     "RAYMUNDO":os.environ.get("MELI_REFRESH_TOKEN_RAYMUNDO"),
+    "WILBERT":os.environ.get("MELI_REFRESH_TOKEN_WILBERT"),
+    "MILDRED":os.environ.get("MELI_REFRESH_TOKEN_MILDRED"),
+    "DILCIE":os.environ.get("MELI_REFRESH_TOKEN_DILCIE"),
+    "BREN":os.environ.get("MELI_REFRESH_TOKEN_BREN"),
+    "YC_NEW":os.environ.get("MELI_REFRESH_TOKEN_YC_NEW"),
 }
 
 # Templates de respuesta por keyword
