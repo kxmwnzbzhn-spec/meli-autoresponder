@@ -21,7 +21,7 @@ TG_CHAT=os.environ.get("TELEGRAM_CHAT_ID")
 PERFUME_RX = re.compile(r"perfume|fragrance|\bedp\b|\bedt\b|eau de|cologne|alchemia|armaf|odyssey|colonia", re.I)
 SPEAKER_RX = re.compile(r"\bjbl\b|\bbose\b|bocina|parlante|altavoz|speaker|sony", re.I)
 
-DEFAULT_FLOOR = 599
+DEFAULT_FLOOR = 299
 DEFAULT_CEILING = 999
 UP_STEP_PCT = 0.05
 MAX_UP = 30
