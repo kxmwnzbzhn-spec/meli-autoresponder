@@ -1,0 +1,54 @@
+name: relist-5-wilbert-v2
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - run: pip install requests -q
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_WILBERT: ${{ secrets.MELI_REFRESH_TOKEN_WILBERT }}
+        run: |
+          python3 - <<'PY'
+          import os, requests, time
+          API="https://api.mercadolibre.com"
+          tok=requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token",
+              "client_id":os.environ["MELI_APP_ID"],
+              "client_secret":os.environ["MELI_APP_SECRET"],
+              "refresh_token":os.environ["MELI_REFRESH_TOKEN_WILBERT"]},timeout=20).json()["access_token"]
+          h={"Authorization":f"Bearer {tok}"}
+          hj={**h,"Content-Type":"application/json"}
+          IIDS=["MLM5266046030","MLM5265893746","MLM5266032976","MLM5265868092","MLM5265906396"]
+          for iid in IIDS:
+              print(f"\n=== {iid} ===")
+              # Esperar a que MELI marque "closed" definitivo (tras el close del run anterior)
+              for w in (0, 30, 60, 90, 120):
+                  if w: time.sleep(w)
+                  it=requests.get(f"{API}/items/{iid}",headers=h).json()
+                  st=it.get("status")
+                  sub=it.get("sub_status",[])
+                  print(f"  attempt(t+{w}s): st={st} sub={sub}")
+                  if st=="closed":
+                      lt=it.get("listing_type_id","gold_pro")
+                      r=requests.post(f"{API}/items/{iid}/relist",headers=hj,
+                          json={"listing_type_id":lt},timeout=20)
+                      print(f"  relist: {r.status_code}")
+                      if r.status_code in (200,201):
+                          new=r.json().get("id",iid)
+                          # active + qty=1
+                          r3=requests.put(f"{API}/items/{new}",headers=hj,
+                              json={"available_quantity":1,"status":"active"},timeout=15)
+                          print(f"  active: {r3.status_code}  new_id={new}")
+                          break
+                      else:
+                          print(f"    err: {r.text[:200]}")
+                          break
+                  if st=="active":
+                      print(f"  ya active, skip")
+                      break
+              else:
+                  print(f"  TIMEOUT - sigue {st}")
+              time.sleep(1)
+          PY
