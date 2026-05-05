@@ -33,5 +33,5 @@ jobs:
         with:
           name: martes-4x6
           path: |
-            ETIQUETAS_LUNES_MARTES_5_MAYO_4x6.pdf
-            DESPACHO_LUNES_MARTES_5_MAYO.xlsx
+            ETIQUETAS_TODAS_PENDIENTES_4x6.pdf
+            DESPACHO_TODAS_PENDIENTES.xlsx
