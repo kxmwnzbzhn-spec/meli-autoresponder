@@ -1,0 +1,74 @@
+name: new-pubs-2-retry
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - run: pip install requests -q
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_WILBERT: ${{ secrets.MELI_REFRESH_TOKEN_WILBERT }}
+        run: |
+          python3 - <<'PY'
+          import os, requests, time
+          API="https://api.mercadolibre.com"
+          tok=requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token",
+              "client_id":os.environ["MELI_APP_ID"],
+              "client_secret":os.environ["MELI_APP_SECRET"],
+              "refresh_token":os.environ["MELI_REFRESH_TOKEN_WILBERT"]},timeout=20).json()["access_token"]
+          h={"Authorization":f"Bearer {tok}"}
+          hj={**h,"Content-Type":"application/json"}
+          # solo los 2 que fallaron
+          SOURCES=["MLM5265893746","MLM5265906396"]
+          for src in SOURCES:
+              print(f"\n=== {src} ===")
+              it=requests.get(f"{API}/items/{src}?include_attributes=all",headers=h).json()
+              # Para listings de catalog, NO agregar GTIN — MELI lo hereda del catálogo
+              attrs=[]
+              for a in it.get("attributes",[]) or []:
+                  if a.get("id") in ("BRAND","MODEL","COLOR","ITEM_CONDITION","DETAILED_MODEL","FRAGRANCE_TYPE","ITEM_VOLUME","UNIT_VOLUME"):
+                      v={"id":a["id"]}
+                      if a.get("value_id"): v["value_id"]=a["value_id"]
+                      if a.get("value_name"): v["value_name"]=a["value_name"]
+                      attrs.append(v)
+              # NO GTIN cuando hay catalog
+              sale_terms=[]
+              for st in it.get("sale_terms",[]) or []:
+                  v={"id":st["id"]}
+                  if st.get("value_id"): v["value_id"]=st["value_id"]
+                  if st.get("value_name"): v["value_name"]=st["value_name"]
+                  sale_terms.append(v)
+              pics=[{"id":p["id"]} for p in (it.get("pictures") or []) if p.get("id")]
+              shipping=it.get("shipping") or {"mode":"me2","free_shipping":True,"logistic_type":"xd_drop_off","local_pick_up":False}
+
+              body={
+                "site_id":"MLM",
+                "title":(it.get("title") or "")[:60],
+                "category_id": it.get("category_id"),
+                "price": it.get("price",499),
+                "currency_id":"MXN",
+                "available_quantity": 1,
+                "buying_mode":"buy_it_now",
+                "listing_type_id": it.get("listing_type_id","gold_pro"),
+                "condition": it.get("condition","new"),
+                "shipping": shipping,
+                "pictures": pics,
+                "attributes": attrs,
+                "sale_terms": sale_terms,
+              }
+              cpid=it.get("catalog_product_id")
+              if cpid:
+                  body["catalog_product_id"]=cpid
+                  body["catalog_listing"]=True
+
+              r=requests.post(f"{API}/items",headers=hj,json=body,timeout=45)
+              print(f"  POST: {r.status_code}")
+              if r.status_code in (200,201):
+                  new=r.json().get("id")
+                  print(f"  *** NUEVO: {new} ***")
+              else:
+                  print(f"  err: {r.text[:600]}")
+              time.sleep(1)
+          PY
