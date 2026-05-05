@@ -1,0 +1,57 @@
+name: pause-wilbert-perfumes
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - run: pip install requests -q
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_WILBERT: ${{ secrets.MELI_REFRESH_TOKEN_WILBERT }}
+        run: |
+          python3 - <<'PY'
+          import os, requests, re, time
+          API="https://api.mercadolibre.com"
+          tok=requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token",
+              "client_id":os.environ["MELI_APP_ID"],
+              "client_secret":os.environ["MELI_APP_SECRET"],
+              "refresh_token":os.environ["MELI_REFRESH_TOKEN_WILBERT"]},timeout=20).json()["access_token"]
+          h={"Authorization":f"Bearer {tok}"}
+          hj={**h,"Content-Type":"application/json"}
+          uid=requests.get(f"{API}/users/me",headers=h).json()["id"]
+          PERFUME_RX=re.compile(r"perfume|fragrance|\bedp\b|\bedt\b|eau de|cologne|alchemia|armaf|odyssey|colonia|lattafa|nova|maleka|club de nuit|spectra|delight|island|mandarin|aqua men|mega man",re.I)
+          # Listar active
+          ids=[]
+          off=0
+          while True:
+              j=requests.get(f"{API}/users/{uid}/items/search?status=active&limit=50&offset={off}",headers=h,timeout=20).json()
+              r=j.get("results",[]); ids+=r
+              off+=50
+              if off>=j.get("paging",{}).get("total",0) or not r: break
+          # Bulk
+          items={}
+          for i in range(0,len(ids),20):
+              r=requests.get(f"{API}/items?ids={','.join(ids[i:i+20])}&attributes=id,title,status",headers=h,timeout=20).json()
+              for it in r:
+                  if it.get("code")==200: items[it["body"]["id"]]=it["body"]
+          # Filtrar perfumes
+          paused=0; errors=0; log=[]
+          for iid,b in items.items():
+              t=b.get("title","")
+              if not PERFUME_RX.search(t): continue
+              # SKIP blacklist (ya pausados/closed)
+              r=requests.put(f"{API}/items/{iid}",headers=hj,json={"status":"paused"},timeout=15)
+              if r.status_code in (200,201):
+                  paused+=1
+                  log.append(f"  PAUSED {iid} '{t[:50]}'")
+              else:
+                  errors+=1
+                  log.append(f"  ERR {iid} {r.status_code} {r.text[:100]}")
+              time.sleep(0.1)
+          print(f"\n=== PERFUMES PAUSADOS ===")
+          print(f"  paused: {paused}")
+          print(f"  errors: {errors}")
+          for l in log: print(l)
+          PY
