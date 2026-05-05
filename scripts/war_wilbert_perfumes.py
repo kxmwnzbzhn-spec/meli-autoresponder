@@ -149,9 +149,10 @@ def main():
         target=None; tag=""
         if status=="winning" and share_n==0:
             A["winning_alone"]+=1
-            step=min(MAX_UP,max(1,int(cur*UP_STEP_PCT)))
-            target=min(ceiling,cur+step)
-            tag="UP_ALONE"
+            if cur<floor:
+                target=floor; tag="UP_TO_FLOOR"
+            else:
+                A["no_change"]+=1; continue
         elif status=="sharing" or (status=="winning" and share_n>0):
             A["sharing"]+=1
             target=(ptw_p or cur)-1
