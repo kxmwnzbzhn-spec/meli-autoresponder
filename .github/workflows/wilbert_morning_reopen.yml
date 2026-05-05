@@ -1,0 +1,32 @@
+name: wilbert-morning-reopen
+on:
+  workflow_dispatch:
+  schedule:
+    # Triple cobertura para garantizar arranque ≤ 6:00 AM CDMX (12:00 UTC)
+    - cron: '50 11 * * *'   # 5:50 AM CDMX
+    - cron: '55 11 * * *'   # 5:55 AM CDMX
+    - cron: '0 12 * * *'    # 6:00 AM CDMX
+concurrency:
+  group: wilbert-morning-reopen
+  cancel-in-progress: false
+jobs:
+  reopen:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    permissions:
+      actions: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests -q
+      - env:
+          MELI_APP_ID:                ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET:            ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_WILBERT: ${{ secrets.MELI_REFRESH_TOKEN_WILBERT }}
+          GH_TOKEN_OPS:               ${{ secrets.GITHUB_TOKEN }}
+          REPO_OWNER:                 ${{ github.repository_owner }}
+          TELEGRAM_BOT_TOKEN:         ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID:           ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python scripts/wilbert_reopen.py
