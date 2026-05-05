@@ -8,6 +8,12 @@ Lógica corregida:
 """
 import os, time, json, requests, re
 
+import json as _jblack
+try:
+    with open("blacklist.json") as _bf: BLACKLIST=set(x["item_id"] for x in _jblack.load(_bf).get("items",[]))
+except Exception: BLACKLIST=set()
+print(f"BL items: {len(BLACKLIST)}")
+
 API = "https://api.mercadolibre.com"
 APP_ID     = os.environ["MELI_APP_ID"]
 APP_SECRET = os.environ["MELI_APP_SECRET"]
@@ -116,6 +122,12 @@ def main():
     log=[]
 
     for iid, it in speakers.items():
+        if iid in BLACKLIST:
+            if it.get("status")=="active":
+                try: requests.put(f"{API}/items/{iid}",headers={"Authorization":f"Bearer {tok}","Content-Type":"application/json"},json={"status":"paused"},timeout=15)
+                except: pass
+                A.setdefault("blacklist_paused",0); A["blacklist_paused"]+=1
+            continue
         cat=it["_cat"]; rule=RULES[cat]
         title=it.get("title","")[:48]
         cur=it.get("price"); st=it.get("status"); qty=it.get("available_quantity",0)
