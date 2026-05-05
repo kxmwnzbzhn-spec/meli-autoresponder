@@ -149,12 +149,15 @@ for acc, rt in ACCS.items():
                 hist=sh.get("status_history") or {}
                 dh=hist.get("date_handling")
                 if dh: deadline=(datetime.fromisoformat(dh.replace("Z","+00:00"))+timedelta(hours=48)).astimezone(TZ)
-            # Sin filtro de fecha. Incluye hoy + mañana en adelante.
-            # Wilbert: SIEMPRE HOY (acumulado por pausa previa, despacho urgente)
+            # Política operativa:
+            # - Wilbert: SIEMPRE incluir, scope=HOY (acumulado por pausa, despacho urgente)
+            # - Otras cuentas: SOLO deadline > hoy (las de hoy ya se imprimieron ayer)
             if acc == "Wilbert":
                 scope = "HOY"
             else:
-                scope = "HOY" if (deadline and deadline <= END_TODAY) else "FUTURO"
+                if not deadline or deadline <= END_TODAY:
+                    continue
+                scope = "FUTURO"
             items=ord_o.get("order_items",[])
             comp_lines=[f"{clean_title((it.get('item') or {}).get('title',''))} x{it.get('quantity',1)}" for it in items]
             buyer=(ord_o.get("buyer") or {}).get("nickname","?")
