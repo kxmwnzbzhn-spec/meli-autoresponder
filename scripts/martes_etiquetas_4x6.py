@@ -1,7 +1,6 @@
-"""ETIQUETAS LUNES+MARTES — formato 4x6 in (288x432 pt).
-Header amarillo integrado arriba + etiqueta MELI escalada para caber en 4x6.
-Filtra: status ready_to_ship/handling, deadline <= martes 23:59 CDMX.
-Incluye todo lo atrasado de lunes y todo lo de martes.
+"""ETIQUETAS TODAS PENDIENTES — formato 4x6 in (288x432 pt).
+Hoy + mañana en adelante. Status ready_to_ship/handling que aún no se enviaron.
+Header amarillo integrado arriba + etiqueta MELI escalada para llenar 4x6.
 """
 import os, io, time, requests
 from datetime import datetime, timedelta, timezone
@@ -26,8 +25,11 @@ ACCS={
     "Bren":     os.environ.get("MELI_REFRESH_TOKEN_BREN"),
 }
 TZ=timezone(timedelta(hours=-6))
-# Cota superior: hasta martes 23:59 CDMX (incluye atrasados de lunes + martes)
-END_MARTES   = datetime.fromisoformat("2026-05-05").replace(hour=23, minute=59, tzinfo=TZ)
+# Hoy CDMX
+TODAY_CDMX = datetime.now(TZ).replace(hour=0, minute=0, second=0, microsecond=0)
+END_TODAY  = TODAY_CDMX.replace(hour=23, minute=59)
+# Substatuses excluidos (ya no se pueden imprimir o ya están en transito)
+SUB_EXCLUDE = {"shipped","ready_to_pickup","delivered","not_delivered","returned","picked_up"}
 
 # Tamaño impresora 4x6 in
 PAGE_W = 4 * 72   # 288 pt
@@ -134,7 +136,7 @@ for acc, rt in ACCS.items():
             sh=requests.get(f"https://api.mercadolibre.com/shipments/{sid}",headers=H,timeout=10).json()
             st=sh.get("status"); sub=sh.get("substatus")
             if st not in ("ready_to_ship","handling"): continue
-            if sub in ("shipped","ready_to_pickup"): continue
+            if sub in SUB_EXCLUDE: continue
             deadline=None
             try:
                 sla=requests.get(f"https://api.mercadolibre.com/shipments/{sid}/sla",headers=H,timeout=8).json()
@@ -145,15 +147,16 @@ for acc, rt in ACCS.items():
                 hist=sh.get("status_history") or {}
                 dh=hist.get("date_handling")
                 if dh: deadline=(datetime.fromisoformat(dh.replace("Z","+00:00"))+timedelta(hours=48)).astimezone(TZ)
-            if not deadline: continue
-            # Incluye todos los atrasados (deadline pasado) + martes; excluye lo de miércoles+
-            if deadline > END_MARTES: continue
+            # Sin filtro de fecha. Incluye hoy + mañana en adelante.
+            scope = "HOY" if (deadline and deadline <= END_TODAY) else "FUTURO"
             items=ord_o.get("order_items",[])
             comp_lines=[f"{clean_title((it.get('item') or {}).get('title',''))} x{it.get('quantity',1)}" for it in items]
             buyer=(ord_o.get("buyer") or {}).get("nickname","?")
+            dl_str = deadline.strftime("%a %d %H:%M") if deadline else "s/d"
             shipments.append({"sid":sid,"account":acc,"token":at,
                               "comp_lines":comp_lines,"buyer":buyer,
-                              "deadline":deadline.strftime("%a %H:%M"),
+                              "deadline":dl_str,"scope":scope,
+                              "substatus":sub or "",
                               "tracking":sh.get("tracking_number","")})
             matches+=1
             time.sleep(0.04)
@@ -161,8 +164,13 @@ for acc, rt in ACCS.items():
             print(f"  err {sid}: {str(e)[:60]}")
     print(f"  matches: {matches}")
 
-print(f"\nTotal LUNES+MARTES: {len(shipments)}")
-shipments.sort(key=lambda s: ("/".join(s["comp_lines"]), s["account"]))
+print(f"\nTotal pendientes: {len(shipments)}")
+hoy_n = sum(1 for s in shipments if s["scope"]=="HOY")
+fut_n = len(shipments) - hoy_n
+print(f"  HOY: {hoy_n}  FUTURO: {fut_n}")
+# Orden: HOY primero, luego FUTURO; dentro de cada grupo por producto+cuenta
+shipments.sort(key=lambda s: (0 if s["scope"]=="HOY" else 1,
+                              "/".join(s["comp_lines"]), s["account"]))
 if LIMIT > 0:
     print(f"   PREVIEW MODE: detener tras {LIMIT} páginas OK")
 
@@ -213,8 +221,9 @@ for s in shipments:
                       headers=H, params={"shipment_ids":s["sid"],"response_type":"pdf"},
                       timeout=30)
         if r.status_code!=200 or not r.headers.get("content-type","").lower().startswith("application/pdf"):
-            fail.append(s["sid"])
-            print(f"    err {s['account']}/{s['sid']}: HTTP {r.status_code} ct={r.headers.get('content-type','?')[:40]} body={r.text[:120]}")
+            fail.append({"sid":s["sid"],"account":s["account"],"sub":s["substatus"],
+                         "scope":s["scope"],"reason":r.text[:300]})
+            print(f"    err {s['account']}/{s['sid']} sub={s['substatus']}: HTTP {r.status_code} {r.text[:200]}")
             continue
         raw_pdf_bytes = r.content
         lbl_pdf=PdfReader(io.BytesIO(raw_pdf_bytes))
@@ -253,25 +262,39 @@ for s in shipments:
                 stop_render=True
                 break
     except Exception as e:
-        fail.append(s["sid"])
+        fail.append({"sid":s["sid"],"account":s["account"],"sub":s.get("substatus",""),
+                     "scope":s.get("scope",""),"reason":f"{type(e).__name__}: {str(e)[:200]}"})
         print(f"    err {s['account']}/{s['sid']}: {type(e).__name__}: {str(e)[:140]}")
     time.sleep(0.08)
 
-pdf_out="ETIQUETAS_LUNES_MARTES_5_MAYO_4x6.pdf"
+pdf_out="ETIQUETAS_TODAS_PENDIENTES_4x6.pdf"
 with open(pdf_out,"wb") as f: writer.write(f)
 print(f"\n✅ PDF: {pdf_out} ({len(writer.pages)} páginas) | Fallidas: {len(fail)}")
+# Resumen de fallas por motivo
+if fail:
+    from collections import Counter
+    reasons=Counter()
+    for f_ in fail:
+        # extrae mensaje del JSON si existe
+        import re as _re
+        m=_re.search(r'"message":"([^"]+)', f_.get("reason",""))
+        key = m.group(1)[:80] if m else f_.get("reason","?")[:80]
+        reasons[(f_.get("sub",""),key)] += 1
+    print("\n=== Fallidas por motivo ===")
+    for (sub,msg),n in reasons.most_common(15):
+        print(f"  {n:4} sub={sub!r}  {msg}")
 
 
 # === FASE 3: XLSX organizado por producto ===
 wb=Workbook()
 ws=wb.active
-ws.title="Despacho Lunes+Martes 5 May"
+ws.title="Pendientes hoy + futuro"
 hf=PatternFill("solid", fgColor="2C3E50")
 hF=Font(bold=True, color="FFFFFF", size=11)
 center=Alignment(horizontal="center", vertical="center", wrap_text=True)
 border=Border(left=Side(style="thin"), right=Side(style="thin"),
               top=Side(style="thin"), bottom=Side(style="thin"))
-headers=["#","Cuenta","Shipment ID","Comprador","PRODUCTO","Tracking","Deadline"]
+headers=["#","Scope","Cuenta","Shipment ID","Comprador","PRODUCTO","Tracking","Deadline"]
 for col,h in enumerate(headers,1):
     cell=ws.cell(row=1,column=col,value=h)
     cell.fill=hf; cell.font=hF; cell.alignment=center; cell.border=border
@@ -281,14 +304,16 @@ acc_colors={"Juan":"D5E8D4","Raymundo":"DAE8FC","Claribel":"FFE6CC","Asva":"E1D5
 for i,s in enumerate(shipments,1):
     fill=PatternFill("solid", fgColor=acc_colors.get(s["account"],"FFFFFF"))
     prod_text="\n".join(s["comp_lines"])
-    row=[i, s["account"], s["sid"], s["buyer"], prod_text, s["tracking"], s["deadline"]]
+    row=[i, s["scope"], s["account"], s["sid"], s["buyer"], prod_text, s["tracking"], s["deadline"]]
     for col,val in enumerate(row,1):
         c=ws.cell(row=i+1, column=col, value=val)
         c.fill=fill; c.border=border
         c.alignment=Alignment(vertical="center", wrap_text=True)
-        if col==5: c.font=Font(bold=True, size=10)
+        if col==6: c.font=Font(bold=True, size=10)
+        if col==2 and val=="HOY":
+            c.fill=PatternFill("solid", fgColor="FFD966"); c.font=Font(bold=True)
 
-widths={1:5, 2:11, 3:14, 4:24, 5:55, 6:24, 7:13}
+widths={1:5, 2:8, 3:11, 4:14, 5:24, 6:55, 7:24, 8:14}
 for col,w in widths.items(): ws.column_dimensions[chr(64+col)].width=w
 for r in range(2, len(shipments)+2): ws.row_dimensions[r].height=30
 ws.freeze_panes="A2"
@@ -311,11 +336,11 @@ ws2.column_dimensions["A"].width=60
 ws2.column_dimensions["B"].width=12
 ws2.column_dimensions["C"].width=25
 
-xlsx_out="DESPACHO_LUNES_MARTES_5_MAYO.xlsx"
+xlsx_out="DESPACHO_TODAS_PENDIENTES.xlsx"
 wb.save(xlsx_out)
 print(f"✅ XLSX: {xlsx_out}")
 
-print(f"\n=== RESUMEN LUNES+MARTES (4x6) ===")
+print(f"\n=== RESUMEN TODAS PENDIENTES (4x6) ===")
 print(f"Total shipments: {len(shipments)}")
 acc_count=defaultdict(int)
 for s in shipments: acc_count[s["account"]]+=1
