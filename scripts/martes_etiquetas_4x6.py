@@ -150,7 +150,11 @@ for acc, rt in ACCS.items():
                 dh=hist.get("date_handling")
                 if dh: deadline=(datetime.fromisoformat(dh.replace("Z","+00:00"))+timedelta(hours=48)).astimezone(TZ)
             # Sin filtro de fecha. Incluye hoy + mañana en adelante.
-            scope = "HOY" if (deadline and deadline <= END_TODAY) else "FUTURO"
+            # Wilbert: SIEMPRE HOY (acumulado por pausa previa, despacho urgente)
+            if acc == "Wilbert":
+                scope = "HOY"
+            else:
+                scope = "HOY" if (deadline and deadline <= END_TODAY) else "FUTURO"
             items=ord_o.get("order_items",[])
             comp_lines=[f"{clean_title((it.get('item') or {}).get('title',''))} x{it.get('quantity',1)}" for it in items]
             buyer=(ord_o.get("buyer") or {}).get("nickname","?")
