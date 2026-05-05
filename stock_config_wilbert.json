@@ -47,7 +47,9 @@
     "title": "Perfume Armaf Odyssey Mandarin Sky Limited Edition",
     "catalog_product_id": "MLM22299658",
     "type": "catalog_no_variations",
-    "condition": "new"
+    "condition": "new",
+    "floor_price": 249,
+    "ceiling_price": 999
   },
   "MLM5266045818": {
     "line": "Mandarin-Sky-60ml",
@@ -147,6 +149,8 @@
     "title": "Armaf Odyssey Mega Man Edición Limitada Edp 100 Ml",
     "catalog_product_id": "MLM21765262",
     "type": "catalog_no_variations",
-    "condition": "new"
+    "condition": "new",
+    "floor_price": 249,
+    "ceiling_price": 999
   }
 }
