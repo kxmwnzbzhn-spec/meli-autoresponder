@@ -1,0 +1,23 @@
+name: probe-asva-speakers-v2
+on:
+  workflow_dispatch:
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests -q
+      - name: Probe v2
+        env:
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_ASVA: ${{ secrets.MELI_REFRESH_TOKEN_ASVA }}
+        run: python scripts/probe_asva_speakers_v2.py
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: probe_asva_speakers_v2_result
+          path: probe_asva_speakers_v2_result.json
+          if-no-files-found: warn
