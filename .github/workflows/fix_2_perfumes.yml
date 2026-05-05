@@ -1,0 +1,30 @@
+name: fix-2-perfumes
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - run: pip install requests -q
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_WILBERT: ${{ secrets.MELI_REFRESH_TOKEN_WILBERT }}
+        run: |
+          python3 - <<'PY'
+          import os, requests
+          API="https://api.mercadolibre.com"
+          tok=requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token",
+              "client_id":os.environ["MELI_APP_ID"],
+              "client_secret":os.environ["MELI_APP_SECRET"],
+              "refresh_token":os.environ["MELI_REFRESH_TOKEN_WILBERT"]},timeout=20).json()["access_token"]
+          h={"Authorization":f"Bearer {tok}","Content-Type":"application/json"}
+          for iid in ("MLM5265893752","MLM5265893628"):
+              p=requests.get(f"{API}/items/{iid}/price_to_win?version=v2",headers={"Authorization":f"Bearer {tok}"}).json()
+              ptw=p.get("price_to_win") or 0
+              target=max(249, int(ptw)-1)
+              cur=p.get("current_price") or 0
+              print(f"{iid} cur={cur} ptw={ptw} target={target}")
+              r=requests.put(f"{API}/items/{iid}",headers=h,json={"price":target},timeout=15)
+              print(f"  PUT: {r.status_code} {r.text[:150]}")
+          PY
