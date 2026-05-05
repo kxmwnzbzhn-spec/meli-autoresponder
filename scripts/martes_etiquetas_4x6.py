@@ -18,11 +18,13 @@ APP_SECRET=os.environ["MELI_APP_SECRET"]
 ACCS={
     "Juan":     os.environ.get("MELI_REFRESH_TOKEN_JUAN") or os.environ.get("MELI_REFRESH_TOKEN"),
     "Raymundo": os.environ.get("MELI_REFRESH_TOKEN_RAYMUNDO"),
+    "Wilbert":  os.environ.get("MELI_REFRESH_TOKEN_WILBERT"),
     "Claribel": os.environ.get("MELI_REFRESH_TOKEN_CLARIBEL"),
     "Asva":     os.environ.get("MELI_REFRESH_TOKEN_ASVA"),
     "Mildred":  os.environ.get("MELI_REFRESH_TOKEN_MILDRED"),
     "Dilcie":   os.environ.get("MELI_REFRESH_TOKEN_DILCIE"),
     "Bren":     os.environ.get("MELI_REFRESH_TOKEN_BREN"),
+    "Yc_New":   os.environ.get("MELI_REFRESH_TOKEN_YC_NEW"),
 }
 TZ=timezone(timedelta(hours=-6))
 # Hoy CDMX
@@ -175,9 +177,10 @@ if LIMIT > 0:
     print(f"   PREVIEW MODE: detener tras {LIMIT} páginas OK")
 
 
-# === FASE 2: PDF 4x6 con header integrado + etiqueta escalada ===
-print("\n=== Generando PDF 4x6 MARTES ===")
-writer=PdfWriter()
+# === FASE 2: 2 PDFs separados (HOY y FUTURO) ===
+print("\n=== Generando PDFs 4x6 (HOY + FUTURO) ===")
+writer_hoy=PdfWriter()
+writer_fut=PdfWriter()
 fail=[]
 ok_pages=0
 
@@ -256,7 +259,8 @@ for s in shipments:
             hdr_page=render_header(s, header_h)
             new_page.merge_page(hdr_page)
 
-            writer.add_page(new_page)
+            target = writer_hoy if s["scope"]=="HOY" else writer_fut
+            target.add_page(new_page)
             ok_pages+=1
             if LIMIT>0 and ok_pages>=LIMIT:
                 stop_render=True
@@ -267,9 +271,13 @@ for s in shipments:
         print(f"    err {s['account']}/{s['sid']}: {type(e).__name__}: {str(e)[:140]}")
     time.sleep(0.08)
 
-pdf_out="ETIQUETAS_TODAS_PENDIENTES_4x6.pdf"
-with open(pdf_out,"wb") as f: writer.write(f)
-print(f"\n✅ PDF: {pdf_out} ({len(writer.pages)} páginas) | Fallidas: {len(fail)}")
+pdf_hoy="ETIQUETAS_HOY_4x6.pdf"
+pdf_fut="ETIQUETAS_FUTURO_4x6.pdf"
+with open(pdf_hoy,"wb") as f: writer_hoy.write(f)
+with open(pdf_fut,"wb") as f: writer_fut.write(f)
+print(f"\n✅ PDF HOY:    {pdf_hoy} ({len(writer_hoy.pages)} págs)")
+print(f"✅ PDF FUTURO: {pdf_fut} ({len(writer_fut.pages)} págs)")
+print(f"   Fallidas: {len(fail)}")
 # Resumen de fallas por motivo
 if fail:
     from collections import Counter
@@ -299,8 +307,8 @@ for col,h in enumerate(headers,1):
     cell=ws.cell(row=1,column=col,value=h)
     cell.fill=hf; cell.font=hF; cell.alignment=center; cell.border=border
 
-acc_colors={"Juan":"D5E8D4","Raymundo":"DAE8FC","Claribel":"FFE6CC","Asva":"E1D5E7",
-            "Mildred":"FFF2CC","Dilcie":"F5CBA7","Bren":"D4E6F1"}
+acc_colors={"Juan":"D5E8D4","Raymundo":"DAE8FC","Wilbert":"FAD7A0","Claribel":"FFE6CC",
+            "Asva":"E1D5E7","Mildred":"FFF2CC","Dilcie":"F5CBA7","Bren":"D4E6F1","Yc_New":"D5DBDB"}
 for i,s in enumerate(shipments,1):
     fill=PatternFill("solid", fgColor=acc_colors.get(s["account"],"FFFFFF"))
     prod_text="\n".join(s["comp_lines"])
