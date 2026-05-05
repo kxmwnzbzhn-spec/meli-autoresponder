@@ -1,0 +1,39 @@
+name: relist-5-wilbert-v3
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - run: pip install requests -q
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_WILBERT: ${{ secrets.MELI_REFRESH_TOKEN_WILBERT }}
+        run: |
+          python3 - <<'PY'
+          import os, requests, time
+          API="https://api.mercadolibre.com"
+          tok=requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token",
+              "client_id":os.environ["MELI_APP_ID"],
+              "client_secret":os.environ["MELI_APP_SECRET"],
+              "refresh_token":os.environ["MELI_REFRESH_TOKEN_WILBERT"]},timeout=20).json()["access_token"]
+          h={"Authorization":f"Bearer {tok}"}
+          hj={**h,"Content-Type":"application/json"}
+          IIDS=["MLM5266046030","MLM5265893746","MLM5266032976","MLM5265868092","MLM5265906396"]
+          for iid in IIDS:
+              print(f"\n=== {iid} ===")
+              it=requests.get(f"{API}/items/{iid}",headers=h).json()
+              st=it.get("status"); price=it.get("price"); lt=it.get("listing_type_id","gold_pro")
+              print(f"  st={st} price={price} sub={it.get('sub_status',[])}")
+              if st!="closed":
+                  print(f"  no es closed, skip")
+                  continue
+              body={"listing_type_id":lt,"price":price,"available_quantity":1}
+              r=requests.post(f"{API}/items/{iid}/relist",headers=hj,json=body,timeout=20)
+              print(f"  relist: {r.status_code} {r.text[:200]}")
+              if r.status_code in (200,201):
+                  new=r.json().get("id",iid)
+                  print(f"  new_id={new}")
+              time.sleep(1)
+          PY
