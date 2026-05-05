@@ -13,16 +13,19 @@ ACCOUNTS={
 }
 
 # Templates AFIRMATIVOS — JAMAS evasivas. Siempre confirmar originalidad.
+# Para "app/aplicacion/auracast" → respuesta depende del condition (new vs used/refurbished)
+APP_NEW="Buen dia, si, es producto 100% original y nuevo. Es compatible con la app JBL Portable y Auracast. Gracias."
+APP_USED="Buen dia, si, es producto 100% original. Por ser modelo reacondicionado, NO es compatible con la app JBL Portable ni Auracast. Funciona perfectamente como bocina Bluetooth estandar. Gracias."
+
 TEMPLATES=[
     (["disponibl","stock","existencia","hay disponible","en almacen","tienen"], "Buen dia, si tenemos disponibilidad inmediata. Despachamos en 24h habiles. Gracias."),
     (["envio","envi","mandar","enviar","llega","cuando llega","cuanto tarda","tiempo de entrega"], "Buen dia, envio GRATIS con Mercado Envios. Despacho en 24h habiles, entrega estimada 2 a 5 dias segun zona. Gracias."),
     (["factura","facturar","fiscal","rfc"], "Buen dia, si facturamos. Al completar la compra envienos por mensaje privado sus datos fiscales (RFC, razon social, uso CFDI, email) y procesamos en 48h. Gracias."),
     (["garantia","warranty","reparar","falla","defecto"], "Buen dia, son productos 100% originales y ofrecemos garantia del vendedor de 30 dias por defectos de fabrica comprobables con video. No cubre danos por agua excesiva, caidas o mal uso. Gracias."),
-    # ORIGINAL / autentico / replica / pirata / falso → AFIRMAR siempre
     (["original","autentic","replica","pirata","falso","clon","imitacion","fake"], "Buen dia, si, son productos 100% originales y nuevos, con garantia del vendedor. Gracias."),
-    # Fabricado / china / vietnam / pais → afirmar origen oficial
     (["fabricad","fabrica","china","vietnam","mexico","origen","pais","made in","procedenc"], "Buen dia, son productos 100% originales fabricados en las plantas oficiales autorizadas por la marca. Gracias."),
-    (["app","aplicacion","portable","auracast"], "Buen dia, son productos 100% originales. Este modelo opera como bocina Bluetooth estandar y, segun se indica en la descripcion, no es compatible con app movil JBL Portable ni Auracast. Gracias."),
+    # APP keyword especial — usa condition
+    (["__APP__","app","aplicacion","auracast","jbl portable"], "__APP_PLACEHOLDER__"),
     (["color","colores","disponib","que color","tienes el"], "Buen dia, los colores disponibles aparecen en la variacion al seleccionar el producto. Por favor revise las opciones al agregar al carrito. Gracias."),
     (["precio","descuento","rebaja","ofrece","negociar","menos"], "Buen dia, el precio publicado es el precio final e incluye envio gratis. No aplica descuentos adicionales. Gracias."),
     (["bateria","duracion","horas","carga","cargador"], "Buen dia, son productos 100% originales. La autonomia y caracteristicas de bateria se detallan en la descripcion. Incluye cable USB-C de carga. Gracias."),
@@ -32,14 +35,34 @@ TEMPLATES=[
     (["tela","material","algodon","nailon","poliester","esponja","top"], "Buen dia, los materiales y composicion estan detallados en la descripcion del producto. Gracias."),
 ]
 
-# DEFAULT — afirmativo, NO evasivo
 DEFAULT="Buen dia, son productos 100% originales y nuevos. Para mas detalles tecnicos revise la descripcion del producto. Gracias."
 
-def match(text):
+# cache condition por iid
+ITEM_CONDITION_CACHE={}
+
+def get_condition(iid, headers):
+    if iid in ITEM_CONDITION_CACHE: return ITEM_CONDITION_CACHE[iid]
+    try:
+        b=requests.get(f"https://api.mercadolibre.com/items/{iid}?attributes=condition,title",headers=headers,timeout=12).json()
+        c=b.get("condition","new")
+        # También chequear si el title menciona reacond
+        title=(b.get("title","") or "").lower()
+        if "reacond" in title or "refurbished" in title or "usado" in title or "caja abierta" in title:
+            c="used"
+    except Exception:
+        c="new"
+    ITEM_CONDITION_CACHE[iid]=c
+    return c
+
+def match(text, item_id, headers):
     t=text.lower()
     for kws,tpl in TEMPLATES:
         if any(k in t for k in kws):
+            if tpl=="__APP_PLACEHOLDER__":
+                cond=get_condition(item_id, headers)
+                return APP_NEW if cond=="new" else APP_USED
             return tpl
+    # Si no match, default. Pero también chequear si "app" estaba en alguna otra palabra:
     return DEFAULT
 
 total_answered=0
@@ -55,6 +78,7 @@ for label,rt in ACCOUNTS.items():
         print(f"\n=== {label}: token invalido ({r.get('error','?')}) ==="); continue
     TOKEN=r["access_token"]
     H={"Authorization":f"Bearer {TOKEN}","Content-Type":"application/json"}
+    HG={"Authorization":f"Bearer {TOKEN}"}
     try:
         me=requests.get("https://api.mercadolibre.com/users/me",headers=H,timeout=15).json()
     except Exception as e:
@@ -74,8 +98,8 @@ for label,rt in ACCOUNTS.items():
         qid=ques.get("id")
         text=ques.get("text","")
         item_id=ques.get("item_id")
-        ans=match(text)
-        print(f"  Q{qid} [{item_id}] '{text[:70]}' -> '{ans[:55]}'")
+        ans=match(text, item_id, HG)
+        print(f"  Q{qid} [{item_id}] '{text[:65]}' -> '{ans[:55]}'")
         try:
             rp=requests.post("https://api.mercadolibre.com/answers",headers=H,
                 json={"question_id":qid,"text":ans},timeout=15)
