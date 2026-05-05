@@ -109,7 +109,11 @@
     "title": "Armaf Odyssey Aqua Men 100ml Edp",
     "catalog_product_id": "MLM23633415",
     "type": "catalog_no_variations",
-    "condition": "new"
+    "condition": "new",
+    "real_stock": 6,
+    "master_stock": 6,
+    "floor_price": 299,
+    "ceiling_price": 999
   },
   "MLM5266032976": {
     "line": "Armaf-Maleka",
