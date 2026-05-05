@@ -1,0 +1,36 @@
+name: probe-asva-speakers
+on:
+  workflow_dispatch:
+    inputs:
+      ref_cpid:
+        description: "Catalog product id de referencia (ej. MLMU3924356098)"
+        required: false
+        default: "MLMU3924356098"
+      probe_domain:
+        description: "Domain id a sondear"
+        required: false
+        default: "MLM-PORTABLE_SPEAKERS"
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install requests -q
+      - name: Probe
+        env:
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_ASVA: ${{ secrets.MELI_REFRESH_TOKEN_ASVA }}
+          REF_CPID: ${{ github.event.inputs.ref_cpid }}
+          PROBE_DOMAIN: ${{ github.event.inputs.probe_domain }}
+        run: python scripts/probe_asva_speakers.py
+      - name: Upload result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: probe_asva_speakers_result
+          path: probe_asva_speakers_result.json
+          if-no-files-found: warn
