@@ -244,7 +244,8 @@ def main():
              f"react={A['reactivated']} ↑={A['price_up']} ↓={A['price_down']} "
              f"alone={A['winning_alone']} share={A['sharing']} "
              f"floor={A['floor_block']} err={A['errors']}")
-        tg(msg)
+        # tg(msg)  # silenciado: spam constante de price changes
 
 if __name__ == "__main__":
     main()
+
