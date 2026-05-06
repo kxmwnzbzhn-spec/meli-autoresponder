@@ -27,7 +27,7 @@ RULES = {
     "clip5":    {"floor": 699, "ceiling": 899,  "rx": r"\bclip\s*5\b"},
     "charge6":  {"floor": 399, "ceiling": 999,  "rx": r"\bcharge\s*6\b"},
     "flip7":    {"floor": 399, "ceiling": 999,  "rx": r"\bflip\s*7\b"},
-    "grip":     {"floor": 399, "ceiling": 799,  "rx": r"\bgrip\b"},
+    "grip":     {"floor": 399, "ceiling": 999,  "rx": r"\bgrip\b"},
     "xb100":    {"floor": 499, "ceiling": 699,  "rx": r"xb[\s\-]*100"},
     "bose":     {"floor": 1999, "ceiling": 3999,"rx": r"bose|soundlink"},
 }
