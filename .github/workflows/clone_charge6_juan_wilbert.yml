@@ -1,0 +1,110 @@
+name: clone-charge6-juan-wilbert
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - run: pip install requests -q
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+          MELI_REFRESH_TOKEN_WILBERT: ${{ secrets.MELI_REFRESH_TOKEN_WILBERT }}
+        run: |
+          python3 - <<'PY'
+          import os, requests, time, json
+          API="https://api.mercadolibre.com"
+          def tok(rt):
+              return requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token",
+                  "client_id":os.environ["MELI_APP_ID"],
+                  "client_secret":os.environ["MELI_APP_SECRET"],
+                  "refresh_token":rt},timeout=20).json().get("access_token")
+          tj=tok(os.environ["MELI_REFRESH_TOKEN"])
+          tw=tok(os.environ["MELI_REFRESH_TOKEN_WILBERT"])
+          hj={"Authorization":f"Bearer {tj}"}
+          hw={"Authorization":f"Bearer {tw}"}
+          hwj={**hw,"Content-Type":"application/json"}
+          # Item fuente: MLM2894654315 (Charge 6 Negro de Juan, family 1599970057545363)
+          SRC="MLM2894654315"
+          src=requests.get(f"{API}/items/{SRC}?include_attributes=all",headers=hj,timeout=20).json()
+          family_name=src.get("family_name")
+          print(f"Source title: {src.get('title','')}")
+          print(f"family_name: {family_name}")
+          
+          attrs_base=[]
+          for a in src.get("attributes",[]) or []:
+              if a.get("id") in ("BRAND","MODEL","ITEM_CONDITION","DETAILED_MODEL","ITEM_VOLUME"):
+                  v={"id":a["id"]}
+                  if a.get("value_id"): v["value_id"]=a["value_id"]
+                  if a.get("value_name"): v["value_name"]=a["value_name"]
+                  attrs_base.append(v)
+          attrs_base.append({"id":"GTIN","value_name":"No aplica"})
+          
+          sale_terms=[]
+          for st in src.get("sale_terms",[]) or []:
+              v={"id":st["id"]}
+              if st.get("value_id"): v["value_id"]=st["value_id"]
+              if st.get("value_name"): v["value_name"]=st["value_name"]
+              sale_terms.append(v)
+          if not any(s.get("id")=="WARRANTY_TIME" for s in sale_terms):
+              sale_terms.append({"id":"WARRANTY_TYPE","value_name":"Garantía del vendedor"})
+              sale_terms.append({"id":"WARRANTY_TIME","value_name":"30 días"})
+          
+          pics=[{"id":p["id"]} for p in (src.get("pictures") or []) if p.get("id")]
+          shipping=src.get("shipping") or {"mode":"me2","free_shipping":True,"logistic_type":"xd_drop_off","local_pick_up":False}
+          price=src.get("price",399)
+          cat=src.get("category_id")
+          cond=src.get("condition","used")
+          lt=src.get("listing_type_id","gold_pro")
+          
+          # 4 colores: Negro, Azul, Camuflaje, Rojo
+          # Visible MELI = 1 si stock_real > 0, 0 (paused) si == 0
+          COLORS=[
+            ("Negro",30,True),
+            ("Azul",10,True),
+            ("Camuflaje",15,True),
+            ("Rojo",0,False),
+          ]
+          new_ids=[]
+          for color,real_stock,activate in COLORS:
+              attrs=[a for a in attrs_base]
+              attrs.append({"id":"COLOR","value_name":color})
+              title=src.get("title","")[:55]
+              if "Negro" in title: title=title.replace("Negro",color)
+              if color not in title: title=(title+" "+color)[:60]
+              body={
+                "site_id":"MLM",
+                "family_name":family_name,
+                "category_id":cat,
+                "price":price,
+                "currency_id":"MXN",
+                "available_quantity":1,
+                "buying_mode":"buy_it_now",
+                "listing_type_id":lt,
+                "condition":cond,
+                "shipping":shipping,
+                "pictures":pics,
+                "attributes":attrs,
+                "sale_terms":sale_terms,
+              }
+              print(f"\n=== {color} (real={real_stock}) ===")
+              r=requests.post(f"{API}/items",headers=hwj,json=body,timeout=45)
+              print(f"  POST: {r.status_code}")
+              if r.status_code in (200,201):
+                  new=r.json().get("id")
+                  print(f"  *** NUEVO: {new} ***")
+                  new_ids.append((new,color,real_stock,activate))
+                  if not activate:
+                      time.sleep(1)
+                      rp=requests.put(f"{API}/items/{new}",headers=hwj,json={"status":"paused"},timeout=15)
+                      print(f"  pause Rojo: {rp.status_code}")
+              else:
+                  print(f"  err: {r.text[:400]}")
+              time.sleep(1)
+          
+          # Update stock_config_wilbert.json
+          print(f"\n=== Stock config update ===")
+          for nid,color,real,active in new_ids:
+              print(f"  {nid} {color} real={real} active={active}")
+          PY
