@@ -1,0 +1,56 @@
+name: seo-update-recent
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - run: pip install requests -q
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_WILBERT: ${{ secrets.MELI_REFRESH_TOKEN_WILBERT }}
+          MELI_REFRESH_TOKEN_RAYMUNDO: ${{ secrets.MELI_REFRESH_TOKEN_RAYMUNDO }}
+        run: |
+          python3 - <<'PY'
+          import os, requests, time
+          API="https://api.mercadolibre.com"
+          def tok(rt):
+              return requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token",
+                  "client_id":os.environ["MELI_APP_ID"],
+                  "client_secret":os.environ["MELI_APP_SECRET"],
+                  "refresh_token":rt},timeout=20).json().get("access_token")
+          tw=tok(os.environ["MELI_REFRESH_TOKEN_WILBERT"])
+          tr=tok(os.environ["MELI_REFRESH_TOKEN_RAYMUNDO"])
+          hwj={"Authorization":f"Bearer {tw}","Content-Type":"application/json"}
+          hrj={"Authorization":f"Bearer {tr}","Content-Type":"application/json"}
+
+          DESC_CHARGE6="JBL Charge 6 100% Original. Bocina Bluetooth portatil reacondicionada en excelente estado. Sonido JBL Pro Sound potente y nitido. Bateria hasta 24 horas, carga rapida USB-C, soporta PowerBank. Resistencia IP67: sumergible en agua y antipolvo. Conectividad Bluetooth 5.1. PartyBoost para conectar varias bocinas. Garantia 30 dias del vendedor. Envio GRATIS con Mercado Envios. Despacho 24h habiles. Producto 100% probado y verificado."
+          DESC_GO4="JBL Go 4 100% Original modelo nuevo. Caja abierta - producto probado, sin uso. Bocina Bluetooth portatil ultra compacta. Bluetooth 5.3, IP67 (resistente al agua y polvo), Auracast para parear varias Go 4 simultaneamente, bateria hasta 7 horas. Compatible con app JBL Portable. Eligir color al comprar. Garantia 30 dias del vendedor. Envio GRATIS con Mercado Envios. Despacho 24h habiles."
+          DESC_FLIP7="JBL Flip 7 100% Original. Caja abierta - producto probado en perfecto estado. Bluetooth 5.3, IP68 sumergible, sonido JBL Pro Sound con AI Sound Boost, bateria 14 horas + 2 horas adicionales (playtime boost). Auracast para parear varias bocinas. Compatible con app JBL Portable. Garantia 30 dias del vendedor. Envio GRATIS Mercado Envios."
+
+          UPDATES=[
+            ("MLM2911241921","wilbert","JBL Charge 6 Original Bocina Bluetooth IP67 Reacond Negro",DESC_CHARGE6),
+            ("MLM5295749840","wilbert","JBL Charge 6 Original Bocina Bluetooth IP67 Reacond Azul",DESC_CHARGE6),
+            ("MLM2911241939","wilbert","JBL Charge 6 Original Bocina Bluetooth IP67 Reacond Rojo",DESC_CHARGE6),
+            ("MLM2911205487","wilbert","JBL Charge 6 Original Bocina IP67 Reacond Camuflaje",DESC_CHARGE6),
+            ("MLM2911242253","wilbert","JBL Go 4 Original Bocina Bluetooth IP67 Caja Abierta Color",DESC_GO4),
+            ("MLM2911242617","raymundo","JBL Flip 7 Original Bocina Bluetooth IP68 Caja Abierta",DESC_FLIP7),
+          ]
+          for iid,acc,title,desc in UPDATES:
+              h = hwj if acc=="wilbert" else hrj
+              print(f"\n{iid} ({acc})")
+              # Title
+              r1=requests.put(f"{API}/items/{iid}",headers=h,json={"title":title[:60]},timeout=15)
+              print(f"  title: {r1.status_code} {r1.text[:120] if r1.status_code not in (200,201) else 'OK'}")
+              # Description
+              r2=requests.put(f"{API}/items/{iid}/description",headers=h,json={"plain_text":desc},timeout=15)
+              if r2.status_code in (200,201,204):
+                  print(f"  desc: {r2.status_code} OK")
+              else:
+                  # POST si no existe
+                  r3=requests.post(f"{API}/items/{iid}/description",headers=h,json={"plain_text":desc},timeout=15)
+                  print(f"  desc POST: {r3.status_code}")
+              time.sleep(0.5)
+          print("\n=== SEO done ===")
+          PY
