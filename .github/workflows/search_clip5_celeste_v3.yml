@@ -1,0 +1,57 @@
+name: search-clip5-celeste-v3
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - run: pip install requests -q
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_YC_NEW: ${{ secrets.MELI_REFRESH_TOKEN_YC_NEW }}
+        run: |
+          python3 - <<'PY'
+          import os, requests, time
+          API="https://api.mercadolibre.com"
+          tok=requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token",
+              "client_id":os.environ["MELI_APP_ID"],
+              "client_secret":os.environ["MELI_APP_SECRET"],
+              "refresh_token":os.environ["MELI_REFRESH_TOKEN_YC_NEW"]},timeout=20).json()["access_token"]
+          h={"Authorization":f"Bearer {tok}"}
+          # Search items con sort=sold_quantity (los más vendidos primero)
+          # Query: clip 5 celeste / azul cielo
+          rows=[]
+          seen_cpid=set()
+          for q in ("clip 5 celeste","clip 5 azul cielo","jbl clip 5 azul claro","clip 5 sky"):
+              for sort in ("relevance",):
+                  r=requests.get(f"{API}/sites/MLM/search?q={q}&category=MLM1051&limit=50&condition=new",headers=h,timeout=20).json()
+                  for it in r.get("results",[])[:50]:
+                      cpid=it.get("catalog_product_id")
+                      if not cpid or cpid in seen_cpid: continue
+                      title=(it.get("title") or "").lower()
+                      if "clip 5" not in title: continue
+                      # Filtrar por color celeste/azul
+                      ats={a.get("id"):a.get("value_name") for a in it.get("attributes",[]) or []}
+                      color=(ats.get("COLOR") or ats.get("MAIN_COLOR") or "").lower()
+                      if not any(c in (color+" "+title) for c in ("celeste","azul cielo","azul claro","sky","light blue","cielo")):
+                          continue
+                      seen_cpid.add(cpid)
+                      sold=it.get("sold_quantity",0)
+                      rows.append({
+                          "cpid":cpid,
+                          "iid":it.get("id"),
+                          "title":it.get("title",""),
+                          "color":color,
+                          "sold":sold,
+                          "price":it.get("price"),
+                          "permalink":it.get("permalink"),
+                      })
+          rows.sort(key=lambda x:-(x["sold"] or 0))
+          print(f"\n=== TOP catálogos Clip 5 Celeste (por ventas item top) ===")
+          for r in rows[:10]:
+              print(f"\ncpid={r['cpid']}  sold={r['sold']}  price=${r['price']}")
+              print(f"  title: {r['title'][:70]}")
+              print(f"  color: {r['color']}")
+              if r['permalink']: print(f"  url: {r['permalink']}")
+          PY
