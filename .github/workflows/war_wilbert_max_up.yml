@@ -1,0 +1,102 @@
+name: war-wilbert-max-up
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - run: pip install requests -q
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_WILBERT: ${{ secrets.MELI_REFRESH_TOKEN_WILBERT }}
+        run: |
+          python3 - <<'PY'
+          import os, requests, time, re
+          API="https://api.mercadolibre.com"
+          tok=requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token",
+              "client_id":os.environ["MELI_APP_ID"],
+              "client_secret":os.environ["MELI_APP_SECRET"],
+              "refresh_token":os.environ["MELI_REFRESH_TOKEN_WILBERT"]},timeout=20).json()["access_token"]
+          h={"Authorization":f"Bearer {tok}"}
+          hj={**h,"Content-Type":"application/json"}
+          UID=3367276814
+          RULES = {
+            "go4":     {"floor":449,"ceiling":699, "rx":r"\bgo\s*4\b"},
+            "go3":     {"floor":399,"ceiling":599, "rx":r"\bgo\s*3\b"},
+            "clip5":   {"floor":699,"ceiling":899, "rx":r"\bclip\s*5\b"},
+            "charge6": {"floor":399,"ceiling":999, "rx":r"\bcharge\s*6\b"},
+            "flip7":   {"floor":399,"ceiling":999, "rx":r"\bflip\s*7\b"},
+            "grip":    {"floor":399,"ceiling":799, "rx":r"\bgrip\b"},
+            "xb100":   {"floor":499,"ceiling":699, "rx":r"xb[\s\-]*100|sony"},
+            "bose":    {"floor":1999,"ceiling":3999,"rx":r"bose|soundlink"},
+          }
+          PERFUME_RX=re.compile(r"perfume|fragrance|edp|edt|cologne|alchemia|armaf|odyssey|lattafa|nova|maleka|spectra|delight|island|mandarin|aqua men|mega man|fruit",re.I)
+          def classify(title):
+              if PERFUME_RX.search(title or ""): return None
+              for k,r in RULES.items():
+                  if re.search(r["rx"], title or "", re.I): return k
+              return None
+          # Listar active
+          ids=[]; off=0
+          while True:
+              j=requests.get(f"{API}/users/{UID}/items/search?status=active&limit=50&offset={off}",headers=h,timeout=20).json()
+              r=j.get("results",[]); ids+=r
+              off+=50
+              if off>=j.get("paging",{}).get("total",0) or not r: break
+          items={}
+          for i in range(0,len(ids),20):
+              r=requests.get(f"{API}/items?ids={','.join(ids[i:i+20])}&attributes=id,title,price",headers=h,timeout=20).json()
+              for it in r:
+                  if it.get("code")==200: items[it["body"]["id"]]=it["body"]
+          A={"up":0,"down":0,"floor":0,"no_change":0,"err":0}
+          log=[]
+          for iid,b in items.items():
+              cat=classify(b.get("title",""))
+              if not cat: continue
+              rule=RULES[cat]
+              cur=b.get("price")
+              try:
+                  pt=requests.get(f"{API}/items/{iid}/price_to_win?version=v2",headers=h,timeout=12).json()
+              except: continue
+              ptw=pt.get("price_to_win")
+              status=pt.get("status","")
+              sh=pt.get("competitors_sharing_first_place",0) or 0
+              winner=pt.get("winner") or {}
+              is_full=any(b.get("id")=="fulfillment" and b.get("status")=="boosted" for b in winner.get("boosts",[]))
+
+              target=None; tag=""
+              if status=="winning" and sh==0:
+                  # subir hacia ceiling (10% step)
+                  step=max(1,int(cur*0.10))
+                  target=min(rule["ceiling"], cur+step)
+                  tag="UP"
+              elif not ptw:
+                  step=max(1,int(cur*0.10))
+                  target=min(rule["ceiling"], cur+step)
+                  tag="UP_NOPTW"
+              else:
+                  # perdiendo o sharing → ptw-1
+                  target=int(ptw)-1
+                  tag="DOWN_FULL" if is_full else "DOWN"
+                  if is_full and target<rule["floor"]:
+                      target=int(ptw*0.95)
+                  if target<rule["floor"]:
+                      A["floor"]+=1
+                      log.append(f"  FLOOR {iid} ptw={ptw} floor={rule['floor']} '{(b.get('title') or '')[:45]}'")
+                      if cur<rule["floor"]: requests.put(f"{API}/items/{iid}",headers=hj,json={"price":rule["floor"]},timeout=15)
+                      continue
+              target=min(target,rule["ceiling"])
+              target=max(target,rule["floor"])
+              if target==cur: A["no_change"]+=1; continue
+              r=requests.put(f"{API}/items/{iid}",headers=hj,json={"price":target},timeout=15)
+              if r.status_code in (200,201):
+                  if target>cur: A["up"]+=1
+                  else: A["down"]+=1
+                  log.append(f"  {tag} {iid} {cur}→{target} (ptw={ptw} st={status} sh={sh} FULL={is_full}) '{(b.get('title') or '')[:40]}'")
+              else:
+                  A["err"]+=1
+              time.sleep(0.1)
+          print(f"\n=== RESUMEN ===\n  UP: {A['up']}  DOWN: {A['down']}  no_change: {A['no_change']}  floor: {A['floor']}  err: {A['err']}")
+          for l in log: print(l)
+          PY
