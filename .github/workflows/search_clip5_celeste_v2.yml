@@ -1,0 +1,64 @@
+name: search-clip5-celeste-v2
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - run: pip install requests -q
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_YC_NEW: ${{ secrets.MELI_REFRESH_TOKEN_YC_NEW }}
+        run: |
+          python3 - <<'PY'
+          import os, requests, time
+          API="https://api.mercadolibre.com"
+          tok=requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token",
+              "client_id":os.environ["MELI_APP_ID"],
+              "client_secret":os.environ["MELI_APP_SECRET"],
+              "refresh_token":os.environ["MELI_REFRESH_TOKEN_YC_NEW"]},timeout=20).json()["access_token"]
+          h={"Authorization":f"Bearer {tok}"}
+          # Search products
+          queries=["JBL Clip 5 celeste","Clip 5 celeste","Clip 5 azul claro","Clip 5 sky","Clip 5 azul cielo"]
+          seen=set()
+          for q in queries:
+              r=requests.get(f"{API}/products/search?status=active&site_id=MLM&q={q}&limit=30",headers=h,timeout=15).json()
+              for p in r.get("results",[]):
+                  pid=p.get("id")
+                  if pid: seen.add(pid)
+          print(f"candidatos: {len(seen)}")
+          rows=[]
+          for pid in seen:
+              try:
+                  d=requests.get(f"{API}/products/{pid}",headers=h,timeout=15).json()
+              except: continue
+              name=d.get("name","")
+              if "clip 5" not in name.lower(): continue
+              attrs={a.get("id"):a.get("value_name") for a in d.get("attributes",[]) or []}
+              color=(attrs.get("COLOR") or attrs.get("MAIN_COLOR") or "")
+              if not any(c in color.lower() for c in ("celeste","azul","light","sky","cielo","blue")):
+                  continue
+              bbw=d.get("buy_box_winner") or {}
+              # sold del catálogo
+              sold=0
+              for k in ("sold_quantity","total_sold_quantity"):
+                  if d.get(k): sold=d.get(k); break
+              # buy_box_activity_status / sales
+              rows.append({
+                "cpid":pid,
+                "name":name,
+                "color":color,
+                "sold":sold,
+                "price":bbw.get("price"),
+                "permalink":d.get("permalink",""),
+              })
+              time.sleep(0.05)
+          # Ordenar por sold desc
+          rows.sort(key=lambda x:-(x["sold"] or 0))
+          print(f"\n=== TOP CLIP 5 Celeste/Azul (por ventas) ===")
+          print(f"{'cpid':<14} {'sold':>5} {'price':>6} {'color':<18} title")
+          for r in rows[:15]:
+              print(f"{r['cpid']:<14} {r['sold']:>5} {str(r['price']):>6} {(r['color'] or '')[:18]:<18} {r['name'][:55]}")
+              if r['permalink']: print(f"  → {r['permalink']}")
+          PY
