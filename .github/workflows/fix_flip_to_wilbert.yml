@@ -1,0 +1,94 @@
+name: fix-flip-to-wilbert
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - run: pip install requests -q
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+          MELI_REFRESH_TOKEN_RAYMUNDO: ${{ secrets.MELI_REFRESH_TOKEN_RAYMUNDO }}
+          MELI_REFRESH_TOKEN_WILBERT: ${{ secrets.MELI_REFRESH_TOKEN_WILBERT }}
+        run: |
+          python3 - <<'PY'
+          import os, requests, time
+          API="https://api.mercadolibre.com"
+          def tok(rt):
+              return requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token",
+                  "client_id":os.environ["MELI_APP_ID"],
+                  "client_secret":os.environ["MELI_APP_SECRET"],
+                  "refresh_token":rt},timeout=20).json().get("access_token")
+          tj=tok(os.environ["MELI_REFRESH_TOKEN"])
+          tr=tok(os.environ["MELI_REFRESH_TOKEN_RAYMUNDO"])
+          tw=tok(os.environ["MELI_REFRESH_TOKEN_WILBERT"])
+          hj={"Authorization":f"Bearer {tj}"}
+          hr={"Authorization":f"Bearer {tr}"}; hrj={**hr,"Content-Type":"application/json"}
+          hw={"Authorization":f"Bearer {tw}"}; hwj={**hw,"Content-Type":"application/json"}
+
+          # FASE A: pausar Flip 7 en Raymundo
+          r=requests.put(f"{API}/items/MLM2911242617",headers=hrj,json={"status":"paused"},timeout=15)
+          print(f"pause Flip Raymundo: {r.status_code}")
+
+          # FASE B: pausar TODA la cuenta Raymundo (active)
+          uid_r=requests.get(f"{API}/users/me",headers=hr).json().get("id")
+          ids=[]; off=0
+          while True:
+              j=requests.get(f"{API}/users/{uid_r}/items/search?status=active&limit=50&offset={off}",headers=hr,timeout=20).json()
+              ids+=j.get("results",[])
+              off+=50
+              if off>=j.get("paging",{}).get("total",0) or not j.get("results"): break
+          print(f"Raymundo active items: {len(ids)}")
+          paused=0; errs=0
+          for iid in ids:
+              r=requests.put(f"{API}/items/{iid}",headers=hrj,json={"status":"paused"},timeout=15)
+              if r.status_code in (200,201): paused+=1
+              else: errs+=1
+              time.sleep(0.05)
+          print(f"  Raymundo pausados: {paused}/{len(ids)} errs={errs}")
+
+          # FASE C: clonar Flip 7 (con 4 colores) en Wilbert
+          src=requests.get(f"{API}/items/MLM2911242617?include_attributes=all",headers=hr,timeout=20).json()
+          attrs=[]
+          for a in src.get("attributes",[]) or []:
+              if a.get("id") in ("BRAND","MODEL","DETAILED_MODEL","ITEM_VOLUME","MODEL_NAME","ITEM_CONDITION"):
+                  v={"id":a["id"]}
+                  if a.get("value_id"): v["value_id"]=a["value_id"]
+                  if a.get("value_name"): v["value_name"]=a["value_name"]
+                  attrs.append(v)
+          if not any(a.get("id")=="ITEM_CONDITION" for a in attrs):
+              attrs.append({"id":"ITEM_CONDITION","value_name":"Usado"})
+          pics=[{"id":p["id"]} for p in (src.get("pictures") or []) if p.get("id")]
+          shipping={"mode":"me2","free_shipping":True,"logistic_type":"xd_drop_off","local_pick_up":False}
+          sale_terms=[{"id":"WARRANTY_TYPE","value_name":"Garantía del vendedor"},{"id":"WARRANTY_TIME","value_name":"30 días"}]
+          new_vars=[]
+          for c in ("Morado","Azul","Rojo","Negro"):
+              new_vars.append({
+                "attribute_combinations":[{"id":"COLOR","value_name":c}],
+                "available_quantity":1,
+                "price":299,
+                "picture_ids":[p["id"] for p in pics][:6],
+              })
+          body={"site_id":"MLM","title":"JBL Flip 7 Original Bocina Bluetooth IP68 Caja Abierta",
+            "category_id":src.get("category_id"),"price":299,"currency_id":"MXN",
+            "buying_mode":"buy_it_now","listing_type_id":src.get("listing_type_id","gold_pro"),
+            "condition":"used","shipping":shipping,"pictures":pics,"attributes":attrs,
+            "sale_terms":sale_terms,"variations":new_vars}
+          rp=requests.post(f"{API}/items",headers=hwj,json=body,timeout=45)
+          print(f"\nPOST Flip 7 Wilbert: {rp.status_code}")
+          if rp.status_code in (200,201):
+              new=rp.json().get("id")
+              print(f"*** NUEVO Wilbert: {new} ***")
+              # Description SEO
+              desc="JBL Flip 7 100% Original. Caja abierta - producto probado en perfecto estado. Bluetooth 5.3, IP68 sumergible, sonido JBL Pro Sound con AI Sound Boost, bateria 14 horas + 2 horas adicionales (playtime boost). Auracast para parear varias bocinas. Compatible con app JBL Portable. Garantia 30 dias del vendedor. Envio GRATIS Mercado Envios."
+              rd=requests.post(f"{API}/items/{new}/description",headers=hwj,json={"plain_text":desc},timeout=15)
+              print(f"  desc: {rd.status_code}")
+              for v in rp.json().get("variations",[]):
+                  ac=v.get("attribute_combinations",[])
+                  c=ac[0].get("value_name","") if ac else ""
+                  print(f"  var {v.get('id')} color={c} qty={v.get('available_quantity')}")
+          else:
+              print(rp.text[:600])
+          PY
