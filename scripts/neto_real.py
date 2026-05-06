@@ -1,4 +1,4 @@
-import os, requests, json, time
+import os, requests, json
 from datetime import datetime, timezone, timedelta
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
@@ -15,18 +15,22 @@ ACCOUNTS=[
 cdmx=datetime.now(timezone.utc)-timedelta(hours=6)
 since=cdmx-timedelta(days=60)
 date_from=since.strftime("%Y-%m-%dT%H:%M:%S.000Z")
-print(f"=== NETO REAL incluyendo envíos — desde {date_from} ===\n")
+print(f"=== NETO REAL v2 (envío seller + refunds reales) — desde {date_from} ===\n")
 
 def get_ship_cost(sid, headers):
-    """Returns sender's cost for a shipment (what seller pays)."""
     if not sid: return 0.0, "no_sid"
     try:
-        r=requests.get(f"https://api.mercadolibre.com/shipments/{sid}/costs",headers=headers,timeout=10).json()
-        sc=r.get("senders",{}).get("cost") if "senders" in r else r.get("senders_cost",{}).get("cost",0)
-        if sc is None: sc=0
-        return float(sc), "ok"
+        r=requests.get(f"https://api.mercadolibre.com/shipments/{sid}/costs",headers=headers,timeout=10)
+        if r.status_code!=200: return 0.0, f"http{r.status_code}"
+        j=r.json()
+        senders=j.get("senders",[])
+        if isinstance(senders,list):
+            cost=sum((s.get("cost",0) or 0) for s in senders)
+        else:
+            cost=senders.get("cost",0) or 0
+        return float(cost), "ok"
     except Exception as e:
-        return 0.0, f"err:{e}"
+        return 0.0, f"err"
 
 results={}
 for label,env in ACCOUNTS:
@@ -40,7 +44,6 @@ for label,env in ACCOUNTS:
     uid=me["id"]; nick=me.get("nickname")
     print(f"--- {label} ({nick} {uid}) ---")
     
-    # Pull orders
     orders=[]; offset=0
     while True:
         rr=requests.get(f"https://api.mercadolibre.com/orders/search?seller={uid}&order.date_created.from={date_from}&limit=50&offset={offset}&sort=date_desc",headers=H,timeout=30).json()
@@ -51,70 +54,66 @@ for label,env in ACCOUNTS:
         offset+=50
         if offset>5000: break
     
-    paid_orders=[o for o in orders if o.get("status") in ("paid","shipped","delivered")]
+    paid=[o for o in orders if o.get("status") in ("paid","shipped","delivered")]
     cancelled=[o for o in orders if o.get("status")=="cancelled"]
-    refunded=[o for o in orders if "refunded" in (o.get("status_detail") or "")]
     
-    # Compute bruto, comisión, qty
     gross=fees=qty=0
     sids=[]
-    for o in paid_orders:
+    for o in paid:
         for it in o.get("order_items",[]):
             q=it.get("quantity",0) or 0
-            gross+= (it.get("unit_price",0) or 0)*q
-            fees += (it.get("sale_fee",0) or 0)*q
-            qty  += q
+            gross+=(it.get("unit_price",0) or 0)*q
+            fees+=(it.get("sale_fee",0) or 0)*q
+            qty+=q
         sid=(o.get("shipping",{}) or {}).get("id")
         if sid: sids.append(sid)
     
-    # Query shipments in parallel for sender cost
-    ship_total=0.0; ship_ok=0; ship_err=0; ship_zero=0
-    print(f"  paid={len(paid_orders)}  shipments={len(sids)}  consultando costos…")
-    with ThreadPoolExecutor(max_workers=10) as ex:
+    # REFUNDS: only count payments with status='refunded' or 'refund' in cancelled orders
+    refund_total=0.0
+    cancel_real=0
+    for o in cancelled:
+        order_refund=0.0
+        for p in (o.get("payments") or []):
+            pst=p.get("status","")
+            ra=p.get("transaction_amount_refunded",0) or 0
+            if pst=="refunded" and ra>0:
+                order_refund+=ra
+        if order_refund>0:
+            refund_total+=order_refund
+            cancel_real+=1
+    
+    # Shipping cost in parallel
+    ship_total=0.0; ship_ok=ship_err=0
+    print(f"  paid={len(paid)}  shipments={len(sids)}  consultando costos…")
+    with ThreadPoolExecutor(max_workers=15) as ex:
         futs={ex.submit(get_ship_cost, sid, H): sid for sid in sids}
         for f in as_completed(futs):
-            cost, st = f.result()
-            ship_total += cost
+            cost, st=f.result()
+            ship_total+=cost
             if st=="ok": ship_ok+=1
             else: ship_err+=1
-            if cost==0: ship_zero+=1
     
-    # Cancelled refunds: total_amount of cancelled orders that were refunded
-    refund_total=0
-    for o in cancelled:
-        # if cancelled by seller after payment, refund happened
-        # heuristic: if there's a refunded payment
-        for p in (o.get("payments") or []):
-            ra=p.get("transaction_amount_refunded",0) or 0
-            refund_total+=ra
+    net = gross - fees - ship_total - refund_total
+    print(f"  Bruto:        ${gross:>13,.2f}")
+    print(f"  Comis:       -${fees:>13,.2f}  ({fees/gross*100 if gross else 0:.1f}%)")
+    print(f"  Envío seller:-${ship_total:>13,.2f}  (avg ${ship_total/ship_ok if ship_ok else 0:.2f}/ord, ok={ship_ok}, err={ship_err})")
+    print(f"  Refunds:     -${refund_total:>13,.2f}  ({cancel_real} de {len(cancelled)} canceladas con reembolso real)")
+    print(f"  NETO REAL:    ${net:>13,.2f}\n")
     
-    net_real = gross - fees - ship_total - refund_total
-    print(f"  Bruto:        ${gross:>12,.2f}")
-    print(f"  Comis:       -${fees:>12,.2f}  ({fees/gross*100 if gross else 0:.1f}%)")
-    print(f"  Envío seller:-${ship_total:>12,.2f}  (avg ${ship_total/len(sids) if sids else 0:.2f}/orden, ok={ship_ok}, err={ship_err}, zero={ship_zero})")
-    print(f"  Refunds:     -${refund_total:>12,.2f}  ({len(cancelled)} canceladas)")
-    print(f"  NETO REAL:    ${net_real:>12,.2f}\n")
-    
-    results[label]={
-        "nick":nick,"uid":uid,
-        "paid":len(paid_orders),"cancelled":len(cancelled),"qty":qty,
-        "gross":gross,"fees":fees,"ship":ship_total,"refund":refund_total,
-        "net_real":net_real,
-        "ship_ok":ship_ok,"ship_err":ship_err,"ship_zero":ship_zero
-    }
+    results[label]={"nick":nick,"uid":uid,"paid":len(paid),"cancelled":len(cancelled),"cancelled_refunded":cancel_real,
+                    "qty":qty,"gross":gross,"fees":fees,"ship":ship_total,"refund":refund_total,"net":net}
 
 print("\n=== RESUMEN ===")
-print(f"{'Cuenta':<10} {'Órd':>4} {'Bruto':>14} {'Comis':>12} {'Envío':>12} {'Refund':>10} {'NETO REAL':>14}")
+print(f"{'Cuenta':<10} {'Órd':>4} {'Bruto':>14} {'Comis':>13} {'Envío':>13} {'Refund':>11} {'NETO':>14}")
 print("-"*90)
 T={k:0 for k in ['gross','fees','ship','refund','net','o']}
 for k in ["JUAN","RAYMUNDO","CLARIBEL","ASVA","WILBERT"]:
     if k not in results: continue
     v=results[k]
-    print(f"{k:<10} {v['paid']:>4} ${v['gross']:>13,.2f} ${v['fees']:>11,.2f} ${v['ship']:>11,.2f} ${v['refund']:>9,.2f} ${v['net_real']:>13,.2f}")
-    T['gross']+=v['gross']; T['fees']+=v['fees']; T['ship']+=v['ship']; T['refund']+=v['refund']
-    T['net']+=v['net_real']; T['o']+=v['paid']
+    print(f"{k:<10} {v['paid']:>4} ${v['gross']:>13,.2f} ${v['fees']:>12,.2f} ${v['ship']:>12,.2f} ${v['refund']:>10,.2f} ${v['net']:>13,.2f}")
+    T['gross']+=v['gross']; T['fees']+=v['fees']; T['ship']+=v['ship']; T['refund']+=v['refund']; T['net']+=v['net']; T['o']+=v['paid']
 print("-"*90)
-print(f"{'TOTAL':<10} {T['o']:>4} ${T['gross']:>13,.2f} ${T['fees']:>11,.2f} ${T['ship']:>11,.2f} ${T['refund']:>9,.2f} ${T['net']:>13,.2f}")
+print(f"{'TOTAL':<10} {T['o']:>4} ${T['gross']:>13,.2f} ${T['fees']:>12,.2f} ${T['ship']:>12,.2f} ${T['refund']:>10,.2f} ${T['net']:>13,.2f}")
 
 print("\n=== JSON ===")
 print(json.dumps(results,ensure_ascii=False))
