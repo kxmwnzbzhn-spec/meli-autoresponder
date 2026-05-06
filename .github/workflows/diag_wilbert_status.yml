@@ -1,0 +1,31 @@
+name: diag-wilbert-status
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - run: pip install requests -q
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_WILBERT: ${{ secrets.MELI_REFRESH_TOKEN_WILBERT }}
+        run: |
+          python3 - <<'PY'
+          import os, requests
+          API="https://api.mercadolibre.com"
+          r=requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token",
+              "client_id":os.environ["MELI_APP_ID"],
+              "client_secret":os.environ["MELI_APP_SECRET"],
+              "refresh_token":os.environ["MELI_REFRESH_TOKEN_WILBERT"]},timeout=20).json()
+          tok=r.get("access_token")
+          print(f"oauth resp keys: {list(r.keys())}")
+          print(f"token ok: {bool(tok)}")
+          h={"Authorization":f"Bearer {tok}"}
+          me=requests.get(f"{API}/users/me",headers=h,timeout=15).json()
+          print(f"me: {me}")
+          uid=me.get("id") or 3367276814
+          for st in ("active","paused","closed","under_review"):
+              j=requests.get(f"{API}/users/{uid}/items/search?status={st}&limit=1",headers=h,timeout=20).json()
+              print(f"{st}: total={j.get('paging',{}).get('total','?')}")
+          PY
