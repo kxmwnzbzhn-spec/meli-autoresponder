@@ -204,12 +204,12 @@ def main():
                 target = min(rule["ceiling"], cur + step)
                 tag = "UP_NOPTW"
             else:
-                if is_full:
+                # Probar ptw-1 primero. Solo si NO cabe en floor y es FULL, intentar ptw*0.95
+                target = int(ptw_price) - 1
+                tag = "DOWN_FULL" if is_full else "DOWN"
+                if is_full and target < rule["floor"]:
+                    # ptw-1 ya no cabe; intentar ptw*0.95 que puede ser aún menor
                     target = int(ptw_price * 0.95)
-                    tag = "DOWN_FULL"
-                else:
-                    target = int(ptw_price) - 1
-                    tag = "DOWN"
                 if target < rule["floor"]:
                     A["floor_block"]+=1
                     log.append(f"  FLOOR_BLOCK {iid} ptw={ptw_price} floor={rule['floor']} (FULL={is_full}) '{title}'")
