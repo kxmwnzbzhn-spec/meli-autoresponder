@@ -1,0 +1,51 @@
+name: wilbert-quick-fix
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    permissions:
+      actions: write
+    steps:
+      - run: pip install requests -q
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_WILBERT: ${{ secrets.MELI_REFRESH_TOKEN_WILBERT }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python3 - <<'PY'
+          import os, requests
+          API="https://api.mercadolibre.com"
+          tok=requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token",
+              "client_id":os.environ["MELI_APP_ID"],
+              "client_secret":os.environ["MELI_APP_SECRET"],
+              "refresh_token":os.environ["MELI_REFRESH_TOKEN_WILBERT"]},timeout=20).json()["access_token"]
+          h={"Authorization":f"Bearer {tok}"}
+          hj={**h,"Content-Type":"application/json"}
+          for iid in ("MLM2910768405","MLM5295451002"):
+              r=requests.put(f"{API}/items/{iid}",headers=hj,json={"status":"closed"},timeout=15)
+              print(f"close {iid}: {r.status_code} {r.text[:120]}")
+          # Enable war workflows
+          gh={"Authorization":f"Bearer {os.environ['GH_TOKEN']}","Accept":"application/vnd.github+json"}
+          for p in (1,2,3,4,5):
+              r=requests.get(f"https://api.github.com/repos/${{ github.repository }}/actions/workflows?per_page=100&page={p}",headers=gh).json()
+              for w in r.get("workflows",[]):
+                  fn=w["path"].split("/")[-1]
+                  if fn in ("war_wilbert.yml","war_wilbert_perfumes.yml") and w["state"]!="active":
+                      rr=requests.put(f"https://api.github.com/repos/${{ github.repository }}/actions/workflows/{w['id']}/enable",headers=gh)
+                      print(f"enable {fn}: {rr.status_code}")
+          PY
+      - name: Dispatch wars
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          curl -sL -X POST -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${{ github.repository }}/actions/workflows/war_wilbert.yml/dispatches" \
+            -d '{"ref":"main"}'
+          curl -sL -X POST -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${{ github.repository }}/actions/workflows/war_wilbert_perfumes.yml/dispatches" \
+            -d '{"ref":"main"}'
+          echo "wars dispatched"
