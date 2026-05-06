@@ -1,0 +1,85 @@
+name: clone-grip-raymundo-to-wilbert
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - run: pip install requests -q
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_RAYMUNDO: ${{ secrets.MELI_REFRESH_TOKEN_RAYMUNDO }}
+          MELI_REFRESH_TOKEN_WILBERT: ${{ secrets.MELI_REFRESH_TOKEN_WILBERT }}
+        run: |
+          python3 - <<'PY'
+          import os, requests, time, re
+          API="https://api.mercadolibre.com"
+          def tok(rt):
+              return requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token",
+                  "client_id":os.environ["MELI_APP_ID"],
+                  "client_secret":os.environ["MELI_APP_SECRET"],
+                  "refresh_token":rt},timeout=20).json().get("access_token")
+          tr=tok(os.environ["MELI_REFRESH_TOKEN_RAYMUNDO"])
+          tw=tok(os.environ["MELI_REFRESH_TOKEN_WILBERT"])
+          hr={"Authorization":f"Bearer {tr}"}
+          hw={"Authorization":f"Bearer {tw}"}
+          hwj={**hw,"Content-Type":"application/json"}
+          UID_R=3338633403
+          # Buscar items Raymundo con "Grip" en título (todos status)
+          ids=[]; off=0
+          while True:
+              j=requests.get(f"{API}/users/{UID_R}/items/search?limit=50&offset={off}",headers=hr,timeout=20).json()
+              r=j.get("results",[]); ids+=r
+              off+=50
+              if off>=j.get("paging",{}).get("total",0) or not r: break
+          print(f"Total Raymundo: {len(ids)}")
+          # Bulk leer titles
+          items={}
+          for i in range(0,len(ids),20):
+              r=requests.get(f"{API}/items?ids={','.join(ids[i:i+20])}&attributes=id,title,status",headers=hr,timeout=25).json()
+              for it in r:
+                  if it.get("code")==200: items[it["body"]["id"]]=it["body"]
+          # Filtrar GRIP
+          GRIP_RX=re.compile(r"\bgrip\b",re.I)
+          grips=[(iid,b.get("title","")[:60]) for iid,b in items.items() if GRIP_RX.search(b.get("title",""))]
+          print(f"\nJBL Grip encontrados: {len(grips)}")
+          for r in grips: print(f"  {r[0]} '{r[1]}'")
+          # Clonar a Wilbert
+          new_ok=0; new_err=0
+          for src,title in grips:
+              it=requests.get(f"{API}/items/{src}?include_attributes=all",headers=hr,timeout=20).json()
+              if not it.get("title"):
+                  new_err+=1; continue
+              attrs=[]
+              for a in it.get("attributes",[]) or []:
+                  if a.get("id") in ("BRAND","MODEL","COLOR","ITEM_CONDITION","DETAILED_MODEL","MAIN_COLOR","ITEM_VOLUME"):
+                      v={"id":a["id"]}
+                      if a.get("value_id"): v["value_id"]=a["value_id"]
+                      if a.get("value_name"): v["value_name"]=a["value_name"]
+                      attrs.append(v)
+              sale_terms=[]
+              for st in it.get("sale_terms",[]) or []:
+                  v={"id":st["id"]}
+                  if st.get("value_id"): v["value_id"]=st["value_id"]
+                  if st.get("value_name"): v["value_name"]=st["value_name"]
+                  sale_terms.append(v)
+              pics=[{"id":p["id"]} for p in (it.get("pictures") or []) if p.get("id")]
+              shipping=it.get("shipping") or {"mode":"me2","free_shipping":True,"logistic_type":"xd_drop_off","local_pick_up":False}
+              cpid=it.get("catalog_product_id")
+              body={"site_id":"MLM","title":(it.get("title") or "")[:60],"category_id":it.get("category_id"),
+                "price":it.get("price",499),"currency_id":"MXN","available_quantity":1,"buying_mode":"buy_it_now",
+                "listing_type_id":it.get("listing_type_id","gold_pro"),"condition":it.get("condition","new"),
+                "shipping":shipping,"pictures":pics,"attributes":attrs,"sale_terms":sale_terms}
+              if cpid:
+                  body["catalog_product_id"]=cpid; body["catalog_listing"]=True
+              rp=requests.post(f"{API}/items",headers=hwj,json=body,timeout=45)
+              if rp.status_code in (200,201):
+                  new_ok+=1
+                  print(f"  {src} → {rp.json().get('id')}  price=${body['price']}")
+              else:
+                  new_err+=1
+                  print(f"  ERR POST {src}: {rp.status_code} {rp.text[:300]}")
+              time.sleep(0.5)
+          print(f"\n=== RESUMEN === clonados={new_ok}/{len(grips)} err={new_err}")
+          PY
