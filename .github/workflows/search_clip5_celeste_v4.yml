@@ -1,0 +1,57 @@
+name: search-clip5-celeste-v4
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - run: pip install requests -q
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_YC_NEW: ${{ secrets.MELI_REFRESH_TOKEN_YC_NEW }}
+        run: |
+          python3 - <<'PY'
+          import os, requests
+          API="https://api.mercadolibre.com"
+          tok=requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token",
+              "client_id":os.environ["MELI_APP_ID"],
+              "client_secret":os.environ["MELI_APP_SECRET"],
+              "refresh_token":os.environ["MELI_REFRESH_TOKEN_YC_NEW"]},timeout=20).json()["access_token"]
+          h={"Authorization":f"Bearer {tok}"}
+          # Buscar items "JBL Clip 5" todos los que tengan sold>0 y mostrar cpid+color
+          rows=[]
+          seen=set()
+          for q in ("jbl clip 5","clip 5 bluetooth"):
+              r=requests.get(f"{API}/sites/MLM/search?q={q}&category=MLM1051&limit=50&condition=new",headers=h,timeout=20).json()
+              for it in r.get("results",[]):
+                  cpid=it.get("catalog_product_id")
+                  if not cpid: continue
+                  k=(cpid,)
+                  if k in seen: continue
+                  seen.add(k)
+                  ats={a.get("id"):a.get("value_name") for a in it.get("attributes",[]) or []}
+                  color=(ats.get("COLOR") or ats.get("MAIN_COLOR") or "")
+                  rows.append({
+                    "cpid":cpid,
+                    "color":color,
+                    "title":it.get("title",""),
+                    "sold":it.get("sold_quantity",0),
+                    "price":it.get("price"),
+                    "permalink":it.get("permalink"),
+                  })
+          # Filtrar colores celeste-like
+          KW=("celeste","cielo","sky","claro","light","aqua")
+          azul_celeste=[r for r in rows if any(kw in r["color"].lower() or kw in r["title"].lower() for kw in KW)]
+          azul_celeste.sort(key=lambda x:-(x["sold"] or 0))
+          print(f"\n=== Clip 5 azul claro/celeste/sky ({len(azul_celeste)}) ===")
+          for r in azul_celeste[:10]:
+              print(f"\nCPID: {r['cpid']}  sold={r['sold']}  price=${r['price']}")
+              print(f"  color: {r['color']}")
+              print(f"  title: {r['title'][:65]}")
+              if r['permalink']: print(f"  url: {r['permalink']}")
+          # Mostrar TODOS los colores únicos como referencia
+          print(f"\n=== Todos los colores Clip 5 vistos ===")
+          colors=sorted(set(r["color"] for r in rows if r["color"]))
+          for c in colors: print(f"  - {c}")
+          PY
