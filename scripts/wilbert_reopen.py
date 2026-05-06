@@ -56,7 +56,7 @@ tok=meli_refresh()
 h={"Authorization":f"Bearer {tok}"}
 hj={**h,"Content-Type":"application/json"}
 me=requests.get(f"{API}/users/me",headers=h,timeout=15).json()
-uid=me["id"]
+uid=me.get("id") or 3367276814  # fallback Wilbert UID
 print(f"Wilbert UID={uid}")
 
 # Listar paused
