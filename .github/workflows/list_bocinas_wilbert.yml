@@ -1,0 +1,49 @@
+name: list-bocinas-wilbert
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - run: pip install requests -q
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_WILBERT: ${{ secrets.MELI_REFRESH_TOKEN_WILBERT }}
+        run: |
+          python3 - <<'PY'
+          import os, requests, re, json
+          API="https://api.mercadolibre.com"
+          tok=requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token",
+              "client_id":os.environ["MELI_APP_ID"],
+              "client_secret":os.environ["MELI_APP_SECRET"],
+              "refresh_token":os.environ["MELI_REFRESH_TOKEN_WILBERT"]},timeout=20).json()["access_token"]
+          h={"Authorization":f"Bearer {tok}"}
+          UID=3367276814
+          PERFUME_RX=re.compile(r"perfume|fragrance|edp|edt|eau de|cologne|alchemia|armaf|odyssey|colonia|lattafa|nova|maleka|club de nuit|spectra|delight|island|mandarin|aqua men|mega man|fruit",re.I)
+          # Listar todos
+          ids=[]; off=0
+          while True:
+              j=requests.get(f"{API}/users/{UID}/items/search?limit=50&offset={off}",headers=h,timeout=20).json()
+              r=j.get("results",[]); ids+=r
+              off+=50
+              if off>=j.get("paging",{}).get("total",0) or not r: break
+          print(f"Total: {len(ids)}")
+          # Bulk
+          items={}
+          for i in range(0,len(ids),20):
+              r=requests.get(f"{API}/items?ids={','.join(ids[i:i+20])}&attributes=id,title,status,sub_status,price",headers=h,timeout=20).json()
+              for it in r:
+                  if it.get("code")==200: items[it["body"]["id"]]=it["body"]
+          bocinas=[]; perfumes=[]
+          for iid,b in items.items():
+              t=b.get("title","")
+              if PERFUME_RX.search(t): perfumes.append(iid)
+              else: bocinas.append((iid,b.get("status"),b.get("price"),t[:55]))
+          print(f"\nBocinas ({len(bocinas)}):")
+          for r in bocinas: print(f"  {r[0]} st={r[1]} ${r[2]} '{r[3]}'")
+          print(f"\nPerfumes ({len(perfumes)}): {perfumes}")
+          # Persistir lista IID-ONLY
+          out={"bocinas":[r[0] for r in bocinas],"perfumes":perfumes}
+          with open("/tmp/wilbert_bocinas.json","w") as f: json.dump(out,f)
+          PY
