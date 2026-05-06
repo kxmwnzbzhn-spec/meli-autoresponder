@@ -1,0 +1,68 @@
+name: publish-clip5cam-yiriam
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - run: pip install requests -q
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_YC_NEW: ${{ secrets.MELI_REFRESH_TOKEN_YC_NEW }}
+        run: |
+          python3 - <<'PY'
+          import os, requests, time
+          API="https://api.mercadolibre.com"
+          tok=requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token",
+              "client_id":os.environ["MELI_APP_ID"],
+              "client_secret":os.environ["MELI_APP_SECRET"],
+              "refresh_token":os.environ["MELI_REFRESH_TOKEN_YC_NEW"]},timeout=20).json()["access_token"]
+          h={"Authorization":f"Bearer {tok}"}
+          hj={**h,"Content-Type":"application/json"}
+          CPID="MLM55738772"
+          # Info catalog
+          p=requests.get(f"{API}/products/{CPID}",headers=h,timeout=20).json()
+          print(f"name: {p.get('name')}")
+          bbw=p.get("buy_box_winner") or {}
+          comp_price=bbw.get("price")
+          print(f"buy_box_winner price={comp_price}")
+          target = max(199, int(comp_price)-1) if comp_price else 599
+          # Si bbw es FULL boost, bajar más
+          shipping_type=bbw.get("logistic_type","")
+          if shipping_type in ("fulfillment","fbm"):
+              target=int(comp_price*0.95) if comp_price else 599
+              print(f"FULL detected, target={target}")
+          attrs=[]
+          # Title del catalog
+          name=(p.get("name") or "Parlante JBL Clip 5 Camuflaje")[:60]
+          # category por catalog
+          cat=p.get("domain_id","")
+          # Pictures del catalog
+          pics_raw=p.get("pictures") or []
+          pics=[{"id":x.get("id")} for x in pics_raw if x.get("id")][:8]
+          # category_id real
+          cat_id=p.get("category_id")
+          body={
+            "site_id":"MLM",
+            "category_id":cat_id,
+            "price":target,
+            "currency_id":"MXN",
+            "available_quantity":1,
+            "buying_mode":"buy_it_now",
+            "listing_type_id":"gold_pro",
+            "condition":"new",
+            "shipping":{"mode":"me2","free_shipping":True,"logistic_type":"xd_drop_off","local_pick_up":False},
+            "catalog_product_id":CPID,
+            "catalog_listing":True,
+          }
+          if pics: body["pictures"]=pics
+          print(f"target_price={target} cat={cat_id} pics={len(pics)}")
+          r=requests.post(f"{API}/items",headers=hj,json=body,timeout=45)
+          print(f"POST: {r.status_code}")
+          if r.status_code in (200,201):
+              new=r.json().get("id")
+              print(f"*** NUEVO: {new} *** price={target}")
+          else:
+              print(f"err: {r.text[:1000]}")
+          PY
