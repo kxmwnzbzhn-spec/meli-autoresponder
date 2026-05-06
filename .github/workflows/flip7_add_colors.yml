@@ -1,0 +1,60 @@
+name: flip7-add-colors
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - run: pip install requests -q
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_RAYMUNDO: ${{ secrets.MELI_REFRESH_TOKEN_RAYMUNDO }}
+        run: |
+          python3 - <<'PY'
+          import os, requests
+          API="https://api.mercadolibre.com"
+          tok=requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token",
+              "client_id":os.environ["MELI_APP_ID"],
+              "client_secret":os.environ["MELI_APP_SECRET"],
+              "refresh_token":os.environ["MELI_REFRESH_TOKEN_RAYMUNDO"]},timeout=20).json()["access_token"]
+          h={"Authorization":f"Bearer {tok}"}
+          hj={**h,"Content-Type":"application/json"}
+          IID="MLM2911242617"
+          it=requests.get(f"{API}/items/{IID}?include_attributes=all",headers=h).json()
+          existing=it.get("variations",[]) or []
+          pics_global=[p["id"] for p in (it.get("pictures") or []) if p.get("id")]
+          # Preservar existentes + agregar nuevas
+          new_vars=[]
+          existing_colors=set()
+          for v in existing:
+              ac=v.get("attribute_combinations",[])
+              col=ac[0].get("value_name","") if ac else ""
+              existing_colors.add(col)
+              new_vars.append({
+                "id":v.get("id"),
+                "price":v.get("price"),
+                "available_quantity":v.get("available_quantity",1),
+                "attribute_combinations":ac,
+                "picture_ids":v.get("picture_ids",[])
+              })
+          # Agregar Azul, Rojo, Negro si no existen
+          for c in ("Azul","Rojo","Negro"):
+              if c in existing_colors: continue
+              new_vars.append({
+                "attribute_combinations":[{"id":"COLOR","value_name":c}],
+                "available_quantity":1,
+                "price":299,
+                "picture_ids":pics_global[:6]
+              })
+          body={"variations":new_vars}
+          r=requests.put(f"{API}/items/{IID}",headers=hj,json=body,timeout=30)
+          print(f"PUT variations: {r.status_code}")
+          if r.status_code in (200,201):
+              for v in r.json().get("variations",[]):
+                  ac=v.get("attribute_combinations",[])
+                  c=ac[0].get("value_name","") if ac else ""
+                  print(f"  var {v.get('id')} color={c} qty={v.get('available_quantity')}")
+          else:
+              print(r.text[:500])
+          PY
