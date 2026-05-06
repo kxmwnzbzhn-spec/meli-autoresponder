@@ -1,0 +1,144 @@
+name: clone-flip7-raymundo
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - run: pip install requests -q
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+          MELI_REFRESH_TOKEN_RAYMUNDO: ${{ secrets.MELI_REFRESH_TOKEN_RAYMUNDO }}
+          MELI_REFRESH_TOKEN_CLARIBEL: ${{ secrets.MELI_REFRESH_TOKEN_CLARIBEL }}
+          MELI_REFRESH_TOKEN_ASVA: ${{ secrets.MELI_REFRESH_TOKEN_ASVA }}
+          MELI_REFRESH_TOKEN_WILBERT: ${{ secrets.MELI_REFRESH_TOKEN_WILBERT }}
+        run: |
+          python3 - <<'PY'
+          import os, requests, time
+          API="https://api.mercadolibre.com"
+          def tok(rt):
+              try:
+                  return requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token",
+                      "client_id":os.environ["MELI_APP_ID"],
+                      "client_secret":os.environ["MELI_APP_SECRET"],
+                      "refresh_token":rt},timeout=20).json().get("access_token")
+              except: return None
+          FAMILY="6607419785232593"
+          # Buscar en Juan, Asva, Claribel, Wilbert (Raymundo target)
+          ACCS={"JUAN":"MELI_REFRESH_TOKEN","ASVA":"MELI_REFRESH_TOKEN_ASVA","CLARIBEL":"MELI_REFRESH_TOKEN_CLARIBEL","WILBERT":"MELI_REFRESH_TOKEN_WILBERT"}
+          src=None; src_acc=None
+          for label,k in ACCS.items():
+              rt=os.environ.get(k)
+              if not rt: continue
+              t=tok(rt)
+              if not t: continue
+              h={"Authorization":f"Bearer {t}"}
+              me=requests.get(f"{API}/users/me",headers=h).json()
+              uid=me.get("id")
+              if not uid: continue
+              # Listar items y buscar family_id match
+              ids=[]; off=0
+              while True:
+                  j=requests.get(f"{API}/users/{uid}/items/search?limit=50&offset={off}",headers=h,timeout=20).json()
+                  r=j.get("results",[]); ids+=r
+                  off+=50
+                  if off>=j.get("paging",{}).get("total",0) or not r: break
+              # Bulk con family_id
+              for i in range(0,len(ids),20):
+                  r=requests.get(f"{API}/items?ids={','.join(ids[i:i+20])}&attributes=id,title,family_id,catalog_product_id,variations",headers=h,timeout=25).json()
+                  for it in r:
+                      if it.get("code")==200:
+                          b=it["body"]
+                          if str(b.get("family_id",""))==FAMILY or "flip 7" in b.get("title","").lower():
+                              if "flip 7" in b.get("title","").lower() and not src:
+                                  src=b; src_acc=label
+                                  src["__token__"]=t
+                                  src["__full_iid__"]=b["id"]
+                              if str(b.get("family_id",""))==FAMILY:
+                                  src=b; src_acc=label
+                                  src["__token__"]=t
+                                  src["__full_iid__"]=b["id"]
+                                  break
+                  if src and str(src.get("family_id",""))==FAMILY: break
+              if src and str(src.get("family_id",""))==FAMILY: break
+          if not src:
+              print("NO encontrado item con family_id"); raise SystemExit(1)
+          print(f"Found in {src_acc}: {src['__full_iid__']} family_id={src.get('family_id')} title='{src.get('title','')[:60]}'")
+          # GET full item
+          ts=src["__token__"]
+          hs={"Authorization":f"Bearer {ts}"}
+          full=requests.get(f"{API}/items/{src['__full_iid__']}?include_attributes=all",headers=hs,timeout=20).json()
+          # Extract colors
+          colors=[]
+          for v in full.get("variations",[]) or []:
+              for ac in v.get("attribute_combinations",[]) or []:
+                  if (ac.get("name") or "").lower()=="color":
+                      colors.append(ac.get("value_name")); break
+          print(f"Colores: {colors}")
+          if not colors:
+              # quizás item single — buscar attribute COLOR
+              for a in full.get("attributes",[]) or []:
+                  if a.get("id")=="COLOR":
+                      colors=[a.get("value_name")]; break
+          
+          # Build for Raymundo
+          tr=tok(os.environ["MELI_REFRESH_TOKEN_RAYMUNDO"])
+          hrj={"Authorization":f"Bearer {tr}","Content-Type":"application/json"}
+          attrs_base=[]
+          for a in full.get("attributes",[]) or []:
+              if a.get("id") in ("BRAND","MODEL","DETAILED_MODEL","ITEM_VOLUME","MODEL_NAME"):
+                  v={"id":a["id"]}
+                  if a.get("value_id"): v["value_id"]=a["value_id"]
+                  if a.get("value_name"): v["value_name"]=a["value_name"]
+                  attrs_base.append(v)
+          attrs_base.append({"id":"ITEM_CONDITION","value_name":"Usado"})
+          
+          pics_global=[{"id":p["id"]} for p in (full.get("pictures") or []) if p.get("id")]
+          var_pics={}
+          for v in full.get("variations",[]) or []:
+              for ac in v.get("attribute_combinations",[]) or []:
+                  if (ac.get("name") or "").lower()=="color":
+                      c=ac.get("value_name")
+                      pids=v.get("picture_ids") or []
+                      if pids: var_pics[c]=pids
+                      break
+          sale_terms=[{"id":"WARRANTY_TYPE","value_name":"Garantía del vendedor"},{"id":"WARRANTY_TIME","value_name":"30 días"}]
+          
+          new_vars=[]
+          for c in colors:
+              new_vars.append({
+                "attribute_combinations":[{"id":"COLOR","value_name":c}],
+                "available_quantity":1,
+                "price":299,
+                "picture_ids":(var_pics.get(c) or [p["id"] for p in pics_global[:4]])[:6],
+              })
+          title="Bocina Jbl Flip 7 Bluetooth Caja Abierta Usada"[:60]
+          body={
+            "site_id":"MLM",
+            "title":title,
+            "category_id":full.get("category_id"),
+            "price":299,
+            "currency_id":"MXN",
+            "buying_mode":"buy_it_now",
+            "listing_type_id":full.get("listing_type_id","gold_pro"),
+            "condition":"used",
+            "shipping":{"mode":"me2","free_shipping":True,"logistic_type":"xd_drop_off","local_pick_up":False},
+            "pictures":pics_global,
+            "attributes":attrs_base,
+            "sale_terms":sale_terms,
+            "variations":new_vars,
+          }
+          print(f"\nPOST Raymundo {len(new_vars)} variations")
+          r=requests.post(f"{API}/items",headers=hrj,json=body,timeout=45)
+          print(f"POST: {r.status_code}")
+          if r.status_code in (200,201):
+              print(f"*** NUEVO Raymundo: {r.json().get('id')} ***")
+              for v in r.json().get("variations",[]):
+                  ac=v.get("attribute_combinations",[])
+                  c=ac[0].get("value_name") if ac else ""
+                  print(f"  var {v.get('id')} color={c} qty={v.get('available_quantity')}")
+          else:
+              print(r.text[:600])
+          PY
