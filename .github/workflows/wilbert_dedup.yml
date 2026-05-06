@@ -1,0 +1,70 @@
+name: wilbert-dedup
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - run: pip install requests -q
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_WILBERT: ${{ secrets.MELI_REFRESH_TOKEN_WILBERT }}
+        run: |
+          python3 - <<'PY'
+          import os, requests, time
+          from collections import defaultdict
+          API="https://api.mercadolibre.com"
+          tok=requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token",
+              "client_id":os.environ["MELI_APP_ID"],
+              "client_secret":os.environ["MELI_APP_SECRET"],
+              "refresh_token":os.environ["MELI_REFRESH_TOKEN_WILBERT"]},timeout=20).json()["access_token"]
+          h={"Authorization":f"Bearer {tok}"}
+          hj={**h,"Content-Type":"application/json"}
+          UID=3367276814
+          # Listar todos active
+          ids=[]; off=0
+          while True:
+              j=requests.get(f"{API}/users/{UID}/items/search?status=active&limit=50&offset={off}",headers=h,timeout=20).json()
+              r=j.get("results",[]); ids+=r
+              off+=50
+              if off>=j.get("paging",{}).get("total",0) or not r: break
+          # Bulk con date_created y sold
+          items={}
+          for i in range(0,len(ids),20):
+              r=requests.get(f"{API}/items?ids={','.join(ids[i:i+20])}&attributes=id,title,catalog_product_id,sold_quantity,date_created,price",headers=h,timeout=25).json()
+              for it in r:
+                  if it.get("code")==200: items[it["body"]["id"]]=it["body"]
+          # Agrupar por cpid (solo bocinas — perfumes excluir por título)
+          import re
+          PERFUME_RX=re.compile(r"perfume|fragrance|edp|edt|cologne|alchemia|armaf|odyssey|lattafa|nova|maleka|spectra|delight|island|mandarin|aqua men|mega man|fruit",re.I)
+          groups=defaultdict(list)
+          for iid,b in items.items():
+              if PERFUME_RX.search(b.get("title","")): continue
+              cpid=b.get("catalog_product_id")
+              if not cpid: continue
+              groups[cpid].append({"iid":iid,"sold":b.get("sold_quantity",0),"date":b.get("date_created",""),"title":b.get("title","")[:40]})
+          # Para cada grupo con >1, cerrar todos menos el "ganador" (más sold, más viejo en empate)
+          to_close=[]
+          for cpid,arr in groups.items():
+              if len(arr)<2: continue
+              arr.sort(key=lambda x:(-x["sold"], x["date"]))
+              keeper=arr[0]
+              losers=arr[1:]
+              print(f"\nCPID {cpid}: {len(arr)} items")
+              print(f"  KEEP: {keeper['iid']} sold={keeper['sold']} date={keeper['date']} '{keeper['title']}'")
+              for l in losers:
+                  print(f"  CLOSE: {l['iid']} sold={l['sold']} date={l['date']} '{l['title']}'")
+                  to_close.append(l["iid"])
+          # Cerrar
+          closed=0; errors=0
+          for iid in to_close:
+              r=requests.put(f"{API}/items/{iid}",headers=hj,json={"status":"closed"},timeout=15)
+              if r.status_code in (200,201): closed+=1
+              else: errors+=1; print(f"  ERR close {iid}: {r.status_code} {r.text[:100]}")
+              time.sleep(0.1)
+          print(f"\n=== DEDUP RESUMEN ===")
+          print(f"  Items active analizados: {len(items)}")
+          print(f"  Grupos cpid con duplicados: {sum(1 for a in groups.values() if len(a)>1)}")
+          print(f"  Duplicados cerrados: {closed}/{len(to_close)} errs={errors}")
+          PY
