@@ -1,0 +1,107 @@
+name: clone-go4-multicolor
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - run: pip install requests -q
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+          MELI_REFRESH_TOKEN_WILBERT: ${{ secrets.MELI_REFRESH_TOKEN_WILBERT }}
+        run: |
+          python3 - <<'PY'
+          import os, requests, time
+          API="https://api.mercadolibre.com"
+          def tok(rt):
+              return requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token",
+                  "client_id":os.environ["MELI_APP_ID"],
+                  "client_secret":os.environ["MELI_APP_SECRET"],
+                  "refresh_token":rt},timeout=20).json().get("access_token")
+          tj=tok(os.environ["MELI_REFRESH_TOKEN"])
+          tw=tok(os.environ["MELI_REFRESH_TOKEN_WILBERT"])
+          hj={"Authorization":f"Bearer {tj}"}
+          hwj={"Authorization":f"Bearer {tw}","Content-Type":"application/json"}
+          # Source: MLM5244765752 multi-color en Juan
+          src=requests.get(f"{API}/items/MLM5244765752?include_attributes=all",headers=hj,timeout=20).json()
+          colors=[]
+          for v in src.get("variations",[]) or []:
+              for ac in v.get("attribute_combinations",[]) or []:
+                  if (ac.get("name") or "").lower()=="color":
+                      colors.append(ac.get("value_name"))
+                      break
+          print(f"Colores fuente: {colors}")
+          
+          attrs_base=[]
+          for a in src.get("attributes",[]) or []:
+              if a.get("id") in ("BRAND","MODEL","DETAILED_MODEL","ITEM_VOLUME","MODEL_NAME"):
+                  v={"id":a["id"]}
+                  if a.get("value_id"): v["value_id"]=a["value_id"]
+                  if a.get("value_name"): v["value_name"]=a["value_name"]
+                  attrs_base.append(v)
+          # Condition usada caja abierta
+          attrs_base.append({"id":"ITEM_CONDITION","value_name":"Usado"})
+          
+          # Pictures globales
+          pics_global=[{"id":p["id"]} for p in (src.get("pictures") or []) if p.get("id")]
+          # Pictures por variación si existen
+          var_pics={}
+          for v in src.get("variations",[]) or []:
+              for ac in v.get("attribute_combinations",[]) or []:
+                  if (ac.get("name") or "").lower()=="color":
+                      color=ac.get("value_name")
+                      pids=v.get("picture_ids") or []
+                      if pids: var_pics[color]=[{"id":p} for p in pids]
+                      break
+          
+          sale_terms=[]
+          for st in src.get("sale_terms",[]) or []:
+              v={"id":st["id"]}
+              if st.get("value_id"): v["value_id"]=st["value_id"]
+              if st.get("value_name"): v["value_name"]=st["value_name"]
+              sale_terms.append(v)
+          if not any(s.get("id")=="WARRANTY_TIME" for s in sale_terms):
+              sale_terms.append({"id":"WARRANTY_TYPE","value_name":"Garantía del vendedor"})
+              sale_terms.append({"id":"WARRANTY_TIME","value_name":"30 días"})
+          
+          # Construir variations: cada color qty=1
+          new_vars=[]
+          for c in colors:
+              new_vars.append({
+                "attribute_combinations":[{"id":"COLOR","value_name":c}],
+                "available_quantity":1,
+                "price":299,
+                "picture_ids":[p["id"] for p in (var_pics.get(c) or pics_global[:4])][:6],
+              })
+          
+          title="Bocina Jbl Go 4 Bluetooth Ip67 Caja Abierta Usada"
+          body={
+            "site_id":"MLM",
+            "title":title[:60],
+            "category_id":src.get("category_id"),
+            "price":299,
+            "currency_id":"MXN",
+            "buying_mode":"buy_it_now",
+            "listing_type_id":src.get("listing_type_id","gold_pro"),
+            "condition":"used",
+            "shipping":{"mode":"me2","free_shipping":True,"logistic_type":"xd_drop_off","local_pick_up":False},
+            "pictures":pics_global,
+            "attributes":attrs_base,
+            "sale_terms":sale_terms,
+            "variations":new_vars,
+          }
+          print(f"\n=== POST {len(new_vars)} variations ===")
+          r=requests.post(f"{API}/items",headers=hwj,json=body,timeout=45)
+          print(f"POST: {r.status_code}")
+          if r.status_code in (200,201):
+              new=r.json().get("id")
+              print(f"*** NUEVO: {new} ***")
+              for v in r.json().get("variations",[]):
+                  ac=v.get("attribute_combinations",[])
+                  c=ac[0].get("value_name") if ac else ""
+                  print(f"  var {v.get('id')} color={c} qty={v.get('available_quantity')}")
+          else:
+              print(r.text[:600])
+          PY
