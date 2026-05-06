@@ -156,5 +156,12 @@
     "condition": "new",
     "floor_price": 249,
     "ceiling_price": 999
+  },
+  "MLM2910457937": {
+    "real_stock": 50,
+    "master_stock": 50,
+    "min_visible": 1,
+    "auto_replenish": true,
+    "active": true
   }
 }
