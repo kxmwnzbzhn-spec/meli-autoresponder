@@ -1,0 +1,62 @@
+name: wilbert-force-reopen
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install requests -q
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_WILBERT: ${{ secrets.MELI_REFRESH_TOKEN_WILBERT }}
+        run: |
+          python3 - <<'PY'
+          import os, requests, time, json
+          API="https://api.mercadolibre.com"
+          tok=requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token",
+              "client_id":os.environ["MELI_APP_ID"],
+              "client_secret":os.environ["MELI_APP_SECRET"],
+              "refresh_token":os.environ["MELI_REFRESH_TOKEN_WILBERT"]},timeout=20).json()["access_token"]
+          h={"Authorization":f"Bearer {tok}"}
+          hj={**h,"Content-Type":"application/json"}
+          UID=3367276814
+          # Cargar blacklist
+          try: BL=set(x["item_id"] for x in json.load(open("blacklist.json")).get("items",[]))
+          except: BL=set()
+          # Listar TODOS sin filtro
+          ids=[]; off=0
+          while True:
+              j=requests.get(f"{API}/users/{UID}/items/search?limit=50&offset={off}",headers=h,timeout=20).json()
+              r=j.get("results",[]); ids+=r
+              off+=50
+              if off>=j.get("paging",{}).get("total",0) or not r: break
+          print(f"Total items: {len(ids)}")
+          # Estado por status
+          statuses={}; activated=0; errors=0; skipped_bl=0; skipped_active=0
+          for i in range(0,len(ids),20):
+              chunk=ids[i:i+20]
+              r=requests.get(f"{API}/items?ids={','.join(chunk)}&attributes=id,status,sub_status",headers=h,timeout=20).json()
+              for it in r:
+                  if it.get("code")!=200: continue
+                  b=it["body"]
+                  iid=b["id"]; st=b.get("status"); sub=b.get("sub_status",[])
+                  statuses[(st,tuple(sub or []))]=statuses.get((st,tuple(sub or [])),0)+1
+                  if iid in BL: skipped_bl+=1; continue
+                  if st=="active": skipped_active+=1; continue
+                  # Intentar activar
+                  rr=requests.put(f"{API}/items/{iid}",headers=hj,json={"status":"active","available_quantity":1},timeout=15)
+                  if rr.status_code in (200,201):
+                      activated+=1
+                  else:
+                      # Si error, retry sólo status
+                      time.sleep(0.3)
+                      rr2=requests.put(f"{API}/items/{iid}",headers=hj,json={"status":"active"},timeout=15)
+                      if rr2.status_code in (200,201): activated+=1
+                      else: errors+=1
+                  time.sleep(0.05)
+          print("\n=== Statuses originales ===")
+          for k,v in statuses.items(): print(f"  {k}: {v}")
+          print(f"\nactivated={activated} errors={errors} bl_skip={skipped_bl} already_active={skipped_active}")
+          PY
