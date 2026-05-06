@@ -1,0 +1,78 @@
+name: planb-fix-batch1
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - run: pip install requests -q
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_WILBERT: ${{ secrets.MELI_REFRESH_TOKEN_WILBERT }}
+          MELI_REFRESH_TOKEN_YC_NEW: ${{ secrets.MELI_REFRESH_TOKEN_YC_NEW }}
+        run: |
+          python3 - <<'PY'
+          import os, requests, time
+          API="https://api.mercadolibre.com"
+          def tok(rt):
+              return requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token",
+                  "client_id":os.environ["MELI_APP_ID"],
+                  "client_secret":os.environ["MELI_APP_SECRET"],
+                  "refresh_token":rt},timeout=20).json().get("access_token")
+          tw=tok(os.environ["MELI_REFRESH_TOKEN_WILBERT"])
+          ty=tok(os.environ["MELI_REFRESH_TOKEN_YC_NEW"])
+          hw={"Authorization":f"Bearer {tw}"}; hwj={**hw,"Content-Type":"application/json"}
+          hy={"Authorization":f"Bearer {ty}"}; hyj={**hy,"Content-Type":"application/json"}
+
+          # FASE A: cerrar las 10 erróneamente clonadas en YIRIAM
+          YIRIAM_ERR=["MLM2910767681","MLM2910806167","MLM2910457141","MLM2910457145","MLM2910880063","MLM2910457147","MLM2910880067","MLM2910880069","MLM2910880071","MLM2910457151"]
+          print("=== A: CERRAR 10 EN YIRIAM (deshacer) ===")
+          closed_yir=0
+          for iid in YIRIAM_ERR:
+              r=requests.put(f"{API}/items/{iid}",headers=hyj,json={"status":"closed"},timeout=15)
+              if r.status_code in (200,201): closed_yir+=1
+              else: print(f"  ERR {iid}: {r.status_code} {r.text[:120]}")
+              time.sleep(0.1)
+          print(f"  closed yiriam: {closed_yir}/10")
+
+          # FASE B: re-publicar las 10 fuentes en WILBERT (POST nuevo)
+          SOURCES=["MLM5287500034","MLM5287499028","MLM5287499008","MLM5287500734","MLM5287497362","MLM5287497338","MLM5287495728","MLM5287500058","MLM5287501100","MLM5287384768"]
+          print("\n=== B: RE-PUBLICAR EN WILBERT ===")
+          new_ok=0; new_err=0
+          for src in SOURCES:
+              it=requests.get(f"{API}/items/{src}?include_attributes=all",headers=hw).json()
+              if not it.get("title"):
+                  new_err+=1; print(f"  ERR leer {src}"); continue
+              attrs=[]
+              for a in it.get("attributes",[]) or []:
+                  if a.get("id") in ("BRAND","MODEL","COLOR","ITEM_CONDITION","DETAILED_MODEL","MAIN_COLOR","ITEM_VOLUME"):
+                      v={"id":a["id"]}
+                      if a.get("value_id"): v["value_id"]=a["value_id"]
+                      if a.get("value_name"): v["value_name"]=a["value_name"]
+                      attrs.append(v)
+              sale_terms=[]
+              for st in it.get("sale_terms",[]) or []:
+                  v={"id":st["id"]}
+                  if st.get("value_id"): v["value_id"]=st["value_id"]
+                  if st.get("value_name"): v["value_name"]=st["value_name"]
+                  sale_terms.append(v)
+              pics=[{"id":p["id"]} for p in (it.get("pictures") or []) if p.get("id")]
+              shipping=it.get("shipping") or {"mode":"me2","free_shipping":True,"logistic_type":"xd_drop_off","local_pick_up":False}
+              cpid=it.get("catalog_product_id")
+              body={"site_id":"MLM","title":(it.get("title") or "")[:60],"category_id":it.get("category_id"),
+                "price":it.get("price",499),"currency_id":"MXN","available_quantity":1,"buying_mode":"buy_it_now",
+                "listing_type_id":it.get("listing_type_id","gold_pro"),"condition":it.get("condition","used"),
+                "shipping":shipping,"pictures":pics,"attributes":attrs,"sale_terms":sale_terms}
+              if cpid:
+                  body["catalog_product_id"]=cpid; body["catalog_listing"]=True
+              r=requests.post(f"{API}/items",headers=hwj,json=body,timeout=45)
+              if r.status_code in (200,201):
+                  new_ok+=1
+                  print(f"  {src} → {r.json().get('id')}")
+              else:
+                  new_err+=1
+                  print(f"  ERR POST {src}: {r.status_code} {r.text[:300]}")
+              time.sleep(1)
+          print(f"\n=== RESUMEN ===  yiriam_closed={closed_yir} wilbert_new={new_ok}/{len(SOURCES)} new_err={new_err}")
+          PY
