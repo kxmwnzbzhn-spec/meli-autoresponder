@@ -12,5 +12,5 @@ jobs:
       - env:
           MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
           MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
-          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN_RAYMUNDO }}
-        run: python scripts/probe_ship.py
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+        run: python scripts/probe_juan_canc.py
