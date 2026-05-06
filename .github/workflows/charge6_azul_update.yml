@@ -1,0 +1,34 @@
+name: charge6-azul-update
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - run: pip install requests -q
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_WILBERT: ${{ secrets.MELI_REFRESH_TOKEN_WILBERT }}
+        run: |
+          python3 - <<'PY'
+          import os, requests, time
+          API="https://api.mercadolibre.com"
+          tok=requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token",
+              "client_id":os.environ["MELI_APP_ID"],
+              "client_secret":os.environ["MELI_APP_SECRET"],
+              "refresh_token":os.environ["MELI_REFRESH_TOKEN_WILBERT"]},timeout=20).json()["access_token"]
+          h={"Authorization":f"Bearer {tok}"}
+          hj={**h,"Content-Type":"application/json"}
+          # 4 Charge 6 — Azul + reaplicar desc a las 3 (sin "original")
+          IIDS=["MLM5295749840","MLM2911241921","MLM2911241939","MLM2911205487"]
+          DESC="Bocina Charge 6 1.1 espejo no compatible con la app"
+          shipping={"mode":"me2","free_shipping":True,"logistic_type":"xd_drop_off","local_pick_up":False}
+          for iid in IIDS:
+              print(f"\n{iid}")
+              r1=requests.put(f"{API}/items/{iid}",headers=hj,json={"price":399,"shipping":shipping},timeout=15)
+              print(f"  price+ship: {r1.status_code} {'OK' if r1.status_code in (200,201) else r1.text[:120]}")
+              r2=requests.put(f"{API}/items/{iid}/description",headers=hj,json={"plain_text":DESC},timeout=15)
+              print(f"  desc: {r2.status_code}")
+              time.sleep(0.3)
+          PY
