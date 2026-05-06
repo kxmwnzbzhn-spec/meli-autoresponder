@@ -1,0 +1,61 @@
+name: search-clip5-v5
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - run: pip install requests -q
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_YC_NEW: ${{ secrets.MELI_REFRESH_TOKEN_YC_NEW }}
+        run: |
+          python3 - <<'PY'
+          import os, requests, time, json
+          API="https://api.mercadolibre.com"
+          tok=requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token",
+              "client_id":os.environ["MELI_APP_ID"],
+              "client_secret":os.environ["MELI_APP_SECRET"],
+              "refresh_token":os.environ["MELI_REFRESH_TOKEN_YC_NEW"]},timeout=20).json()["access_token"]
+          h={"Authorization":f"Bearer {tok}"}
+          # /products/search domain MLM-SPEAKERS
+          r=requests.get(f"{API}/products/search?status=active&site_id=MLM&q=jbl+clip+5&limit=50",headers=h,timeout=20).json()
+          cpids=[]
+          for p in r.get("results",[]):
+              n=(p.get("name") or "").lower()
+              if "clip 5" in n: cpids.append(p["id"])
+          print(f"Catálogos Clip 5 encontrados: {len(cpids)}")
+          # Para cada uno GET full y mostrar attrs
+          info=[]
+          for cpid in cpids:
+              try:
+                  d=requests.get(f"{API}/products/{cpid}",headers=h,timeout=15).json()
+              except: continue
+              ats={a.get("id"):a.get("value_name") for a in d.get("attributes",[]) or []}
+              color=ats.get("COLOR") or ats.get("MAIN_COLOR") or ""
+              bbw=d.get("buy_box_winner") or {}
+              info.append({
+                  "cpid":cpid,
+                  "name":d.get("name",""),
+                  "color":color,
+                  "price":bbw.get("price"),
+                  "permalink":d.get("permalink",""),
+                  "main_features":d.get("main_features"),
+              })
+              time.sleep(0.05)
+          # Mostrar todos los colores
+          print(f"\n=== Todos los catálogos Clip 5 ({len(info)}) ===")
+          for r in info:
+              print(f"  {r['cpid']:<14} color='{r['color']:<25}' price={r['price']} name='{r['name'][:55]}'")
+          # Filtrar celeste/azul cielo/sky
+          KW=("celeste","cielo","sky","azul claro","light blue","aqua","crystal")
+          matches=[r for r in info if any(kw in (r["color"]+" "+r["name"]).lower() for kw in KW)]
+          print(f"\n=== Posibles 'celeste' ({len(matches)}) ===")
+          for r in matches:
+              print(f"\n  CPID: {r['cpid']}")
+              print(f"  Color: {r['color']}")
+              print(f"  Precio buy box: ${r['price']}")
+              print(f"  Name: {r['name']}")
+              print(f"  URL: {r['permalink']}")
+          PY
