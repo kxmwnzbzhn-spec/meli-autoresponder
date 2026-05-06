@@ -1,0 +1,42 @@
+name: up-grip-999
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - run: pip install requests -q
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_WILBERT: ${{ secrets.MELI_REFRESH_TOKEN_WILBERT }}
+        run: |
+          python3 - <<'PY'
+          import os, requests, time
+          API="https://api.mercadolibre.com"
+          tok=requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token",
+              "client_id":os.environ["MELI_APP_ID"],
+              "client_secret":os.environ["MELI_APP_SECRET"],
+              "refresh_token":os.environ["MELI_REFRESH_TOKEN_WILBERT"]},timeout=20).json()["access_token"]
+          h={"Authorization":f"Bearer {tok}"}
+          hj={**h,"Content-Type":"application/json"}
+          GRIPS=["MLM5295549238","MLM5295460002"]
+          for iid in GRIPS:
+              p=requests.get(f"{API}/items/{iid}/price_to_win?version=v2",headers=h,timeout=15).json()
+              cur=p.get("current_price")
+              ptw=p.get("price_to_win")
+              status=p.get("status")
+              sh=p.get("competitors_sharing_first_place",0)
+              print(f"\n{iid}: cur=${cur} ptw=${ptw} st={status} sh={sh}")
+              # Subir a 999
+              r=requests.put(f"{API}/items/{iid}",headers=hj,json={"price":999},timeout=15)
+              print(f"  PUT 999: {r.status_code}")
+              if r.status_code in (200,201):
+                  time.sleep(2)
+                  # Re-check ptw
+                  p2=requests.get(f"{API}/items/{iid}/price_to_win?version=v2",headers=h,timeout=15).json()
+                  print(f"  AFTER: cur=${p2.get('current_price')} ptw=${p2.get('price_to_win')} st={p2.get('status')}")
+              else:
+                  print(f"  err: {r.text[:200]}")
+              time.sleep(0.5)
+          PY
