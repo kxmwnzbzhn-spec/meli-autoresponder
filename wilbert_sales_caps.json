@@ -3,10 +3,11 @@
   "caps_by_date": {
     "2026-05-04": 50,
     "2026-05-05": 60,
-    "2026-05-06": 70
+    "2026-05-06": 100,
+    "2026-05-07": 999999
   },
   "default_cap": 999999,
   "paused_today_at": "2026-05-04T21:49:40.723368+00:00",
   "auto_pause_enabled": true,
-  "notes": "Cuando units_sold (paid+shipped) del día CDMX >= cap → dispatch pause_wilbert + bloquear war_wilbert"
+  "notes": "HOY 06/05: 100 unid → pausar. MAÑANA 07/05: sin límite (default)."
 }
