@@ -1,0 +1,35 @@
+name: find-wilbert-email
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - run: pip install requests -q
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_WILBERT: ${{ secrets.MELI_REFRESH_TOKEN_WILBERT }}
+        run: |
+          python3 - <<'PY'
+          import os, requests, json
+          API="https://api.mercadolibre.com"
+          tok=requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token",
+              "client_id":os.environ["MELI_APP_ID"],
+              "client_secret":os.environ["MELI_APP_SECRET"],
+              "refresh_token":os.environ["MELI_REFRESH_TOKEN_WILBERT"]},timeout=20).json().get("access_token")
+          h={"Authorization":f"Bearer {tok}"}
+          UID=3367276814
+          for ep in (f"/users/me",f"/users/{UID}",f"/users/{UID}?include=email",f"/my/applications",f"/users/{UID}/private"):
+              r=requests.get(f"{API}{ep}",headers=h,timeout=15)
+              print(f"\nGET {ep}: {r.status_code}")
+              try:
+                  d=r.json()
+                  if isinstance(d,dict):
+                      for k,v in d.items():
+                          if k in ("email","nickname","first_name","last_name","registration_date","status","permalink","secure_email"):
+                              print(f"  {k}: {v}")
+                      if "email" not in d and r.status_code==200:
+                          print(f"  keys: {list(d.keys())[:15]}")
+              except: print(f"  raw: {r.text[:200]}")
+          PY
