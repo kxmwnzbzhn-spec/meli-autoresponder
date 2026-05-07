@@ -1,0 +1,19 @@
+name: dedup-angel
+on: { workflow_dispatch: }
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests -q
+      - env:
+          MELI_APP_SECRET:                ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_ANGEL:       ${{ secrets.MELI_REFRESH_TOKEN_ANGEL }}
+          MELI_REFRESH_TOKEN_ANGEL_DAMIAN:${{ secrets.MELI_REFRESH_TOKEN_ANGEL_DAMIAN }}
+          REPO_PAT:                       ${{ secrets.REPO_PAT }}
+          TELEGRAM_BOT_TOKEN:             ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID:               ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python scripts/dedup_angel.py
