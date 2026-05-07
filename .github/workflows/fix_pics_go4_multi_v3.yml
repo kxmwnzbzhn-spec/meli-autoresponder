@@ -1,0 +1,73 @@
+name: fix-pics-go4-multi-v3
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - run: pip install requests -q
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+          MELI_REFRESH_TOKEN_WILBERT: ${{ secrets.MELI_REFRESH_TOKEN_WILBERT }}
+        run: |
+          python3 - <<'PY'
+          import os, requests, time
+          API="https://api.mercadolibre.com"
+          def tok(rt):
+              return requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token",
+                  "client_id":os.environ["MELI_APP_ID"],
+                  "client_secret":os.environ["MELI_APP_SECRET"],
+                  "refresh_token":rt},timeout=20).json().get("access_token")
+          tj=tok(os.environ["MELI_REFRESH_TOKEN"])
+          tw=tok(os.environ["MELI_REFRESH_TOKEN_WILBERT"])
+          hj={"Authorization":f"Bearer {tj}"}
+          hw={"Authorization":f"Bearer {tw}"}
+          hwj={**hw,"Content-Type":"application/json"}
+          IID="MLM5300550156"
+          # Source juan
+          src=requests.get(f"{API}/items/MLM5244765752?include_attributes=all",headers=hj,timeout=20).json()
+          # Pics por color: usar picture_ids directos
+          pic_ids_by_color={}
+          for v in src.get("variations",[]) or []:
+              col=""
+              for ac in v.get("attribute_combinations",[]) or []:
+                  if (ac.get("name") or "").lower()=="color":
+                      col=ac.get("value_name"); break
+              if col and v.get("picture_ids"):
+                  pic_ids_by_color[col]=v["picture_ids"][:6]
+          print("Pic IDs source:")
+          for c,p in pic_ids_by_color.items(): print(f"  {c}: {p[:2]}...")
+          # PUT en Wilbert
+          target=requests.get(f"{API}/items/{IID}?include_attributes=all",headers=hw,timeout=20).json()
+          out_vars=[]
+          all_new_pics=set()
+          for v in target.get("variations",[]) or []:
+              col=""
+              for ac in v.get("attribute_combinations",[]) or []:
+                  if (ac.get("name") or "").lower()=="color":
+                      col=ac.get("value_name"); break
+              vd={"id":v["id"],"price":v.get("price"),"available_quantity":v.get("available_quantity",1),
+                  "attribute_combinations":v.get("attribute_combinations",[])}
+              pids=pic_ids_by_color.get(col,[])
+              if pids:
+                  vd["picture_ids"]=pids
+                  for p in pids: all_new_pics.add(p)
+              out_vars.append(vd)
+          existing=[p["id"] for p in (target.get("pictures") or []) if p.get("id")]
+          for pid in all_new_pics:
+              if pid not in existing: existing.append(pid)
+          existing=existing[:12]
+          body={"pictures":[{"id":p} for p in existing],"variations":out_vars}
+          r=requests.put(f"{API}/items/{IID}",headers=hwj,json=body,timeout=30)
+          print(f"\nPUT: {r.status_code}")
+          if r.status_code in (200,201):
+              for v in r.json().get("variations",[]):
+                  ac=v.get("attribute_combinations",[])
+                  c=ac[0].get("value_name") if ac else ""
+                  pids=v.get("picture_ids",[])
+                  print(f"  {c}: {len(pids)} pics first={pids[0] if pids else 'none'}")
+          else:
+              print(r.text[:600])
+          PY
