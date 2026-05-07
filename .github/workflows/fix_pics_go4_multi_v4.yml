@@ -1,0 +1,69 @@
+name: fix-pics-go4-multi-v4
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - run: pip install requests -q
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+          MELI_REFRESH_TOKEN_WILBERT: ${{ secrets.MELI_REFRESH_TOKEN_WILBERT }}
+        run: |
+          python3 - <<'PY'
+          import os, requests
+          API="https://api.mercadolibre.com"
+          def tok(rt):
+              return requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token",
+                  "client_id":os.environ["MELI_APP_ID"],
+                  "client_secret":os.environ["MELI_APP_SECRET"],
+                  "refresh_token":rt},timeout=20).json().get("access_token")
+          tj=tok(os.environ["MELI_REFRESH_TOKEN"])
+          tw=tok(os.environ["MELI_REFRESH_TOKEN_WILBERT"])
+          hj={"Authorization":f"Bearer {tj}"}
+          hw={"Authorization":f"Bearer {tw}"}
+          hwj={**hw,"Content-Type":"application/json"}
+          IID="MLM5300550156"
+          src=requests.get(f"{API}/items/MLM5244765752?include_attributes=all",headers=hj,timeout=20).json()
+          # Tomar 2 pics por color = 12 totales
+          pic_ids_by_color={}
+          for v in src.get("variations",[]) or []:
+              col=""
+              for ac in v.get("attribute_combinations",[]) or []:
+                  if (ac.get("name") or "").lower()=="color":
+                      col=ac.get("value_name"); break
+              if col and v.get("picture_ids"):
+                  pic_ids_by_color[col]=v["picture_ids"][:2]  # solo 2 por color = 6×2=12
+          # Pictures globales = unión de todas
+          all_pics=[]
+          for pids in pic_ids_by_color.values():
+              for p in pids:
+                  if p not in all_pics: all_pics.append(p)
+          print(f"all_pics global: {len(all_pics)}")
+          # Variations
+          target=requests.get(f"{API}/items/{IID}?include_attributes=all",headers=hw,timeout=20).json()
+          out_vars=[]
+          for v in target.get("variations",[]) or []:
+              col=""
+              for ac in v.get("attribute_combinations",[]) or []:
+                  if (ac.get("name") or "").lower()=="color":
+                      col=ac.get("value_name"); break
+              vd={"id":v["id"],"price":v.get("price"),"available_quantity":v.get("available_quantity",1),
+                  "attribute_combinations":v.get("attribute_combinations",[])}
+              if pic_ids_by_color.get(col):
+                  vd["picture_ids"]=pic_ids_by_color[col]
+              out_vars.append(vd)
+          body={"pictures":[{"id":p} for p in all_pics],"variations":out_vars}
+          r=requests.put(f"{API}/items/{IID}",headers=hwj,json=body,timeout=30)
+          print(f"PUT: {r.status_code}")
+          if r.status_code in (200,201):
+              for v in r.json().get("variations",[]):
+                  ac=v.get("attribute_combinations",[])
+                  c=ac[0].get("value_name") if ac else ""
+                  pids=v.get("picture_ids",[])
+                  print(f"  {c}: {pids}")
+          else:
+              print(r.text[:500])
+          PY
