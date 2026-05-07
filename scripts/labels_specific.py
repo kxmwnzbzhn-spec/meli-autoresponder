@@ -29,7 +29,41 @@ def tok(rt):
         "grant_type":"refresh_token","client_id":APP_ID,"client_secret":APP_SECRET,"refresh_token":rt}).json()
     return r.get("access_token")
 
-def clean_title(title):
+def _parse_color(text):
+    if not text: return None
+    tl=" "+text.lower()+" "
+    col_map=[("camuflaj","Camuflaje"),("camo","Camuflaje"),("azul marino","Azul Marino"),
+             ("aqua","Aqua"),("celeste","Celeste"),("negr","Negro"),(" black","Negro"),
+             ("roj","Rojo"),(" red","Rojo"),("rosa","Rosa"),("pink","Rosa"),
+             ("morad","Morado"),("violeta","Morado"),("purple","Morado"),
+             (" azul","Azul"),(" blue","Azul"),("blanco","Blanco"),("white","Blanco"),
+             ("verde","Verde"),("green","Verde"),("amarillo","Amarillo"),("yellow","Amarillo"),
+             ("naranja","Naranja"),("orange","Naranja"),("gris","Gris"),("gray","Gris"),
+             ("plateado","Plata"),("silver","Plata"),("dorado","Dorado"),("gold","Dorado")]
+    for k,v in col_map:
+        if k in tl: return v
+    return None
+
+def get_variant_color(item_obj, H):
+    attrs = item_obj.get("variation_attributes") or []
+    for a in attrs:
+        if a.get("id")=="COLOR" or "color" in (a.get("name","") or "").lower():
+            v = a.get("value_name") or ""
+            c = _parse_color(v)
+            if c: return c
+    iid = item_obj.get("id"); vid = item_obj.get("variation_id")
+    if iid and vid:
+        try:
+            r = requests.get(f"https://api.mercadolibre.com/items/{iid}/variations/{vid}",
+                             headers=H, timeout=8)
+            if r.status_code == 200:
+                for ac in (r.json().get("attribute_combinations") or []):
+                    if ac.get("id")=="COLOR" or "color" in (ac.get("name","") or "").lower():
+                        return _parse_color(ac.get("value_name"))
+        except: pass
+    return None
+
+def clean_title(title, item_obj=None, H=None):
     t=(title or "").strip()
     for w in ["Bocina ","bocina ","Parlante ","parlante ","Altavoz ","altavoz ","Speaker ","speaker ",
               "JBL ","jbl ","Jbl ","Sony ","SONY ","Bose ","BOSE "]:
@@ -44,15 +78,11 @@ def clean_title(title):
     elif "xb100" in tl: model="Sony XB100"
     elif "soundlink" in tl: model="Bose SoundLink"
     else: model=t[:30]
-    col_map=[("camuflaj","Camuflaje"),("camo","Camuflaje"),("azul marino","Azul Marino"),
-             ("aqua","Aqua"),("celeste","Celeste"),("negr","Negro"),("black","Negro"),
-             ("roj","Rojo"),(" red","Rojo"),("rosa","Rosa"),("pink","Rosa"),
-             ("morad","Morado"),("violeta","Morado"),("purple","Morado"),
-             (" azul","Azul"),(" blue","Azul")]
-    color=None
-    for k,v in col_map:
-        if k in (" "+tl):
-            color=v; break
+    color = None
+    if item_obj is not None:
+        color = get_variant_color(item_obj, H)
+    if not color:
+        color = _parse_color(t)
     return f"{model} {color}" if color else model
 
 _COND_CACHE={}
@@ -202,7 +232,7 @@ for acc_hint, oid in targets:
     comp_lines=[]; has_used=False
     for it in items:
         io_obj = it.get("item") or {}
-        title = clean_title(io_obj.get("title",""))
+        title = clean_title(io_obj.get("title",""), io_obj, H)
         qty = it.get("quantity",1)
         cond = get_condition(io_obj, H)
         if cond == "used":
