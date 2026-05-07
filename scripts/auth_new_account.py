@@ -83,11 +83,12 @@ if r.status_code == 200:
     file_data = r.json()
     content = base64.b64decode(file_data["content"]).decode("utf-8")
     sha = file_data["sha"]
-    # Buscar la línea del account y cambiar active:false a active:true
-    new_content = content.replace(
-        f'id: "{ACCOUNT_NAME}", name: "Raymundo May",  tokenEnv: "MELI_REFRESH_TOKEN_{ACCOUNT_NAME}", active: false',
-        f'id: "{ACCOUNT_NAME}", name: "Raymundo May",  tokenEnv: "MELI_REFRESH_TOKEN_{ACCOUNT_NAME}", active: true'
-    )
+    # Buscar la línea del account (por id) y cambiar active:false → active:true (regex genérico)
+    import re
+    pattern = re.compile(r'(\{\s*id:\s*"' + re.escape(ACCOUNT_NAME) + r'"[^}]*?active:\s*)false', re.DOTALL)
+    new_content, n = pattern.subn(r'\1true', content)
+    if n == 0:
+        print(f"  ⚠️  no encontré entry para id={ACCOUNT_NAME} con active:false")
     if new_content != content:
         upd_body = {
             "message": f"Activate {ACCOUNT_NAME} (secret added)",
