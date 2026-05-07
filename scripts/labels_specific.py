@@ -134,53 +134,71 @@ for chunk in ORDERS_RAW.split(","):
     targets.append((acc.strip(), oid.strip()))
 print(f"=== Targets: {targets} ===")
 
+# Pre-tokenize todas las cuentas
+TOKENS = {}
+for a, rt in ACCS.items():
+    if rt:
+        t = tok(rt)
+        if t: TOKENS[a] = t
+print(f"Tokens disponibles para: {list(TOKENS.keys())}")
+
+def find_in_all_accounts(oid, hint_acc=None):
+    """Busca el oid como order/pack/shipment en todas las cuentas. Devuelve (acc, sid, items) o (None,None,None)."""
+    order = [hint_acc] + [a for a in TOKENS.keys() if a != hint_acc] if hint_acc else list(TOKENS.keys())
+    for a in order:
+        if a not in TOKENS: continue
+        H = {"Authorization": f"Bearer {TOKENS[a]}"}
+        # 1) /orders
+        o = requests.get(f"https://api.mercadolibre.com/orders/{oid}", headers=H, timeout=10).json()
+        if isinstance(o, dict) and o.get("error") is None and not o.get("message","").startswith("Order do not exists"):
+            sid = (o.get("shipping") or {}).get("id")
+            items = o.get("order_items") or []
+            if sid:
+                return a, sid, items, H
+        # 2) /shipments
+        sh = requests.get(f"https://api.mercadolibre.com/shipments/{oid}", headers=H, timeout=10)
+        if sh.status_code == 200:
+            j = sh.json()
+            if isinstance(j, dict) and j.get("status"):
+                # buscar items via orders/search
+                items=[]
+                try:
+                    qr = requests.get("https://api.mercadolibre.com/orders/search", headers=H, timeout=15,
+                                      params={"shipping.id":oid}).json()
+                    if qr.get("results"): items = qr["results"][0].get("order_items",[])
+                except: pass
+                return a, oid, items, H
+        # 3) /packs
+        pk = requests.get(f"https://api.mercadolibre.com/packs/{oid}", headers=H, timeout=10).json()
+        if isinstance(pk, dict) and pk.get("orders"):
+            for sub_o in pk["orders"]:
+                sub_oid = sub_o.get("id")
+                if not sub_oid: continue
+                sub = requests.get(f"https://api.mercadolibre.com/orders/{sub_oid}", headers=H, timeout=10).json()
+                sid = (sub.get("shipping") or {}).get("id")
+                if sid:
+                    return a, sid, sub.get("order_items",[]), H
+    return None, None, None, None
+
 writer = PdfWriter()
 fail = []
 ok = 0
-for acc, oid in targets:
-    rt = ACCS.get(acc)
-    if not rt:
-        print(f"  err {acc}/{oid}: cuenta sin token"); fail.append((acc,oid,"sin token")); continue
-    at = tok(rt)
-    if not at:
-        print(f"  err {acc}/{oid}: no pude renovar token"); fail.append((acc,oid,"refresh token failed")); continue
-    H = {"Authorization": f"Bearer {at}"}
-
-    # 1) intenta /orders/{id}
-    o = requests.get(f"https://api.mercadolibre.com/orders/{oid}", headers=H, timeout=15).json()
-    print(f"  {acc}/{oid}: order resp keys={list(o.keys())[:8]}")
-    sid = (o.get("shipping") or {}).get("id")
-    items = o.get("order_items") or []
-    pack_id = o.get("pack_id")
-    if not sid and pack_id:
-        # 2) si es pack, lista las orders del pack y toma el shipping del primero
-        print(f"    es pack; pack_id={pack_id}")
-        pk = requests.get(f"https://api.mercadolibre.com/packs/{pack_id}", headers=H, timeout=15).json()
-        for sub_o in (pk.get("orders") or []):
-            sub_oid = sub_o.get("id")
-            if not sub_oid: continue
-            sub = requests.get(f"https://api.mercadolibre.com/orders/{sub_oid}", headers=H, timeout=15).json()
-            sid = (sub.get("shipping") or {}).get("id")
-            if sid:
-                if not items: items = sub.get("order_items") or []
-                break
+for acc_hint, oid in targets:
+    print(f"\n--- Buscando {oid} (hint: {acc_hint}) ---")
+    acc, sid, items, H = find_in_all_accounts(oid, acc_hint)
     if not sid:
-        # 3) tal vez el ID que dieron ES el shipment_id directo
-        sh_test = requests.get(f"https://api.mercadolibre.com/shipments/{oid}", headers=H, timeout=10)
-        if sh_test.status_code == 200:
-            sid = oid
-            print(f"    ID era shipment_id directo")
-            # buscar items: orders.search por shipment_id
-            try:
-                qr = requests.get("https://api.mercadolibre.com/orders/search", headers=H, timeout=15,
-                                  params={"shipping.id":sid}).json()
-                if qr.get("results"):
-                    items = qr["results"][0].get("order_items",[])
-            except: pass
-    if not sid:
-        print(f"  err {acc}/{oid}: sin shipping (tried order, pack, shipment). Body: {str(o)[:300]}")
-        fail.append((acc,oid,f"sin shipping. order keys={list(o.keys())[:5]}")); continue
-    print(f"    resolved sid={sid}, items={len(items)}")
+        print(f"  NO ENCONTRADO en ninguna cuenta")
+        fail.append((acc_hint, oid, "no encontrado en ninguna cuenta")); continue
+    print(f"  encontrado en cuenta={acc} sid={sid}")
+    # Re-query order para obtener buyer (no lo trae find_in_all_accounts)
+    buyer="?"
+    try:
+        oqr = requests.get("https://api.mercadolibre.com/orders/search", headers=H, timeout=10,
+                           params={"shipping.id":sid}).json()
+        if oqr.get("results"):
+            buyer = ((oqr["results"][0].get("buyer") or {}).get("nickname")) or "?"
+            if not items: items = oqr["results"][0].get("order_items",[])
+    except: pass
     comp_lines=[]; has_used=False
     for it in items:
         io_obj = it.get("item") or {}
@@ -192,9 +210,10 @@ for acc, oid in targets:
             comp_lines.append(f"USADO {title} x{qty}")
         else:
             comp_lines.append(f"{title} x{qty}")
-    buyer = (o.get("buyer") or {}).get("nickname","?")
+    if not comp_lines:
+        comp_lines = [f"Order {oid}"]
     s = {"sid":sid,"account":acc,"buyer":buyer,"comp_lines":comp_lines,"has_used":has_used}
-    print(f"  {acc}/{oid} -> sid={sid}  buyer={buyer}  used={has_used}  comp={comp_lines}")
+    print(f"  resolved -> sid={sid}  buyer={buyer}  used={has_used}  comp={comp_lines}")
 
     # Get label PDF
     r = requests.get("https://api.mercadolibre.com/shipment_labels",
