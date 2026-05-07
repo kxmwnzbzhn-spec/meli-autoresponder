@@ -205,5 +205,45 @@
     "auto_replenish": true,
     "active": true,
     "color": "Camuflaje"
+  },
+  "MLM2910457933": {
+    "real_stock": 0,
+    "master_stock": 0,
+    "min_visible": 0,
+    "auto_replenish": false,
+    "active": false,
+    "agotado": true
+  },
+  "MLM2910457999": {
+    "real_stock": 0,
+    "master_stock": 0,
+    "min_visible": 0,
+    "auto_replenish": false,
+    "active": false,
+    "agotado": true
+  },
+  "MLM2910768375": {
+    "real_stock": 0,
+    "master_stock": 0,
+    "min_visible": 0,
+    "auto_replenish": false,
+    "active": false,
+    "agotado": true
+  },
+  "MLM2910768379": {
+    "real_stock": 0,
+    "master_stock": 0,
+    "min_visible": 0,
+    "auto_replenish": false,
+    "active": false,
+    "agotado": true
+  },
+  "MLM2910880775": {
+    "real_stock": 0,
+    "master_stock": 0,
+    "min_visible": 0,
+    "auto_replenish": false,
+    "active": false,
+    "agotado": true
   }
 }
