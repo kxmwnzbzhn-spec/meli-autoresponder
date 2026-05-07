@@ -163,5 +163,46 @@
     "min_visible": 1,
     "auto_replenish": true,
     "active": true
+  },
+  "MLM5300550156": {
+    "variations_real_stock": {
+      "Azul": 12
+    },
+    "min_visible": 1,
+    "auto_replenish": true,
+    "active": true,
+    "title": "Bocina Bluetooth Portátil Go 4 IP67 OEM 1.1 Espejo"
+  },
+  "MLM2911241921": {
+    "real_stock": 0,
+    "master_stock": 0,
+    "min_visible": 0,
+    "auto_replenish": false,
+    "active": false,
+    "agotado": true
+  },
+  "MLM5295749840": {
+    "real_stock": 0,
+    "master_stock": 0,
+    "min_visible": 0,
+    "auto_replenish": false,
+    "active": false,
+    "agotado": true
+  },
+  "MLM2911241939": {
+    "real_stock": 0,
+    "master_stock": 0,
+    "min_visible": 0,
+    "auto_replenish": false,
+    "active": false,
+    "agotado": true
+  },
+  "MLM2911205487": {
+    "real_stock": 0,
+    "master_stock": 0,
+    "min_visible": 0,
+    "auto_replenish": false,
+    "active": false,
+    "agotado": true
   }
 }
