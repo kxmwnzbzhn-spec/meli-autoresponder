@@ -1,0 +1,56 @@
+name: find-wilbert-live
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - run: pip install requests -q
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_WILBERT: ${{ secrets.MELI_REFRESH_TOKEN_WILBERT }}
+        run: |
+          python3 - <<'PY'
+          import os, requests
+          from collections import Counter
+          API="https://api.mercadolibre.com"
+          tok=requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token",
+              "client_id":os.environ["MELI_APP_ID"],
+              "client_secret":os.environ["MELI_APP_SECRET"],
+              "refresh_token":os.environ["MELI_REFRESH_TOKEN_WILBERT"]},timeout=20).json()["access_token"]
+          h={"Authorization":f"Bearer {tok}"}
+          hj={**h,"Content-Type":"application/json"}
+          UID=3367276814
+          ids=[]; off=0
+          while True:
+              j=requests.get(f"{API}/users/{UID}/items/search?limit=50&offset={off}",headers=h,timeout=20).json()
+              r=j.get("results",[]); ids+=r
+              off+=50
+              if off>=j.get("paging",{}).get("total",0) or not r: break
+          print(f"Total items: {len(ids)}")
+          # Bulk con status + sub_status
+          items={}
+          for i in range(0,len(ids),20):
+              r=requests.get(f"{API}/items?ids={','.join(ids[i:i+20])}&attributes=id,status,sub_status,available_quantity,title",headers=h,timeout=25).json()
+              for it in r:
+                  if it.get("code")==200: items[it["body"]["id"]]=it["body"]
+          c=Counter()
+          live=[]
+          for iid,b in items.items():
+              st=b.get("status")
+              sub=tuple(b.get("sub_status") or [])
+              c[(st,sub)]+=1
+              if st=="active":
+                  live.append((iid,b.get("title","")[:50],b.get("available_quantity")))
+          print("\n=== Statuses ===")
+          for k,v in c.most_common(): print(f"  {k}: {v}")
+          print(f"\n=== ACTIVE items: {len(live)} ===")
+          for r in live: print(f"  {r[0]} qty={r[2]} '{r[1]}'")
+          # Pausar todos active
+          if live:
+              print("\n=== PAUSANDO ===")
+              for iid,_,_ in live:
+                  r=requests.put(f"{API}/items/{iid}",headers=hj,json={"status":"paused"},timeout=15)
+                  print(f"  {iid}: {r.status_code}")
+          PY
