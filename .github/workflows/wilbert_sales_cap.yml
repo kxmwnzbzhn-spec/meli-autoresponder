@@ -29,30 +29,24 @@ jobs:
         run: python scripts/wilbert_sales_cap_check.py
       - name: Commit cap state if changed
         run: |
-          git config user.email "bot@local"; git config user.name "bot"
+          git config user.email "bot@local"
+          git config user.name "bot"
           git pull --rebase 2>/dev/null || true
           git add wilbert_sales_caps.json
           git diff --cached --quiet || git commit -m "wilbert-sales-cap: state update"
           git push origin main 2>/dev/null || true
-      - name: Re-trigger SELF (perpetual loop ~75-90s)
+      - name: Re-trigger SELF
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Solo retrigger si auto_pause_enabled=true (sino ya pausó y deja descansar)
-          STILL_ACTIVE=$(python3 -c "
-import json
-try:
-    d=json.load(open('wilbert_sales_caps.json'))
-    print('1' if d.get('auto_pause_enabled', True) else '0')
-except: print('1')
-")
+          STILL_ACTIVE=$(python3 -c "import json; d=json.load(open('wilbert_sales_caps.json')); print('1' if d.get('auto_pause_enabled', True) else '0')" 2>/dev/null || echo "1")
           if [ "$STILL_ACTIVE" = "1" ]; then
-              sleep 45
-              curl -sL -X POST -H "Authorization: Bearer $GH_TOKEN" \
-                -H "Accept: application/vnd.github+json" \
-                "https://api.github.com/repos/${{ github.repository }}/actions/workflows/wilbert_sales_cap.yml/dispatches" \
-                -d '{"ref":"main"}'
-              echo "self-retrigger sent"
+            sleep 45
+            curl -sL -X POST -H "Authorization: Bearer $GH_TOKEN" \
+              -H "Accept: application/vnd.github+json" \
+              "https://api.github.com/repos/${{ github.repository }}/actions/workflows/wilbert_sales_cap.yml/dispatches" \
+              -d '{"ref":"main"}'
+            echo "self-retrigger sent"
           else
-              echo "auto_pause disabled, skip retrigger"
+            echo "auto_pause disabled, skip retrigger"
           fi
