@@ -5,18 +5,24 @@ on:
       code:
         description: 'OAuth code TG-...'
         required: true
+      account_name:
+        description: 'Nombre de la cuenta (ej RAYMUNDO_MAY)'
+        required: true
+        default: 'RAYMUNDO_MAY'
 jobs:
   run:
     runs-on: ubuntu-latest
-    timeout-minutes: 3
+    timeout-minutes: 4
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: { python-version: '3.11' }
-      - run: pip install requests -q
+      - run: pip install requests pynacl -q
       - env:
           MELI_APP_SECRET:    ${{ secrets.MELI_APP_SECRET }}
           CODE:               ${{ inputs.code }}
+          ACCOUNT_NAME:       ${{ inputs.account_name }}
+          REPO_PAT:           ${{ secrets.REPO_PAT }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID:   ${{ secrets.TELEGRAM_CHAT_ID }}
         run: python scripts/auth_new_account.py
