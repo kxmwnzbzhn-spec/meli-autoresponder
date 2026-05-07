@@ -1,0 +1,44 @@
+name: diag-perfume-1
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - run: pip install requests -q
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_WILBERT: ${{ secrets.MELI_REFRESH_TOKEN_WILBERT }}
+        run: |
+          python3 - <<'PY'
+          import os, requests
+          API="https://api.mercadolibre.com"
+          tok=requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token",
+              "client_id":os.environ["MELI_APP_ID"],
+              "client_secret":os.environ["MELI_APP_SECRET"],
+              "refresh_token":os.environ["MELI_REFRESH_TOKEN_WILBERT"]},timeout=20).json()["access_token"]
+          h={"Authorization":f"Bearer {tok}"}
+          hj={**h,"Content-Type":"application/json"}
+          IID="MLM5265893750"
+          it=requests.get(f"{API}/items/{IID}",headers=h).json()
+          print(f"status={it.get('status')} sub={it.get('sub_status')} qty={it.get('available_quantity')} price=${it.get('price')} title='{it.get('title','')[:55]}'")
+          if it.get("status")!="active":
+              print("Item NO active, no se puede pelear ptw")
+              raise SystemExit(0)
+          p=requests.get(f"{API}/items/{IID}/price_to_win?version=v2",headers=h).json()
+          ptw=p.get("price_to_win"); st=p.get("status"); sh=p.get("competitors_sharing_first_place")
+          winner=p.get("winner") or {}
+          is_full=any(b.get("id")=="fulfillment" and b.get("status")=="boosted" for b in winner.get("boosts",[]))
+          print(f"ptw={ptw} st={st} sh={sh} FULL={is_full}")
+          # Si estamos perdiendo, bajar a ptw-1 (con floor 249 default perfume bajo)
+          floor=249
+          if st!="winning" and ptw:
+              target=int(ptw)-1
+              if is_full and target<floor: target=int(ptw*0.95)
+              if target<floor:
+                  print(f"FLOOR_BLOCK ptw={ptw} floor={floor}")
+              else:
+                  r=requests.put(f"{API}/items/{IID}",headers=hj,json={"price":target},timeout=15)
+                  print(f"PUT {target}: {r.status_code}")
+          PY
