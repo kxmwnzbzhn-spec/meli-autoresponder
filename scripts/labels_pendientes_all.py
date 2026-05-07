@@ -68,6 +68,28 @@ def clean_title(title):
     return f"{model} {color}" if color else model
 
 
+_COND_CACHE={}
+def get_condition(item_obj, H):
+    """Devuelve 'used' / 'new' / None. Usa cache + fallback a /items/{id}."""
+    cond = item_obj.get("condition")
+    if cond: return cond
+    iid = item_obj.get("id")
+    if not iid: return None
+    if iid in _COND_CACHE: return _COND_CACHE[iid]
+    try:
+        r = requests.get(f"https://api.mercadolibre.com/items/{iid}",
+                         headers=H, timeout=8,
+                         params={"attributes":"condition"})
+        if r.status_code == 200:
+            cond = (r.json() or {}).get("condition")
+            _COND_CACHE[iid] = cond
+            return cond
+    except Exception:
+        pass
+    _COND_CACHE[iid] = None
+    return None
+
+
 def detect_content_bbox(pdf_bytes, page_idx=0):
     try:
         imgs = convert_from_bytes(pdf_bytes, dpi=72,
@@ -90,16 +112,29 @@ def detect_content_bbox(pdf_bytes, page_idx=0):
 
 
 def render_header(s, header_h):
+    has_used = bool(s.get("has_used"))
+    usado_strip = 14 if has_used else 0
+    total_h = header_h + usado_strip
     buf=io.BytesIO()
     c=canvas.Canvas(buf, pagesize=(PAGE_W, PAGE_H))
-    c.setFillColor(Color(1, 0.96, 0.74))
-    c.rect(0, PAGE_H-header_h, PAGE_W, header_h, fill=1, stroke=0)
-    c.setFillColorRGB(0,0,0)
     cx = PAGE_W/2.0
+    # Banda amarilla para datos
+    c.setFillColor(Color(1, 0.96, 0.74))
+    c.rect(0, PAGE_H-total_h, PAGE_W, header_h, fill=1, stroke=0)
+    # Strip rojo USADO arriba del todo (si aplica)
+    if has_used:
+        c.setFillColorRGB(0.85, 0.13, 0.13)
+        c.rect(0, PAGE_H-usado_strip, PAGE_W, usado_strip, fill=1, stroke=0)
+        c.setFillColorRGB(1,1,1)
+        c.setFont("Helvetica-Bold", 9)
+        c.drawCentredString(cx, PAGE_H-11, "*** PRODUCTO USADO ***")
+    # Texto en banda amarilla
+    yellow_top = PAGE_H - usado_strip
+    c.setFillColorRGB(0,0,0)
     c.setFont("Helvetica-Bold", 7.5)
-    c.drawCentredString(cx, PAGE_H-11, f"[{s['account'].upper()}] {s['buyer'][:30]} | Ship:{s['sid']}")
+    c.drawCentredString(cx, yellow_top-11, f"[{s['account'].upper()}] {s['buyer'][:30]} | Ship:{s['sid']}")
     big = s["comp_lines"][:4]; n=len(big); lh=16
-    block_top=PAGE_H-18; block_bot=PAGE_H-header_h+4
+    block_top=yellow_top-18; block_bot=PAGE_H-total_h+4
     block_h=block_top-block_bot; text_h=n*lh
     first_y = block_top - (block_h - text_h)/2.0 - 12
     c.setFont("Helvetica-Bold", 14)
@@ -153,7 +188,18 @@ for acc, rt in ACCS.items():
             acc_seen[(acc, st, sub or "(none)")] += 1
             if (st, sub) not in ALLOWED: continue
             items=ord_o.get("order_items",[])
-            comp_lines=[f"{clean_title((it.get('item') or {}).get('title',''))} x{it.get('quantity',1)}" for it in items]
+            comp_lines=[]
+            has_used=False
+            for it in items:
+                io_obj = it.get("item") or {}
+                title = clean_title(io_obj.get("title",""))
+                qty = it.get("quantity",1)
+                cond = get_condition(io_obj, H)
+                if cond == "used":
+                    has_used = True
+                    comp_lines.append(f"USADO {title} x{qty}")
+                else:
+                    comp_lines.append(f"{title} x{qty}")
             buyer=(ord_o.get("buyer") or {}).get("nickname","?")
             deadline=None
             try:
@@ -164,7 +210,7 @@ for acc, rt in ACCS.items():
             shipments.append({
                 "sid":sid,"account":acc,"token":at,
                 "comp_lines":comp_lines,"buyer":buyer,
-                "status":st,"substatus":sub,
+                "status":st,"substatus":sub,"has_used":has_used,
                 "deadline": deadline.strftime("%a %d %H:%M") if deadline else "s/d",
                 "tracking": sh.get("tracking_number","")
             })
@@ -236,41 +282,48 @@ hF=Font(bold=True, color="FFFFFF", size=11)
 center=Alignment(horizontal="center", vertical="center", wrap_text=True)
 border=Border(left=Side(style="thin"), right=Side(style="thin"),
               top=Side(style="thin"), bottom=Side(style="thin"))
-headers=["#","Cuenta","Substatus","Shipment ID","Comprador","PRODUCTO","Tracking","Deadline"]
+headers=["#","Cuenta","Substatus","Cond","Shipment ID","Comprador","PRODUCTO","Tracking","Deadline"]
 for col,h in enumerate(headers,1):
     c=ws.cell(row=1,column=col,value=h)
     c.fill=hf; c.font=hF; c.alignment=center; c.border=border
 acc_colors={"Juan":"D5E8D4","Raymundo":"DAE8FC","Wilbert":"FAD7A0","Claribel":"FFE6CC",
             "Asva":"E1D5E7","Mildred":"FFF2CC","Dilcie":"F5CBA7","Bren":"D4E6F1","Yc_New":"D5DBDB"}
+used_fill = PatternFill("solid", fgColor="FF6B6B")
 for i,s in enumerate(shipments,1):
     fill=PatternFill("solid", fgColor=acc_colors.get(s["account"],"FFFFFF"))
-    row=[i, s["account"], s["substatus"], s["sid"], s["buyer"], "\n".join(s["comp_lines"]), s["tracking"], s["deadline"]]
+    cond_label = "USADO" if s.get("has_used") else "Nuevo"
+    row=[i, s["account"], s["substatus"], cond_label, s["sid"], s["buyer"], "\n".join(s["comp_lines"]), s["tracking"], s["deadline"]]
     for col,val in enumerate(row,1):
         c=ws.cell(row=i+1, column=col, value=val)
         c.fill=fill; c.border=border
         c.alignment=Alignment(vertical="center", wrap_text=True)
-        if col==6: c.font=Font(bold=True, size=10)
-widths={1:5,2:11,3:14,4:14,5:24,6:50,7:24,8:14}
+        if col==7: c.font=Font(bold=True, size=10)
+        if col==4 and val=="USADO":
+            c.fill=used_fill; c.font=Font(bold=True, color="FFFFFF")
+widths={1:5,2:11,3:14,4:8,5:14,6:24,7:50,8:24,9:14}
 for col,w in widths.items(): ws.column_dimensions[chr(64+col)].width=w
 for r in range(2, len(shipments)+2): ws.row_dimensions[r].height=28
 ws.freeze_panes="A2"
 
 # Hoja 2: breakdown por cuenta
 ws2=wb.create_sheet("Por cuenta")
-ws2.append(["Cuenta","ready_to_print","printed","TOTAL"])
-for c in ["A1","B1","C1","D1"]: ws2[c].fill=hf; ws2[c].font=hF
+ws2.append(["Cuenta","ready_to_print","printed","TOTAL","USADOS"])
+for c in ["A1","B1","C1","D1","E1"]: ws2[c].fill=hf; ws2[c].font=hF
 totals = defaultdict(lambda: Counter())
+usados = Counter()
 for s in shipments:
     totals[s["account"]][s["substatus"]] += 1
+    if s.get("has_used"): usados[s["account"]] += 1
 for acc in sorted(totals.keys()):
     rtp = totals[acc]["ready_to_print"]
     pr  = totals[acc]["printed"]
-    ws2.append([acc, rtp, pr, rtp+pr])
+    ws2.append([acc, rtp, pr, rtp+pr, usados[acc]])
 ws2.append([])
 ws2.append(["TOTAL", sum(t["ready_to_print"] for t in totals.values()),
             sum(t["printed"] for t in totals.values()),
-            sum(t["ready_to_print"]+t["printed"] for t in totals.values())])
-for col in "ABCD": ws2.column_dimensions[col].width=18
+            sum(t["ready_to_print"]+t["printed"] for t in totals.values()),
+            sum(usados.values())])
+for col in "ABCDE": ws2.column_dimensions[col].width=18
 
 xlsx_out = "DESPACHO_PENDIENTES_TODAS.xlsx"
 wb.save(xlsx_out)
