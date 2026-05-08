@@ -30,6 +30,14 @@ def gh(method, path, **kw):
 try:
     BL=set(x["item_id"] for x in json.load(open("blacklist.json")).get("items",[]))
 except: BL=set()
+
+# Cargar stock_config_wilbert para respetar items agotados
+try:
+    with open("stock_config_wilbert.json") as _cf: CFG=json.load(_cf)
+except Exception: CFG={}
+AGOTADO=set(iid for iid,c in CFG.items() if c.get("agotado") or c.get("active") is False or c.get("auto_replenish") is False)
+print(f"Skipping (agotado/inactive): {len(AGOTADO)}")
+BL=BL.union(AGOTADO)
 print(f"Blacklist: {BL}")
 
 # 2) Enable workflows war_wilbert.yml + war_wilbert_perfumes.yml
