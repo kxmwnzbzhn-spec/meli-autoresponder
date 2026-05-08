@@ -1,0 +1,63 @@
+name: publish-jpg-le-male
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - run: pip install requests -q
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_WILBERT: ${{ secrets.MELI_REFRESH_TOKEN_WILBERT }}
+        run: |
+          python3 - <<'PY'
+          import os, requests, time
+          API="https://api.mercadolibre.com"
+          tok=requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token",
+              "client_id":os.environ["MELI_APP_ID"],
+              "client_secret":os.environ["MELI_APP_SECRET"],
+              "refresh_token":os.environ["MELI_REFRESH_TOKEN_WILBERT"]},timeout=20).json()["access_token"]
+          h={"Authorization":f"Bearer {tok}"}
+          hj={**h,"Content-Type":"application/json"}
+          # Buscar catalog Le Male Elixir 125ml
+          cands=[]
+          for q in ("Jean Paul Gaultier Le Male Elixir 125","Le Male Elixir Parfum 125ml","JPG Le Male Elixir"):
+              r=requests.get(f"{API}/products/search?status=active&site_id=MLM&q={q}&limit=15",headers=h,timeout=15).json()
+              for p in r.get("results",[]):
+                  n=(p.get("name") or "").lower()
+                  if "le male" in n and "elixir" in n: cands.append(p["id"])
+          cands=list(dict.fromkeys(cands))
+          print(f"Candidatos: {len(cands)}")
+          info=[]
+          for pid in cands[:10]:
+              try:
+                  it_r=requests.get(f"{API}/products/{pid}/items?limit=50",headers=h,timeout=15).json()
+                  count=len(it_r.get("results",[]))
+                  cat=(it_r.get("results") or [{}])[0].get("category_id","MLM1271")
+                  d=requests.get(f"{API}/products/{pid}",headers=h,timeout=15).json()
+                  info.append({"cpid":pid,"name":d.get("name",""),"items":count,"cat":cat,
+                    "pics":d.get("pictures") or []})
+              except: continue
+              time.sleep(0.05)
+          info.sort(key=lambda x:-x["items"])
+          print("Top:")
+          for r in info[:5]: print(f"  {r['cpid']} items={r['items']} '{r['name'][:60]}'")
+          if not info: print("NO match"); raise SystemExit(0)
+          top=info[0]
+          pics=[{"id":p.get("id")} for p in top["pics"] if p.get("id")][:10]
+          body={
+            "site_id":"MLM","title":"Perfume Jean Paul Gaultier Le Male Elixir 125ml",
+            "category_id":top["cat"],"price":999,"currency_id":"MXN",
+            "available_quantity":1,"buying_mode":"buy_it_now","listing_type_id":"gold_pro",
+            "condition":"new",
+            "shipping":{"mode":"me2","free_shipping":True,"logistic_type":"xd_drop_off","local_pick_up":False},
+            "catalog_product_id":top["cpid"],"catalog_listing":True,"pictures":pics,
+          }
+          r=requests.post(f"{API}/items",headers=hj,json=body,timeout=45)
+          print(f"POST: {r.status_code}")
+          if r.status_code in (200,201):
+              print(f"*** NUEVO: {r.json().get('id')} cpid={top['cpid']} ***")
+          else:
+              print(r.text[:500])
+          PY
