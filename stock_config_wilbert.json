@@ -536,5 +536,31 @@
     "agotado": true,
     "auto_replenish": false,
     "real_stock": 0
+  },
+  "MLM2916673327": {
+    "title": "Miss Dior Blooming Bouquet 100ml EDT",
+    "catalog_product_id": "MLM20922422",
+    "floor_price": 799,
+    "ceiling_price": 1499,
+    "min_visible": 1,
+    "real_stock": 10,
+    "master_stock": 10,
+    "auto_replenish": true,
+    "active": true,
+    "type": "catalog_no_variations",
+    "condition": "new"
+  },
+  "MLM2916649417": {
+    "title": "Jo Milano Game of Spades Wildcard 100ml",
+    "catalog_product_id": "MLM26894105",
+    "floor_price": 499,
+    "ceiling_price": 1199,
+    "min_visible": 1,
+    "real_stock": 10,
+    "master_stock": 10,
+    "auto_replenish": true,
+    "active": true,
+    "type": "catalog_no_variations",
+    "condition": "new"
   }
 }
