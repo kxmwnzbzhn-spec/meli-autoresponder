@@ -478,5 +478,18 @@
     "min_visible": 1,
     "auto_replenish": true,
     "active": true
+  },
+  "MLM5309659262": {
+    "title": "Perfume Billie Eilish Eilish Mujer EDP 100ml",
+    "catalog_product_id": "MLM20601206",
+    "floor_price": 399,
+    "ceiling_price": 899,
+    "min_visible": 1,
+    "real_stock": 48,
+    "master_stock": 48,
+    "auto_replenish": true,
+    "active": true,
+    "type": "catalog_no_variations",
+    "condition": "new"
   }
 }
