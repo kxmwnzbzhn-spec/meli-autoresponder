@@ -1,13 +1,17 @@
 {
   "MLM5266045796": {
     "line": "Mandarin-Sky-shared",
-    "auto_replenish": true,
-    "min_visible": 1,
-    "active": true,
+    "auto_replenish": false,
+    "min_visible": 0,
+    "active": false,
     "title": "Perfume Armaf Odyssey Mandarin Sky Limited Edition",
     "catalog_product_id": "MLM63357676",
     "type": "catalog_no_variations",
-    "condition": "new"
+    "condition": "new",
+    "agotado": true,
+    "paused_by_user": true,
+    "floor_locked_by_user": true,
+    "real_stock": 0
   },
   "MLM5265867982": {
     "line": "Mandarin-Sky-shared",
@@ -57,13 +61,17 @@
   },
   "MLM5266045818": {
     "line": "Mandarin-Sky-60ml",
-    "auto_replenish": true,
-    "min_visible": 1,
-    "active": true,
+    "auto_replenish": false,
+    "min_visible": 0,
+    "active": false,
     "title": "Perfume Armaf Odyssey Mandarin Sky 60ml Para Cabal",
     "catalog_product_id": "MLM46926154",
     "type": "catalog_no_variations",
-    "condition": "new"
+    "condition": "new",
+    "agotado": true,
+    "paused_by_user": true,
+    "floor_locked_by_user": true,
+    "real_stock": 0
   },
   "MLM5265868092": {
     "line": "Lattafa-His-Confession",
@@ -77,23 +85,31 @@
   },
   "MLM5265880848": {
     "line": "Armaf-Spectra",
-    "auto_replenish": true,
-    "min_visible": 1,
-    "active": true,
+    "auto_replenish": false,
+    "min_visible": 0,
+    "active": false,
     "title": "Perfume Armaf Odyssey Spectra Hombre 100ml Eau De ",
     "catalog_product_id": "MLM42520269",
     "type": "catalog_no_variations",
-    "condition": "new"
+    "condition": "new",
+    "agotado": true,
+    "paused_by_user": true,
+    "floor_locked_by_user": true,
+    "real_stock": 0
   },
   "MLM5266020058": {
     "line": "Mandarin-Sky-shared",
-    "auto_replenish": true,
-    "min_visible": 1,
-    "active": true,
+    "auto_replenish": false,
+    "min_visible": 0,
+    "active": false,
     "title": "Perfume Armaf Odyssey Mandarin Sky Edp 100ml",
     "catalog_product_id": "MLM56232246",
     "type": "catalog_no_variations",
-    "condition": "new"
+    "condition": "new",
+    "agotado": true,
+    "paused_by_user": true,
+    "floor_locked_by_user": true,
+    "real_stock": 0
   },
   "MLM5265893746": {
     "line": "Armaf-Club-Iconic",
@@ -151,15 +167,19 @@
   },
   "MLM5265893752": {
     "line": "Mandarin-Sky-shared",
-    "auto_replenish": true,
-    "min_visible": 1,
-    "active": true,
+    "auto_replenish": false,
+    "min_visible": 0,
+    "active": false,
     "title": "Armaf Odyssey Mega Man Edición Limitada Edp 100 Ml",
     "catalog_product_id": "MLM21765262",
     "type": "catalog_no_variations",
     "condition": "new",
     "floor_price": 249,
-    "ceiling_price": 999
+    "ceiling_price": 999,
+    "agotado": true,
+    "paused_by_user": true,
+    "floor_locked_by_user": true,
+    "real_stock": 0
   },
   "MLM2910457937": {
     "real_stock": 0,
@@ -605,5 +625,23 @@
     "active": true,
     "type": "catalog_no_variations",
     "condition": "new"
+  },
+  "MLM5290875026": {
+    "active": false,
+    "agotado": true,
+    "paused_by_user": true,
+    "floor_locked_by_user": true,
+    "auto_replenish": false,
+    "real_stock": 0,
+    "min_visible": 0
+  },
+  "MLM2908818183": {
+    "active": false,
+    "agotado": true,
+    "paused_by_user": true,
+    "floor_locked_by_user": true,
+    "auto_replenish": false,
+    "real_stock": 0,
+    "min_visible": 0
   }
 }
