@@ -457,11 +457,25 @@
     "floor_price": 399,
     "ceiling_price": 899,
     "min_visible": 1,
-    "real_stock": 20,
-    "auto_replenish": true,
-    "active": true,
+    "real_stock": 0,
+    "auto_replenish": false,
+    "active": false,
     "type": "catalog_no_variations",
     "condition": "new",
-    "master_stock": 20
+    "master_stock": 20,
+    "agotado": true
+  },
+  "MLM2908818917": {
+    "active": false,
+    "agotado": true,
+    "auto_replenish": false,
+    "real_stock": 0
+  },
+  "MLM2908793357": {
+    "real_stock": 20,
+    "master_stock": 20,
+    "min_visible": 1,
+    "auto_replenish": true,
+    "active": true
   }
 }
