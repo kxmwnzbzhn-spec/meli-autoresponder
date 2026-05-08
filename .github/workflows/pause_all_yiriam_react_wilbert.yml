@@ -1,0 +1,50 @@
+name: pause-all-yiriam-react-wilbert
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - run: pip install requests -q
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_YC_NEW: ${{ secrets.MELI_REFRESH_TOKEN_YC_NEW }}
+          MELI_REFRESH_TOKEN_WILBERT: ${{ secrets.MELI_REFRESH_TOKEN_WILBERT }}
+        run: |
+          python3 - <<'PY'
+          import os, requests, time
+          API="https://api.mercadolibre.com"
+          def tok(rt):
+              return requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token",
+                  "client_id":os.environ["MELI_APP_ID"],
+                  "client_secret":os.environ["MELI_APP_SECRET"],
+                  "refresh_token":rt},timeout=20).json().get("access_token")
+          ty=tok(os.environ["MELI_REFRESH_TOKEN_YC_NEW"])
+          tw=tok(os.environ["MELI_REFRESH_TOKEN_WILBERT"])
+          hy={"Authorization":f"Bearer {ty}"}
+          hyj={**hy,"Content-Type":"application/json"}
+          hwj={"Authorization":f"Bearer {tw}","Content-Type":"application/json"}
+          UID_Y=3364413125
+          # Listar active en Yiriam
+          ids=[]; off=0
+          while True:
+              j=requests.get(f"{API}/users/{UID_Y}/items/search?status=active&limit=50&offset={off}",headers=hy,timeout=20).json()
+              r=j.get("results",[]); ids+=r
+              off+=50
+              if off>=j.get("paging",{}).get("total",0) or not r: break
+          print(f"Yiriam active: {len(ids)}")
+          paused=0
+          for iid in ids:
+              r=requests.put(f"{API}/items/{iid}",headers=hyj,json={"status":"paused"},timeout=15)
+              if r.status_code in (200,201): paused+=1
+              time.sleep(0.05)
+          print(f"Yiriam: pausados {paused}/{len(ids)}")
+          # Reactivar 2 Wilbert
+          for iid in ("MLM2910806817","MLM2910457917"):
+              r=requests.put(f"{API}/items/{iid}",headers=hwj,json={"status":"active","available_quantity":1},timeout=15)
+              print(f"WILBERT activate {iid}: {r.status_code}")
+              if r.status_code not in (200,201):
+                  r2=requests.put(f"{API}/items/{iid}",headers=hwj,json={"status":"active"},timeout=15)
+                  print(f"  retry: {r2.status_code} {r2.text[:120]}")
+          PY
