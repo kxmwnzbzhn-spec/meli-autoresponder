@@ -1,0 +1,106 @@
+name: wilbert-night-audit
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install requests -q
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_WILBERT: ${{ secrets.MELI_REFRESH_TOKEN_WILBERT }}
+          GH_TOKEN_OPS: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python3 - <<'PY'
+          import os, requests, json
+          from datetime import datetime, timezone, timedelta
+          API="https://api.mercadolibre.com"
+          REPO="kxmwnzbzhn-spec/meli-autoresponder"
+          
+          # --- 1) Workflows críticos: state ---
+          print("=== 1) Workflows críticos ===")
+          gh={"Authorization":f"Bearer {os.environ['GH_TOKEN_OPS']}"}
+          target=("war_wilbert.yml","war_wilbert_perfumes.yml","wilbert_sales_cap.yml","wilbert_morning_reopen.yml","blacklist_enforce.yml","answer_all.yml")
+          states={}
+          for p in (1,2,3,4,5):
+              r=requests.get(f"https://api.github.com/repos/{REPO}/actions/workflows?per_page=100&page={p}",headers=gh).json()
+              for w in r.get("workflows",[]):
+                  fn=w["path"].split("/")[-1]
+                  if fn in target: states[fn]=w["state"]
+          for fn in target:
+              s=states.get(fn,"NOT FOUND")
+              flag="✓" if s=="active" else "✗"
+              print(f"  {flag} {fn}: {s}")
+          
+          # --- 2) Últimos runs (loop alive) ---
+          print("\n=== 2) Loop alive (últimos 3 runs cada uno) ===")
+          for fn in ("war_wilbert.yml","war_wilbert_perfumes.yml","wilbert_sales_cap.yml"):
+              r=requests.get(f"https://api.github.com/repos/{REPO}/actions/workflows/{fn}/runs?per_page=3",headers=gh).json()
+              runs=r.get("workflow_runs",[])
+              print(f"\n  {fn}:")
+              for run in runs[:3]:
+                  print(f"    {run['id']} {run['status']:>11} {str(run.get('conclusion')):>10} {run['created_at']}")
+          
+          # --- 3) MELI: estado items ---
+          tok=requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token",
+              "client_id":os.environ["MELI_APP_ID"],
+              "client_secret":os.environ["MELI_APP_SECRET"],
+              "refresh_token":os.environ["MELI_REFRESH_TOKEN_WILBERT"]},timeout=20).json()["access_token"]
+          h={"Authorization":f"Bearer {tok}"}
+          UID=3367276814
+          print("\n=== 3) Estado items Wilbert ===")
+          counts={}
+          for st in ("active","paused","under_review","closed"):
+              j=requests.get(f"{API}/users/{UID}/items/search?status={st}&limit=1",headers=h,timeout=20).json()
+              counts[st]=j.get("paging",{}).get("total",0)
+          for k,v in counts.items(): print(f"  {k}: {v}")
+          
+          # --- 4) Items active sin stock visible ---
+          ids=[]; off=0
+          while True:
+              j=requests.get(f"{API}/users/{UID}/items/search?status=active&limit=50&offset={off}",headers=h,timeout=20).json()
+              r=j.get("results",[]); ids+=r
+              off+=50
+              if off>=j.get("paging",{}).get("total",0) or not r: break
+          items={}
+          for i in range(0,len(ids),20):
+              r=requests.get(f"{API}/items?ids={','.join(ids[i:i+20])}&attributes=id,available_quantity,price",headers=h,timeout=25).json()
+              for it in r:
+                  if it.get("code")==200: items[it["body"]["id"]]=it["body"]
+          zero=[iid for iid,b in items.items() if (b.get("available_quantity") or 0)<=0]
+          print(f"\n=== 4) Items active con qty<=0 (problema): {len(zero)} ===")
+          for iid in zero[:5]: print(f"  {iid}")
+          
+          # --- 5) Config audit ---
+          try: cfg=json.load(open("stock_config_wilbert.json"))
+          except: cfg={}
+          missing=[i for i in ids if i not in cfg]
+          print(f"\n=== 5) Config: {len(cfg)} entries ===")
+          print(f"  Items active sin entry: {len(missing)}")
+          
+          # --- 6) Sales cap config ---
+          try:
+              caps=json.load(open("wilbert_sales_caps.json"))
+              now_cdmx=datetime.now(timezone.utc)-timedelta(hours=6)
+              today=now_cdmx.strftime("%Y-%m-%d")
+              tomorrow=(now_cdmx+timedelta(days=1)).strftime("%Y-%m-%d")
+              cap_today=caps.get("caps_by_date",{}).get(today,caps.get("default_cap"))
+              cap_tom=caps.get("caps_by_date",{}).get(tomorrow,caps.get("default_cap"))
+              print(f"\n=== 6) Sales cap ===")
+              print(f"  Hoy {today}: {cap_today}")
+              print(f"  Mañana {tomorrow}: {cap_tom}")
+              print(f"  auto_pause: {caps.get('auto_pause_enabled')}")
+          except Exception as e:
+              print(f"  caps err: {e}")
+          
+          # --- 7) Ventas hoy ---
+          since=(now_cdmx.replace(hour=0,minute=0,second=0,microsecond=0)+timedelta(hours=6)).strftime("%Y-%m-%dT%H:%M:%S.000-00:00")
+          try:
+              j=requests.get(f"{API}/orders/search?seller={UID}&order.date_created.from={since}&limit=1",headers=h,timeout=20).json()
+              total_today=j.get("paging",{}).get("total","?")
+              print(f"\n=== 7) Ventas hoy: {total_today} órdenes ===")
+          except Exception as e:
+              print(f"  orders err: {e}")
+          PY
