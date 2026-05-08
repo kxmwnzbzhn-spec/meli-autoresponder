@@ -671,5 +671,12 @@
     "real_stock": 0,
     "min_visible": 0,
     "closed": true
+  },
+  "MLM2916664375": {
+    "floor_price": 449,
+    "ceiling_price": 1499,
+    "min_visible": 1,
+    "auto_replenish": true,
+    "active": true
   }
 }
