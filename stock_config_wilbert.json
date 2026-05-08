@@ -242,7 +242,9 @@
     "min_visible": 0,
     "auto_replenish": false,
     "active": false,
-    "agotado": true
+    "agotado": true,
+    "paused_by_user": true,
+    "floor_locked_by_user": true
   },
   "MLM2910768379": {
     "real_stock": 0,
@@ -250,7 +252,9 @@
     "min_visible": 0,
     "auto_replenish": false,
     "active": false,
-    "agotado": true
+    "agotado": true,
+    "paused_by_user": true,
+    "floor_locked_by_user": true
   },
   "MLM2910880775": {
     "real_stock": 0,
