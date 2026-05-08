@@ -1,0 +1,65 @@
+name: wilbert-auto-replenish-5min
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '*/5 * * * *'
+concurrency:
+  group: wilbert-replenish-5min
+  cancel-in-progress: false
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions: { actions: write }
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install requests -q
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_WILBERT: ${{ secrets.MELI_REFRESH_TOKEN_WILBERT }}
+        run: |
+          python3 - <<'PY'
+          import os, requests, json, time
+          API="https://api.mercadolibre.com"
+          tok=requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token",
+              "client_id":os.environ["MELI_APP_ID"],
+              "client_secret":os.environ["MELI_APP_SECRET"],
+              "refresh_token":os.environ["MELI_REFRESH_TOKEN_WILBERT"]},timeout=20).json()["access_token"]
+          h={"Authorization":f"Bearer {tok}"}
+          hj={**h,"Content-Type":"application/json"}
+          UID=3367276814
+          # Cargar config + blacklist
+          try: cfg=json.load(open("stock_config_wilbert.json"))
+          except: cfg={}
+          try: BL=set(x["item_id"] for x in json.load(open("blacklist.json")).get("items",[]))
+          except: BL=set()
+          # Listar paused
+          ids=[]; off=0
+          while True:
+              j=requests.get(f"{API}/users/{UID}/items/search?status=paused&limit=50&offset={off}",headers=h,timeout=20).json()
+              r=j.get("results",[]); ids+=r
+              off+=50
+              if off>=j.get("paging",{}).get("total",0) or not r: break
+          # Bulk para sub_status
+          items={}
+          for i in range(0,len(ids),20):
+              r=requests.get(f"{API}/items?ids={','.join(ids[i:i+20])}&attributes=id,sub_status,available_quantity,title",headers=h,timeout=25).json()
+              for it in r:
+                  if it.get("code")==200: items[it["body"]["id"]]=it["body"]
+          react=0; skip=0
+          for iid,b in items.items():
+              c=cfg.get(iid,{})
+              if iid in BL: skip+=1; continue
+              if c.get("agotado") or c.get("paused_by_user") or c.get("active") is False:
+                  skip+=1; continue
+              # Solo reactivar si sub_status indica out_of_stock o paused_by_seller (auto)
+              sub=b.get("sub_status") or []
+              qty_target=c.get("min_visible",1)
+              r=requests.put(f"{API}/items/{iid}",headers=hj,json={"status":"active","available_quantity":qty_target},timeout=15)
+              if r.status_code in (200,201):
+                  react+=1
+                  print(f"  REACT {iid} qty={qty_target} '{b.get('title','')[:45]}'")
+              time.sleep(0.05)
+          print(f"\n=== {react} reactivados, {skip} skipped (BL/agotado) ===")
+          PY
