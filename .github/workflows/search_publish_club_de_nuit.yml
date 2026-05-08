@@ -1,0 +1,115 @@
+name: search-publish-club-de-nuit
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - run: pip install requests -q
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_WILBERT: ${{ secrets.MELI_REFRESH_TOKEN_WILBERT }}
+        run: |
+          python3 - <<'PY'
+          import os, requests, time
+          API="https://api.mercadolibre.com"
+          tok=requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token",
+              "client_id":os.environ["MELI_APP_ID"],
+              "client_secret":os.environ["MELI_APP_SECRET"],
+              "refresh_token":os.environ["MELI_REFRESH_TOKEN_WILBERT"]},timeout=20).json()["access_token"]
+          h={"Authorization":f"Bearer {tok}"}
+          hj={**h,"Content-Type":"application/json"}
+          # Search products
+          EAN="6294015164152"
+          # Probar buscar por EAN directo
+          candidates=[]
+          for q in ("Club de Nuit Iconic 105ml","Armaf Club de Nuit Iconic 105","6294015164152","Club de Nuit Iconic"):
+              r=requests.get(f"{API}/products/search?status=active&site_id=MLM&q={q}&limit=20",headers=h,timeout=15).json()
+              for p in r.get("results",[]):
+                  pid=p["id"]
+                  candidates.append(pid)
+          candidates=list(dict.fromkeys(candidates))  # unique preserve order
+          print(f"Candidatos: {len(candidates)}")
+          # GET cada uno detalle
+          info=[]
+          for pid in candidates[:30]:
+              try:
+                  d=requests.get(f"{API}/products/{pid}",headers=h,timeout=15).json()
+              except: continue
+              name=(d.get("name") or "").lower()
+              if "club de nuit" not in name and "iconic" not in name: continue
+              attrs={a.get("id"):a.get("value_name") for a in d.get("attributes",[]) or []}
+              gtin=attrs.get("GTIN","") or ""
+              vol=attrs.get("ITEM_VOLUME","") or ""
+              # buy_box winner
+              bbw=d.get("buy_box_winner") or {}
+              # contar items que venden este catalog (proxy de "más vendido")
+              items_total=d.get("settings",{}).get("listing_strategy","")
+              # /products/{cpid}/items
+              try:
+                  it_r=requests.get(f"{API}/products/{pid}/items?limit=50",headers=h,timeout=15).json()
+                  count_items=len(it_r.get("results",[]))
+                  total_sold=sum((i.get("sold_quantity",0) or 0) for i in it_r.get("results",[]))
+              except:
+                  count_items=0; total_sold=0
+              info.append({
+                "cpid":pid,"name":d.get("name",""),"gtin":gtin,"vol":vol,
+                "bbw_price":bbw.get("price"),"items":count_items,"total_sold":total_sold,
+                "perma":d.get("permalink","")
+              })
+              time.sleep(0.05)
+          # Ordenar por total_sold DESC
+          info.sort(key=lambda x:-(x["total_sold"] or 0))
+          print(f"\n=== TOP CANDIDATOS ===")
+          for r in info[:10]:
+              print(f"\n  CPID: {r['cpid']}")
+              print(f"  Name: {r['name'][:65]}")
+              print(f"  GTIN: {r['gtin']}  Vol: {r['vol']}")
+              print(f"  buy_box price: ${r['bbw_price']}  items_count: {r['items']}  total_sold: {r['total_sold']}")
+              print(f"  URL: {r['perma']}")
+          # Filtrar match con EAN si lo encuentra
+          match=[r for r in info if r["gtin"]==EAN]
+          if match:
+              top=match[0]
+              print(f"\n*** MATCH EAN ***  cpid={top['cpid']} sold={top['total_sold']}")
+          else:
+              top=info[0] if info else None
+              if top: print(f"\n*** NO match EAN, usando TOP por sold ***  cpid={top['cpid']}")
+          # Publicar en Wilbert
+          if top:
+              cpid=top["cpid"]
+              d=requests.get(f"{API}/products/{cpid}",headers=h,timeout=15).json()
+              cat=d.get("category_id")
+              # Precio inicial: ptw-1 o ceiling
+              start_price=int(top["bbw_price"])-1 if top.get("bbw_price") else 599
+              start_price=max(399,min(899,start_price))
+              # Pictures del catalog
+              pics=[{"id":p.get("id")} for p in (d.get("pictures") or []) if p.get("id")][:10]
+              body={
+                "site_id":"MLM",
+                "category_id":cat,
+                "price":start_price,
+                "currency_id":"MXN",
+                "available_quantity":1,
+                "buying_mode":"buy_it_now",
+                "listing_type_id":"gold_pro",
+                "condition":"new",
+                "shipping":{"mode":"me2","free_shipping":True,"logistic_type":"xd_drop_off","local_pick_up":False},
+                "catalog_product_id":cpid,
+                "catalog_listing":True,
+              }
+              if pics: body["pictures"]=pics
+              print(f"\nPublicando: cpid={cpid} price=${start_price}")
+              r=requests.post(f"{API}/items",headers=hj,json=body,timeout=45)
+              print(f"POST: {r.status_code}")
+              if r.status_code in (200,201):
+                  new=r.json().get("id")
+                  print(f"*** NUEVO Wilbert: {new} ***")
+                  # Description
+                  desc=("Perfume Armaf Club de Nuit Iconic Eau de Parfum 105 ml. Fragancia masculina elegante con notas amaderadas, especiadas y cítricas. Inspirada en clásicos de lujo, presentación premium. Garantía 30 dias del vendedor por defectos de fabrica. Envio GRATIS Mercado Envios. Despacho 24h habiles.")
+                  rd=requests.post(f"{API}/items/{new}/description",headers=hj,json={"plain_text":desc},timeout=15)
+                  print(f"description: {rd.status_code}")
+              else:
+                  print(r.text[:600])
+          PY
