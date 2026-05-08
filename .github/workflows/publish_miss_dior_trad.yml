@@ -1,0 +1,53 @@
+name: publish-miss-dior-trad
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - run: pip install requests -q
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_WILBERT: ${{ secrets.MELI_REFRESH_TOKEN_WILBERT }}
+        run: |
+          python3 - <<'PY'
+          import os, requests
+          API="https://api.mercadolibre.com"
+          tok=requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token",
+              "client_id":os.environ["MELI_APP_ID"],
+              "client_secret":os.environ["MELI_APP_SECRET"],
+              "refresh_token":os.environ["MELI_REFRESH_TOKEN_WILBERT"]},timeout=20).json()["access_token"]
+          h={"Authorization":f"Bearer {tok}"}
+          hj={**h,"Content-Type":"application/json"}
+          # Get attributes de un item top del catalog Miss Dior
+          it_r=requests.get(f"{API}/products/MLM6230451/items?limit=1",headers=h,timeout=15).json()
+          src_id=(it_r.get("results") or [{}])[0].get("id")
+          print(f"Source: {src_id}")
+          src=requests.get(f"{API}/items/{src_id}?include_attributes=all",headers=h,timeout=15).json()
+          attrs=[]
+          for a in src.get("attributes",[]) or []:
+              if a.get("id") in ("BRAND","FRAGRANCE_TYPE","ITEM_VOLUME","UNIT_VOLUME","GENDER","FAMILY_BRAND","DETAILED_MODEL","MODEL"):
+                  v={"id":a["id"]}
+                  if a.get("value_id"): v["value_id"]=a["value_id"]
+                  if a.get("value_name"): v["value_name"]=a["value_name"]
+                  attrs.append(v)
+          if not any(a.get("id")=="GTIN" for a in attrs):
+              attrs.append({"id":"GTIN","value_name":"No aplica"})
+          pics=[{"id":p.get("id")} for p in (src.get("pictures") or []) if p.get("id")][:10]
+          body={
+            "site_id":"MLM","title":"Miss Dior Eau de Parfum 100ml Mujer Floral Atemporal",
+            "category_id":src.get("category_id"),
+            "price":1199,"currency_id":"MXN",
+            "available_quantity":1,"buying_mode":"buy_it_now","listing_type_id":"gold_pro",
+            "condition":"new",
+            "shipping":{"mode":"me2","free_shipping":True,"logistic_type":"xd_drop_off","local_pick_up":False},
+            "pictures":pics,"attributes":attrs,
+          }
+          r=requests.post(f"{API}/items",headers=hj,json=body,timeout=45)
+          print(f"POST: {r.status_code}")
+          if r.status_code in (200,201):
+              print(f"*** NUEVO trad: {r.json().get('id')} ***")
+          else:
+              print(r.text[:600])
+          PY
