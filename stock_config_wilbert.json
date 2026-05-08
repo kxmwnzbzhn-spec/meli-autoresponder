@@ -678,5 +678,25 @@
     "min_visible": 1,
     "auto_replenish": true,
     "active": true
+  },
+  "MLM2916908707": {
+    "active": false,
+    "agotado": true,
+    "paused_by_user": true,
+    "floor_locked_by_user": true,
+    "auto_replenish": false,
+    "real_stock": 0,
+    "min_visible": 0,
+    "closed": true
+  },
+  "MLM2916897191": {
+    "active": false,
+    "agotado": true,
+    "paused_by_user": true,
+    "floor_locked_by_user": true,
+    "auto_replenish": false,
+    "real_stock": 0,
+    "min_visible": 0,
+    "closed": true
   }
 }
