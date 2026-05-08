@@ -1,0 +1,79 @@
+name: publish-21-perfumes
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - run: pip install requests -q
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_WILBERT: ${{ secrets.MELI_REFRESH_TOKEN_WILBERT }}
+        run: |
+          python3 - <<'PY'
+          import os, requests, time, json
+          API="https://api.mercadolibre.com"
+          tok=requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token",
+              "client_id":os.environ["MELI_APP_ID"],
+              "client_secret":os.environ["MELI_APP_SECRET"],
+              "refresh_token":os.environ["MELI_REFRESH_TOKEN_WILBERT"]},timeout=20).json()["access_token"]
+          h={"Authorization":f"Bearer {tok}"}
+          hj={**h,"Content-Type":"application/json"}
+          # (cpid, title, floor, ceiling, real_stock, paused?)
+          ITEMS=[
+            ("MLM9176957","Perfume Creed Aventus EDP 100ml Hombre",499,1999,11,False),
+            ("MLM21595910","Perfume Initio Oud for Greatness EDP 90ml Unisex",499,1999,12,False),
+            ("MLM18995918","Perfume Creed Silver Mountain Water EDP 100ml",499,1999,12,False),
+            ("MLM43701077","Perfume Viktor Rolf Spicebomb Dark Leather 90ml",499,1999,10,False),
+            ("MLM29586150","Perfume Dolce Gabbana Devotion EDP 100ml Mujer",499,1999,10,False),
+            ("MLM68047375","Perfume Gucci Flora Gorgeous Gardenia Mujer",499,1999,10,False),
+            ("MLM25958991","Perfume Orientica Amber Rouge EDP 150ml Unisex",499,1999,12,False),
+            ("MLM65832593","Perfume Byredo Rose of No Mans Land EDP 100ml",499,1999,10,False),
+            ("MLM50526482","Perfume Giorgio Armani My Way EDP 90ml Mujer",499,1999,11,False),
+            ("MLM22304106","Perfume Creed Himalaya EDP 100ml Hombre",499,1999,11,False),
+            ("MLM48766151","Perfume Lattafa Khamrah Dukhan EDP 100ml",499,1999,11,False),
+            ("MLM40591622","Perfume Marc Jacobs Daisy Eau So Fresh 75ml",499,1999,11,False),
+            ("MLM41095335","Perfume Armaf Odyssey Candee EDP 100ml Mujer",499,1999,8,False),
+            ("MLM25959047","Perfume Orientica Royal Amber 150ml EDP",499,1999,11,False),
+            ("MLM25646215","Perfume Parfums de Marly Oriana 75ml EDP Dama",499,1999,11,False),
+            ("MLM24563064","Perfume Lattafa Fakhar Men EDP 100ml",499,1999,11,False),
+            ("MLM51040105","Perfume Armaf Odyssey Aqua Men EDP 200ml",499,1999,0,True),
+            ("MLM62201698","Perfume Le Labo Santal 33 EDP 100ml Unisex",999,2500,10,False),
+            ("MLM20560053","Perfume Armaf Odyssey Homme EDP 100ml",499,1999,0,True),
+            ("MLM58548590","Perfume Lattafa Asad Zanzibar EDP 100ml",499,1999,1,False),
+            ("MLM25909299","Perfume Lattafa Musaman EDP 100ml Unisex",499,1999,1,False),
+          ]
+          results=[]
+          for cpid,title,floor,ceiling,real,paused in ITEMS:
+              try:
+                  d=requests.get(f"{API}/products/{cpid}",headers=h,timeout=15).json()
+                  it_r=requests.get(f"{API}/products/{cpid}/items?limit=5",headers=h,timeout=15).json()
+                  cat=(it_r.get("results") or [{}])[0].get("category_id","MLM1271")
+                  bbw=d.get("buy_box_winner") or {}
+                  start=bbw.get("price")
+                  start=int(start)-1 if start else int((floor+ceiling)/2)
+                  start=max(floor,min(ceiling,start))
+                  pics=[{"id":p.get("id")} for p in (d.get("pictures") or []) if p.get("id")][:10]
+                  body={"site_id":"MLM","title":title[:60],"category_id":cat,"price":start,
+                    "currency_id":"MXN","available_quantity":1,"buying_mode":"buy_it_now",
+                    "listing_type_id":"gold_pro","condition":"new",
+                    "shipping":{"mode":"me2","free_shipping":True,"logistic_type":"xd_drop_off","local_pick_up":False},
+                    "catalog_product_id":cpid,"catalog_listing":True,"pictures":pics}
+                  r=requests.post(f"{API}/items",headers=hj,json=body,timeout=45)
+                  if r.status_code in (200,201):
+                      new=r.json().get("id")
+                      print(f"OK {cpid} → {new} price=${start} floor=${floor} ceiling=${ceiling} real={real} paused={paused}")
+                      if paused:
+                          time.sleep(1)
+                          requests.put(f"{API}/items/{new}",headers=hj,json={"status":"paused"},timeout=15)
+                      results.append({"cpid":cpid,"new":new,"floor":floor,"ceiling":ceiling,"real":real,"paused":paused,"title":title})
+                  else:
+                      print(f"ERR {cpid}: {r.status_code} {r.text[:150]}")
+              except Exception as e:
+                  print(f"EXC {cpid}: {e}")
+              time.sleep(0.5)
+          # Print summary at end
+          print("\n=== RESUMEN ===")
+          for r in results: print(f"  {r['new']}  cpid={r['cpid']}  floor=${r['floor']}  ceiling=${r['ceiling']}  real={r['real']}  paused={r['paused']}")
+          PY
