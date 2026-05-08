@@ -1,0 +1,29 @@
+name: charge6-lock-499
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - run: pip install requests -q
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_WILBERT: ${{ secrets.MELI_REFRESH_TOKEN_WILBERT }}
+        run: |
+          python3 - <<'PY'
+          import os, requests
+          API="https://api.mercadolibre.com"
+          tok=requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token",
+              "client_id":os.environ["MELI_APP_ID"],
+              "client_secret":os.environ["MELI_APP_SECRET"],
+              "refresh_token":os.environ["MELI_REFRESH_TOKEN_WILBERT"]},timeout=20).json()["access_token"]
+          hj={"Authorization":f"Bearer {tok}","Content-Type":"application/json"}
+          # 3 Charge 6: precio $499 + active
+          for iid in ("MLM2911241939","MLM2911205487","MLM2911241921"):
+              r=requests.put(f"{API}/items/{iid}",headers=hj,json={"price":499,"status":"active","available_quantity":1},timeout=15)
+              print(f"{iid}: {r.status_code} {'OK $499 active' if r.status_code in (200,201) else r.text[:120]}")
+          # MLM5295749840 paused
+          r=requests.put(f"{API}/items/MLM5295749840",headers=hj,json={"status":"paused"},timeout=15)
+          print(f"MLM5295749840: {r.status_code} pause {'OK' if r.status_code in (200,201) else r.text[:120]}")
+          PY
