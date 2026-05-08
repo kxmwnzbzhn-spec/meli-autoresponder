@@ -1,0 +1,56 @@
+name: apply-promos-10
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - run: pip install requests -q
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_WILBERT: ${{ secrets.MELI_REFRESH_TOKEN_WILBERT }}
+        run: |
+          python3 - <<'PY'
+          import os, requests, time
+          API="https://api.mercadolibre.com"
+          tok=requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token",
+              "client_id":os.environ["MELI_APP_ID"],
+              "client_secret":os.environ["MELI_APP_SECRET"],
+              "refresh_token":os.environ["MELI_REFRESH_TOKEN_WILBERT"]},timeout=20).json()["access_token"]
+          h={"Authorization":f"Bearer {tok}"}
+          hj={**h,"Content-Type":"application/json"}
+          # 3 a $449 + 7 a $799
+          GROUPS=[
+            (449,["MLM2910806845","MLM2910768333","MLM2910806881"]),
+            (799,["MLM2910880769","MLM2910806871","MLM2910768361","MLM2910806853","MLM2910457991","MLM2910457983","MLM2910457973"])
+          ]
+          for target,items in GROUPS:
+              for iid in items:
+                  print(f"\n=== {iid} → ${target} ===")
+                  it=requests.get(f"{API}/items/{iid}",headers=h).json()
+                  cur=it.get("price",0)
+                  if cur<=target:
+                      print(f"  cur=${cur} ya<=${target}, skip")
+                      continue
+                  # Probar v1: POST /seller-promotions/items?app_version=v2 PRICE_DISCOUNT
+                  body={"id":iid,"promotion_type":"PRICE_DISCOUNT","offer_type":"PRICE_DISCOUNT","deal_price":target}
+                  r=requests.post(f"{API}/seller-promotions/items?app_version=v2",headers=hj,json=body,timeout=20)
+                  if r.status_code in (200,201):
+                      print(f"  ✓ POST PRICE_DISCOUNT: {r.status_code}")
+                      continue
+                  print(f"  POST: {r.status_code} {r.text[:180]}")
+                  # v2: PUT por id con percentage
+                  pct=round((1-(target/cur))*100,2)
+                  body2={"deal_price":target,"offer_type":"PRICE_DISCOUNT","promotion_type":"PRICE_DISCOUNT"}
+                  r2=requests.put(f"{API}/seller-promotions/items/{iid}?app_version=v2",headers=hj,json=body2,timeout=20)
+                  if r2.status_code in (200,201):
+                      print(f"  ✓ PUT v2: {r2.status_code}")
+                      continue
+                  print(f"  PUT: {r2.status_code} {r2.text[:180]}")
+                  # v3: percent
+                  body3={"id":iid,"promotion_type":"PRICE_DISCOUNT","offer_type":"PERCENT_DISCOUNT","percentage":pct}
+                  r3=requests.post(f"{API}/seller-promotions/items?app_version=v2",headers=hj,json=body3,timeout=20)
+                  print(f"  PERCENT {pct}%: {r3.status_code} {r3.text[:180]}")
+                  time.sleep(0.3)
+          PY
