@@ -1,0 +1,28 @@
+name: close-2916897141
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - run: pip install requests -q
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_WILBERT: ${{ secrets.MELI_REFRESH_TOKEN_WILBERT }}
+        run: |
+          python3 - <<'PY'
+          import os, requests, time
+          API="https://api.mercadolibre.com"
+          tok=requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token",
+              "client_id":os.environ["MELI_APP_ID"],
+              "client_secret":os.environ["MELI_APP_SECRET"],
+              "refresh_token":os.environ["MELI_REFRESH_TOKEN_WILBERT"]},timeout=20).json()["access_token"]
+          hj={"Authorization":f"Bearer {tok}","Content-Type":"application/json"}
+          IID="MLM2916897141"
+          r1=requests.put(f"{API}/items/{IID}",headers=hj,json={"status":"paused"},timeout=15)
+          print(f"pause: {r1.status_code}")
+          time.sleep(2)
+          r2=requests.put(f"{API}/items/{IID}",headers=hj,json={"status":"closed"},timeout=15)
+          print(f"close: {r2.status_code}")
+          PY
