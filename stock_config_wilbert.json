@@ -661,5 +661,15 @@
     "auto_replenish": false,
     "real_stock": 0,
     "min_visible": 0
+  },
+  "MLM2908867469": {
+    "active": false,
+    "agotado": true,
+    "paused_by_user": true,
+    "floor_locked_by_user": true,
+    "auto_replenish": false,
+    "real_stock": 0,
+    "min_visible": 0,
+    "closed": true
   }
 }
