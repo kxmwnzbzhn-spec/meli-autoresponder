@@ -97,6 +97,18 @@
       "reason": "user close",
       "added": "2026-05-08",
       "added_by": "Sr. Luis"
+    },
+    {
+      "item_id": "MLM2916908707",
+      "reason": "user delete",
+      "added": "2026-05-08",
+      "added_by": "Sr. Luis"
+    },
+    {
+      "item_id": "MLM2916897191",
+      "reason": "user delete",
+      "added": "2026-05-08",
+      "added_by": "Sr. Luis"
     }
   ],
   "user_product_ids": [],
