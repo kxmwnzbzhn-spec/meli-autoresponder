@@ -562,5 +562,44 @@
     "active": true,
     "type": "catalog_no_variations",
     "condition": "new"
+  },
+  "MLM2916675975": {
+    "title": "Perfect EDP 100ml Mujer",
+    "catalog_product_id": "MLM18533730",
+    "floor_price": 499,
+    "ceiling_price": 999,
+    "min_visible": 1,
+    "real_stock": 10,
+    "master_stock": 10,
+    "auto_replenish": true,
+    "active": true,
+    "type": "catalog_no_variations",
+    "condition": "new"
+  },
+  "MLM2916651543": {
+    "title": "Marc Jacobs Perfect Elixir 100ml",
+    "catalog_product_id": "MLM45861205",
+    "floor_price": 499,
+    "ceiling_price": 1499,
+    "min_visible": 1,
+    "real_stock": 10,
+    "master_stock": 10,
+    "auto_replenish": true,
+    "active": true,
+    "type": "catalog_no_variations",
+    "condition": "new"
+  },
+  "MLM2916700919": {
+    "title": "Dior Sauvage EDT 100ml Hombre",
+    "catalog_product_id": "MLM21147797",
+    "floor_price": 499,
+    "ceiling_price": 1199,
+    "min_visible": 1,
+    "real_stock": 10,
+    "master_stock": 10,
+    "auto_replenish": true,
+    "active": true,
+    "type": "catalog_no_variations",
+    "condition": "new"
   }
 }
