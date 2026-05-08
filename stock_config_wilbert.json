@@ -450,5 +450,17 @@
     "master_stock": 10,
     "auto_replenish": true,
     "active": true
+  },
+  "MLM5309531604": {
+    "title": "Perfume Armaf Club De Nuit Iconic Edp 105ml",
+    "catalog_product_id": "MLM28067123",
+    "floor_price": 399,
+    "ceiling_price": 899,
+    "min_visible": 1,
+    "real_stock": 10,
+    "auto_replenish": true,
+    "active": true,
+    "type": "catalog_no_variations",
+    "condition": "new"
   }
 }
