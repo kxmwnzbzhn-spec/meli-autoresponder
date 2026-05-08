@@ -1,0 +1,79 @@
+name: clone-2914422351-to-yiriam
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - run: pip install requests -q
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_WILBERT: ${{ secrets.MELI_REFRESH_TOKEN_WILBERT }}
+          MELI_REFRESH_TOKEN_YC_NEW: ${{ secrets.MELI_REFRESH_TOKEN_YC_NEW }}
+        run: |
+          python3 - <<'PY'
+          import os, requests
+          API="https://api.mercadolibre.com"
+          def tok(rt):
+              return requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token",
+                  "client_id":os.environ["MELI_APP_ID"],
+                  "client_secret":os.environ["MELI_APP_SECRET"],
+                  "refresh_token":rt},timeout=20).json().get("access_token")
+          tw=tok(os.environ["MELI_REFRESH_TOKEN_WILBERT"])
+          ty=tok(os.environ["MELI_REFRESH_TOKEN_YC_NEW"])
+          hw={"Authorization":f"Bearer {tw}"}
+          hy={"Authorization":f"Bearer {ty}"}
+          hyj={**hy,"Content-Type":"application/json"}
+          # Read source from Wilbert
+          src=requests.get(f"{API}/items/MLM2914422351?include_attributes=all",headers=hw,timeout=15).json()
+          cpid=src.get("catalog_product_id")
+          title=src.get("title","")
+          print(f"SRC: title='{title}' cpid={cpid}")
+          # Verificar duplicado en Yiriam por cpid
+          UID_Y=3364413125
+          dup=False
+          if cpid:
+              ids=[]; off=0
+              while True:
+                  j=requests.get(f"{API}/users/{UID_Y}/items/search?limit=50&offset={off}",headers=hy,timeout=20).json()
+                  r=j.get("results",[]); ids+=r
+                  off+=50
+                  if off>=j.get("paging",{}).get("total",0) or not r: break
+              for i in range(0,len(ids),20):
+                  r=requests.get(f"{API}/items?ids={','.join(ids[i:i+20])}&attributes=id,catalog_product_id,status,title",headers=hy,timeout=20).json()
+                  for it in r:
+                      if it.get("code")==200:
+                          b=it["body"]
+                          if b.get("catalog_product_id")==cpid:
+                              print(f"  DUP en Yiriam: {b.get('id')} status={b.get('status')} '{b.get('title','')[:50]}'")
+                              dup=True
+                              break
+                  if dup: break
+          if dup:
+              print("DUPLICADO encontrado, NO publico"); raise SystemExit(0)
+          # Clonar
+          attrs=[]
+          for a in src.get("attributes",[]) or []:
+              if a.get("id") in ("BRAND","MODEL","COLOR","ITEM_CONDITION","DETAILED_MODEL","MAIN_COLOR","ITEM_VOLUME","MODEL_NAME"):
+                  v={"id":a["id"]}
+                  if a.get("value_id"): v["value_id"]=a["value_id"]
+                  if a.get("value_name"): v["value_name"]=a["value_name"]
+                  attrs.append(v)
+          sale_terms=[{"id":"WARRANTY_TYPE","value_name":"Garantía del vendedor"},{"id":"WARRANTY_TIME","value_name":"30 días"}]
+          pics=[{"id":p["id"]} for p in (src.get("pictures") or []) if p.get("id")][:10]
+          shipping=src.get("shipping") or {"mode":"me2","free_shipping":True,"logistic_type":"xd_drop_off","local_pick_up":False}
+          body={"site_id":"MLM","title":title[:60],"category_id":src.get("category_id"),
+            "price":src.get("price",499),"currency_id":"MXN","available_quantity":1,
+            "buying_mode":"buy_it_now","listing_type_id":src.get("listing_type_id","gold_pro"),
+            "condition":src.get("condition","used"),"shipping":shipping,"pictures":pics,
+            "attributes":attrs,"sale_terms":sale_terms}
+          if cpid:
+              body["catalog_product_id"]=cpid; body["catalog_listing"]=True
+          r=requests.post(f"{API}/items",headers=hyj,json=body,timeout=45)
+          print(f"POST Yiriam: {r.status_code}")
+          if r.status_code in (200,201):
+              print(f"*** NUEVO: {r.json().get('id')} cpid={cpid} ***")
+          else:
+              print(r.text[:500])
+          PY
