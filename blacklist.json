@@ -91,6 +91,12 @@
       "reason": "user pause",
       "added": "2026-05-08",
       "added_by": "Sr. Luis"
+    },
+    {
+      "item_id": "MLM2908867469",
+      "reason": "user close",
+      "added": "2026-05-08",
+      "added_by": "Sr. Luis"
     }
   ],
   "user_product_ids": [],
