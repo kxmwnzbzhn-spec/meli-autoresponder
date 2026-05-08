@@ -8,6 +8,12 @@ Lógica corregida:
 """
 import os, time, json, requests, re
 
+# Cargar config Wilbert con overrides per-item
+try:
+    with open("stock_config_wilbert.json") as _cf: CFG_WILBERT=json.load(_cf)
+except Exception: CFG_WILBERT={}
+print(f"CFG entries: {len(CFG_WILBERT)}")
+
 import json as _jblack
 try:
     with open("blacklist.json") as _bf: BLACKLIST=set(x["item_id"] for x in _jblack.load(_bf).get("items",[]))
@@ -131,6 +137,16 @@ def main():
         cat=it["_cat"]; rule=RULES[cat]
         title=it.get("title","")[:48]
         cur=it.get("price"); st=it.get("status"); qty=it.get("available_quantity",0)
+        # Respetar overrides per-item del config
+        _cfg_item=CFG_WILBERT.get(iid,{})
+        if _cfg_item.get("agotado") or _cfg_item.get("floor_locked_by_user"):
+            A.setdefault("user_locked",0); A["user_locked"]+=1
+            continue
+        # Override floor/ceiling per item
+        rule=dict(rule)
+        if _cfg_item.get("floor_price"): rule["floor"]=int(_cfg_item["floor_price"])
+        if _cfg_item.get("ceiling_price"): rule["ceiling"]=int(_cfg_item["ceiling_price"])
+
 
         # Reactivar pausados
         if st=="paused":
