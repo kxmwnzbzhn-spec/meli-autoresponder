@@ -1,0 +1,73 @@
+name: search-catalog-list
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - run: pip install requests -q
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_WILBERT: ${{ secrets.MELI_REFRESH_TOKEN_WILBERT }}
+        run: |
+          python3 - <<'PY'
+          import os, requests, time
+          API="https://api.mercadolibre.com"
+          tok=requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token",
+              "client_id":os.environ["MELI_APP_ID"],
+              "client_secret":os.environ["MELI_APP_SECRET"],
+              "refresh_token":os.environ["MELI_REFRESH_TOKEN_WILBERT"]},timeout=20).json()["access_token"]
+          h={"Authorization":f"Bearer {tok}"}
+          PRODUCTS=[
+            (48,"Set Valentino 30ml"),(31,"Million Royal 100ml"),(24,"Creed Aventus"),
+            (24,"INITIO Oud for Greatness 90ml"),(24,"Creed Silver Mountain Water 100ml"),
+            (19,"Spicebomb Dark Leather"),(17,"Spicebomb Viktor Rolf"),
+            (12,"Dolce Gabbana Devotion"),(12,"Love By Kilian Dont Be Shy"),
+            (12,"Bharara Viking Beirut"),(12,"Sehr Lattafa"),
+            (12,"Giorgio Armani Passione Intense"),(12,"Dolce Gabbana Velvet Tender Oud"),
+            (12,"Gucci Flora Gorgeous Gardenia"),(12,"Orientica Amber Rouge"),
+            (12,"Stronger With You Sandalwood Armani"),(12,"Stronger With You Parfum 100ml Armani"),
+            (12,"Byredo Rose of No Mans Land 100ml"),(12,"My Way Giorgio Armani 90ml"),
+            (12,"Mon Paris Yves Saint Laurent 90ml"),(12,"Creed Himalaya 100ml"),
+            (12,"Khamrah Dukhan Lattafa 100ml"),(12,"Daisy Marc Jacobs Eau So Fresh 75ml"),
+            (11,"Dolce Gabbana Light Blue"),(11,"Odyssey Candee Armaf"),
+            (11,"Oud Al Laly"),(11,"Orientica Luxury Collection Royal Amber"),
+            (11,"Stronger With You Tabacco Armani"),(11,"Amouage Outlands"),
+            (11,"Tom Ford Black Orchid 100ml"),(11,"Parfums de Marly Oriana 75ml"),
+            (10,"Fahhar Lattafa"),(10,"Myar Rojo Cherry Intense"),
+            (10,"Penhaligons Lady Blanche"),(10,"Designer Shaik Arabia SHK 100ml"),
+            (10,"Dolce Gabbana Velvet Rose"),(9,"Odyssey Aqua Armaf"),(9,"Santal 33 Le Labo"),
+            (7,"Odyssey Dubai Chocolate Armaf"),(6,"Odyssey Wild One Armaf"),
+            (5,"Dolce Gabbana Pour Homme"),(5,"Odyssey Homme Armaf"),
+            (4,"Azzaro The Wanted EDP Intense"),(4,"Nitro Verde"),
+            (3,"Her Confession Lattafa 100ml"),(1,"Lattafa Asad Zanzibar"),
+            (1,"Lattafa Musaman"),(0,"Viktor Rolf Spicebomb Dark Leather 90ml"),
+            (0,"Viking Beirut Parfum 100ml"),(0,"Gucci Flora Gorgeous Gardenia Women 100ml"),
+            (0,"Lattafa Khamrah Dukhan 100ml")
+          ]
+          print(f"{'STK':>3} {'CPID':<14} {'items':>5} {'BBW $':>6}  Producto / Catalog")
+          print("="*100)
+          for stock,q in PRODUCTS:
+              try:
+                  r=requests.get(f"{API}/products/search?status=active&site_id=MLM&q={q}&limit=10",headers=h,timeout=12).json()
+                  cands=r.get("results",[]) or []
+                  best=None; best_score=-1
+                  for p in cands[:8]:
+                      pid=p.get("id"); name=(p.get("name") or "")
+                      if not pid: continue
+                      try:
+                          it=requests.get(f"{API}/products/{pid}/items?limit=50",headers=h,timeout=12).json()
+                          c=len(it.get("results",[]))
+                      except: c=0
+                      if c>best_score:
+                          best_score=c; best={"pid":pid,"name":name,"items":c,"bbw":(p.get("buy_box_winner") or {}).get("price")}
+                      time.sleep(0.05)
+                  if best:
+                      print(f"{stock:>3} {best['pid']:<14} {best['items']:>5} {str(best['bbw']):>6}  {q}  →  {best['name'][:55]}")
+                  else:
+                      print(f"{stock:>3} {'NO MATCH':<14} {'':>5} {'':>6}  {q}")
+              except Exception as e:
+                  print(f"{stock:>3} ERR  {q}: {e}")
+              time.sleep(0.15)
+          PY
