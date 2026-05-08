@@ -1,0 +1,40 @@
+name: pelea-2916664375
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - run: pip install requests -q
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_WILBERT: ${{ secrets.MELI_REFRESH_TOKEN_WILBERT }}
+        run: |
+          python3 - <<'PY'
+          import os, requests
+          API="https://api.mercadolibre.com"
+          tok=requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token",
+              "client_id":os.environ["MELI_APP_ID"],
+              "client_secret":os.environ["MELI_APP_SECRET"],
+              "refresh_token":os.environ["MELI_REFRESH_TOKEN_WILBERT"]},timeout=20).json()["access_token"]
+          h={"Authorization":f"Bearer {tok}"}
+          hj={**h,"Content-Type":"application/json"}
+          IID="MLM2916664375"
+          it=requests.get(f"{API}/items/{IID}",headers=h).json()
+          print(f"Antes: status={it.get('status')} price=${it.get('price')} title='{it.get('title','')[:55]}'")
+          p=requests.get(f"{API}/items/{IID}/price_to_win?version=v2",headers=h).json()
+          ptw=p.get("price_to_win"); status=p.get("status")
+          winner=p.get("winner") or {}
+          is_full=any(b.get("id")=="fulfillment" and b.get("status")=="boosted" for b in winner.get("boosts",[]))
+          print(f"ptw={ptw} status={status} FULL={is_full}")
+          floor=449
+          target=int(ptw)-1 if ptw else floor
+          if target<floor: target=floor
+          target=max(floor,target)
+          if target!=it.get("price"):
+              r=requests.put(f"{API}/items/{IID}",headers=hj,json={"price":target},timeout=15)
+              print(f"PUT ${target}: {r.status_code}")
+          else:
+              print("ya en target")
+          PY
