@@ -1,0 +1,55 @@
+name: apply-promo-v3
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - run: pip install requests -q
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_WILBERT: ${{ secrets.MELI_REFRESH_TOKEN_WILBERT }}
+        run: |
+          python3 - <<'PY'
+          import os, requests, time
+          from datetime import datetime, timedelta
+          API="https://api.mercadolibre.com"
+          tok=requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token",
+              "client_id":os.environ["MELI_APP_ID"],
+              "client_secret":os.environ["MELI_APP_SECRET"],
+              "refresh_token":os.environ["MELI_REFRESH_TOKEN_WILBERT"]},timeout=20).json()["access_token"]
+          h={"Authorization":f"Bearer {tok}"}
+          hj={**h,"Content-Type":"application/json"}
+          # Probar formatos varios con un solo item para detectar el correcto
+          IID="MLM2910457917"
+          formats=[
+            ("LOCAL_NO_MS","2026-05-08T16:00:00-06:00","2026-06-07T23:59:59-06:00"),
+            ("UTC_Z","2026-05-08T22:00:00.000Z","2026-06-08T05:59:59.000Z"),
+            ("LOCAL_NO_TZ","2026-05-08T16:00:00","2026-06-07T23:59:59"),
+            ("DATE_ONLY","2026-05-08","2026-06-07"),
+            ("EPOCH_MS",1746748800000,1749340799000),
+          ]
+          for label,sd,fd in formats:
+              body={"deal_price":549,"offer_type":"PRICE_DISCOUNT","promotion_type":"PRICE_DISCOUNT","start_date":sd,"finish_date":fd}
+              r=requests.put(f"{API}/seller-promotions/items/{IID}?app_version=v2",headers=hj,json=body,timeout=20)
+              print(f"[{label}] {r.status_code} {r.text[:180]}")
+              if r.status_code in (200,201):
+                  print(f"  *** WINNER format: {label} ***")
+                  break
+              time.sleep(0.5)
+          # Listar promociones tipo SMART o las que ya están en seller para usar
+          for ep in (f"{API}/seller-promotions/promotions?app_version=v2",
+                     f"{API}/seller-promotions/promotions/search?app_version=v2&seller_id=3367276814"):
+              try:
+                  rr=requests.get(ep,headers=h,timeout=15)
+                  print(f"\n{ep[-80:]}: {rr.status_code}")
+                  d=rr.json()
+                  if isinstance(d,dict) and d.get("results"):
+                      for p in d["results"][:5]: print(f"  promo {p.get('id')} type={p.get('type')} st={p.get('status')}")
+                  elif isinstance(d,list):
+                      for p in d[:5]: print(f"  promo {p.get('id')} type={p.get('type')} st={p.get('status')}")
+                  else:
+                      print(f"  raw: {str(d)[:200]}")
+              except Exception as e: print(f"err {e}")
+          PY
