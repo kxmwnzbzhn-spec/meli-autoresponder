@@ -119,6 +119,9 @@ def main():
         cur=it.get("price"); st=it.get("status"); qty=it.get("available_quantity",0)
         title=(it.get("title","") or "")[:48]
         c=cfg.get(iid,{})
+        if c.get("agotado") or c.get("floor_locked_by_user"):
+            A.setdefault("user_locked",0); A["user_locked"]+=1
+            continue
         floor=c.get("floor_price", DEFAULT_FLOOR)
         ceiling=c.get("ceiling_price", DEFAULT_CEILING)
 
