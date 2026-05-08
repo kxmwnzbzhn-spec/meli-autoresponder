@@ -11,13 +11,15 @@
   },
   "MLM5265867982": {
     "line": "Mandarin-Sky-shared",
-    "auto_replenish": true,
-    "min_visible": 1,
-    "active": true,
+    "auto_replenish": false,
+    "min_visible": 0,
+    "active": false,
     "title": "Perfume Hombre Armaf Odyssey Mandarin Sky Edp 100m",
     "catalog_product_id": "MLM53673404",
     "type": "catalog_no_variations",
-    "condition": "new"
+    "condition": "new",
+    "agotado": true,
+    "real_stock": 0
   },
   "MLM5266045802": {
     "line": "Mandarin-Sky-shared",
@@ -41,15 +43,17 @@
   },
   "MLM5265893628": {
     "line": "Mandarin-Sky-shared",
-    "auto_replenish": true,
-    "min_visible": 1,
-    "active": true,
+    "auto_replenish": false,
+    "min_visible": 0,
+    "active": false,
     "title": "Perfume Armaf Odyssey Mandarin Sky Limited Edition",
     "catalog_product_id": "MLM22299658",
     "type": "catalog_no_variations",
     "condition": "new",
     "floor_price": 249,
-    "ceiling_price": 999
+    "ceiling_price": 999,
+    "agotado": true,
+    "real_stock": 0
   },
   "MLM5266045818": {
     "line": "Mandarin-Sky-60ml",
