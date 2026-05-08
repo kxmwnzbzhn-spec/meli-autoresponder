@@ -491,5 +491,50 @@
     "active": true,
     "type": "catalog_no_variations",
     "condition": "new"
+  },
+  "MLM2916672247": {
+    "title": "Million Gold Hombre Rabanne EDP 100ml",
+    "catalog_product_id": "MLM39361112",
+    "floor_price": 499,
+    "ceiling_price": 999,
+    "min_visible": 1,
+    "real_stock": 10,
+    "master_stock": 10,
+    "auto_replenish": true,
+    "active": true,
+    "type": "catalog_no_variations",
+    "condition": "new"
+  },
+  "MLM2916672499": {
+    "title": "Baccarat Rouge 540 Maison Francis Kurkdjian 70ml",
+    "catalog_product_id": "MLM44822445",
+    "floor_price": 999,
+    "ceiling_price": 2499,
+    "min_visible": 1,
+    "real_stock": 10,
+    "master_stock": 10,
+    "auto_replenish": true,
+    "active": true,
+    "type": "catalog_no_variations",
+    "condition": "new"
+  },
+  "MLM2916672931": {
+    "title": "Marshmallow Blush EDP 100ml Mujer",
+    "catalog_product_id": "MLM49548953",
+    "floor_price": 499,
+    "ceiling_price": 1499,
+    "min_visible": 1,
+    "real_stock": 10,
+    "master_stock": 10,
+    "auto_replenish": true,
+    "active": true,
+    "type": "catalog_no_variations",
+    "condition": "new"
+  },
+  "MLM5309542808": {
+    "active": false,
+    "agotado": true,
+    "auto_replenish": false,
+    "real_stock": 0
   }
 }
