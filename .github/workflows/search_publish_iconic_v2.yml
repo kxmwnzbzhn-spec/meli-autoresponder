@@ -1,0 +1,87 @@
+name: search-publish-iconic-v2
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - run: pip install requests -q
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_WILBERT: ${{ secrets.MELI_REFRESH_TOKEN_WILBERT }}
+        run: |
+          python3 - <<'PY'
+          import os, requests, time
+          API="https://api.mercadolibre.com"
+          tok=requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token",
+              "client_id":os.environ["MELI_APP_ID"],
+              "client_secret":os.environ["MELI_APP_SECRET"],
+              "refresh_token":os.environ["MELI_REFRESH_TOKEN_WILBERT"]},timeout=20).json()["access_token"]
+          h={"Authorization":f"Bearer {tok}"}
+          hj={**h,"Content-Type":"application/json"}
+          # Search más específico para Iconic
+          candidates=[]
+          for q in ("Armaf Club de Nuit Iconic","Club de Nuit Iconic 105","Iconic 105ml Armaf"):
+              r=requests.get(f"{API}/products/search?status=active&site_id=MLM&q={q}&limit=20",headers=h,timeout=15).json()
+              for p in r.get("results",[]):
+                  n=(p.get("name") or "").lower()
+                  if "iconic" in n: candidates.append(p["id"])
+          candidates=list(dict.fromkeys(candidates))
+          print(f"Candidatos Iconic: {len(candidates)}")
+          info=[]
+          for pid in candidates[:15]:
+              try:
+                  d=requests.get(f"{API}/products/{pid}",headers=h,timeout=15).json()
+              except: continue
+              name=d.get("name","")
+              if "iconic" not in name.lower(): continue
+              try:
+                  it_r=requests.get(f"{API}/products/{pid}/items?limit=50",headers=h,timeout=15).json()
+                  count=len(it_r.get("results",[]))
+                  sold=sum((i.get("sold_quantity",0) or 0) for i in it_r.get("results",[]))
+              except:
+                  count=0; sold=0
+              info.append({"cpid":pid,"name":name,"sold":sold,"items":count,"category":d.get("category_id"),"perma":d.get("permalink","")})
+          # Ordenar por items count + sold (proxy de popularidad)
+          info.sort(key=lambda x:-(x["items"]+x["sold"]))
+          print(f"\n=== Top Iconic ===")
+          for r in info[:5]:
+              print(f"  {r['cpid']}  items={r['items']} sold={r['sold']}  {r['name'][:60]}")
+              print(f"    cat={r['category']}  url={r['perma']}")
+          if not info:
+              print("NO Iconic catalog found")
+              raise SystemExit(0)
+          top=info[0]
+          cpid=top["cpid"]
+          # POST con title explícito (las categorías de perfumes a veces requieren title aunque sea catalog)
+          d=requests.get(f"{API}/products/{cpid}",headers=h,timeout=15).json()
+          pics=[{"id":p.get("id")} for p in (d.get("pictures") or []) if p.get("id")][:10]
+          title=("Perfume Armaf Club De Nuit Iconic Edp 105ml")[:60]
+          body={
+            "site_id":"MLM",
+            "title":title,
+            "category_id":d.get("category_id"),
+            "price":599,
+            "currency_id":"MXN",
+            "available_quantity":1,
+            "buying_mode":"buy_it_now",
+            "listing_type_id":"gold_pro",
+            "condition":"new",
+            "shipping":{"mode":"me2","free_shipping":True,"logistic_type":"xd_drop_off","local_pick_up":False},
+            "catalog_product_id":cpid,
+            "catalog_listing":True,
+          }
+          if pics: body["pictures"]=pics
+          print(f"\nPublicando cpid={cpid} title='{title}' price=$599")
+          r=requests.post(f"{API}/items",headers=hj,json=body,timeout=45)
+          print(f"POST: {r.status_code}")
+          if r.status_code in (200,201):
+              new=r.json().get("id")
+              print(f"*** NUEVO: {new} ***")
+              desc="Perfume Armaf Club de Nuit Iconic Eau de Parfum 105 ml. Fragancia masculina elegante con notas amaderadas y especiadas. Presentacion premium. Garantia 30 dias del vendedor. Envio GRATIS Mercado Envios."
+              rd=requests.post(f"{API}/items/{new}/description",headers=hj,json={"plain_text":desc},timeout=15)
+              print(f"description: {rd.status_code}")
+          else:
+              print(r.text[:600])
+          PY
