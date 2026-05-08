@@ -457,10 +457,11 @@
     "floor_price": 399,
     "ceiling_price": 899,
     "min_visible": 1,
-    "real_stock": 10,
+    "real_stock": 20,
     "auto_replenish": true,
     "active": true,
     "type": "catalog_no_variations",
-    "condition": "new"
+    "condition": "new",
+    "master_stock": 20
   }
 }
