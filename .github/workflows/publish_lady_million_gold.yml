@@ -1,0 +1,57 @@
+name: publish-lady-million-gold
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - run: pip install requests -q
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_WILBERT: ${{ secrets.MELI_REFRESH_TOKEN_WILBERT }}
+        run: |
+          python3 - <<'PY'
+          import os, requests
+          API="https://api.mercadolibre.com"
+          tok=requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token",
+              "client_id":os.environ["MELI_APP_ID"],
+              "client_secret":os.environ["MELI_APP_SECRET"],
+              "refresh_token":os.environ["MELI_REFRESH_TOKEN_WILBERT"]},timeout=20).json()["access_token"]
+          h={"Authorization":f"Bearer {tok}"}
+          hj={**h,"Content-Type":"application/json"}
+          CPID="MLM43509261"
+          d=requests.get(f"{API}/products/{CPID}",headers=h,timeout=15).json()
+          # cat de un item vinculado
+          it_r=requests.get(f"{API}/products/{CPID}/items?limit=5",headers=h,timeout=15).json()
+          first=(it_r.get("results") or [{}])[0]
+          cat=first.get("category_id") or "MLM1271"
+          bbw=d.get("buy_box_winner") or {}
+          start=bbw.get("price")
+          start=int(start)-1 if start else 999
+          start=max(499,min(1499,start))
+          pics=[{"id":p.get("id")} for p in (d.get("pictures") or []) if p.get("id")][:10]
+          body={
+            "site_id":"MLM",
+            "title":"Perfume Lady Million Gold 90ml EDP Refillable Mujer",
+            "category_id":cat,
+            "price":start,
+            "currency_id":"MXN",
+            "available_quantity":1,
+            "buying_mode":"buy_it_now",
+            "listing_type_id":"gold_pro",
+            "condition":"new",
+            "shipping":{"mode":"me2","free_shipping":True,"logistic_type":"xd_drop_off","local_pick_up":False},
+            "catalog_product_id":CPID,
+            "catalog_listing":True,
+            "pictures":pics,
+          }
+          print(f"cat={cat} start_price=${start}")
+          r=requests.post(f"{API}/items",headers=hj,json=body,timeout=45)
+          print(f"POST: {r.status_code}")
+          if r.status_code in (200,201):
+              new=r.json().get("id")
+              print(f"*** NUEVO: {new} ***")
+          else:
+              print(r.text[:600])
+          PY
