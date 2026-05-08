@@ -1,0 +1,26 @@
+name: clip-azul-yiriam-set
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - run: pip install requests -q
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_YC_NEW: ${{ secrets.MELI_REFRESH_TOKEN_YC_NEW }}
+        run: |
+          python3 - <<'PY'
+          import os, requests
+          API="https://api.mercadolibre.com"
+          tok=requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token",
+              "client_id":os.environ["MELI_APP_ID"],
+              "client_secret":os.environ["MELI_APP_SECRET"],
+              "refresh_token":os.environ["MELI_REFRESH_TOKEN_YC_NEW"]},timeout=20).json()["access_token"]
+          hj={"Authorization":f"Bearer {tok}","Content-Type":"application/json"}
+          IID="MLM5291786738"
+          # Active + price 549 (ceiling); war ajustará luego
+          r=requests.put(f"{API}/items/{IID}",headers=hj,json={"status":"active","available_quantity":1,"price":549},timeout=15)
+          print(f"PUT active+549: {r.status_code}")
+          PY
