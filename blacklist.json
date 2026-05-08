@@ -79,6 +79,18 @@
       "reason": "user pause - no reactivar",
       "added": "2026-05-08",
       "added_by": "Sr. Luis"
+    },
+    {
+      "item_id": "MLM2908806053",
+      "reason": "user pause",
+      "added": "2026-05-08",
+      "added_by": "Sr. Luis"
+    },
+    {
+      "item_id": "MLM2908793735",
+      "reason": "user pause",
+      "added": "2026-05-08",
+      "added_by": "Sr. Luis"
     }
   ],
   "user_product_ids": [],
