@@ -1,0 +1,86 @@
+name: wilbert-replenish-now
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install requests -q
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_WILBERT: ${{ secrets.MELI_REFRESH_TOKEN_WILBERT }}
+        run: |
+          python3 - <<'PY'
+          import os, requests, json, time
+          API="https://api.mercadolibre.com"
+          tok=requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token",
+              "client_id":os.environ["MELI_APP_ID"],
+              "client_secret":os.environ["MELI_APP_SECRET"],
+              "refresh_token":os.environ["MELI_REFRESH_TOKEN_WILBERT"]},timeout=20).json()["access_token"]
+          h={"Authorization":f"Bearer {tok}"}
+          hj={**h,"Content-Type":"application/json"}
+          UID=3367276814
+          # Cargar config + blacklist
+          try: cfg=json.load(open("stock_config_wilbert.json"))
+          except: cfg={}
+          try: BL=set(x["item_id"] for x in json.load(open("blacklist.json")).get("items",[]))
+          except: BL=set()
+          
+          # Listar paused
+          ids=[]; off=0
+          while True:
+              j=requests.get(f"{API}/users/{UID}/items/search?status=paused&limit=50&offset={off}",headers=h,timeout=20).json()
+              r=j.get("results",[]); ids+=r
+              off+=50
+              if off>=j.get("paging",{}).get("total",0) or not r: break
+          print(f"Paused items: {len(ids)}")
+          
+          # Bulk para ver sub_status
+          items={}
+          for i in range(0,len(ids),20):
+              r=requests.get(f"{API}/items?ids={','.join(ids[i:i+20])}&attributes=id,title,sub_status,available_quantity",headers=h,timeout=25).json()
+              for it in r:
+                  if it.get("code")==200: items[it["body"]["id"]]=it["body"]
+          
+          react=0; skip_bl=0; skip_user=0; skip_agotado=0; err=0
+          for iid,b in items.items():
+              if iid in BL: skip_bl+=1; continue
+              c=cfg.get(iid,{})
+              # Skip si user marcó agotado o paused_by_user
+              if c.get("agotado") or c.get("paused_by_user"): skip_agotado+=1; continue
+              if c.get("active") is False: skip_agotado+=1; continue
+              # Sub-status motivo
+              sub=b.get("sub_status") or []
+              # Reactivar — todos paused que no estén marcados agotado
+              qty=c.get("min_visible",1)
+              r=requests.put(f"{API}/items/{iid}",headers=hj,json={"status":"active","available_quantity":qty},timeout=15)
+              if r.status_code in (200,201):
+                  react+=1
+              else:
+                  r2=requests.put(f"{API}/items/{iid}",headers=hj,json={"status":"active"},timeout=15)
+                  if r2.status_code in (200,201): react+=1
+                  else: err+=1
+              time.sleep(0.05)
+          
+          print(f"\n=== AUDIT REPLENISH ===")
+          print(f"  Reactivados: {react}")
+          print(f"  Skip blacklist: {skip_bl}")
+          print(f"  Skip agotado/user: {skip_agotado}")
+          print(f"  Errors: {err}")
+          
+          # Audit: items en MELI active sin entry en config
+          ids_act=[]; off=0
+          while True:
+              j=requests.get(f"{API}/users/{UID}/items/search?status=active&limit=50&offset={off}",headers=h,timeout=20).json()
+              r=j.get("results",[]); ids_act+=r
+              off+=50
+              if off>=j.get("paging",{}).get("total",0) or not r: break
+          missing=[i for i in ids_act if i not in cfg]
+          print(f"\n=== AUDIT CONFIG ===")
+          print(f"  Items active: {len(ids_act)}")
+          print(f"  Sin entry en config: {len(missing)}")
+          if missing:
+              print(f"  IIDs faltantes (primeros 10): {missing[:10]}")
+          PY
