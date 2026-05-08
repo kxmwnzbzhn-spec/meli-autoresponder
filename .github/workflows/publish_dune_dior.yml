@@ -1,0 +1,57 @@
+name: publish-dune-dior
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - run: pip install requests -q
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_WILBERT: ${{ secrets.MELI_REFRESH_TOKEN_WILBERT }}
+        run: |
+          python3 - <<'PY'
+          import os, requests
+          API="https://api.mercadolibre.com"
+          tok=requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token",
+              "client_id":os.environ["MELI_APP_ID"],
+              "client_secret":os.environ["MELI_APP_SECRET"],
+              "refresh_token":os.environ["MELI_REFRESH_TOKEN_WILBERT"]},timeout=20).json()["access_token"]
+          h={"Authorization":f"Bearer {tok}"}
+          hj={**h,"Content-Type":"application/json"}
+          UP="MLMU975654942"
+          # Get UP info para family_name + category
+          d=requests.get(f"{API}/user-products/{UP}",headers=h,timeout=15).json()
+          print(f"UP: {d.get('id')} domain={d.get('domain_id')}")
+          # Buscar items existentes del UP para sacar category
+          # Usar /sites/MLM/search por nombre
+          r_search=requests.get(f"{API}/sites/MLM/search?q=Dune+Christian+Dior+100ml&limit=5",headers=h,timeout=15).json()
+          cat=(r_search.get("results") or [{}])[0].get("category_id","MLM1271")
+          family_name=d.get("name","Perfume Dune Christian Dior 100ml")
+          print(f"category={cat} family_name={family_name}")
+          # Pictures from UP
+          pics=[{"id":p.get("id")} for p in (d.get("pictures") or []) if p.get("id")][:10]
+          body={
+            "site_id":"MLM",
+            "family_name":family_name,
+            "category_id":cat,
+            "price":1499,
+            "currency_id":"MXN",
+            "available_quantity":1,
+            "buying_mode":"buy_it_now",
+            "listing_type_id":"gold_pro",
+            "condition":"new",
+            "shipping":{"mode":"me2","free_shipping":True,"logistic_type":"xd_drop_off","local_pick_up":False},
+            "pictures":pics,
+            "attributes":[{"id":"BRAND","value_name":"Christian Dior"},{"id":"GTIN","value_name":"No aplica"}],
+            "sale_terms":[{"id":"WARRANTY_TYPE","value_name":"Garantía del vendedor"},{"id":"WARRANTY_TIME","value_name":"30 días"}],
+          }
+          r=requests.post(f"{API}/items",headers=hj,json=body,timeout=45)
+          print(f"POST: {r.status_code}")
+          if r.status_code in (200,201):
+              new=r.json().get("id")
+              print(f"*** NUEVO: {new} ***")
+          else:
+              print(r.text[:600])
+          PY
