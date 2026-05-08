@@ -1,0 +1,87 @@
+name: go4-pink-publish
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - run: pip install requests -q
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_WILBERT: ${{ secrets.MELI_REFRESH_TOKEN_WILBERT }}
+        run: |
+          python3 - <<'PY'
+          import os, requests, time
+          API="https://api.mercadolibre.com"
+          tok=requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token",
+              "client_id":os.environ["MELI_APP_ID"],
+              "client_secret":os.environ["MELI_APP_SECRET"],
+              "refresh_token":os.environ["MELI_REFRESH_TOKEN_WILBERT"]},timeout=20).json()["access_token"]
+          h={"Authorization":f"Bearer {tok}"}
+          hj={**h,"Content-Type":"application/json"}
+          # Search JBL Go 4 Rosa/Pink
+          cands=[]
+          for q in ("JBL Go 4 Rosa","JBL Go 4 Pink","JBL Go4 Rosa","Bocina JBL Go 4 Rosa"):
+              r=requests.get(f"{API}/products/search?status=active&site_id=MLM&q={q}&limit=20",headers=h,timeout=15).json()
+              for p in r.get("results",[]):
+                  n=(p.get("name") or "").lower()
+                  if "go 4" not in n and "go4" not in n: continue
+                  cands.append(p["id"])
+          cands=list(dict.fromkeys(cands))
+          print(f"Candidates: {len(cands)}")
+          info=[]
+          for pid in cands[:25]:
+              try:
+                  d=requests.get(f"{API}/products/{pid}",headers=h,timeout=15).json()
+              except: continue
+              attrs={a.get("id"):a.get("value_name") for a in d.get("attributes",[]) or []}
+              col=(attrs.get("COLOR") or attrs.get("MAIN_COLOR") or "").lower()
+              # filtrar rosa/pink
+              if not any(k in col+" "+(d.get("name") or "").lower() for k in ("rosa","pink")):
+                  continue
+              try:
+                  it_r=requests.get(f"{API}/products/{pid}/items?limit=50",headers=h,timeout=15).json()
+                  count=len(it_r.get("results",[]))
+                  sold=sum((i.get("sold_quantity",0) or 0) for i in it_r.get("results",[]))
+                  cat=(it_r.get("results") or [{}])[0].get("category_id","MLM59800")
+              except:
+                  count=0; sold=0; cat="MLM59800"
+              info.append({"cpid":pid,"name":d.get("name",""),"color":col,
+                "items":count,"sold":sold,"cat":cat,"perma":d.get("permalink","")})
+              time.sleep(0.05)
+          info.sort(key=lambda x:-(x["items"]+x["sold"]))
+          print("\n=== Top Go 4 Rosa/Pink ===")
+          for r in info[:5]:
+              print(f"  {r['cpid']}  items={r['items']} sold={r['sold']}  '{r['name'][:55]}'  color={r['color']}")
+              if r['perma']: print(f"    {r['perma']}")
+          if not info:
+              print("NO encontrado"); raise SystemExit(0)
+          top=info[0]
+          cpid=top["cpid"]; cat=top["cat"]
+          d=requests.get(f"{API}/products/{cpid}",headers=h,timeout=15).json()
+          pics=[{"id":p.get("id")} for p in (d.get("pictures") or []) if p.get("id")][:10]
+          body={
+            "site_id":"MLM",
+            "title":"Bocina JBL Go 4 Bluetooth IP67 Portátil Color Rosa",
+            "category_id":cat,
+            "price":549,
+            "currency_id":"MXN",
+            "available_quantity":1,
+            "buying_mode":"buy_it_now",
+            "listing_type_id":"gold_pro",
+            "condition":"new",
+            "shipping":{"mode":"me2","free_shipping":True,"logistic_type":"xd_drop_off","local_pick_up":False},
+            "catalog_product_id":cpid,
+            "catalog_listing":True,
+            "pictures":pics,
+          }
+          print(f"\nPublicando cpid={cpid} price=$549")
+          r=requests.post(f"{API}/items",headers=hj,json=body,timeout=45)
+          print(f"POST: {r.status_code}")
+          if r.status_code in (200,201):
+              new=r.json().get("id")
+              print(f"*** NUEVO: {new} ***")
+          else:
+              print(r.text[:600])
+          PY
