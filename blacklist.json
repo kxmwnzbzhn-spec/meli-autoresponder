@@ -13,6 +13,18 @@
       "reason": "Nunca activar — listada explícitamente",
       "added": "2026-05-04",
       "added_by": "Sr. Luis"
+    },
+    {
+      "item_id": "MLM5265893628",
+      "reason": "agotado FINAL no reactivar",
+      "added": "2026-05-08",
+      "added_by": "Sr. Luis"
+    },
+    {
+      "item_id": "MLM5265867982",
+      "reason": "agotado FINAL no reactivar",
+      "added": "2026-05-08",
+      "added_by": "Sr. Luis"
     }
   ],
   "user_product_ids": [],
