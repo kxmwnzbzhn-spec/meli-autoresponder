@@ -25,6 +25,18 @@
       "reason": "agotado FINAL no reactivar",
       "added": "2026-05-08",
       "added_by": "Sr. Luis"
+    },
+    {
+      "item_id": "MLM2910768375",
+      "reason": "user pause - no reactivar",
+      "added": "2026-05-08",
+      "added_by": "Sr. Luis"
+    },
+    {
+      "item_id": "MLM2910768379",
+      "reason": "user pause - no reactivar",
+      "added": "2026-05-08",
+      "added_by": "Sr. Luis"
     }
   ],
   "user_product_ids": [],
