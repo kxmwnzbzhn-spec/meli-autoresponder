@@ -179,7 +179,10 @@
     "min_visible": 1,
     "auto_replenish": true,
     "active": true,
-    "color": "Negro"
+    "color": "Negro",
+    "floor_price": 499,
+    "ceiling_price": 499,
+    "floor_locked_by_user": true
   },
   "MLM5295749840": {
     "real_stock": 0,
@@ -196,7 +199,10 @@
     "min_visible": 1,
     "auto_replenish": true,
     "active": true,
-    "color": "Rojo"
+    "color": "Rojo",
+    "floor_price": 499,
+    "ceiling_price": 499,
+    "floor_locked_by_user": true
   },
   "MLM2911205487": {
     "real_stock": 15,
@@ -204,7 +210,10 @@
     "min_visible": 1,
     "auto_replenish": true,
     "active": true,
-    "color": "Camuflaje"
+    "color": "Camuflaje",
+    "floor_price": 499,
+    "ceiling_price": 499,
+    "floor_locked_by_user": true
   },
   "MLM2910457933": {
     "real_stock": 0,
