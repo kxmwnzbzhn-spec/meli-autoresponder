@@ -1,117 +1,158 @@
-import os,requests,json
-r=requests.post("https://api.mercadolibre.com/oauth/token",data={"grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],"client_secret":os.environ["MELI_APP_SECRET"],"refresh_token":os.environ["MELI_REFRESH_TOKEN"]}).json()
-H={"Authorization":f"Bearer {r['access_token']}"}
-sid=requests.get("https://api.mercadolibre.com/users/me",headers=H).json()["id"]
-# Traer TODOS los items sin filtro de status
-ids=[]; s=0
-while True:
-    d=requests.get(f"https://api.mercadolibre.com/users/{sid}/items/search?limit=100&offset={s}&include_filters=false",headers=H).json()
-    got=d.get("results",[])
-    if not got: break
-    ids+=got; s+=100
-    if s>=d.get("paging",{}).get("total",0): break
-# Tambien con filters especiales
-for f in ["UNDER_REVIEW_ACCREDITATION_REQUIRED","UNDER_REVIEW","PENDING_DOCUMENTATION","FORBIDDEN"]:
-    s=0
-    while True:
-        d=requests.get(f"https://api.mercadolibre.com/users/{sid}/items/search?limit=100&offset={s}&filters={f}",headers=H).json()
-        got=d.get("results",[])
-        if not got: break
-        for i in got:
-            if i not in ids: ids.append(i)
-        s+=100
-        if s>=d.get("paging",{}).get("total",0): break
-# Tambien por status explicit
-for st in ["closed","paused","under_review","inactive","active"]:
-    s=0
-    while True:
-        d=requests.get(f"https://api.mercadolibre.com/users/{sid}/items/search?status={st}&limit=100&offset={s}",headers=H).json()
-        got=d.get("results",[])
-        if not got: break
-        for i in got:
-            if i not in ids: ids.append(i)
-        s+=100
-        if s>=d.get("paging",{}).get("total",0): break
+import os, requests, json
+from datetime import datetime, timezone, timedelta
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
-print(f"Total items encontrados: {len(ids)}")
+APP_ID=os.environ["MELI_APP_ID"]; APP_SECRET=os.environ["MELI_APP_SECRET"]
 
-bocinas=[]
-for i in range(0,len(ids),20):
-    b=",".join(ids[i:i+20])
-    res=requests.get(f"https://api.mercadolibre.com/items?ids={b}&attributes=id,title,status,sub_status,catalog_listing,catalog_product_id,price,date_created",headers=H).json()
-    for x in res:
-        b2=x.get("body",{})
-        t=(b2.get("title") or "").lower()
-        if any(k in t for k in ["jbl","sony srs","bocina","parlante","altavoz","speaker"]):
-            bocinas.append(b2)
+# Saldos confirmados por el usuario (snapshots post-IVA)
+SALDOS_USER={
+    "JUAN":120942.00,
+    "RAYMUNDO":338000.00,
+    "CLARIBEL":34517.00,  # post-retiro a Asva
+    "RAYMUNDO_MAY":81126.00,
+    "ANGEL_DAMIAN":60000.00,
+    "ASGARI":50000.00,
+}
 
-print(f"\nBocinas encontradas: {len(bocinas)}")
-
-def norm_sub(s):
-    if isinstance(s,list): return ",".join(s) or "-"
-    return s or "-"
-
-# Organizar por modelo+color
-def classify(t):
-    t=t.lower()
-    model="OTRO"; color="?"
-    if "charge 6" in t or "charge6" in t: model="Charge 6"
-    elif "flip 7" in t or "flip7" in t: model="Flip 7"
-    elif "clip 5" in t or "clip5" in t: model="Clip 5"
-    elif "grip" in t: model="Grip"
-    elif "go essential" in t or "goessential" in t: model="Go Essential 2"
-    elif "go 4" in t or "go4" in t: model="Go 4"
-    elif "go 3" in t or "go3" in t: model="Go 3"
-    elif "srs-xb100" in t or "xb100" in t or "sony srs" in t: model="Sony XB100"
-    for raw,norm in [("azul marino","Azul Marino"),("camuflaje","Camuflaje"),("camo","Camuflaje"),("morado","Morada"),("morada","Morada"),("violeta","Morada"),("purple","Morada"),("negra","Negra"),("negro","Negra"),("black","Negra"),("azul","Azul"),("blue","Azul"),("roja","Roja"),("rojo","Roja"),("red","Roja"),("rosa","Rosa"),("pink","Rosa"),("blanca","Blanca"),("blanco","Blanca"),("white","Blanca"),("naranja","Naranja"),("verde","Verde")]:
-        if raw in t: color=norm; break
-    return model,color
-
-# imprimir TODAS organizadas
-by_key={}
-for b in bocinas:
-    m,c=classify(b.get("title") or "")
-    k=(m,c)
-    by_key.setdefault(k,[]).append(b)
-
-print("\n=== INVENTARIO COMPLETO (TODAS las bocinas, todos estados) ===")
-EXPECTED=[
-    ("Charge 6","Azul"),("Charge 6","Roja"),("Charge 6","Camuflaje"),
-    ("Flip 7","Negra"),("Flip 7","Roja"),("Flip 7","Morada"),
-    ("Clip 5","Negra"),("Clip 5","Morada"),("Clip 5","Rosa"),
-    ("Grip","Negra"),
-    ("Sony XB100","Negra"),
-    ("Go Essential 2","Azul"),("Go Essential 2","Roja"),
-    ("Go 4","Negra"),("Go 4","Roja"),("Go 4","Rosa"),("Go 4","Azul Marino"),("Go 4","Camuflaje"),
-    ("Go 3","Negra"),
+ACCOUNTS=[
+    ("JUAN","MELI_REFRESH_TOKEN"),
+    ("RAYMUNDO","MELI_REFRESH_TOKEN_RAYMUNDO"),
+    ("CLARIBEL","MELI_REFRESH_TOKEN_CLARIBEL"),
+    ("WILBERT","MELI_REFRESH_TOKEN_WILBERT"),
+    ("DILCIE","MELI_REFRESH_TOKEN_DILCIE"),
+    ("BREN","MELI_REFRESH_TOKEN_BREN"),
+    ("YC_NEW","MELI_REFRESH_TOKEN_YC_NEW"),
+    ("RAYMUNDO_MAY","MELI_REFRESH_TOKEN_RAYMUNDO_MAY"),
+    ("ANGEL_DAMIAN","MELI_REFRESH_TOKEN_ANGEL_DAMIAN"),
+    ("ASGARI","MELI_REFRESH_TOKEN_ASGARI"),
 ]
-print(f"\n{'MODELO':<16} {'COLOR':<14} {'ACTIVA':<7} {'UNDER_REV':<10} {'CLOSED':<7} {'OTHER':<6} IDs")
-for k in EXPECTED:
-    items=by_key.get(k,[])
-    active=[b for b in items if b.get("status")=="active"]
-    rev=[b for b in items if b.get("status")=="under_review"]
-    closed=[b for b in items if b.get("status") in ("closed","inactive")]
-    other=[b for b in items if b.get("status") not in ("active","under_review","closed","inactive")]
-    status_sum=f"{len(active):<7} {len(rev):<10} {len(closed):<7} {len(other):<6}"
-    # ids con status
-    ids_s=[]
-    for b in items:
-        s=b.get("status")[:4]
-        ss=norm_sub(b.get("sub_status"))[:12]
-        ids_s.append(f"{b.get('id')}({s}/{ss})")
-    print(f"{k[0]:<16} {k[1]:<14} {status_sum}  {', '.join(ids_s) if ids_s else 'NINGUNO'}")
 
-# Tambien otras bocinas no esperadas
-print("\n=== OTRAS BOCINAS NO ESPERADAS ===")
-for k,items in sorted(by_key.items()):
-    if k in EXPECTED: continue
-    for b in items:
-        print(f"  {b.get('id')} | {b.get('status')}/{norm_sub(b.get('sub_status'))} | ${b.get('price')} | {k[0]}/{k[1]} | {b.get('title')[:70]}")
+cdmx=datetime.now(timezone.utc)-timedelta(hours=6)
+since=cdmx-timedelta(days=90)
+date_from=since.strftime("%Y-%m-%dT%H:%M:%S.000Z")
+print(f"=== AUDITORÍA COMPLETA — {cdmx.strftime('%d-%m-%Y %H:%M')} CDMX ===\n")
 
-print("\n=== RESUMEN ===")
-total_active=sum(1 for k in EXPECTED if any(b.get("status")=="active" for b in by_key.get(k,[])))
-total_pending=sum(1 for k in EXPECTED if not any(b.get("status")=="active" for b in by_key.get(k,[])) and any(b.get("status")=="under_review" for b in by_key.get(k,[])))
-total_sin_nada=sum(1 for k in EXPECTED if not any(b.get("status") in ("active","under_review") for b in by_key.get(k,[])))
-print(f"  Activas (vendiéndose): {total_active}/19")
-print(f"  Solo under_review (esperando factura): {total_pending}/19")
-print(f"  Sin publicación activa ni en revisión: {total_sin_nada}/19")
+def get_ship(sid,h):
+    try:
+        r=requests.get(f"https://api.mercadolibre.com/shipments/{sid}/costs",headers=h,timeout=10)
+        if r.status_code!=200: return 0.0
+        j=r.json(); s=j.get("senders",[])
+        if isinstance(s,list): return float(sum(x.get("cost",0) or 0 for x in s))
+        return float(s.get("cost",0) or 0)
+    except: return 0.0
+
+def is_post(o):
+    cd=o.get("cancel_detail") or {}
+    desc=(cd.get("description") or "").lower()
+    return ("mediation" in desc) or ("cancel_purchase" in desc) or ("buyer" in desc)
+
+results={}
+for label,env in ACCOUNTS:
+    RT=os.environ.get(env,"")
+    if not RT: 
+        results[label]={"err":"no token"}; continue
+    try:
+        r=requests.post("https://api.mercadolibre.com/oauth/token",data={"grant_type":"refresh_token","client_id":APP_ID,"client_secret":APP_SECRET,"refresh_token":RT},timeout=15).json()
+        if "access_token" not in r:
+            results[label]={"err":"refresh"}; continue
+        H={"Authorization":f"Bearer {r['access_token']}"}
+        me=requests.get("https://api.mercadolibre.com/users/me",headers=H,timeout=15).json()
+        uid=me["id"]; nick=me.get("nickname","")
+    except Exception as e:
+        results[label]={"err":f"auth:{e}"}; continue
+    
+    # Active claims (disputas abiertas, potencial deducción al saldo)
+    claims_open=0; claims_amount=0
+    try:
+        c=requests.get("https://api.mercadolibre.com/post-purchase/v1/claims/search?status=opened&limit=50",headers=H,timeout=20).json()
+        if isinstance(c,dict):
+            claims_open=len(c.get("data") or [])
+            # Estimate amount (varía, no siempre viene)
+            for cl in (c.get("data") or []):
+                amt=cl.get("amount") or (cl.get("resource_id") and 0)
+                claims_amount += float(amt) if isinstance(amt,(int,float)) else 0
+    except: pass
+    
+    # Recent orders with pending payments / pending refunds
+    orders=[]; offset=0
+    while True:
+        rr=requests.get(f"https://api.mercadolibre.com/orders/search?seller={uid}&order.date_created.from={date_from}&limit=50&offset={offset}&sort=date_desc",headers=H,timeout=30).json()
+        res=rr.get("results",[])
+        if not res: break
+        orders.extend(res)
+        if len(res)<50: break
+        offset+=50
+        if offset>5000: break
+    
+    # Active mediations / pending refunds: orders with status paid but with mediations array non-empty
+    active_med=[]
+    pending_refund_amount=0
+    for o in orders:
+        meds=o.get("mediations") or []
+        if meds and o.get("status") in ("paid","shipped","delivered"):
+            for it in o.get("order_items",[]):
+                pending_refund_amount += (it.get("unit_price",0) or 0) * (it.get("quantity",0) or 0)
+            active_med.append(o.get("id"))
+    
+    # For Wilbert: compute NETO real desde inicio
+    saldo_confirmed = SALDOS_USER.get(label)
+    if saldo_confirmed is None and label=="WILBERT":
+        # Compute properly
+        paid=[o for o in orders if o.get("status") in ("paid","shipped","delivered")]
+        cancelled=[o for o in orders if o.get("status")=="cancelled"]
+        gross=fees=qty=0; sids=[]
+        for o in paid:
+            for it in o.get("order_items",[]):
+                q=it.get("quantity",0) or 0
+                gross+=(it.get("unit_price",0) or 0)*q
+                fees+=(it.get("sale_fee",0) or 0)*q
+                qty+=q
+            sid=(o.get("shipping",{}) or {}).get("id")
+            if sid: sids.append(sid)
+        refund=0
+        for o in cancelled:
+            if not is_post(o): continue
+            for p in (o.get("payments") or []):
+                if p.get("status")=="refunded":
+                    refund+=p.get("transaction_amount_refunded",0) or 0
+        ship=0.0
+        if sids:
+            with ThreadPoolExecutor(max_workers=15) as ex:
+                futs=[ex.submit(get_ship,sid,H) for sid in sids]
+                for f in as_completed(futs):
+                    ship+=f.result()
+        iva=(gross-refund)*0.16/1.16 if (gross-refund)>0 else 0
+        saldo_calc = gross - fees - ship - refund - iva
+        saldo_confirmed = saldo_calc
+        results[label]={"nick":nick,"saldo":saldo_calc,"source":"calculated (post-IVA)",
+                        "claims_open":claims_open,"active_med":len(active_med),"pending_refund":pending_refund_amount,
+                        "neto_realizable":saldo_calc - pending_refund_amount}
+    elif saldo_confirmed is not None:
+        results[label]={"nick":nick,"saldo":saldo_confirmed,"source":"snapshot user (post-IVA)",
+                        "claims_open":claims_open,"active_med":len(active_med),"pending_refund":pending_refund_amount,
+                        "neto_realizable":saldo_confirmed - pending_refund_amount}
+    else:
+        # cuentas sin ventas (Dilcie, Bren, YC_NEW)
+        results[label]={"nick":nick,"saldo":0,"source":"sin ventas",
+                        "claims_open":claims_open,"active_med":len(active_med),"pending_refund":pending_refund_amount,
+                        "neto_realizable":0}
+
+# Print table
+print(f"{'Cuenta':<14} {'Saldo MP':>13} {'Med abiertas':>13} {'Refund pend':>13} {'NETO realiz.':>15}")
+print("-"*75)
+T={"saldo":0,"pend":0,"realiz":0,"med":0,"claims":0}
+for k,_ in ACCOUNTS:
+    if k=="ASVA": continue  # excluida
+    v=results.get(k,{})
+    if "err" in v:
+        print(f"{k:<14} ERR: {v['err']}"); continue
+    print(f"{k:<14} ${v['saldo']:>12,.2f} {v['active_med']:>13} ${v['pending_refund']:>12,.2f} ${v['neto_realizable']:>14,.2f}")
+    T['saldo']+=v['saldo']; T['pend']+=v['pending_refund']; T['realiz']+=v['neto_realizable']
+    T['med']+=v['active_med']; T['claims']+=v['claims_open']
+print("-"*75)
+print(f"{'TOTAL':<14} ${T['saldo']:>12,.2f} {T['med']:>13} ${T['pend']:>12,.2f} ${T['realiz']:>14,.2f}")
+print(f"\nClaims abiertos en total: {T['claims']}")
+print(f"\nNOTA: 'Refund pending' = órdenes con mediations en curso que podrían reembolsarse.")
+
+print("\n=== JSON ===")
+print(json.dumps({"results":results,"totals":T},ensure_ascii=False))
