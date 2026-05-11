@@ -150,7 +150,7 @@
     "auto_replenish": true,
     "min_visible": 1,
     "active": true,
-    "title": "Angel Nova Fruitté Edp Para Mujer",
+    "title": "Angel Nova Fruitt\u00e9 Edp Para Mujer",
     "catalog_product_id": "MLM18209912",
     "type": "catalog_no_variations",
     "condition": "new"
@@ -170,7 +170,7 @@
     "auto_replenish": false,
     "min_visible": 0,
     "active": false,
-    "title": "Armaf Odyssey Mega Man Edición Limitada Edp 100 Ml",
+    "title": "Armaf Odyssey Mega Man Edici\u00f3n Limitada Edp 100 Ml",
     "catalog_product_id": "MLM21765262",
     "type": "catalog_no_variations",
     "condition": "new",
@@ -196,7 +196,7 @@
     "min_visible": 1,
     "auto_replenish": true,
     "active": true,
-    "title": "Bocina Bluetooth Portátil Go 4 IP67 OEM 1.1 Espejo"
+    "title": "Bocina Bluetooth Port\u00e1til Go 4 IP67 OEM 1.1 Espejo"
   },
   "MLM2911241921": {
     "real_stock": 30,
@@ -285,15 +285,18 @@
     "agotado": true
   },
   "MLM2910806817": {
-    "title": "Bocina Jbl Go 4 Jblgo4 Portátil Con Bluetooth Waterproof Roja Rojo",
+    "title": "Bocina Jbl Go 4 Jblgo4 Port\u00e1til Con Bluetooth Waterproof Roja Rojo",
     "min_visible": 1,
     "real_stock": 10,
     "master_stock": 10,
     "auto_replenish": true,
-    "active": true
+    "active": true,
+    "floor_price": 699,
+    "ceiling_price": 699,
+    "floor_locked_by_user": true
   },
   "MLM2910880717": {
-    "title": "Bocina Jbl Go 4 Jblgo4 Portátil Con Bluetooth Waterproof Negra Negro",
+    "title": "Bocina Jbl Go 4 Jblgo4 Port\u00e1til Con Bluetooth Waterproof Negra Negro",
     "min_visible": 1,
     "real_stock": 22,
     "master_stock": 22,
@@ -301,7 +304,7 @@
     "active": true
   },
   "MLM2910806853": {
-    "title": "Bocina Jbl Audio Clip 5 Clip 5 Portátil Con Bluetooth Waterproof Negra Negro",
+    "title": "Bocina Jbl Audio Clip 5 Clip 5 Port\u00e1til Con Bluetooth Waterproof Negra Negro",
     "min_visible": 1,
     "real_stock": 10,
     "master_stock": 10,
@@ -309,15 +312,18 @@
     "active": true
   },
   "MLM2910806845": {
-    "title": "Bocina Jbl Go 3 Jblgo3 Portátil Con Bluetooth Waterproof Negra Negro",
+    "title": "Bocina Jbl Go 3 Jblgo3 Port\u00e1til Con Bluetooth Waterproof Negra Negro",
     "min_visible": 1,
     "real_stock": 10,
     "master_stock": 10,
     "auto_replenish": true,
-    "active": true
+    "active": true,
+    "floor_price": 499,
+    "ceiling_price": 499,
+    "floor_locked_by_user": true
   },
   "MLM5295549238": {
-    "title": "Parlante Jbl Grip Portátil Con Bluetooth Waterproof Negra Negro",
+    "title": "Parlante Jbl Grip Port\u00e1til Con Bluetooth Waterproof Negra Negro",
     "min_visible": 1,
     "real_stock": 10,
     "master_stock": 10,
@@ -325,15 +331,18 @@
     "active": true
   },
   "MLM2911238257": {
-    "title": "Sony Srs-xb100 Altavoz De Viaje Inalámbrico Bluetooth Port Color Negro",
+    "title": "Sony Srs-xb100 Altavoz De Viaje Inal\u00e1mbrico Bluetooth Port Color Negro",
     "min_visible": 1,
     "real_stock": 10,
     "master_stock": 10,
     "auto_replenish": true,
-    "active": true
+    "active": true,
+    "floor_price": 699,
+    "ceiling_price": 699,
+    "floor_locked_by_user": true
   },
   "MLM5297087174": {
-    "title": "Altavoz Bluetooth De Estantería Bose Soundlink Home Silver Color Light Silver",
+    "title": "Altavoz Bluetooth De Estanter\u00eda Bose Soundlink Home Silver Color Light Silver",
     "min_visible": 1,
     "real_stock": 10,
     "master_stock": 10,
@@ -341,7 +350,7 @@
     "active": true
   },
   "MLM2910806871": {
-    "title": "Parlante Jbl Clip 5 Portátil Con Bluetooth Waterproof Azul",
+    "title": "Parlante Jbl Clip 5 Port\u00e1til Con Bluetooth Waterproof Azul",
     "min_visible": 1,
     "real_stock": 10,
     "master_stock": 10,
@@ -349,7 +358,7 @@
     "active": true
   },
   "MLM5295460002": {
-    "title": "Altavoz Bluetooth Portátil Jbl Grip Con Luz - Negro",
+    "title": "Altavoz Bluetooth Port\u00e1til Jbl Grip Con Luz - Negro",
     "min_visible": 1,
     "real_stock": 10,
     "master_stock": 10,
@@ -357,7 +366,7 @@
     "active": true
   },
   "MLM2910880749": {
-    "title": "Bocina Portátil Jbl Go 4 Bluetooth, Camuflaje. Color Camuflaje",
+    "title": "Bocina Port\u00e1til Jbl Go 4 Bluetooth, Camuflaje. Color Camuflaje",
     "min_visible": 1,
     "real_stock": 10,
     "master_stock": 10,
@@ -365,7 +374,7 @@
     "active": true
   },
   "MLM5297098664": {
-    "title": "Altavoz Bose Soundlink Home, Altavoz De Estantería Bluetooth Negro",
+    "title": "Altavoz Bose Soundlink Home, Altavoz De Estanter\u00eda Bluetooth Negro",
     "min_visible": 1,
     "real_stock": 10,
     "master_stock": 10,
@@ -389,7 +398,7 @@
     "active": true
   },
   "MLM2910457983": {
-    "title": "Bocina Portátil Jbl Clip 5 Potencia De Salida 7w Color Negro",
+    "title": "Bocina Port\u00e1til Jbl Clip 5 Potencia De Salida 7w Color Negro",
     "min_visible": 1,
     "real_stock": 10,
     "master_stock": 10,
@@ -397,7 +406,7 @@
     "active": true
   },
   "MLM2910768361": {
-    "title": "Bocina Jbl Audio Clip 5 Clip 5 Portátil Con Bluetooth Waterproof Negra Negro",
+    "title": "Bocina Jbl Audio Clip 5 Clip 5 Port\u00e1til Con Bluetooth Waterproof Negra Negro",
     "min_visible": 1,
     "real_stock": 10,
     "master_stock": 10,
@@ -405,7 +414,7 @@
     "active": true
   },
   "MLM2910768369": {
-    "title": "Altavoz Bluetooth Jbl Go 4 Portátil Impermeable En Rojo",
+    "title": "Altavoz Bluetooth Jbl Go 4 Port\u00e1til Impermeable En Rojo",
     "min_visible": 1,
     "real_stock": 10,
     "master_stock": 10,
@@ -421,7 +430,7 @@
     "active": true
   },
   "MLM2910457917": {
-    "title": "Bocina Jbl Go 4 Jblgo4 Portátil Con Bluetooth Waterproof Celeste",
+    "title": "Bocina Jbl Go 4 Jblgo4 Port\u00e1til Con Bluetooth Waterproof Celeste",
     "min_visible": 1,
     "real_stock": 10,
     "master_stock": 10,
@@ -429,7 +438,7 @@
     "active": true
   },
   "MLM2910768335": {
-    "title": "Jbl Go 4 - Altavoz Bluetooth Ultraportátil Rosa",
+    "title": "Jbl Go 4 - Altavoz Bluetooth Ultraport\u00e1til Rosa",
     "min_visible": 1,
     "real_stock": 10,
     "master_stock": 10,
@@ -437,7 +446,7 @@
     "active": true
   },
   "MLM2910768325": {
-    "title": "Parlante Bluetooth Jbl Go 4 Portátil Rosa",
+    "title": "Parlante Bluetooth Jbl Go 4 Port\u00e1til Rosa",
     "min_visible": 1,
     "real_stock": 10,
     "master_stock": 10,
@@ -445,7 +454,7 @@
     "active": true
   },
   "MLM2910768333": {
-    "title": "Parlante Jbl Go 3 Jblgo3 Portátil Con Bluetooth Waterproof Negro",
+    "title": "Parlante Jbl Go 3 Jblgo3 Port\u00e1til Con Bluetooth Waterproof Negro",
     "min_visible": 1,
     "real_stock": 10,
     "master_stock": 10,
@@ -453,7 +462,7 @@
     "active": true
   },
   "MLM2910457977": {
-    "title": "Bocina Portátil Jbl Clip 5 Bluetooth Negro",
+    "title": "Bocina Port\u00e1til Jbl Clip 5 Bluetooth Negro",
     "min_visible": 1,
     "real_stock": 10,
     "master_stock": 10,
@@ -461,7 +470,7 @@
     "active": true
   },
   "MLM2910457973": {
-    "title": "Bocina Portátil Jbl Clip 5 Bluetooth Azul",
+    "title": "Bocina Port\u00e1til Jbl Clip 5 Bluetooth Azul",
     "min_visible": 1,
     "real_stock": 10,
     "master_stock": 10,
@@ -469,7 +478,7 @@
     "active": true
   },
   "MLM2910457981": {
-    "title": "Jbl Go 4 - Altavoz Ultraportátil Bluetooth Color Rojo",
+    "title": "Jbl Go 4 - Altavoz Ultraport\u00e1til Bluetooth Color Rojo",
     "min_visible": 1,
     "real_stock": 10,
     "master_stock": 10,
