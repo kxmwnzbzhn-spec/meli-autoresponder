@@ -18,8 +18,10 @@ RT = os.environ["MELI_REFRESH_TOKEN_WILBERT"]
 TZ = timezone(timedelta(hours=-6))
 PAGE_W=4*72; PAGE_H=6*72
 
-# Substatuses incluidos: 'delayed' (demoradas) + 'printed' (listas para enviar)
-ALLOWED_SUBS = {"delayed", "printed"}
+# Filtro: status=ready_to_ship, substatus IN allowed, deadline <= cutoff
+ALLOWED_SUBS = {"delayed", "printed", "ready_to_print"}
+# Cutoff: hoy 11:00 AM CDMX (incluye demoradas + listas para enviar de hoy)
+CUTOFF = datetime.now(TZ).replace(hour=11, minute=0, second=0, microsecond=0)
 
 
 def tok(rt):
@@ -190,13 +192,20 @@ for sid, ord_o in obs.items():
         st=sh.get("status"); sub=sh.get("substatus")
         sub_count[(st,sub or "(none)")] += 1
         if st != "ready_to_ship" or sub not in ALLOWED_SUBS: continue
-        # deadline (informativo)
+        # deadline
         deadline=None
         try:
             sla=requests.get(f"https://api.mercadolibre.com/shipments/{sid}/sla",headers=H,timeout=8).json()
             ed=sla.get("expected_date")
             if ed: deadline=datetime.fromisoformat(ed.replace("Z","+00:00")).astimezone(TZ)
         except: pass
+        if not deadline:
+            # Fallback
+            hist=sh.get("status_history") or {}
+            dh=hist.get("date_handling")
+            if dh: deadline=(datetime.fromisoformat(dh.replace("Z","+00:00"))+timedelta(hours=48)).astimezone(TZ)
+        # Solo deadline <= cutoff (hoy 11:00 AM CDMX) — incluye demoradas (pasadas) + listas de hoy
+        if not deadline or deadline > CUTOFF: continue
         items=ord_o.get("order_items",[])
         comp_lines=[]; has_used=False
         for it in items:
