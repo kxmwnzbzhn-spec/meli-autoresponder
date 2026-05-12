@@ -143,13 +143,27 @@ print("=== Generando PDF tarjetas ===")
 writer = PdfWriter()
 items_sorted = sorted(seen.values(), key=lambda x: (x["model"], x["color"]))
 
-def fit_font(c, text, max_width, base_size, font="Helvetica-Bold", min_size=24):
-    """Devuelve un size que hace que text quepa en max_width."""
+def fit_font(c, text, max_width, base_size, font="Helvetica-Bold", min_size=14):
     sz = base_size
     while sz > min_size:
         if c.stringWidth(text, font, sz) <= max_width: return sz
         sz -= 2
     return min_size
+
+
+def wrap_to_lines(c, text, max_width, font, size, max_lines=3):
+    """Reparte text en hasta max_lines a esa size manteniendo palabras."""
+    words = text.split()
+    lines=[]; cur=""
+    for w in words:
+        test = (cur+" "+w).strip()
+        if c.stringWidth(test, font, size) <= max_width:
+            cur = test
+        else:
+            if cur: lines.append(cur)
+            cur = w
+    if cur: lines.append(cur)
+    return lines[:max_lines]
 
 for p in items_sorted:
     buf = io.BytesIO()
@@ -195,16 +209,31 @@ for p in items_sorted:
             c.drawCentredString(cx, y, ln)
             y -= line_h
     else:
-        # Bocina (modelo grande + color enorme)
-        # Linea modelo arriba (más grande)
-        sz_model = fit_font(c, model, max_w, 64, min_size=32)
-        c.setFont("Helvetica-Bold", sz_model)
-        c.drawCentredString(cx, PAGE_H/2 + 50, model)
+        # Bocina: si modelo cabe en una línea con size grande, va arriba grande
+        # si no, lo envuelve a 2-3 líneas a tamaño menor
+        sz_one = fit_font(c, model, max_w, 64, min_size=30)
+        if c.stringWidth(model, "Helvetica-Bold", sz_one) <= max_w:
+            c.setFont("Helvetica-Bold", sz_one)
+            c.drawCentredString(cx, PAGE_H/2 + 50, model)
+        else:
+            # Wrap a 2-3 líneas
+            lines = wrap_to_lines(c, model, max_w, "Helvetica-Bold", 32, max_lines=3)
+            sz_wrap = 32
+            # Si alguna línea sigue muy ancha, baja size
+            while sz_wrap > 16 and any(c.stringWidth(ln, "Helvetica-Bold", sz_wrap) > max_w for ln in lines):
+                sz_wrap -= 2
+                lines = wrap_to_lines(c, model, max_w, "Helvetica-Bold", sz_wrap, max_lines=3)
+            c.setFont("Helvetica-Bold", sz_wrap)
+            line_h = sz_wrap + 4
+            block_h = len(lines)*line_h
+            y = PAGE_H/2 + 60 + (block_h - line_h)/2
+            for ln in lines:
+                c.drawCentredString(cx, y, ln); y -= line_h
         # Color ENORME debajo
         if color:
-            sz_col = fit_font(c, color, max_w, 90, min_size=40)
+            sz_col = fit_font(c, color, max_w, 90, min_size=32)
             c.setFont("Helvetica-Bold", sz_col)
-            c.drawCentredString(cx, PAGE_H/2 - 50, color)
+            c.drawCentredString(cx, PAGE_H/2 - 80, color)
 
     # Footer (chico) - cuenta + listing_id para referencia
     c.setFont("Helvetica", 7)
