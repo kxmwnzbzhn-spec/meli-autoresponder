@@ -290,10 +290,7 @@
     "real_stock": 10,
     "master_stock": 10,
     "auto_replenish": true,
-    "active": true,
-    "floor_price": 699,
-    "ceiling_price": 699,
-    "floor_locked_by_user": true
+    "active": true
   },
   "MLM2910880717": {
     "title": "Bocina Jbl Go 4 Jblgo4 Port\u00e1til Con Bluetooth Waterproof Negra Negro",
@@ -317,10 +314,7 @@
     "real_stock": 10,
     "master_stock": 10,
     "auto_replenish": true,
-    "active": true,
-    "floor_price": 499,
-    "ceiling_price": 499,
-    "floor_locked_by_user": true
+    "active": true
   },
   "MLM5295549238": {
     "title": "Parlante Jbl Grip Port\u00e1til Con Bluetooth Waterproof Negra Negro",
@@ -336,10 +330,7 @@
     "real_stock": 10,
     "master_stock": 10,
     "auto_replenish": true,
-    "active": true,
-    "floor_price": 699,
-    "ceiling_price": 699,
-    "floor_locked_by_user": true
+    "active": true
   },
   "MLM5297087174": {
     "title": "Altavoz Bluetooth De Estanter\u00eda Bose Soundlink Home Silver Color Light Silver",
