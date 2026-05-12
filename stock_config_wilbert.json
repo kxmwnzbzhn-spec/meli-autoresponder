@@ -187,7 +187,10 @@
     "min_visible": 0,
     "auto_replenish": false,
     "active": false,
-    "agotado": true
+    "agotado": true,
+    "available_quantity": 0,
+    "paused_by_user": true,
+    "floor_locked_by_user": true
   },
   "MLM5300550156": {
     "variations_real_stock": {
@@ -294,11 +297,15 @@
   },
   "MLM2910880717": {
     "title": "Bocina Jbl Go 4 Jblgo4 Port\u00e1til Con Bluetooth Waterproof Negra Negro",
-    "min_visible": 1,
-    "real_stock": 22,
-    "master_stock": 22,
-    "auto_replenish": true,
-    "active": true
+    "min_visible": 0,
+    "real_stock": 0,
+    "master_stock": 0,
+    "auto_replenish": false,
+    "active": false,
+    "available_quantity": 0,
+    "agotado": true,
+    "paused_by_user": true,
+    "floor_locked_by_user": true
   },
   "MLM2910806853": {
     "title": "Bocina Jbl Audio Clip 5 Clip 5 Port\u00e1til Con Bluetooth Waterproof Negra Negro",
