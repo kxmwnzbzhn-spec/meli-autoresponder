@@ -336,7 +336,9 @@
     "real_stock": 10,
     "master_stock": 10,
     "auto_replenish": true,
-    "active": true
+    "active": true,
+    "floor_price": 349,
+    "ceiling_price": 599
   },
   "MLM5295549238": {
     "title": "Parlante Jbl Grip Port\u00e1til Con Bluetooth Waterproof Negra Negro",
@@ -474,7 +476,9 @@
     "real_stock": 10,
     "master_stock": 10,
     "auto_replenish": true,
-    "active": true
+    "active": true,
+    "floor_price": 349,
+    "ceiling_price": 599
   },
   "MLM2910457977": {
     "title": "Bocina Port\u00e1til Jbl Clip 5 Bluetooth Negro",
