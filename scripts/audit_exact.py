@@ -4,24 +4,21 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 
 APP_ID=os.environ["MELI_APP_ID"]; APP_SECRET=os.environ["MELI_APP_SECRET"]
 
-# Anchors confirmados por Sr. Luis con sus fechas
-# Format: (anchor_amount, anchor_date_cdmx, label)
+# Anchors. Para Claribel uso 5-may 23:59 (post-retiro Asva que pasó durante el día)
+# Para Wilbert uso el último snapshot post-retiro de hoy
 ANCHORS={
     "JUAN":          (120942.00, datetime(2026,5,5,0,0,0,tzinfo=timezone(timedelta(hours=-6)))),
     "RAYMUNDO":      (338000.00, datetime(2026,5,5,0,0,0,tzinfo=timezone(timedelta(hours=-6)))),
-    "CLARIBEL":      (34517.00,  datetime(2026,5,5,0,0,0,tzinfo=timezone(timedelta(hours=-6)))),
+    "CLARIBEL":      (34517.00,  datetime(2026,5,5,23,59,0,tzinfo=timezone(timedelta(hours=-6)))),
     "RAYMUNDO_MAY":  (81126.00,  datetime(2026,5,7,0,0,0,tzinfo=timezone(timedelta(hours=-6)))),
     "ANGEL_DAMIAN":  (60000.00,  datetime(2026,5,7,0,0,0,tzinfo=timezone(timedelta(hours=-6)))),
     "ASGARI":        (50000.00,  datetime(2026,5,7,0,0,0,tzinfo=timezone(timedelta(hours=-6)))),
-    "WILBERT":       (338291.62, datetime(2026,5,11,17,20,0,tzinfo=timezone(timedelta(hours=-6)))),
+    "WILBERT":       (474275.55, datetime(2026,5,12,16,41,0,tzinfo=timezone(timedelta(hours=-6)))),  # post-retiro $31,018
 }
 
-# Retiros confirmados después de cada ancla
+# Retiros desde ancla (solo los que vienen DESPUÉS de la fecha de ancla)
 RETIROS=[
-    # (label, fecha_cdmx, monto)
-    ("CLARIBEL", datetime(2026,5,5,12,0,0,tzinfo=timezone(timedelta(hours=-6))), 22405.00),  # ya en ancla
     ("CLARIBEL", datetime(2026,5,10,12,0,0,tzinfo=timezone(timedelta(hours=-6))), 3338.00),
-    ("WILBERT",  datetime(2026,5,10,12,0,0,tzinfo=timezone(timedelta(hours=-6))), 18300.00), # ya en ancla
 ]
 
 ACCOUNTS=[
@@ -38,7 +35,7 @@ ACCOUNTS=[
 ]
 
 cdmx=datetime.now(timezone.utc)-timedelta(hours=6)
-print(f"=== AUDITORÍA EXACTA — {cdmx.strftime('%d-%m-%Y %H:%M')} CDMX ===\n")
+print(f"=== AUDIT EXACTO — {cdmx.strftime('%d-%m-%Y %H:%M')} CDMX ===\n")
 
 def is_post(o):
     cd=o.get("cancel_detail") or {}
@@ -66,19 +63,17 @@ for label,env in ACCOUNTS:
         me=requests.get("https://api.mercadolibre.com/users/me",headers=H,timeout=15).json()
         uid=me["id"]; nick=me.get("nickname","")
     except Exception as e:
-        results[label]={"err":f"auth:{e}"}; continue
+        results[label]={"err":f"auth"}; continue
     
     anchor_info = ANCHORS.get(label)
     if anchor_info:
         anchor_amount, anchor_date = anchor_info
         date_from_utc = anchor_date.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.000Z")
     else:
-        # cuentas sin ancla: pull 60d completo
         anchor_amount = 0
         anchor_date = cdmx - timedelta(days=60)
         date_from_utc = anchor_date.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.000Z")
     
-    # Pull orders desde anchor
     orders=[]; offset=0
     while True:
         rr=requests.get(f"https://api.mercadolibre.com/orders/search?seller={uid}&order.date_created.from={date_from_utc}&limit=50&offset={offset}&sort=date_desc",headers=H,timeout=30).json()
@@ -116,39 +111,20 @@ for label,env in ACCOUNTS:
             for f in as_completed(futs):
                 ship+=f.result()
     
-    # Retención MELI 2.28%
     retencion = gross * 0.0228
-    
-    # NETO delta desde ancla
     neto_delta = gross - fees - ship - refund - retencion
     
-    # Retiros desde ancla
-    retiros_desde_ancla = 0
-    for rl, rd, rm in RETIROS:
+    retiros_desde = 0
+    for rl,rd,rm in RETIROS:
         if rl==label and rd > anchor_date:
-            retiros_desde_ancla += rm
+            retiros_desde += rm
     
-    saldo_final = anchor_amount + neto_delta - retiros_desde_ancla
+    saldo_final = anchor_amount + neto_delta - retiros_desde
     
-    results[label]={
-        "nick":nick,"uid":uid,
-        "anchor":anchor_amount, "anchor_date": anchor_date.strftime("%Y-%m-%d %H:%M"),
-        "paid":len(paid),"cancelled":len(cancelled),"qty":qty,
-        "gross":gross,"fees":fees,"ship":ship,"refund":refund,
-        "retencion":retencion,"neto_delta":neto_delta,
-        "retiros":retiros_desde_ancla,"saldo":saldo_final
-    }
-    print(f"{label:<14} ancla=${anchor_amount:>10,.2f} + delta=${neto_delta:>10,.2f} - retiros=${retiros_desde_ancla:>9,.2f} = ${saldo_final:>11,.2f}   ({len(paid)} paid since {anchor_date.strftime('%d-%b')})")
+    results[label]={"saldo":saldo_final,"anchor":anchor_amount,"delta":neto_delta,"retiros":retiros_desde,"paid":len(paid),"qty":qty,"gross":gross}
+    print(f"{label:<14} ancla=${anchor_amount:>10,.2f} delta=${neto_delta:>10,.2f} retiros=${retiros_desde:>9,.2f} = ${saldo_final:>11,.2f} ({len(paid)} paid)")
 
-print("\n=== RESUMEN ===")
-total_meli=0
-for k,v in results.items():
-    if "err" in v: 
-        print(f"{k:<14} ERROR"); continue
-    print(f"  {k:<14}  ${v['saldo']:>13,.2f}")
-    total_meli += v['saldo']
-
-print(f"\nTOTAL MELI (suma todas las cuentas): ${total_meli:,.2f}")
-
+total=sum(v.get('saldo',0) for v in results.values() if 'err' not in v)
+print(f"\nTOTAL MELI: ${total:,.2f}")
 print("\n=== JSON ===")
 print(json.dumps(results,ensure_ascii=False))
