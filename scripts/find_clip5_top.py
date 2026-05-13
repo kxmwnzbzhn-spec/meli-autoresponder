@@ -4,44 +4,41 @@ CID=os.environ["MELI_APP_ID"]; CS=os.environ["MELI_APP_SECRET"]
 T=requests.post("https://api.mercadolibre.com/oauth/token",data={"grant_type":"refresh_token","client_id":CID,"client_secret":CS,"refresh_token":RT}).json()["access_token"]
 H={"Authorization":f"Bearer {T}"}
 
-def search_listings(query):
-    url=f"https://api.mercadolibre.com/sites/MLM/search?q={urllib.parse.quote(query)}&category=MLM59800&limit=50"
+def search_catalog_products(query):
+    # Catalog products search
+    url=f"https://api.mercadolibre.com/products/search?status=active&site_id=MLM&q={urllib.parse.quote(query)}&limit=20"
     r=requests.get(url,headers=H).json()
-    return r.get("results",[])
+    return r
 
-# Aggregate by catalog_product_id and total sold across active winners
-def find_top_cpid(query, color_keys):
-    print(f"\n=== {query} ===")
-    res=search_listings(query)
-    # Filter for catalog listings AND title mentions the color
-    cpid_data={}  # cpid -> {"title":..,"sold":sum, "price_min":min, "n":count}
-    for it in res:
-        t=(it.get("title") or "").lower()
-        if not any(ck in t for ck in color_keys): continue
-        cpid=it.get("catalog_product_id")
-        if not cpid: continue
-        sold=it.get("sold_quantity",0) or 0
-        cpid_data.setdefault(cpid,{"title":it.get("title"),"sold":0,"price_min":9999999,"n":0,"sample_iid":it.get("id")})
-        cpid_data[cpid]["sold"]+=sold
-        cpid_data[cpid]["price_min"]=min(cpid_data[cpid]["price_min"],it.get("price") or 9999999)
-        cpid_data[cpid]["n"]+=1
-    # also try to query /products to get total catalog sold
-    ranked=sorted(cpid_data.items(),key=lambda x:-x[1]["sold"])
-    for cpid,info in ranked[:8]:
-        # get product info
+def get_product_items(cpid):
+    # listings competing on this catalog
+    url=f"https://api.mercadolibre.com/products/{cpid}/items"
+    r=requests.get(url,headers=H).json()
+    return r
+
+def find_top(query):
+    print(f"\n========== {query} ==========")
+    r=search_catalog_products(query)
+    results=r.get("results",[])
+    print(f"Catalog products found: {len(results)}")
+    for p in results[:10]:
+        cpid=p.get("id")
+        name=p.get("name","")
+        attrs={a.get("id"):a.get("value_name") for a in (p.get("attributes") or [])}
+        color=attrs.get("COLOR","")
+        domain=p.get("domain_id","")
+        status=p.get("status","")
+        sold=None
+        # try GET /products/{cpid}
         try:
-            p=requests.get(f"https://api.mercadolibre.com/products/{cpid}",headers=H).json()
-            name=p.get("name","")
-            attrs={a["id"]:a.get("value_name") for a in (p.get("attributes") or [])}
-        except Exception:
-            name=info["title"]; attrs={}
-        print(f"CPID={cpid} sold_in_listings={info['sold']} min_price=${info['price_min']} listings_found={info['n']}")
-        print(f"  name={name}")
-        print(f"  color_attr={attrs.get('COLOR')} model={attrs.get('MODEL')}")
-        print(f"  sample_listing=MLM{info['sample_iid'][-9:] if info['sample_iid'] else '?'}")
-    return ranked
+            pd=requests.get(f"https://api.mercadolibre.com/products/{cpid}",headers=H).json()
+            sold=pd.get("buy_box_winner",{}).get("sold_quantity") if pd.get("buy_box_winner") else None
+        except: pass
+        print(f"  CPID={cpid}  COLOR={color}  status={status}")
+        print(f"     name={name}")
+        print(f"     domain={domain}")
+        if sold is not None: print(f"     buy_box_sold={sold}")
 
-# Clip 5 Camuflaje
-find_top_cpid("jbl clip 5 camuflaje",["camuflaje","camuflado"])
-# Clip 5 Celeste con rosado / Squad
-find_top_cpid("jbl clip 5 celeste rosa",["celeste","squad","azul","rosa"])
+find_top("jbl clip 5 camuflaje")
+find_top("jbl clip 5 azul rosa")
+find_top("jbl clip 5 squad")
