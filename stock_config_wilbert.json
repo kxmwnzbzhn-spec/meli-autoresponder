@@ -384,7 +384,9 @@
     "real_stock": 10,
     "master_stock": 10,
     "auto_replenish": true,
-    "active": true
+    "active": true,
+    "floor_price": 449,
+    "ceiling_price": 599
   },
   "MLM5297098664": {
     "title": "Altavoz Bose Soundlink Home, Altavoz De Estanter\u00eda Bluetooth Negro",
