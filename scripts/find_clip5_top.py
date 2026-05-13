@@ -4,47 +4,49 @@ CID=os.environ["MELI_APP_ID"]; CS=os.environ["MELI_APP_SECRET"]
 T=requests.post("https://api.mercadolibre.com/oauth/token",data={"grant_type":"refresh_token","client_id":CID,"client_secret":CS,"refresh_token":RT}).json()["access_token"]
 H={"Authorization":f"Bearer {T}"}
 
-def get_sold(cpid):
-    # Try multiple ways to get sold
-    try:
-        # sum sold_quantity from /products/{cpid}/items winners
-        r=requests.get(f"https://api.mercadolibre.com/products/{cpid}/items?limit=50",headers=H).json()
-        total=0; winners=0
-        for it in r.get("results",[]):
-            total += it.get("sold_quantity",0) or 0
-            winners+=1
-        return total, winners, r.get("paging",{}).get("total",0)
-    except: return 0,0,0
-
-# CAMO/CAMUFLAJE candidates
-camo_cpids=[
-  ("MLM48157832","Squad"),
-  ("MLM44712057","Camuflada"),
-  ("MLM58616124","Verde musgo"),
-  ("MLM48364450","Camo"),
-  ("MLM47219000","Verde musgo Jbl"),
-]
-print("\n=== CAMUFLAJE candidates ===")
-for cpid,color in camo_cpids:
-    s,w,tot=get_sold(cpid)
-    pd=requests.get(f"https://api.mercadolibre.com/products/{cpid}",headers=H).json()
-    name=pd.get("name","")
-    bbw=pd.get("buy_box_winner") or {}
-    print(f"CPID={cpid} COLOR={color} sold_in_winners={s} listings={tot} price_winner=${bbw.get('price')} ")
-    print(f"  name={name}")
-    pics=pd.get("pictures") or []
-    if pics: print(f"  pic={pics[0].get('url')}")
-
-# Search for celeste/pink combos
-print("\n=== Search Celeste/Pink ===")
-for q in ["jbl clip 5 day tripper","jbl clip 5 eco","jbl clip 5 sunset","jbl clip 5 rosa","jbl clip 5 sky"]:
-    print(f"  --- query: {q}")
-    url=f"https://api.mercadolibre.com/products/search?status=active&site_id=MLM&q={urllib.parse.quote(q)}&limit=15"
+# Site search with catalog_listing filter, get sold from individual listings
+def site_search(q):
+    url=f"https://api.mercadolibre.com/sites/MLM/search?q={urllib.parse.quote(q)}&category=MLM59800&limit=50"
     r=requests.get(url,headers=H).json()
-    for p in r.get("results",[]):
-        name=p.get("name","")
-        if "clip 5" not in name.lower() and "clip5" not in name.lower(): continue
-        attrs={a.get("id"):a.get("value_name") for a in (p.get("attributes") or [])}
-        color=attrs.get("COLOR","") or attrs.get("MAIN_COLOR","")
-        if not any(k in (color+name).lower() for k in ["celeste","sky","day","rosa","pink","sunset","tripper","aqua","blue","azul claro","sherbet"]): continue
-        print(f"    CPID={p.get('id')}  COLOR={color}  name={name}")
+    return r.get("results",[])
+
+# Aggregate by cpid sold across listings
+def best_cpid_for(query,color_keys):
+    print(f"\n========== {query} ==========")
+    listings=site_search(query)
+    cpid_data={}
+    for it in listings:
+        cpid=it.get("catalog_product_id")
+        if not cpid: continue
+        title=(it.get("title") or "")
+        tl=title.lower()
+        if "clip 5" not in tl and "clip5" not in tl: continue
+        # color must match
+        if not any(ck in tl for ck in color_keys): continue
+        sold=it.get("sold_quantity",0) or 0
+        d=cpid_data.setdefault(cpid,{"sold":0,"n":0,"sample_title":title,"min_price":99999,"sample_iid":it.get("id"),"thumb":it.get("thumbnail")})
+        d["sold"]+=sold; d["n"]+=1
+        d["min_price"]=min(d["min_price"], it.get("price") or 99999)
+    ranked=sorted(cpid_data.items(),key=lambda x:-x[1]["sold"])[:8]
+    for cpid,d in ranked:
+        # fetch product info
+        pd=requests.get(f"https://api.mercadolibre.com/products/{cpid}",headers=H).json()
+        attrs={a.get("id"):a.get("value_name") for a in (pd.get("attributes") or [])}
+        bbw=pd.get("buy_box_winner") or {}
+        pics=pd.get("pictures") or []
+        pic_url=pics[0].get("url") if pics else None
+        print(f"\nCPID={cpid}")
+        print(f"  product_name={pd.get('name','')}")
+        print(f"  COLOR={attrs.get('COLOR')}  MODEL={attrs.get('MODEL')}")
+        print(f"  sold_via_listings={d['sold']} listings_count={d['n']}")
+        print(f"  bbw_price=${bbw.get('price')} bbw_seller={bbw.get('seller_id')}")
+        print(f"  link=https://articulo.mercadolibre.com.mx/p/{cpid}")
+        if pic_url: print(f"  pic={pic_url}")
+
+# CAMUFLAJE
+for q in ["jbl clip 5 camuflaje","jbl clip 5 squad","jbl clip 5 camuflada","jbl clip 5 camo"]:
+    best_cpid_for(q,["camuflaj","camuflad","squad","camo","verde musg"])
+
+# CELESTE+ROSA
+for q in ["jbl clip 5 celeste rosa","jbl clip 5 azul rosa","jbl clip 5 azul cielo rosa","jbl clip 5 celeste","jbl clip 5 cielo"]:
+    best_cpid_for(q,["celeste","cielo","azul claro","rosa","pink","sky","celest"])
