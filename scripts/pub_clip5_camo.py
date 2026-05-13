@@ -8,8 +8,19 @@ TARGETS=["MLM44712057","MLM48157832","MLM58616124"]
 results=[]
 
 for cpid in TARGETS:
-    # Catalog listing body — minimal required
+    # Fetch product details
+    pd=requests.get(f"https://api.mercadolibre.com/products/{cpid}",headers=H).json()
+    title=pd.get("name","")
+    # Find category — try domain_id mapping or default speakers
+    cat="MLM59800"
+    # Try get child_categories / category_id from settings or domain
+    domain=pd.get("domain_id","")
+    print(f"\n--- {cpid} ---")
+    print(f"  title={title[:70]}")
+    print(f"  domain={domain}")
     body={
+        "title": title,
+        "category_id": cat,
         "catalog_listing": True,
         "catalog_product_id": cpid,
         "price": 999,
@@ -18,22 +29,21 @@ for cpid in TARGETS:
         "buying_mode": "buy_it_now",
         "listing_type_id": "gold_pro",
         "condition": "new",
-        "sale_terms": [
+        "sale_terms":[
             {"id":"WARRANTY_TYPE","value_name":"Garantía del vendedor"},
             {"id":"WARRANTY_TIME","value_name":"90 días"}
         ]
     }
-    print(f"\n--- Publishing {cpid} ---")
     r=requests.post("https://api.mercadolibre.com/items",headers=H,json=body)
     print(f"  POST http={r.status_code}")
-    if r.status_code>=300:
-        print(f"  ERR: {r.text[:400]}")
+    if r.status_code<300:
+        new=r.json()
+        new_id=new.get("id")
+        print(f"  NEW_ID={new_id} price=${new.get('price')} status={new.get('status')}")
+        results.append({"cpid":cpid,"new_id":new_id,"price":new.get("price"),"title":title})
+    else:
+        print(f"  ERR: {r.text[:500]}")
         results.append({"cpid":cpid,"err":r.text[:300],"http":r.status_code})
-        continue
-    new=r.json()
-    new_id=new.get("id")
-    results.append({"cpid":cpid,"new_id":new_id,"price":new.get("price")})
-    print(f"  NEW_ID={new_id} status={new.get('status')} price=${new.get('price')}")
     time.sleep(1)
 
 print("\n=== SUMMARY ===")
