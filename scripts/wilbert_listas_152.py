@@ -187,12 +187,16 @@ print(f"shipping ids: {len(obs)}")
 
 shipments=[]
 sub_count=Counter()
+mode_count=Counter()  # (shipping_mode, logistic_type)
+tags_count=Counter()
 for sid, ord_o in obs.items():
     try:
         sh=requests.get(f"https://api.mercadolibre.com/shipments/{sid}",headers=H,timeout=10).json()
         st=sh.get("status"); sub=sh.get("substatus")
         sub_count[(st,sub or "(none)")] += 1
         if st != "ready_to_ship" or sub not in ALLOWED_SUBS: continue
+        mode_count[(sh.get("shipping_mode") or "?", sh.get("logistic_type") or "?")] += 1
+        for t in (sh.get("tags") or []): tags_count[t] += 1
         # *** HANDLING LIMIT (lo que usa el panel MELI) ***
         deadline = None
         # Path 1: lead_time.estimated_handling_limit.date
@@ -248,6 +252,10 @@ for sid, ord_o in obs.items():
     except Exception as e:
         print(f"  err {sid}: {str(e)[:80]}")
 
+print(f"\n=== Distribución (shipping_mode, logistic_type) entre los printed ===")
+for k,n in mode_count.most_common(): print(f"  {n:4} mode={k[0]!r:10} logistic={k[1]!r}")
+print(f"\n=== Tags más comunes entre los printed ===")
+for t,n in tags_count.most_common(20): print(f"  {n:4} {t}")
 print(f"\n=== Distribución TODOS status/substatus de Wilbert ===")
 for (st,sub),n in sub_count.most_common(): print(f"  {n:4} {st}/{sub}")
 seleccionados = Counter(s["substatus"] for s in shipments)
