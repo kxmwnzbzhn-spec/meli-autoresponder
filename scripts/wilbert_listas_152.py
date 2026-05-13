@@ -20,9 +20,8 @@ TZ = timezone(timedelta(hours=-6))
 PAGE_W=4*72; PAGE_H=6*72
 
 ALLOWED_SUBS = {"printed"}
-# Filtro fechas: deadline EN May 13 (mañana) O >= May 15 (excluye May 14)
-TODAY = datetime.now(TZ).date()
-MANANA_DATE = datetime(2026,5,13).date()
+# Hoy es 13 may → mañana = 14 may. Panel: "Mañana" + "A partir del 15 may"
+MANANA_DATE = datetime(2026,5,14).date()
 DEL15_DATE  = datetime(2026,5,15).date()
 
 
@@ -194,19 +193,35 @@ for sid, ord_o in obs.items():
         st=sh.get("status"); sub=sh.get("substatus")
         sub_count[(st,sub or "(none)")] += 1
         if st != "ready_to_ship" or sub not in ALLOWED_SUBS: continue
-        # deadline
-        deadline=None
-        try:
-            sla=requests.get(f"https://api.mercadolibre.com/shipments/{sid}/sla",headers=H,timeout=8).json()
-            ed=sla.get("expected_date")
-            if ed: deadline=datetime.fromisoformat(ed.replace("Z","+00:00")).astimezone(TZ)
-        except: pass
+        # *** HANDLING LIMIT (lo que usa el panel MELI) ***
+        deadline = None
+        # Path 1: lead_time.estimated_handling_limit.date
+        lt = sh.get("lead_time") or {}
+        ehl = lt.get("estimated_handling_limit") or {}
+        if isinstance(ehl, dict):
+            ed = ehl.get("date")
+        else:
+            ed = ehl  # string
+        if ed:
+            try: deadline = datetime.fromisoformat(ed.replace("Z","+00:00")).astimezone(TZ)
+            except: pass
+        # Path 2: date_handling.estimated_handling_limit
+        if not deadline:
+            dh = sh.get("date_handling") or {}
+            ehl2 = dh.get("estimated_handling_limit")
+            if isinstance(ehl2, dict):
+                ed2 = ehl2.get("date")
+            else:
+                ed2 = ehl2
+            if ed2:
+                try: deadline = datetime.fromisoformat(ed2.replace("Z","+00:00")).astimezone(TZ)
+                except: pass
         if not deadline:
             # Fallback
             hist=sh.get("status_history") or {}
             dh=hist.get("date_handling")
             if dh: deadline=(datetime.fromisoformat(dh.replace("Z","+00:00"))+timedelta(hours=48)).astimezone(TZ)
-        # Solo deadline EN May 13 O >= May 15
+        # handling_limit EN mañana (May 14) O >= May 15 (lo que muestra el panel)
         if not deadline: continue
         d = deadline.date()
         if not (d == MANANA_DATE or d >= DEL15_DATE): continue
