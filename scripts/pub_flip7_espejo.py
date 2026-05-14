@@ -5,28 +5,53 @@ T=requests.post("https://api.mercadolibre.com/oauth/token",data={"grant_type":"r
 H={"Authorization":f"Bearer {T}","Content-Type":"application/json"}
 
 COLOR_URLS={
-    "Negro": "https://http2.mlstatic.com/D_NQ_NP_640926-MLA102988010115_122025-F.jpg",
-    "Morado": "https://http2.mlstatic.com/D_NQ_NP_615832-MLA99988153679_112025-F.jpg",
-    "Azul": "https://http2.mlstatic.com/D_NQ_NP_885019-MLA92554764038_092025-F.jpg",
-    "Rojo": "https://http2.mlstatic.com/D_NQ_NP_821565-MLA99986261729_112025-F.jpg"
+    "Negro": ["https://http2.mlstatic.com/D_NQ_NP_640926-MLA102988010115_122025-F.jpg",
+              "https://http2.mlstatic.com/D_NQ_NP_892726-MLA102477869906_122025-F.jpg"],
+    "Morado": ["https://http2.mlstatic.com/D_NQ_NP_615832-MLA99988153679_112025-F.jpg",
+               "https://http2.mlstatic.com/D_NQ_NP_933336-MLA97405146460_112025-F.jpg"],
+    "Azul": ["https://http2.mlstatic.com/D_NQ_NP_885019-MLA92554764038_092025-F.jpg",
+             "https://http2.mlstatic.com/D_NQ_NP_770858-MLA92554764046_092025-F.jpg"],
+    "Rojo": ["https://http2.mlstatic.com/D_NQ_NP_821565-MLA99986261729_112025-F.jpg",
+             "https://http2.mlstatic.com/D_NQ_NP_874113-MLA88010379898_072025-F.jpg"]
 }
-EXTRA_PICS=[
-  "https://http2.mlstatic.com/D_NQ_NP_892726-MLA102477869906_122025-F.jpg",
-  "https://http2.mlstatic.com/D_NQ_NP_770858-MLA92554764046_092025-F.jpg"
-]
 
+# Upload via download-and-multipart
+def upload_pic_via_download(url):
+    img=requests.get(url,timeout=20)
+    if img.status_code!=200: return None
+    files={"file":("pic.jpg",img.content,"image/jpeg")}
+    r=requests.post("https://api.mercadolibre.com/pictures/items/upload",
+                    headers={"Authorization":f"Bearer {T}"}, files=files)
+    if r.status_code<300:
+        return r.json().get("id")
+    print(f"  upload err {r.status_code}: {r.text[:200]}")
+    return None
+
+color_ids={}
+for color,urls in COLOR_URLS.items():
+    ids=[]
+    for u in urls:
+        pid=upload_pic_via_download(u)
+        if pid: ids.append(pid)
+    color_ids[color]=ids
+    print(f"{color}: {len(ids)} pic ids uploaded — first={ids[0] if ids else None}")
+
+# Build variations with picture_ids
 variations=[]
-for color,url in COLOR_URLS.items():
+for color in ["Negro","Morado","Azul","Rojo"]:
+    pids=color_ids.get(color,[])
+    if not pids: 
+        print(f"!! NO PICS for {color} — skipping")
+        continue
     variations.append({
         "attribute_combinations":[{"id":"COLOR","value_name":color}],
         "available_quantity":10,
         "price":399,
-        "picture_ids":[],
-        "pictures":[{"source":url}]
+        "picture_ids":pids
     })
 
-# Top-level pictures = all 4 + extras
-main_pics=[{"source":url} for url in list(COLOR_URLS.values())+EXTRA_PICS]
+# Main picture = first of each color
+main_pic_ids=[color_ids[c][0] for c in ["Negro","Morado","Azul","Rojo"] if color_ids.get(c)]
 
 SEO_TITLE="Bocina Bluetooth Portátil Flip 7 Calidad Espejo Ip67 30w"
 SEO_DESC = """🔊 BOCINA BLUETOOTH PORTÁTIL ESTILO FLIP 7 - CALIDAD ESPEJO 1:1
@@ -50,14 +75,14 @@ SEO_DESC = """🔊 BOCINA BLUETOOTH PORTÁTIL ESTILO FLIP 7 - CALIDAD ESPEJO 1:1
 - NO compatible con la aplicación JBL Portable
 - Réplica con apariencia, sonido y resistencia al agua casi idénticos al modelo original
 
-🎵 IDEAL PARA: Fiestas, playa, alberca, ducha, camping, fiestas en casa, gym, oficina, regalo.
+🎵 IDEAL PARA: Fiestas, playa, alberca, ducha, camping, gym, oficina, regalo.
 
 🚚 ENVÍO GRATIS a todo México con Mercado Envíos
 ✅ Envío en 24/48 horas
 
 COLORES: Negro / Morado / Azul / Rojo
 
-#BocinaBluetooth #BocinaPortatil #SpeakerPortatil #Altavoz #FlipBluetooth #BocinaInalambrica"""
+#BocinaBluetooth #BocinaPortatil #SpeakerPortatil #Altavoz #FlipBluetooth #BocinaInalambrica #BluetoothSpeaker"""
 
 body={
     "title": SEO_TITLE,
@@ -67,11 +92,10 @@ body={
     "buying_mode": "buy_it_now",
     "listing_type_id": "gold_pro",
     "condition": "new",
-    "pictures": main_pics,
+    "pictures": [{"id":pid} for pid in main_pic_ids],
     "attributes": [
         {"id":"BRAND","value_name":"Genérica"},
         {"id":"MODEL","value_name":"Flip 7 Espejo"},
-        {"id":"LINE","value_name":"Flip"},
         {"id":"ITEM_CONDITION","value_name":"Nuevo"}
     ],
     "variations": variations,
@@ -82,15 +106,15 @@ body={
     ]
 }
 
-print("--- POSTING ---")
+print("\n--- POSTING ---")
 r=requests.post("https://api.mercadolibre.com/items",headers=H,json=body)
 print(f"POST http={r.status_code}")
 if r.status_code<300:
     new=r.json()
     new_id=new.get("id")
-    print(f"NEW_ID={new_id} price=${new.get('price')} status={new.get('status')} sub={new.get('sub_status')}")
+    print(f"NEW_ID={new_id} price=${new.get('price')} status={new.get('status')}")
     print(f"link=https://articulo.mercadolibre.com.mx/{new_id}")
     d=requests.post(f"https://api.mercadolibre.com/items/{new_id}/description",headers=H,json={"plain_text":SEO_DESC})
-    print(f"DESC http={d.status_code} {d.text[:200]}")
+    print(f"DESC http={d.status_code}")
 else:
     print(f"ERR: {r.text[:1500]}")
