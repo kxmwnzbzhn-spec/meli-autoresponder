@@ -802,5 +802,12 @@
     "active": true,
     "floor_price": 799,
     "ceiling_price": 999
+  },
+  "MLM2916897169": {
+    "paused_by_user": true,
+    "active": false,
+    "auto_replenish": false,
+    "agotado": true,
+    "floor_locked_by_user": true
   }
 }
