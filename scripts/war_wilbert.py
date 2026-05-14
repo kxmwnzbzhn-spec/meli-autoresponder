@@ -29,7 +29,7 @@ TG_CHAT    = os.environ.get("TELEGRAM_CHAT_ID")
 
 RULES = {
     "go4":      {"floor": 449, "ceiling": 699,  "rx": r"\bgo\s*4\b"},
-    "go3":      {"floor": 399, "ceiling": 599,  "rx": r"\bgo\s*3\b", "force": 499},
+    "go3":      {"floor": 399, "ceiling": 599,  "rx": r"\bgo\s*3\b"},
     "clip5":    {"floor": 699, "ceiling": 899,  "rx": r"\bclip\s*5\b"},
     "charge6":  {"floor": 399, "ceiling": 999,  "rx": r"\bcharge\s*6\b"},
     "flip7":    {"floor": 399, "ceiling": 999,  "rx": r"\bflip\s*7\b"},
