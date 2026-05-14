@@ -769,5 +769,38 @@
     "active": true,
     "floor_price": 799,
     "ceiling_price": 999
+  },
+  "MLM2931612609": {
+    "title": "JBL Clip 5 Negro/Naranja",
+    "min_visible": 1,
+    "real_stock": 10,
+    "master_stock": 10,
+    "available_quantity": 1,
+    "auto_replenish": true,
+    "active": true,
+    "floor_price": 799,
+    "ceiling_price": 999
+  },
+  "MLM2931612611": {
+    "title": "JBL Clip 4 Azul",
+    "min_visible": 1,
+    "real_stock": 10,
+    "master_stock": 10,
+    "available_quantity": 1,
+    "auto_replenish": true,
+    "active": true,
+    "floor_price": 799,
+    "ceiling_price": 999
+  },
+  "MLM2931341689": {
+    "title": "JBL Clip 5 Negro/Naranja IP67",
+    "min_visible": 1,
+    "real_stock": 10,
+    "master_stock": 10,
+    "available_quantity": 1,
+    "auto_replenish": true,
+    "active": true,
+    "floor_price": 799,
+    "ceiling_price": 999
   }
 }
