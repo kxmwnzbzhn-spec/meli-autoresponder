@@ -194,27 +194,28 @@
   },
   "MLM5300550156": {
     "variations_real_stock": {
-      "Rosa": 10,
-      "Azul": 10,
-      "Rojo": 10,
-      "Camuflaje": 10,
-      "Negro": 10,
-      "Aqua": 10
+      "Rosa": 5,
+      "Azul": 5,
+      "Rojo": 5,
+      "Camuflaje": 5,
+      "Negro": 5,
+      "Aqua": 5
     },
-    "min_visible": 6,
+    "min_visible": 30,
     "auto_replenish": true,
     "active": true,
     "title": "Bocina Bluetooth Port\u00e1til Go 4 Ip67 Oem 1.1 Espejo (multi-color)",
     "variations_min_visible": {
-      "Rosa": 1,
-      "Azul": 1,
-      "Rojo": 1,
-      "Camuflaje": 1,
-      "Negro": 1,
-      "Aqua": 1
+      "Rosa": 5,
+      "Azul": 5,
+      "Rojo": 5,
+      "Camuflaje": 5,
+      "Negro": 5,
+      "Aqua": 5
     },
-    "real_stock": 60,
-    "master_stock": 60
+    "real_stock": 30,
+    "master_stock": 30,
+    "available_quantity": 30
   },
   "MLM2911241921": {
     "real_stock": 30,
