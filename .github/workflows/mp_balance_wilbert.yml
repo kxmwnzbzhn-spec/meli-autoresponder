@@ -4,7 +4,6 @@ on:
 jobs:
   run:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -14,4 +13,4 @@ jobs:
           MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
           MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
           MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN_WILBERT }}
-        run: python scripts/wilbert_v3.py
+        run: python scripts/wilbert_today_full.py
