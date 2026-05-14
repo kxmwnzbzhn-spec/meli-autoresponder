@@ -345,8 +345,11 @@
     "min_visible": 1,
     "real_stock": 10,
     "master_stock": 10,
-    "auto_replenish": true,
-    "active": true
+    "auto_replenish": false,
+    "active": false,
+    "paused_by_user": true,
+    "agotado": true,
+    "floor_locked_by_user": true
   },
   "MLM2911238257": {
     "title": "Sony Srs-xb100 Altavoz De Viaje Inal\u00e1mbrico Bluetooth Port Color Negro",
@@ -377,8 +380,11 @@
     "min_visible": 1,
     "real_stock": 10,
     "master_stock": 10,
-    "auto_replenish": true,
-    "active": true
+    "auto_replenish": false,
+    "active": false,
+    "paused_by_user": true,
+    "agotado": true,
+    "floor_locked_by_user": true
   },
   "MLM2910880749": {
     "title": "Bocina Port\u00e1til Jbl Go 4 Bluetooth, Camuflaje. Color Camuflaje",
