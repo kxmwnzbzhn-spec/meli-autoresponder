@@ -4,57 +4,29 @@ CID=os.environ["MELI_APP_ID"]; CS=os.environ["MELI_APP_SECRET"]
 T=requests.post("https://api.mercadolibre.com/oauth/token",data={"grant_type":"refresh_token","client_id":CID,"client_secret":CS,"refresh_token":RT}).json()["access_token"]
 H={"Authorization":f"Bearer {T}","Content-Type":"application/json"}
 
-COLOR_PICS={
-    "Negro": [
-        "https://http2.mlstatic.com/D_NQ_NP_640926-MLA102988010115_122025-F.jpg",
-        "https://http2.mlstatic.com/D_NQ_NP_892726-MLA102477869906_122025-F.jpg"
-    ],
-    "Morado": [
-        "https://http2.mlstatic.com/D_NQ_NP_615832-MLA99988153679_112025-F.jpg",
-        "https://http2.mlstatic.com/D_NQ_NP_933336-MLA97405146460_112025-F.jpg"
-    ],
-    "Azul": [
-        "https://http2.mlstatic.com/D_NQ_NP_885019-MLA92554764038_092025-F.jpg",
-        "https://http2.mlstatic.com/D_NQ_NP_770858-MLA92554764046_092025-F.jpg"
-    ],
-    "Rojo": [
-        "https://http2.mlstatic.com/D_NQ_NP_821565-MLA99986261729_112025-F.jpg",
-        "https://http2.mlstatic.com/D_NQ_NP_874113-MLA88010379898_072025-F.jpg"
-    ]
+COLOR_URLS={
+    "Negro": "https://http2.mlstatic.com/D_NQ_NP_640926-MLA102988010115_122025-F.jpg",
+    "Morado": "https://http2.mlstatic.com/D_NQ_NP_615832-MLA99988153679_112025-F.jpg",
+    "Azul": "https://http2.mlstatic.com/D_NQ_NP_885019-MLA92554764038_092025-F.jpg",
+    "Rojo": "https://http2.mlstatic.com/D_NQ_NP_821565-MLA99986261729_112025-F.jpg"
 }
-
-# Upload pictures via JSON body (alternate endpoint)
-def upload_pic(url):
-    r=requests.post("https://api.mercadolibre.com/pictures/items/upload",
-                    headers={"Authorization":f"Bearer {T}","Content-Type":"application/json"},
-                    json={"source":url})
-    if r.status_code<300:
-        return r.json().get("id")
-    print(f"  upload err {r.status_code}: {r.text[:200]}")
-    return None
-
-color_pic_ids={}
-for color, urls in COLOR_PICS.items():
-    ids=[]
-    for u in urls:
-        pid=upload_pic(u)
-        if pid: ids.append(pid)
-    color_pic_ids[color]=ids
-    print(f"{color}: {len(ids)} pic ids uploaded")
-
-# Main pictures = first of each color
-main_pic_ids=[color_pic_ids[c][0] for c in ["Negro","Morado","Azul","Rojo"] if color_pic_ids.get(c)]
+EXTRA_PICS=[
+  "https://http2.mlstatic.com/D_NQ_NP_892726-MLA102477869906_122025-F.jpg",
+  "https://http2.mlstatic.com/D_NQ_NP_770858-MLA92554764046_092025-F.jpg"
+]
 
 variations=[]
-for color in ["Negro","Morado","Azul","Rojo"]:
-    pids=color_pic_ids.get(color,[])
-    if not pids: continue
+for color,url in COLOR_URLS.items():
     variations.append({
         "attribute_combinations":[{"id":"COLOR","value_name":color}],
         "available_quantity":10,
         "price":399,
-        "picture_ids":pids
+        "picture_ids":[],
+        "pictures":[{"source":url}]
     })
+
+# Top-level pictures = all 4 + extras
+main_pics=[{"source":url} for url in list(COLOR_URLS.values())+EXTRA_PICS]
 
 SEO_TITLE="Bocina Bluetooth Portátil Flip 7 Calidad Espejo Ip67 30w"
 SEO_DESC = """🔊 BOCINA BLUETOOTH PORTÁTIL ESTILO FLIP 7 - CALIDAD ESPEJO 1:1
@@ -73,33 +45,29 @@ SEO_DESC = """🔊 BOCINA BLUETOOTH PORTÁTIL ESTILO FLIP 7 - CALIDAD ESPEJO 1:1
 ✓ 1 Cable USB-C de carga
 ✓ 1 Manual de usuario
 
-⚠️ AVISO IMPORTANTE - LEER ANTES DE COMPRAR:
-- Este producto es CALIDAD ESPEJO 1:1 - NO es producto original JBL
-- NO es compatible con la aplicación JBL Portable
-- Réplica con apariencia, calidad de sonido y resistencia al agua casi idénticas al modelo original
-- Calidad superior comparada con otras replicas del mercado
+⚠️ AVISO IMPORTANTE:
+- CALIDAD ESPEJO 1:1 — NO es producto original JBL
+- NO compatible con la aplicación JBL Portable
+- Réplica con apariencia, sonido y resistencia al agua casi idénticos al modelo original
 
-🎵 IDEAL PARA:
-- Fiestas, reuniones y conciertos al aire libre
-- Playa, piscina, ducha, camping
-- Música en casa, oficina o gimnasio
-- Regalo perfecto
+🎵 IDEAL PARA: Fiestas, playa, alberca, ducha, camping, fiestas en casa, gym, oficina, regalo.
 
 🚚 ENVÍO GRATIS a todo México con Mercado Envíos
-✅ Productos disponibles - Envío en 24/48 horas
+✅ Envío en 24/48 horas
 
-COLORES DISPONIBLES: Negro / Morado / Azul / Rojo
+COLORES: Negro / Morado / Azul / Rojo
 
-#BocinaBluetooth #BocinaPortatil #SpeakerPortatil #Altavoz #FlipBluetooth #BocinaInalambrica #BluetoothSpeaker"""
+#BocinaBluetooth #BocinaPortatil #SpeakerPortatil #Altavoz #FlipBluetooth #BocinaInalambrica"""
 
 body={
     "title": SEO_TITLE,
     "category_id": "MLM59800",
+    "price": 399,
     "currency_id": "MXN",
     "buying_mode": "buy_it_now",
     "listing_type_id": "gold_pro",
     "condition": "new",
-    "pictures": [{"id":pid} for pid in main_pic_ids] if main_pic_ids else None,
+    "pictures": main_pics,
     "attributes": [
         {"id":"BRAND","value_name":"Genérica"},
         {"id":"MODEL","value_name":"Flip 7 Espejo"},
@@ -113,15 +81,15 @@ body={
         {"id":"WARRANTY_TIME","value_name":"30 días"}
     ]
 }
-if body.get("pictures") is None: body.pop("pictures")
 
-print("\n--- POSTING ITEM ---")
+print("--- POSTING ---")
 r=requests.post("https://api.mercadolibre.com/items",headers=H,json=body)
 print(f"POST http={r.status_code}")
 if r.status_code<300:
     new=r.json()
     new_id=new.get("id")
-    print(f"NEW_ID={new_id} price=${new.get('price')} status={new.get('status')}")
+    print(f"NEW_ID={new_id} price=${new.get('price')} status={new.get('status')} sub={new.get('sub_status')}")
+    print(f"link=https://articulo.mercadolibre.com.mx/{new_id}")
     d=requests.post(f"https://api.mercadolibre.com/items/{new_id}/description",headers=H,json={"plain_text":SEO_DESC})
     print(f"DESC http={d.status_code} {d.text[:200]}")
 else:
