@@ -13,4 +13,4 @@ jobs:
           MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
           MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
           MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN_WILBERT }}
-        run: python scripts/wilbert_ayer.py
+        run: python scripts/wilbert_13may.py
