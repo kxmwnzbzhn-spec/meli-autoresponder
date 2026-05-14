@@ -193,29 +193,14 @@
     "floor_locked_by_user": true
   },
   "MLM5300550156": {
-    "variations_real_stock": {
-      "Rosa": 5,
-      "Azul": 5,
-      "Rojo": 5,
-      "Camuflaje": 5,
-      "Negro": 5,
-      "Aqua": 5
-    },
-    "min_visible": 30,
-    "auto_replenish": true,
-    "active": true,
-    "title": "Bocina Bluetooth Port\u00e1til Go 4 Ip67 Oem 1.1 Espejo (multi-color)",
-    "variations_min_visible": {
-      "Rosa": 5,
-      "Azul": 5,
-      "Rojo": 5,
-      "Camuflaje": 5,
-      "Negro": 5,
-      "Aqua": 5
-    },
-    "real_stock": 30,
-    "master_stock": 30,
-    "available_quantity": 30
+    "closed": true,
+    "active": false,
+    "auto_replenish": false,
+    "agotado": true,
+    "real_stock": 0,
+    "master_stock": 0,
+    "available_quantity": 0,
+    "title": "CERRADA \u2014 relisted as MLM5346655686"
   },
   "MLM2911241921": {
     "real_stock": 30,
@@ -816,5 +801,30 @@
     "auto_replenish": false,
     "agotado": true,
     "floor_locked_by_user": true
+  },
+  "MLM5346655686": {
+    "title": "Bocina Bluetooth Port\u00e1til Go 4 IP67 OEM 1.1 Espejo (multi-color, relisted)",
+    "min_visible": 30,
+    "real_stock": 30,
+    "master_stock": 30,
+    "available_quantity": 30,
+    "auto_replenish": true,
+    "active": true,
+    "variations_min_visible": {
+      "Rosa": 5,
+      "Azul": 5,
+      "Rojo": 5,
+      "Camuflaje": 5,
+      "Negro": 5,
+      "Aqua": 5
+    },
+    "variations_real_stock": {
+      "Rosa": 5,
+      "Azul": 5,
+      "Rojo": 5,
+      "Camuflaje": 5,
+      "Negro": 5,
+      "Aqua": 5
+    }
   }
 }
