@@ -1,4 +1,4 @@
-import os,json,base64,requests
+import os,json,base64,requests,datetime as dt
 RT_W=os.environ["MELI_REFRESH_TOKEN_WILBERT"]
 RT_Y=os.environ.get("MELI_REFRESH_TOKEN_YC_NEW","")
 RT_J=os.environ.get("MELI_REFRESH_TOKEN_JUAN","")
@@ -47,14 +47,12 @@ def smart(title,var_color=None):
     t=(title or "").lower()
     modelo=None
     for kw,name in MODELO_KW:
-        if kw in t:
-            modelo=name; break
+        if kw in t: modelo=name; break
     if not modelo: return None
     color=None
-    src=(var_color or "").lower()+" "+t  # variation color preferred
+    src=(var_color or "").lower()+" "+t
     for kw,name in COLOR_KW:
-        if kw in src:
-            color=name; break
+        if kw in src: color=name; break
     if modelo=="Sony XB100": return "Sony XB100|Negro"
     if modelo=="JBL Grip" and not color: color="Negro"
     if modelo=="Dashcam ASV-DC170": return "Dashcam ASV-DC170|-"
@@ -65,64 +63,72 @@ def smart(title,var_color=None):
     if modelo=="JBL Clip 5" and color=="Aqua": color="Azul"
     return f"{modelo}|{color}"
 
-FROM_DATE="2026-04-28T00:00:00.000-06:00"
 EXCLUDED_STATUS={"cancelled","invalid"}
-accounts=[("Wilbert",tok(RT_W)),("Yiriam",tok(RT_Y)),("Juan",tok(RT_J)),("Raymundo",tok(RT_R))]
-sold_by_sku={}
-order_counts={}
-ungrouped={}
-for name,T in accounts:
-    if not T: 
-        print(f"  {name}: NO TOKEN")
-        continue
+# Use day-by-day windows from 2026-04-28 to today
+start=dt.date(2026,4,28)
+end=dt.date(2026,5,16)  # tomorrow inclusive
+
+def fetch_orders(name,T):
     H={"Authorization":f"Bearer {T}"}
     me=requests.get("https://api.mercadolibre.com/users/me",headers=H).json()
     uid=me["id"]
-    off=0; total_orders=0; processed=0
-    while True:
-        url=f"https://api.mercadolibre.com/orders/search?seller={uid}&order.date_created.from={FROM_DATE}&sort=date_desc&limit=50&offset={off}"
-        r=requests.get(url,headers=H,timeout=20).json()
-        results=r.get("results",[])
-        if not results: break
-        total_orders=r.get("paging",{}).get("total",0)
-        for o in results:
-            status=o.get("status","")
-            if status in EXCLUDED_STATUS: continue
-            for it in (o.get("order_items") or []):
-                item=it.get("item",{}) or {}
-                title=item.get("title","")
-                # check variation_attributes for COLOR
-                var_color=""
-                for va in (item.get("variation_attributes") or []):
-                    if va.get("id")=="COLOR":
-                        var_color=va.get("value_name","")
-                qty=int(it.get("quantity",0) or 0)
-                sku=smart(title,var_color)
-                if sku:
-                    d=sold_by_sku.setdefault(sku,{"total":0,"by_acct":{}})
-                    d["total"]+=qty
-                    d["by_acct"][name]=d["by_acct"].get(name,0)+qty
-                else:
-                    ungrouped.setdefault(title[:60],0)
-                    ungrouped[title[:60]]+=qty
-                processed+=1
-        off+=50
-        if off>=total_orders: break
-    order_counts[name]={"total":total_orders,"items_processed":processed}
-    print(f"  {name}: {total_orders} orders, {processed} order_items procesados")
+    sold_local={}
+    total_orders=0; processed=0
+    d=start
+    while d<end:
+        nd=d+dt.timedelta(days=1)
+        d_from=f"{d.isoformat()}T00:00:00.000-06:00"
+        d_to=f"{nd.isoformat()}T00:00:00.000-06:00"
+        off=0
+        while True:
+            url=f"https://api.mercadolibre.com/orders/search?seller={uid}&order.date_created.from={d_from}&order.date_created.to={d_to}&sort=date_desc&limit=50&offset={off}"
+            r=requests.get(url,headers=H,timeout=20).json()
+            results=r.get("results",[])
+            if not results: break
+            tot_day=r.get("paging",{}).get("total",0)
+            for o in results:
+                total_orders+=1
+                if o.get("status","") in EXCLUDED_STATUS: continue
+                for it in (o.get("order_items") or []):
+                    item=it.get("item",{}) or {}
+                    title=item.get("title","")
+                    var_color=""
+                    for va in (item.get("variation_attributes") or []):
+                        if va.get("id")=="COLOR": var_color=va.get("value_name","")
+                    qty=int(it.get("quantity",0) or 0)
+                    sku=smart(title,var_color)
+                    if sku:
+                        sold_local[sku]=sold_local.get(sku,0)+qty
+                    processed+=1
+            off+=50
+            if off>=tot_day: break
+        d=nd
+    return sold_local,total_orders,processed
 
-print(f"\n=== Ventas desde {FROM_DATE[:10]} (Orders API, excl. cancelled) ===")
-print(f"{'SKU':<32} {'BODEGA':>7} {'VENDIDO':>8} {'STOCK':>7}")
+accounts=[("Wilbert",tok(RT_W)),("Yiriam",tok(RT_Y)),("Juan",tok(RT_J)),("Raymundo",tok(RT_R))]
+sold_by_sku={}
+order_counts={}
+detail_by_acct={}
+for name,T in accounts:
+    if not T: continue
+    local,orders,proc=fetch_orders(name,T)
+    order_counts[name]={"orders":orders,"items":proc}
+    detail_by_acct[name]=local
+    for sku,q in local.items():
+        sold_by_sku[sku]=sold_by_sku.get(sku,0)+q
+    print(f"  {name}: {orders} orders, {proc} items procesados, {len(local)} SKUs")
+
+print(f"\n=== STOCK REAL post-28-abr (Orders API por día, todas cuentas) ===")
+print(f"{'SKU':<32} {'BODEGA':>7} {'VENDIDO':>8} {'STOCK':>7}  Wb / Yr / Jn / Rm")
 total_rem=0; total_inv=0; total_sold=0; oversold=[]
 all_skus=sorted(set(list(stock.keys())+list(sold_by_sku.keys())))
 for sku in all_skus:
     inv_qty=0
     if sku in stock:
         v=stock[sku]; inv_qty=v if isinstance(v,int) else v.get("total",0)
-    d=sold_by_sku.get(sku,{})
-    sold=d.get("total",0)
+    sold=sold_by_sku.get(sku,0)
     rem=inv_qty-sold
-    detail=" ".join(f"{a}:{q}" for a,q in d.get("by_acct",{}).items()) if d else ""
+    detail=f"{detail_by_acct.get('Wilbert',{}).get(sku,0)}/{detail_by_acct.get('Yiriam',{}).get(sku,0)}/{detail_by_acct.get('Juan',{}).get(sku,0)}/{detail_by_acct.get('Raymundo',{}).get(sku,0)}"
     flag=" ⚠️" if rem<0 else ""
     if not (inv_qty==0 and sold==0):
         print(f"{sku:<32} {inv_qty:>7} {sold:>8} {rem:>7}{flag}  {detail}")
@@ -130,15 +136,12 @@ for sku in all_skus:
     if rem<0: oversold.append((sku,inv_qty,sold,rem))
     if rem>0: total_rem+=rem
 
+print(f"\nOrders/items por cuenta:",order_counts)
 print(f"\n=== TOTALES ===")
-print(f"Inventario bodega snapshot 28-Abr-2026: {total_inv}")
-print(f"Vendido post-snapshot (Orders API):     {total_sold}")
-print(f"Stock REAL restante (suma positivos):   {total_rem}")
-print(f"\nOrders por cuenta:",order_counts)
+print(f"Bodega snapshot 28-Abr-2026:          {total_inv}")
+print(f"Vendido post-snapshot:                {total_sold}")
+print(f"Stock REAL restante (suma positivos): {total_rem}")
 if oversold:
-    print(f"\n⚠️ SOBREVENTAS (post-snapshot):")
-    for sku,inv,s,r in oversold: print(f"  {sku}: bodega={inv} vendido={s} → debes {-r}")
-if ungrouped:
-    print(f"\nUNGROUPED (no se mapearon a inventario):")
-    for t,q in sorted(ungrouped.items(),key=lambda x:-x[1])[:20]:
-        print(f"  qty={q:>3}  {t}")
+    print(f"\n⚠️ SOBREVENTAS:")
+    for sku,inv,s,r in sorted(oversold,key=lambda x:x[3]):
+        print(f"  {sku}: bodega={inv} vendido={s} debes={-r}")
