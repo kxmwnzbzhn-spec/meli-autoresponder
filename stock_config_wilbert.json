@@ -260,7 +260,10 @@
     "min_visible": 0,
     "auto_replenish": false,
     "active": false,
-    "agotado": true
+    "agotado": true,
+    "available_quantity": 0,
+    "paused_by_user": true,
+    "floor_locked_by_user": true
   },
   "MLM2910457999": {
     "real_stock": 0,
@@ -278,7 +281,8 @@
     "active": false,
     "agotado": true,
     "paused_by_user": true,
-    "floor_locked_by_user": true
+    "floor_locked_by_user": true,
+    "available_quantity": 0
   },
   "MLM2910768379": {
     "real_stock": 0,
@@ -288,7 +292,8 @@
     "active": false,
     "agotado": true,
     "paused_by_user": true,
-    "floor_locked_by_user": true
+    "floor_locked_by_user": true,
+    "available_quantity": 0
   },
   "MLM2910880775": {
     "real_stock": 0,
@@ -301,10 +306,11 @@
   "MLM2910806817": {
     "title": "Bocina Jbl Go 4 Jblgo4 Port\u00e1til Con Bluetooth Waterproof Roja Rojo",
     "min_visible": 1,
-    "real_stock": 10,
-    "master_stock": 10,
+    "real_stock": 15,
+    "master_stock": 15,
     "auto_replenish": true,
-    "active": true
+    "active": true,
+    "available_quantity": 1
   },
   "MLM2910880717": {
     "title": "Bocina Jbl Go 4 Jblgo4 Port\u00e1til Con Bluetooth Waterproof Negra Negro",
@@ -435,10 +441,11 @@
   "MLM2910768369": {
     "title": "Altavoz Bluetooth Jbl Go 4 Port\u00e1til Impermeable En Rojo",
     "min_visible": 1,
-    "real_stock": 10,
-    "master_stock": 10,
+    "real_stock": 15,
+    "master_stock": 15,
     "auto_replenish": true,
-    "active": true
+    "active": true,
+    "available_quantity": 1
   },
   "MLM2910457991": {
     "title": "Altavoz Impermeable Negro Jbl Clip 5",
@@ -451,26 +458,29 @@
   "MLM2910457917": {
     "title": "Bocina Jbl Go 4 Jblgo4 Port\u00e1til Con Bluetooth Waterproof Celeste",
     "min_visible": 1,
-    "real_stock": 10,
-    "master_stock": 10,
+    "real_stock": 15,
+    "master_stock": 15,
     "auto_replenish": true,
-    "active": true
+    "active": true,
+    "available_quantity": 1
   },
   "MLM2910768335": {
     "title": "Jbl Go 4 - Altavoz Bluetooth Ultraport\u00e1til Rosa",
     "min_visible": 1,
-    "real_stock": 10,
-    "master_stock": 10,
+    "real_stock": 15,
+    "master_stock": 15,
     "auto_replenish": true,
-    "active": true
+    "active": true,
+    "available_quantity": 1
   },
   "MLM2910768325": {
     "title": "Parlante Bluetooth Jbl Go 4 Port\u00e1til Rosa",
     "min_visible": 1,
-    "real_stock": 10,
-    "master_stock": 10,
+    "real_stock": 15,
+    "master_stock": 15,
     "auto_replenish": true,
-    "active": true
+    "active": true,
+    "available_quantity": 1
   },
   "MLM2910768333": {
     "title": "Parlante Jbl Go 3 Jblgo3 Port\u00e1til Con Bluetooth Waterproof Negro",
@@ -868,8 +878,8 @@
   "MLM5351937060": {
     "title": "Go 4 Camuflaje (clone alterno MLM2910880749 baja)",
     "min_visible": 1,
-    "real_stock": 10,
-    "master_stock": 10,
+    "real_stock": 15,
+    "master_stock": 15,
     "available_quantity": 1,
     "auto_replenish": true,
     "active": true,
@@ -900,8 +910,8 @@
   "MLM2914422351": {
     "title": "JBL Go 4 Rojo (clone)",
     "min_visible": 1,
-    "real_stock": 10,
-    "master_stock": 10,
+    "real_stock": 15,
+    "master_stock": 15,
     "available_quantity": 1,
     "auto_replenish": true,
     "active": true,
