@@ -203,19 +203,17 @@
     "title": "CERRADA \u2014 relisted as MLM5346655686"
   },
   "MLM2911241921": {
-    "real_stock": 0,
-    "master_stock": 0,
-    "min_visible": 0,
-    "auto_replenish": false,
-    "active": false,
+    "real_stock": 10,
+    "master_stock": 10,
+    "min_visible": 1,
+    "auto_replenish": true,
+    "active": true,
     "color": "Negro",
     "floor_price": 499,
     "ceiling_price": 799,
     "floor_locked_by_user": true,
     "title": "Charge 6 Negro Reacondicionada",
-    "available_quantity": 0,
-    "agotado": true,
-    "paused_by_user": true
+    "available_quantity": 1
   },
   "MLM5295749840": {
     "real_stock": 0,
@@ -227,32 +225,28 @@
     "color": "Azul"
   },
   "MLM2911241939": {
-    "real_stock": 0,
-    "master_stock": 0,
-    "min_visible": 0,
-    "auto_replenish": false,
-    "active": false,
+    "real_stock": 10,
+    "master_stock": 10,
+    "min_visible": 1,
+    "auto_replenish": true,
+    "active": true,
     "color": "Rojo",
     "floor_price": 499,
     "ceiling_price": 499,
     "floor_locked_by_user": true,
-    "available_quantity": 0,
-    "agotado": true,
-    "paused_by_user": true
+    "available_quantity": 1
   },
   "MLM2911205487": {
-    "real_stock": 0,
-    "master_stock": 0,
-    "min_visible": 0,
-    "auto_replenish": false,
-    "active": false,
+    "real_stock": 10,
+    "master_stock": 10,
+    "min_visible": 1,
+    "auto_replenish": true,
+    "active": true,
     "color": "Camuflaje",
     "floor_price": 499,
     "ceiling_price": 499,
     "floor_locked_by_user": true,
-    "available_quantity": 0,
-    "agotado": true,
-    "paused_by_user": true
+    "available_quantity": 1
   },
   "MLM2910457933": {
     "real_stock": 0,
