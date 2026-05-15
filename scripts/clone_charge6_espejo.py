@@ -78,7 +78,7 @@ body={
     "attributes": [
         {"id":"BRAND","value_name":"Genérica"},
         {"id":"MODEL","value_name":"Charge 6 Espejo"},
-        {"id":"ITEM_CONDITION","value_name":"Remanufacturado"}
+        
     ],
     "shipping": {"mode":"me2","local_pick_up":False,"free_shipping":True,"logistic_type":"drop_off"},
     "sale_terms":[
