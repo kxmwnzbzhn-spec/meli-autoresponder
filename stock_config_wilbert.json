@@ -320,11 +320,15 @@
   },
   "MLM2910806853": {
     "title": "Bocina Jbl Audio Clip 5 Clip 5 Port\u00e1til Con Bluetooth Waterproof Negra Negro",
-    "min_visible": 1,
-    "real_stock": 10,
-    "master_stock": 10,
-    "auto_replenish": true,
-    "active": true
+    "min_visible": 0,
+    "real_stock": 0,
+    "master_stock": 0,
+    "auto_replenish": false,
+    "active": false,
+    "paused_by_user": true,
+    "agotado": true,
+    "floor_locked_by_user": true,
+    "available_quantity": 0
   },
   "MLM2910806845": {
     "title": "Bocina Jbl Go 3 Jblgo3 Port\u00e1til Con Bluetooth Waterproof Negra Negro",
@@ -410,27 +414,39 @@
   },
   "MLM2910880769": {
     "title": "Altavoz Impermeable Negro Jbl Clip 5",
-    "min_visible": 1,
-    "real_stock": 10,
-    "master_stock": 10,
-    "auto_replenish": true,
-    "active": true
+    "min_visible": 0,
+    "real_stock": 0,
+    "master_stock": 0,
+    "auto_replenish": false,
+    "active": false,
+    "paused_by_user": true,
+    "agotado": true,
+    "floor_locked_by_user": true,
+    "available_quantity": 0
   },
   "MLM2910457983": {
     "title": "Bocina Port\u00e1til Jbl Clip 5 Potencia De Salida 7w Color Negro",
-    "min_visible": 1,
-    "real_stock": 10,
-    "master_stock": 10,
-    "auto_replenish": true,
-    "active": true
+    "min_visible": 0,
+    "real_stock": 0,
+    "master_stock": 0,
+    "auto_replenish": false,
+    "active": false,
+    "paused_by_user": true,
+    "agotado": true,
+    "floor_locked_by_user": true,
+    "available_quantity": 0
   },
   "MLM2910768361": {
     "title": "Bocina Jbl Audio Clip 5 Clip 5 Port\u00e1til Con Bluetooth Waterproof Negra Negro",
-    "min_visible": 1,
-    "real_stock": 10,
-    "master_stock": 10,
-    "auto_replenish": true,
-    "active": true
+    "min_visible": 0,
+    "real_stock": 0,
+    "master_stock": 0,
+    "auto_replenish": false,
+    "active": false,
+    "paused_by_user": true,
+    "agotado": true,
+    "floor_locked_by_user": true,
+    "available_quantity": 0
   },
   "MLM2910768369": {
     "title": "Altavoz Bluetooth Jbl Go 4 Port\u00e1til Impermeable En Rojo",
@@ -443,11 +459,15 @@
   },
   "MLM2910457991": {
     "title": "Altavoz Impermeable Negro Jbl Clip 5",
-    "min_visible": 1,
-    "real_stock": 10,
-    "master_stock": 10,
-    "auto_replenish": true,
-    "active": true
+    "min_visible": 0,
+    "real_stock": 0,
+    "master_stock": 0,
+    "auto_replenish": false,
+    "active": false,
+    "paused_by_user": true,
+    "agotado": true,
+    "floor_locked_by_user": true,
+    "available_quantity": 0
   },
   "MLM2910457917": {
     "title": "Bocina Jbl Go 4 Jblgo4 Port\u00e1til Con Bluetooth Waterproof Celeste",
@@ -488,11 +508,15 @@
   },
   "MLM2910457977": {
     "title": "Bocina Port\u00e1til Jbl Clip 5 Bluetooth Negro",
-    "min_visible": 1,
-    "real_stock": 10,
-    "master_stock": 10,
-    "auto_replenish": true,
-    "active": true
+    "min_visible": 0,
+    "real_stock": 0,
+    "master_stock": 0,
+    "auto_replenish": false,
+    "active": false,
+    "paused_by_user": true,
+    "agotado": true,
+    "floor_locked_by_user": true,
+    "available_quantity": 0
   },
   "MLM2910457973": {
     "title": "Bocina Port\u00e1til Jbl Clip 5 Bluetooth Azul",
