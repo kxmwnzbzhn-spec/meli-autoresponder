@@ -203,15 +203,17 @@
     "title": "CERRADA \u2014 relisted as MLM5346655686"
   },
   "MLM2911241921": {
-    "real_stock": 30,
-    "master_stock": 30,
+    "real_stock": 10,
+    "master_stock": 10,
     "min_visible": 1,
     "auto_replenish": true,
     "active": true,
     "color": "Negro",
     "floor_price": 499,
     "ceiling_price": 499,
-    "floor_locked_by_user": true
+    "floor_locked_by_user": true,
+    "title": "Charge 6 Negro Reacondicionada",
+    "available_quantity": 1
   },
   "MLM5295749840": {
     "real_stock": 0,
