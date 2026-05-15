@@ -20,7 +20,7 @@ WHITELIST_ITEMS = {
 
 EXPECTED_SELLER_ID = 3367276814   # Wilbert only
 PIXEL_ID = "1520455545762550"     # Asva E
-LOOKBACK_HOURS = 1                # Pull orders de la última 1h (cron 5min sobreposo)
+LOOKBACK_HOURS = 6                # Pull orders de la última 1h (cron 5min sobreposo)
 
 
 def meli_token():
