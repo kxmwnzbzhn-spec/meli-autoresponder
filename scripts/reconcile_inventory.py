@@ -71,7 +71,10 @@ end=dt.date(2026,5,16)  # tomorrow inclusive
 def fetch_orders(name,T):
     H={"Authorization":f"Bearer {T}"}
     me=requests.get("https://api.mercadolibre.com/users/me",headers=H).json()
-    uid=me["id"]
+    uid=me.get("id")
+    if not uid:
+        print(f"  WARN no uid for token, skipping")
+        return {},0,0
     sold_local={}
     total_orders=0; processed=0
     d=start
