@@ -375,14 +375,14 @@
     "floor_locked_by_user": true
   },
   "MLM2910880749": {
-    "title": "Bocina Port\u00e1til Jbl Go 4 Bluetooth, Camuflaje. Color Camuflaje",
-    "min_visible": 1,
-    "real_stock": 10,
-    "master_stock": 10,
-    "auto_replenish": true,
-    "active": true,
-    "floor_price": 449,
-    "ceiling_price": 599
+    "closed": true,
+    "active": false,
+    "auto_replenish": false,
+    "agotado": true,
+    "real_stock": 0,
+    "master_stock": 0,
+    "available_quantity": 0,
+    "title": "BAJA MELI under_review/forbidden - clonado a MLM5351937060"
   },
   "MLM5297098664": {
     "title": "Altavoz Bose Soundlink Home, Altavoz De Estanter\u00eda Bluetooth Negro",
@@ -856,5 +856,59 @@
     "paused_by_user": false,
     "agotado": false,
     "closed": false
+  },
+  "MLM5351937060": {
+    "title": "Go 4 Camuflaje (clone alterno MLM2910880749 baja)",
+    "min_visible": 1,
+    "real_stock": 10,
+    "master_stock": 10,
+    "available_quantity": 1,
+    "auto_replenish": true,
+    "active": true,
+    "floor_price": 449,
+    "ceiling_price": 599
+  },
+  "MLM5347216886": {
+    "title": "Bocina Bluetooth Port\u00e1til Flip 7 Calidad Espejo (multi-color)",
+    "min_visible": 4,
+    "real_stock": 40,
+    "master_stock": 40,
+    "available_quantity": 4,
+    "auto_replenish": true,
+    "active": true,
+    "variations_min_visible": {
+      "Negro": 1,
+      "Morado": 1,
+      "Azul": 1,
+      "Rojo": 1
+    },
+    "variations_real_stock": {
+      "Negro": 10,
+      "Morado": 10,
+      "Azul": 10,
+      "Rojo": 10
+    }
+  },
+  "MLM2914422351": {
+    "title": "JBL Go 4 Rojo (clone)",
+    "min_visible": 1,
+    "real_stock": 10,
+    "master_stock": 10,
+    "available_quantity": 1,
+    "auto_replenish": true,
+    "active": true,
+    "floor_price": 449,
+    "ceiling_price": 699
+  },
+  "MLM5347901578": {
+    "title": "Charge 6 Espejo $899",
+    "min_visible": 1,
+    "real_stock": 10,
+    "master_stock": 10,
+    "available_quantity": 1,
+    "auto_replenish": true,
+    "active": true,
+    "floor_price": 799,
+    "ceiling_price": 999
   }
 }
