@@ -1,74 +1,15 @@
-name: clone-charge6-v2
-on: { workflow_dispatch: {} }
+name: clone_charge6_v2
+on: { workflow_dispatch: {}, push: { paths: [.github/workflows/clone_charge6_v2.yml] } }
 jobs:
-  go:
+  run:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
     steps:
-      - run: pip install requests -q
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - run: pip install requests
       - env:
+          MELI_REFRESH_TOKEN_WILBERT: ${{ secrets.MELI_REFRESH_TOKEN_WILBERT }}
           MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
           MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
-          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
-          MELI_REFRESH_TOKEN_WILBERT: ${{ secrets.MELI_REFRESH_TOKEN_WILBERT }}
-        run: |
-          python3 - <<'PY'
-          import os, requests, time
-          API="https://api.mercadolibre.com"
-          def tok(rt):
-              return requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token",
-                  "client_id":os.environ["MELI_APP_ID"],
-                  "client_secret":os.environ["MELI_APP_SECRET"],
-                  "refresh_token":rt},timeout=20).json().get("access_token")
-          tj=tok(os.environ["MELI_REFRESH_TOKEN"])
-          tw=tok(os.environ["MELI_REFRESH_TOKEN_WILBERT"])
-          hj={"Authorization":f"Bearer {tj}"}
-          hw={"Authorization":f"Bearer {tw}"}
-          hwj={**hw,"Content-Type":"application/json"}
-          SRC="MLM2894654315"
-          src=requests.get(f"{API}/items/{SRC}?include_attributes=all",headers=hj,timeout=20).json()
-          attrs_base=[]
-          for a in src.get("attributes",[]) or []:
-              if a.get("id") in ("BRAND","MODEL","ITEM_CONDITION","DETAILED_MODEL","ITEM_VOLUME"):
-                  v={"id":a["id"]}
-                  if a.get("value_id"): v["value_id"]=a["value_id"]
-                  if a.get("value_name"): v["value_name"]=a["value_name"]
-                  attrs_base.append(v)
-          attrs_base.append({"id":"GTIN","value_name":"No aplica"})
-          sale_terms=[]
-          for st in src.get("sale_terms",[]) or []:
-              v={"id":st["id"]}
-              if st.get("value_id"): v["value_id"]=st["value_id"]
-              if st.get("value_name"): v["value_name"]=st["value_name"]
-              sale_terms.append(v)
-          if not any(s.get("id")=="WARRANTY_TIME" for s in sale_terms):
-              sale_terms.append({"id":"WARRANTY_TYPE","value_name":"Garantía del vendedor"})
-              sale_terms.append({"id":"WARRANTY_TIME","value_name":"30 días"})
-          pics=[{"id":p["id"]} for p in (src.get("pictures") or []) if p.get("id")]
-          shipping=src.get("shipping") or {"mode":"me2","free_shipping":True,"logistic_type":"xd_drop_off","local_pick_up":False}
-          price=src.get("price",399); cat=src.get("category_id")
-          cond=src.get("condition","used"); lt=src.get("listing_type_id","gold_pro")
-          BASE_TITLE="Bocina Jbl Charge 6 Bluetooth Ip67 Portatil Reacondicionada"
-          COLORS=[("Negro",30,True),("Azul",10,True),("Camuflaje",15,True),("Rojo",0,False)]
-          for color,real,active in COLORS:
-              attrs=[a for a in attrs_base]
-              attrs.append({"id":"COLOR","value_name":color})
-              title=f"{BASE_TITLE} {color}"[:60]
-              # SIN family_name ni user_product_id — MELI lo agrupa por title si quiere
-              body={"site_id":"MLM","title":title,"category_id":cat,"price":price,"currency_id":"MXN",
-                "available_quantity":1,"buying_mode":"buy_it_now","listing_type_id":lt,
-                "condition":cond,"shipping":shipping,"pictures":pics,"attributes":attrs,"sale_terms":sale_terms}
-              print(f"\n=== {color} ===")
-              r=requests.post(f"{API}/items",headers=hwj,json=body,timeout=45)
-              print(f"  POST: {r.status_code}")
-              if r.status_code in (200,201):
-                  new=r.json().get("id")
-                  print(f"  *** NUEVO: {new} *** real_stock={real}")
-                  if not active:
-                      time.sleep(1)
-                      rp=requests.put(f"{API}/items/{new}",headers=hwj,json={"status":"paused"},timeout=15)
-                      print(f"  paused: {rp.status_code}")
-              else:
-                  print(f"  err: {r.text[:400]}")
-              time.sleep(1)
-          PY
+        run: python scripts/clone_charge6_v2.py
