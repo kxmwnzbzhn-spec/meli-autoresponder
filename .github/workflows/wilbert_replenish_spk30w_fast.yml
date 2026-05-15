@@ -1,0 +1,106 @@
+name: wilbert-replenish-spk30w-fast
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '*/5 * * * *'  # GH min interval; each job loops internally cada 10s
+concurrency:
+  group: wilbert-replenish-spk30w-fast
+  cancel-in-progress: false
+jobs:
+  poll:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    permissions:
+      actions: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install requests -q
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_WILBERT: ${{ secrets.MELI_REFRESH_TOKEN_WILBERT }}
+        run: |
+          python3 - <<'PY'
+          import os, requests, json, time, sys
+          API = "https://api.mercadolibre.com"
+          ITEM_ID = "MLM2932676401"
+          MIN_VISIBLE = 1
+          INTERVAL_SEC = 10
+          DURATION_SEC = 280  # 4m40s loop, deja buffer pre next cron
+          EXPECTED_SELLER_ID = 3367276814  # Wilbert ONLY
+
+          def get_token():
+              r = requests.post(f"{API}/oauth/token", data={
+                  "grant_type": "refresh_token",
+                  "client_id": os.environ["MELI_APP_ID"],
+                  "client_secret": os.environ["MELI_APP_SECRET"],
+                  "refresh_token": os.environ["MELI_REFRESH_TOKEN_WILBERT"]
+              }, timeout=20)
+              return r.json()["access_token"]
+
+          tok = get_token()
+          h = {"Authorization": f"Bearer {tok}"}
+          hj = {**h, "Content-Type": "application/json"}
+
+          # Pre-flight: confirmar scope
+          rcheck = requests.get(f"{API}/items/{ITEM_ID}?attributes=id,seller_id,title", headers=h, timeout=15).json()
+          if rcheck.get("seller_id") != EXPECTED_SELLER_ID:
+              print(f"ABORT: item seller_id={rcheck.get('seller_id')} != Wilbert {EXPECTED_SELLER_ID}")
+              sys.exit(1)
+          print(f"Scope OK | Item: {rcheck.get('title','')[:60]}")
+          print(f"Starting 10-sec polling loop for {DURATION_SEC}s | min_visible={MIN_VISIBLE}")
+          print("-" * 70)
+
+          start = time.time()
+          checks = 0
+          replens = 0
+          errs = 0
+
+          while time.time() - start < DURATION_SEC:
+              try:
+                  r = requests.get(
+                      f"{API}/items/{ITEM_ID}?attributes=id,seller_id,available_quantity,status,sub_status",
+                      headers=h, timeout=8
+                  )
+                  if r.status_code == 200:
+                      it = r.json()
+                      # Re-verify scope every poll (paranoia)
+                      if it.get("seller_id") != EXPECTED_SELLER_ID:
+                          print(f"SCOPE VIOLATION mid-loop: aborting")
+                          break
+                      qty = it.get("available_quantity", 0)
+                      status = it.get("status", "unknown")
+                      sub = it.get("sub_status") or []
+                      checks += 1
+
+                      needs_replen = (qty < MIN_VISIBLE) or (status == "paused" and "out_of_stock" in sub)
+
+                      if needs_replen:
+                          upd = {"status": "active", "available_quantity": MIN_VISIBLE}
+                          r2 = requests.put(f"{API}/items/{ITEM_ID}", headers=hj, json=upd, timeout=10)
+                          if r2.status_code in (200, 201):
+                              replens += 1
+                              print(f"[{time.strftime('%H:%M:%S')}] REPLEN ok qty:{qty}->{MIN_VISIBLE} status:{status}->active sub:{sub}")
+                          else:
+                              errs += 1
+                              print(f"[{time.strftime('%H:%M:%S')}] REPLEN_ERR {r2.status_code}: {r2.text[:150]}")
+                  elif r.status_code == 401:
+                      # Token expired mid-loop — refresh and continue
+                      print(f"[{time.strftime('%H:%M:%S')}] Token expired, refreshing...")
+                      tok = get_token()
+                      h["Authorization"] = f"Bearer {tok}"
+                      hj["Authorization"] = f"Bearer {tok}"
+                  else:
+                      errs += 1
+                      print(f"[{time.strftime('%H:%M:%S')}] GET_ERR {r.status_code}: {r.text[:100]}")
+              except Exception as e:
+                  errs += 1
+                  print(f"[{time.strftime('%H:%M:%S')}] EXCEPTION: {str(e)[:120]}")
+
+              time.sleep(INTERVAL_SEC)
+
+          elapsed = int(time.time() - start)
+          print("-" * 70)
+          print(f"=== Done | {checks} checks | {replens} replens | {errs} errs | {elapsed}s elapsed ===")
+          PY
