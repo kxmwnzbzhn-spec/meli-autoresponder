@@ -946,5 +946,16 @@
     "active": true,
     "floor_price": 799,
     "ceiling_price": 999
+  },
+  "MLM2916921691": {
+    "paused_by_user": true,
+    "active": false,
+    "auto_replenish": false,
+    "agotado": true,
+    "floor_locked_by_user": true,
+    "real_stock": 0,
+    "master_stock": 0,
+    "available_quantity": 0,
+    "min_visible": 0
   }
 }
