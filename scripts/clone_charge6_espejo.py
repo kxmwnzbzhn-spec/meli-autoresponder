@@ -25,7 +25,7 @@ for u in pic_urls:
     if pid: pic_ids.append(pid)
 print(f"uploaded: {len(pic_ids)} pics")
 
-SEO_TITLE="Bocina Bluetooth Portatil Charge 6 Calidad Espejo 1:1 30w Ip67"
+SEO_TITLE="Bocina Bluetooth Portatil Charge 6 Espejo Ip67 30w"
 SEO_DESC = """BOCINA BLUETOOTH PORTATIL CHARGE 6 - CALIDAD ESPEJO 1:1
 Producto remanufacturado de excelente calidad. No es original JBL.
 
@@ -73,7 +73,7 @@ body={
     "available_quantity": 1,
     "buying_mode": "buy_it_now",
     "listing_type_id": "gold_pro",
-    "condition": "refurbished",
+    "condition": "used",
     "pictures": [{"id":pid} for pid in pic_ids],
     "attributes": [
         {"id":"BRAND","value_name":"Genérica"},
