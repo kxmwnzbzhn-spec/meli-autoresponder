@@ -105,7 +105,17 @@ def fetch_orders(name,T):
         d=nd
     return sold_local,total_orders,processed
 
-accounts=[("Wilbert",tok(RT_W)),("Yiriam",tok(RT_Y)),("Juan",tok(RT_J)),("Raymundo",tok(RT_R))]
+accounts=[
+  ("Wilbert",tok(RT_W)),
+  ("Yiriam",tok(RT_Y)),
+  ("Juan",tok(RT_J)),
+  ("Raymundo",tok(RT_R)),
+  ("Claribel",tok(os.environ.get("MELI_REFRESH_TOKEN_CLARIBEL",""))),
+  ("Asva",tok(os.environ.get("MELI_REFRESH_TOKEN_ASVA",""))),
+  ("Mildred",tok(os.environ.get("MELI_REFRESH_TOKEN_MILDRED",""))),
+  ("Dilcie",tok(os.environ.get("MELI_REFRESH_TOKEN_DILCIE",""))),
+  ("Bren",tok(os.environ.get("MELI_REFRESH_TOKEN_BREN",""))),
+]
 sold_by_sku={}
 order_counts={}
 detail_by_acct={}
@@ -128,7 +138,7 @@ for sku in all_skus:
         v=stock[sku]; inv_qty=v if isinstance(v,int) else v.get("total",0)
     sold=sold_by_sku.get(sku,0)
     rem=inv_qty-sold
-    detail=f"{detail_by_acct.get('Wilbert',{}).get(sku,0)}/{detail_by_acct.get('Yiriam',{}).get(sku,0)}/{detail_by_acct.get('Juan',{}).get(sku,0)}/{detail_by_acct.get('Raymundo',{}).get(sku,0)}"
+    detail=' '.join(f"{a[:2]}:{detail_by_acct.get(a,{}).get(sku,0)}" for a in ['Wilbert','Yiriam','Juan','Raymundo','Claribel','Asva','Mildred','Dilcie','Bren'] if detail_by_acct.get(a,{}).get(sku,0)>0)
     flag=" ⚠️" if rem<0 else ""
     if not (inv_qty==0 and sold==0):
         print(f"{sku:<32} {inv_qty:>7} {sold:>8} {rem:>7}{flag}  {detail}")
