@@ -13,7 +13,9 @@ print(f"Source pics: {len(pic_ids)}")
 TITLE="Bocina Bluetooth Portátil 30W IP67 Acabado Espejo Bass Pro"
 print(f"title len={len(TITLE)}")
 
-DESC = """🔊 BOCINA BLUETOOTH PREMIUM 30W — POTENCIA SIN COMPLICACIONES
+DESC = """Subwoofer pasivo, BT 5.3, USB-C, 12h batería, modo TWS estéreo
+
+🔊 BOCINA BLUETOOTH PREMIUM 30W — POTENCIA SIN COMPLICACIONES
 Una bocina diseñada para los que no se conforman con poco volumen 
 ni con productos frágiles. Acabado espejo metálico de alta gama, 
 sonido envolvente de 30W reales, resistencia IP67 contra agua y 
@@ -96,7 +98,7 @@ SUBTITLE="Subwoofer pasivo, BT 5.3, USB-C, 12h batería, modo TWS estéreo"
 
 body={
     "title": TITLE,
-    "subtitle": SUBTITLE,
+    
     "category_id": "MLM59800",
     "price": 899,
     "currency_id": "MXN",
