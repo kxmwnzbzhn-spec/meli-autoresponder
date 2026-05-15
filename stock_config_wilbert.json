@@ -867,14 +867,17 @@
   },
   "MLM5347886456": {
     "title": "JBL Charge 6 Negro Port\u00e1til",
-    "min_visible": 1,
-    "real_stock": 100,
-    "master_stock": 100,
-    "available_quantity": 1,
-    "auto_replenish": true,
-    "active": true,
+    "min_visible": 0,
+    "real_stock": 0,
+    "master_stock": 0,
+    "available_quantity": 0,
+    "auto_replenish": false,
+    "active": false,
     "floor_price": 1499,
-    "ceiling_price": 1999
+    "ceiling_price": 1999,
+    "paused_by_user": true,
+    "agotado": true,
+    "floor_locked_by_user": true
   },
   "MLM2932676401": {
     "title": "Bocina Bluetooth 30W IP67 Acabado Espejo Bass Pro",
