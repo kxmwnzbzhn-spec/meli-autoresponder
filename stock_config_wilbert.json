@@ -826,5 +826,16 @@
       "Negro": 5,
       "Aqua": 5
     }
+  },
+  "MLM5347886456": {
+    "title": "JBL Charge 6 Negro Port\u00e1til",
+    "min_visible": 1,
+    "real_stock": 20,
+    "master_stock": 20,
+    "available_quantity": 1,
+    "auto_replenish": true,
+    "active": true,
+    "floor_price": 1499,
+    "ceiling_price": 1999
   }
 }
