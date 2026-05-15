@@ -23,11 +23,11 @@ stock_perf=inv.get("stock_perfumes",{})
 print("=== INVENTARIO BODEGA (snapshot 2026-04-28) ===")
 total_inicial=0
 for k,v in stock.items():
-    qty=v if isinstance(v,int) else v.get("qty",0)
+    qty=v if isinstance(v,int) else v.get("total",0)
     total_inicial+=qty
     print(f"  {k:<30} {qty:>4}")
 for k,v in stock_perf.items():
-    qty=v if isinstance(v,int) else v.get("qty",0)
+    qty=v if isinstance(v,int) else v.get("total",0)
     total_inicial+=qty
 print(f"\nTotal inicial bodega: {total_inicial}\n")
 
@@ -79,9 +79,9 @@ total_real=0
 for sku in sorted(set(list(stock.keys())+list(stock_perf.keys())+list(sold_by_sku.keys()))):
     inv_qty=0
     if sku in stock:
-        v=stock[sku]; inv_qty=v if isinstance(v,int) else v.get("qty",0)
+        v=stock[sku]; inv_qty=v if isinstance(v,int) else v.get("total",0)
     if sku in stock_perf:
-        v=stock_perf[sku]; inv_qty=v if isinstance(v,int) else v.get("qty",0)
+        v=stock_perf[sku]; inv_qty=v if isinstance(v,int) else v.get("total",0)
     sold=sold_by_sku.get(sku,{}).get("total",0)
     rem=inv_qty-sold
     total_real+=rem if rem>0 else 0
