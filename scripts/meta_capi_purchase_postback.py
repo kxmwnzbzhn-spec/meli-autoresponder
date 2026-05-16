@@ -1,7 +1,7 @@
 """
 Meli Orders → Meta CAPI Purchase event post-back
 Scope: SOLO ASVAELECTRONICS (seller_id 1668713481)
-Whitelist: solo MLM5233454100 (Bocina 35W Azul)
+Whitelist: solo MLM2886030837 (Bocina 35W Azul)
 """
 import os, requests, json, hashlib, time, sys
 from datetime import datetime, timedelta, timezone
@@ -10,9 +10,9 @@ API_MELI = "https://api.mercadolibre.com"
 META_GRAPH = "https://graph.facebook.com/v21.0"
 
 WHITELIST_ITEMS = {
-    "MLM5233454100": {
-        "name": "Bocina Bluetooth Portatil Impermeable Ip67 Bass 35w Azul",
-        "category": "SPK35W_AZUL_V1"
+    "MLM2886030837": {
+        "name": "Bocina Bluetooth Portatil Impermeable Ip67 Bass 35w Rojo",
+        "category": "SPK35W_ROJO_V1"
     }
 }
 
