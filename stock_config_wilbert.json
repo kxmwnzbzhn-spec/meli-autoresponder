@@ -606,10 +606,13 @@
     "min_visible": 1,
     "real_stock": 10,
     "master_stock": 10,
-    "auto_replenish": true,
-    "active": true,
+    "auto_replenish": false,
+    "active": false,
     "type": "catalog_no_variations",
-    "condition": "new"
+    "condition": "new",
+    "paused_by_user": true,
+    "agotado": true,
+    "floor_locked_by_user": true
   },
   "MLM2916672931": {
     "title": "Marshmallow Blush EDP 100ml Mujer",
@@ -619,10 +622,13 @@
     "min_visible": 1,
     "real_stock": 10,
     "master_stock": 10,
-    "auto_replenish": true,
-    "active": true,
+    "auto_replenish": false,
+    "active": false,
     "type": "catalog_no_variations",
-    "condition": "new"
+    "condition": "new",
+    "paused_by_user": true,
+    "agotado": true,
+    "floor_locked_by_user": true
   },
   "MLM5309542808": {
     "active": false,
@@ -1033,5 +1039,33 @@
     "active": false,
     "auto_replenish": false,
     "agotado": true
+  },
+  "MLM2916921591": {
+    "paused_by_user": true,
+    "active": false,
+    "auto_replenish": false,
+    "agotado": true,
+    "floor_locked_by_user": true
+  },
+  "MLM2916932945": {
+    "paused_by_user": true,
+    "active": false,
+    "auto_replenish": false,
+    "agotado": true,
+    "floor_locked_by_user": true
+  },
+  "MLM2916921745": {
+    "paused_by_user": true,
+    "active": false,
+    "auto_replenish": false,
+    "agotado": true,
+    "floor_locked_by_user": true
+  },
+  "MLM2916897215": {
+    "paused_by_user": true,
+    "active": false,
+    "auto_replenish": false,
+    "agotado": true,
+    "floor_locked_by_user": true
   }
 }
