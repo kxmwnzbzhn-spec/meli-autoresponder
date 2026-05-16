@@ -303,13 +303,14 @@
     "agotado": true
   },
   "MLM2910806817": {
-    "title": "Bocina Jbl Go 4 Jblgo4 Port\u00e1til Con Bluetooth Waterproof Roja Rojo",
-    "min_visible": 1,
-    "real_stock": 15,
-    "master_stock": 15,
-    "auto_replenish": true,
-    "active": true,
-    "available_quantity": 1
+    "closed": true,
+    "active": false,
+    "auto_replenish": false,
+    "agotado": true,
+    "real_stock": 0,
+    "master_stock": 0,
+    "available_quantity": 0,
+    "title": "CERRADA \u2014 clonada como MLM5354755946"
   },
   "MLM2910880717": {
     "title": "Bocina Jbl Go 4 Jblgo4 Port\u00e1til Con Bluetooth Waterproof Negra Negro",
@@ -1067,5 +1068,16 @@
     "auto_replenish": false,
     "agotado": true,
     "floor_locked_by_user": true
+  },
+  "MLM5354755946": {
+    "title": "JBL Go 4 Rojo (clone Wilbert)",
+    "real_stock": 15,
+    "master_stock": 15,
+    "min_visible": 1,
+    "available_quantity": 1,
+    "auto_replenish": true,
+    "active": true,
+    "floor_price": 449,
+    "ceiling_price": 699
   }
 }
