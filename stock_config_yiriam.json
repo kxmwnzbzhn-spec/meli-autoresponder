@@ -2,7 +2,7 @@
   "_meta": {
     "description": "Yiriam stock real almac\u00e9n - 12 perfumes",
     "updated": "2026-05-16",
-    "total": 180
+    "total": 239
   },
   "MLM2935286605": {
     "title": "Angel Nova",
@@ -123,5 +123,71 @@
     "auto_replenish": true,
     "active": true,
     "last_sold": 1
+  },
+  "MLM2935447531": {
+    "title": "Dolce&Gabbana Devotion W",
+    "real_stock": 10,
+    "master_stock": 10,
+    "min_visible": 1,
+    "available_quantity": 1,
+    "auto_replenish": true,
+    "active": true,
+    "last_sold": 0,
+    "_note": "pending user stock count"
+  },
+  "MLM2935447545": {
+    "title": "Creed Silver Mountain Water",
+    "real_stock": 10,
+    "master_stock": 10,
+    "min_visible": 1,
+    "available_quantity": 1,
+    "auto_replenish": true,
+    "active": true,
+    "last_sold": 0,
+    "_note": "pending user stock count"
+  },
+  "MLM5353156204": {
+    "title": "Baccarat Rouge 540",
+    "real_stock": 10,
+    "master_stock": 10,
+    "min_visible": 1,
+    "available_quantity": 1,
+    "auto_replenish": true,
+    "active": true,
+    "last_sold": 0,
+    "_note": "pending user stock count"
+  },
+  "MLM2935587237": {
+    "title": "Lattafa Musaman",
+    "real_stock": 10,
+    "master_stock": 10,
+    "min_visible": 1,
+    "available_quantity": 1,
+    "auto_replenish": true,
+    "active": true,
+    "last_sold": 0,
+    "_note": "pending user stock count"
+  },
+  "MLM2935587247": {
+    "title": "Marshmallow Blush",
+    "real_stock": 10,
+    "master_stock": 10,
+    "min_visible": 1,
+    "available_quantity": 1,
+    "auto_replenish": true,
+    "active": true,
+    "last_sold": 0,
+    "_note": "pending user stock count"
+  },
+  "MLM2935587257": {
+    "title": "Le Labo Santal 33",
+    "real_stock": 10,
+    "master_stock": 10,
+    "min_visible": 1,
+    "available_quantity": 1,
+    "auto_replenish": true,
+    "active": true,
+    "last_sold": 0,
+    "_note": "pending user stock count"
   }
 }
