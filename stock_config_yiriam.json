@@ -1,18 +1,18 @@
 {
   "_meta": {
-    "description": "Yiriam stock real almac\u00e9n - 12 perfumes ganan buy box",
+    "description": "Yiriam stock real almac\u00e9n - 12 perfumes",
     "updated": "2026-05-16",
     "total": 180
   },
   "MLM2935286605": {
-    "title": "Angel Nova Fruitt\u00e9",
+    "title": "Angel Nova",
     "real_stock": 9,
     "master_stock": 9,
     "min_visible": 1,
     "available_quantity": 1,
     "auto_replenish": true,
     "active": true,
-    "last_sold": 0
+    "last_sold": 1
   },
   "MLM2935286537": {
     "title": "Billie Eilish",
@@ -72,7 +72,7 @@
     "available_quantity": 1,
     "auto_replenish": true,
     "active": true,
-    "last_sold": 0
+    "last_sold": 1
   },
   "MLM5353104620": {
     "title": "Orientica Royal Amber",
@@ -92,7 +92,7 @@
     "available_quantity": 1,
     "auto_replenish": true,
     "active": true,
-    "last_sold": 0
+    "last_sold": 1
   },
   "MLM2935286629": {
     "title": "Orientica Amber Rouge",
@@ -102,7 +102,7 @@
     "available_quantity": 1,
     "auto_replenish": true,
     "active": true,
-    "last_sold": 0
+    "last_sold": 1
   },
   "MLM5353056250": {
     "title": "Armaf Island Bliss",
@@ -112,7 +112,7 @@
     "available_quantity": 1,
     "auto_replenish": true,
     "active": true,
-    "last_sold": 0
+    "last_sold": 1
   },
   "MLM5353056406": {
     "title": "Lady Million Gold",
@@ -122,6 +122,6 @@
     "available_quantity": 1,
     "auto_replenish": true,
     "active": true,
-    "last_sold": 0
+    "last_sold": 1
   }
 }
