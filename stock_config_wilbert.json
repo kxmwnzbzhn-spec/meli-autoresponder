@@ -157,16 +157,18 @@
   },
   "MLM5265893750": {
     "line": "Armaf-Delight-Island",
-    "auto_replenish": true,
+    "auto_replenish": false,
     "min_visible": 1,
-    "active": true,
+    "active": false,
     "title": "Armaf Delight Island Bliss Edp 100 Ml Para Mujer",
     "catalog_product_id": "MLM45594561",
     "type": "catalog_no_variations",
     "condition": "new",
     "floor_price": 535,
     "ceiling_price": 535,
-    "floor_locked_by_user": true
+    "floor_locked_by_user": true,
+    "paused_by_user": true,
+    "agotado": true
   },
   "MLM5265893752": {
     "line": "Mandarin-Sky-shared",
@@ -572,11 +574,13 @@
     "min_visible": 1,
     "real_stock": 48,
     "master_stock": 48,
-    "auto_replenish": true,
-    "active": true,
+    "auto_replenish": false,
+    "active": false,
     "type": "catalog_no_variations",
     "condition": "new",
-    "floor_locked_by_user": true
+    "floor_locked_by_user": true,
+    "paused_by_user": true,
+    "agotado": true
   },
   "MLM2916672247": {
     "title": "Million Gold Hombre Rabanne EDP 100ml",
@@ -586,11 +590,13 @@
     "min_visible": 1,
     "real_stock": 10,
     "master_stock": 10,
-    "auto_replenish": true,
-    "active": true,
+    "auto_replenish": false,
+    "active": false,
     "type": "catalog_no_variations",
     "condition": "new",
-    "floor_locked_by_user": true
+    "floor_locked_by_user": true,
+    "paused_by_user": true,
+    "agotado": true
   },
   "MLM2916672499": {
     "title": "Baccarat Rouge 540 Maison Francis Kurkdjian 70ml",
@@ -645,11 +651,13 @@
     "min_visible": 1,
     "real_stock": 10,
     "master_stock": 10,
-    "auto_replenish": true,
-    "active": true,
+    "auto_replenish": false,
+    "active": false,
     "type": "catalog_no_variations",
     "condition": "new",
-    "floor_locked_by_user": true
+    "floor_locked_by_user": true,
+    "paused_by_user": true,
+    "agotado": true
   },
   "MLM2916675975": {
     "title": "Perfect EDP 100ml Mujer",
@@ -685,11 +693,13 @@
     "min_visible": 1,
     "real_stock": 10,
     "master_stock": 10,
-    "auto_replenish": true,
-    "active": true,
+    "auto_replenish": false,
+    "active": false,
     "type": "catalog_no_variations",
     "condition": "new",
-    "floor_locked_by_user": true
+    "floor_locked_by_user": true,
+    "paused_by_user": true,
+    "agotado": true
   },
   "MLM5290875026": {
     "active": false,
@@ -973,31 +983,55 @@
   "MLM2908793361": {
     "floor_price": 591,
     "ceiling_price": 591,
-    "floor_locked_by_user": true
+    "floor_locked_by_user": true,
+    "paused_by_user": true,
+    "active": false,
+    "auto_replenish": false,
+    "agotado": true
   },
   "MLM2916897121": {
     "floor_price": 999,
     "ceiling_price": 999,
-    "floor_locked_by_user": true
+    "floor_locked_by_user": true,
+    "paused_by_user": true,
+    "active": false,
+    "auto_replenish": false,
+    "agotado": true
   },
   "MLM2916908777": {
     "floor_price": 999,
     "ceiling_price": 999,
-    "floor_locked_by_user": true
+    "floor_locked_by_user": true,
+    "paused_by_user": true,
+    "active": false,
+    "auto_replenish": false,
+    "agotado": true
   },
   "MLM2916676513": {
     "floor_price": 999,
     "ceiling_price": 999,
-    "floor_locked_by_user": true
+    "floor_locked_by_user": true,
+    "paused_by_user": true,
+    "active": false,
+    "auto_replenish": false,
+    "agotado": true
   },
   "MLM2916908753": {
     "floor_price": 486,
     "ceiling_price": 486,
-    "floor_locked_by_user": true
+    "floor_locked_by_user": true,
+    "paused_by_user": true,
+    "active": false,
+    "auto_replenish": false,
+    "agotado": true
   },
   "MLM2916921559": {
     "floor_price": 1249,
     "ceiling_price": 1249,
-    "floor_locked_by_user": true
+    "floor_locked_by_user": true,
+    "paused_by_user": true,
+    "active": false,
+    "auto_replenish": false,
+    "agotado": true
   }
 }
