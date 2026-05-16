@@ -13,6 +13,10 @@ WHITELIST_ITEMS = {
     "MLM2886030837": {
         "name": "Bocina Bluetooth Portatil Impermeable Ip67 Bass 35w Rojo",
         "category": "SPK35W_ROJO_V1"
+    },
+    "MLM5356938548": {
+        "name": "Dashcam Asva Electronics DVR-3 con 3 cámaras y pantalla",
+        "category": "DASHCAM_DVR3_V1"
     }
 }
 
