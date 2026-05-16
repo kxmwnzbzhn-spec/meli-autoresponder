@@ -15,6 +15,11 @@ WHITELIST_ITEMS = {
         "category": "SPK35W_ROJO_V1"
     },
     "MLM5356938548": {
+        "name": "Dashcam Asva Electronics DVR-3 con 3 camaras y pantalla",
+        "category": "DASHCAM_DVR3_V1"
+    }
+},
+    "MLM5356938548": {
         "name": "Dashcam Asva Electronics DVR-3 con 3 cámaras y pantalla",
         "category": "DASHCAM_DVR3_V1"
     }
