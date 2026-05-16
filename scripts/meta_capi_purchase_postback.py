@@ -18,11 +18,6 @@ WHITELIST_ITEMS = {
         "name": "Dashcam Asva Electronics DVR-3 con 3 camaras y pantalla",
         "category": "DASHCAM_DVR3_V1"
     }
-},
-    "MLM5356938548": {
-        "name": "Dashcam Asva Electronics DVR-3 con 3 cámaras y pantalla",
-        "category": "DASHCAM_DVR3_V1"
-    }
 }
 
 EXPECTED_SELLER_ID = 1668713481  # ASVAELECTRONICS only
