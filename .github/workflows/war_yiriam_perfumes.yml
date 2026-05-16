@@ -1,0 +1,23 @@
+name: war-yiriam-perfumes
+on:
+  workflow_dispatch:
+  push: { paths: [.github/workflows/war_yiriam_perfumes.yml] }
+  schedule:
+    - cron: '*/3 * * * *'
+concurrency:
+  group: war-yiriam-perfumes
+  cancel-in-progress: false
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - run: pip install requests
+      - env:
+          MELI_REFRESH_TOKEN_YC_NEW: ${{ secrets.MELI_REFRESH_TOKEN_YC_NEW }}
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+        run: python scripts/war_yiriam_perfumes.py
