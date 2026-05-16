@@ -1,8 +1,16 @@
 name: yir_replenish
-on: { workflow_dispatch: {}, push: { paths: [.github/workflows/yir_replenish.yml] } }
+on:
+  workflow_dispatch:
+  push: { paths: [.github/workflows/yir_replenish.yml] }
+  schedule:
+    - cron: '*/5 * * * *'
+concurrency:
+  group: yir_replenish
+  cancel-in-progress: false
 jobs:
   run:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
