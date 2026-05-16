@@ -26,13 +26,13 @@
   },
   "MLM2935286615": {
     "title": "Jo Milano Spades",
-    "real_stock": 10,
+    "real_stock": 9,
     "master_stock": 10,
     "min_visible": 1,
     "available_quantity": 1,
     "auto_replenish": true,
     "active": true,
-    "last_sold": 0
+    "last_sold": 1
   },
   "MLM2935286651": {
     "title": "Million Gold H",
