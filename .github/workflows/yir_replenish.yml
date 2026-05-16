@@ -11,6 +11,8 @@ jobs:
   run:
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -20,5 +22,5 @@ jobs:
           MELI_REFRESH_TOKEN_YC_NEW: ${{ secrets.MELI_REFRESH_TOKEN_YC_NEW }}
           MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
           MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
-          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: python scripts/yir_replenish.py
