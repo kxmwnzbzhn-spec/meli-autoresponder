@@ -1,0 +1,17 @@
+name: exchange-code-user1668-oneshot
+on:
+  workflow_dispatch:
+jobs:
+  exchange:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - run: pip install requests pynacl -q
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          GH_TOKEN_PAT: ${{ secrets.GH_PAT }}
+        run: python scripts/exchange_user1668.py
