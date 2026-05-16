@@ -163,7 +163,10 @@
     "title": "Armaf Delight Island Bliss Edp 100 Ml Para Mujer",
     "catalog_product_id": "MLM45594561",
     "type": "catalog_no_variations",
-    "condition": "new"
+    "condition": "new",
+    "floor_price": 535,
+    "ceiling_price": 535,
+    "floor_locked_by_user": true
   },
   "MLM5265893752": {
     "line": "Mandarin-Sky-shared",
@@ -564,28 +567,30 @@
   "MLM5309659262": {
     "title": "Perfume Billie Eilish Eilish Mujer EDP 100ml",
     "catalog_product_id": "MLM20601206",
-    "floor_price": 399,
-    "ceiling_price": 899,
+    "floor_price": 719,
+    "ceiling_price": 719,
     "min_visible": 1,
     "real_stock": 48,
     "master_stock": 48,
     "auto_replenish": true,
     "active": true,
     "type": "catalog_no_variations",
-    "condition": "new"
+    "condition": "new",
+    "floor_locked_by_user": true
   },
   "MLM2916672247": {
     "title": "Million Gold Hombre Rabanne EDP 100ml",
     "catalog_product_id": "MLM39361112",
-    "floor_price": 499,
-    "ceiling_price": 999,
+    "floor_price": 548,
+    "ceiling_price": 548,
     "min_visible": 1,
     "real_stock": 10,
     "master_stock": 10,
     "auto_replenish": true,
     "active": true,
     "type": "catalog_no_variations",
-    "condition": "new"
+    "condition": "new",
+    "floor_locked_by_user": true
   },
   "MLM2916672499": {
     "title": "Baccarat Rouge 540 Maison Francis Kurkdjian 70ml",
@@ -635,15 +640,16 @@
   "MLM2916649417": {
     "title": "Jo Milano Game of Spades Wildcard 100ml",
     "catalog_product_id": "MLM26894105",
-    "floor_price": 499,
-    "ceiling_price": 1199,
+    "floor_price": 799,
+    "ceiling_price": 799,
     "min_visible": 1,
     "real_stock": 10,
     "master_stock": 10,
     "auto_replenish": true,
     "active": true,
     "type": "catalog_no_variations",
-    "condition": "new"
+    "condition": "new",
+    "floor_locked_by_user": true
   },
   "MLM2916675975": {
     "title": "Perfect EDP 100ml Mujer",
@@ -674,15 +680,16 @@
   "MLM2916700919": {
     "title": "Dior Sauvage EDT 100ml Hombre",
     "catalog_product_id": "MLM21147797",
-    "floor_price": 499,
-    "ceiling_price": 1199,
+    "floor_price": 1046,
+    "ceiling_price": 1046,
     "min_visible": 1,
     "real_stock": 10,
     "master_stock": 10,
     "auto_replenish": true,
     "active": true,
     "type": "catalog_no_variations",
-    "condition": "new"
+    "condition": "new",
+    "floor_locked_by_user": true
   },
   "MLM5290875026": {
     "active": false,
@@ -700,7 +707,9 @@
     "floor_locked_by_user": true,
     "auto_replenish": false,
     "real_stock": 0,
-    "min_visible": 0
+    "min_visible": 0,
+    "floor_price": 629,
+    "ceiling_price": 629
   },
   "MLM2908806053": {
     "active": false,
@@ -960,5 +969,35 @@
     "master_stock": 0,
     "available_quantity": 0,
     "min_visible": 0
+  },
+  "MLM2908793361": {
+    "floor_price": 591,
+    "ceiling_price": 591,
+    "floor_locked_by_user": true
+  },
+  "MLM2916897121": {
+    "floor_price": 999,
+    "ceiling_price": 999,
+    "floor_locked_by_user": true
+  },
+  "MLM2916908777": {
+    "floor_price": 999,
+    "ceiling_price": 999,
+    "floor_locked_by_user": true
+  },
+  "MLM2916676513": {
+    "floor_price": 999,
+    "ceiling_price": 999,
+    "floor_locked_by_user": true
+  },
+  "MLM2916908753": {
+    "floor_price": 486,
+    "ceiling_price": 486,
+    "floor_locked_by_user": true
+  },
+  "MLM2916921559": {
+    "floor_price": 1249,
+    "ceiling_price": 1249,
+    "floor_locked_by_user": true
   }
 }
