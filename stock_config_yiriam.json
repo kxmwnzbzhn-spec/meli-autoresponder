@@ -1,14 +1,127 @@
 {
-  "message": "Not Found",
-  "documentation_url": "https://docs.github.com/rest/repos/contents#get-repository-content",
-  "status": "404",
-  "MLM5291786738": {
-    "title": "Bocina Portátil Jbl Clip 5 Bluetooth Azul",
-    "floor_price": 399,
-    "ceiling_price": 549,
+  "_meta": {
+    "description": "Yiriam stock real almac\u00e9n - 12 perfumes ganan buy box",
+    "updated": "2026-05-16",
+    "total": 180
+  },
+  "MLM2935286605": {
+    "title": "Angel Nova Fruitt\u00e9",
+    "real_stock": 9,
+    "master_stock": 9,
     "min_visible": 1,
-    "real_stock": 5,
+    "available_quantity": 1,
     "auto_replenish": true,
-    "active": true
+    "active": true,
+    "last_sold": 0
+  },
+  "MLM2935286537": {
+    "title": "Billie Eilish",
+    "real_stock": 40,
+    "master_stock": 40,
+    "min_visible": 1,
+    "available_quantity": 1,
+    "auto_replenish": true,
+    "active": true,
+    "last_sold": 0
+  },
+  "MLM2935286615": {
+    "title": "Jo Milano Spades",
+    "real_stock": 10,
+    "master_stock": 10,
+    "min_visible": 1,
+    "available_quantity": 1,
+    "auto_replenish": true,
+    "active": true,
+    "last_sold": 0
+  },
+  "MLM2935286651": {
+    "title": "Million Gold H",
+    "real_stock": 40,
+    "master_stock": 40,
+    "min_visible": 1,
+    "available_quantity": 1,
+    "auto_replenish": true,
+    "active": true,
+    "last_sold": 0
+  },
+  "MLM2935286681": {
+    "title": "Lattafa Khamrah",
+    "real_stock": 10,
+    "master_stock": 10,
+    "min_visible": 1,
+    "available_quantity": 1,
+    "auto_replenish": true,
+    "active": true,
+    "last_sold": 0
+  },
+  "MLM2935286703": {
+    "title": "Creed Aventus",
+    "real_stock": 10,
+    "master_stock": 10,
+    "min_visible": 1,
+    "available_quantity": 1,
+    "auto_replenish": true,
+    "active": true,
+    "last_sold": 0
+  },
+  "MLM2935298361": {
+    "title": "Dior Sauvage",
+    "real_stock": 12,
+    "master_stock": 12,
+    "min_visible": 1,
+    "available_quantity": 1,
+    "auto_replenish": true,
+    "active": true,
+    "last_sold": 0
+  },
+  "MLM5353104620": {
+    "title": "Orientica Royal Amber",
+    "real_stock": 11,
+    "master_stock": 11,
+    "min_visible": 1,
+    "available_quantity": 1,
+    "auto_replenish": true,
+    "active": true,
+    "last_sold": 0
+  },
+  "MLM2935286557": {
+    "title": "Lattafa Confession",
+    "real_stock": 3,
+    "master_stock": 3,
+    "min_visible": 1,
+    "available_quantity": 1,
+    "auto_replenish": true,
+    "active": true,
+    "last_sold": 0
+  },
+  "MLM2935286629": {
+    "title": "Orientica Amber Rouge",
+    "real_stock": 11,
+    "master_stock": 11,
+    "min_visible": 1,
+    "available_quantity": 1,
+    "auto_replenish": true,
+    "active": true,
+    "last_sold": 0
+  },
+  "MLM5353056250": {
+    "title": "Armaf Island Bliss",
+    "real_stock": 12,
+    "master_stock": 12,
+    "min_visible": 1,
+    "available_quantity": 1,
+    "auto_replenish": true,
+    "active": true,
+    "last_sold": 0
+  },
+  "MLM5353056406": {
+    "title": "Lady Million Gold",
+    "real_stock": 12,
+    "master_stock": 12,
+    "min_visible": 1,
+    "available_quantity": 1,
+    "auto_replenish": true,
+    "active": true,
+    "last_sold": 0
   }
 }
