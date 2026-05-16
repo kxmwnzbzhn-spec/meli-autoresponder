@@ -1,0 +1,17 @@
+name: lookup-spk35w-red-oneshot
+on:
+  workflow_dispatch:
+jobs:
+  lookup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - run: pip install requests -q
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_USER1668: ${{ secrets.MELI_REFRESH_TOKEN_USER1668 }}
+        run: python scripts/lookup_spk35w_red.py
