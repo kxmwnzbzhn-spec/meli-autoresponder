@@ -66,13 +66,13 @@
   },
   "MLM2935298361": {
     "title": "Dior Sauvage",
-    "real_stock": 12,
+    "real_stock": 11,
     "master_stock": 12,
     "min_visible": 1,
     "available_quantity": 1,
     "auto_replenish": true,
     "active": true,
-    "last_sold": 1
+    "last_sold": 2
   },
   "MLM5353104620": {
     "title": "Orientica Royal Amber",
