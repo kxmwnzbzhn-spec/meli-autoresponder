@@ -1,0 +1,16 @@
+name = "meli-webhook"
+main = "src/index.js"
+compatibility_date = "2026-05-17"
+workers_dev = true
+
+# Vars públicas (no secretas)
+[vars]
+GH_OWNER = "kxmwnzbzhn-spec"
+GH_REPO = "meli-autoresponder"
+MELI_APP_ID = "5211907102822632"
+
+# Secretos (se setean via wrangler secret put):
+# - SUPABASE_URL
+# - SUPABASE_SERVICE_KEY
+# - GH_TOKEN (PAT con scope repo)
+# - ADMIN_KEY (clave para /stats)
