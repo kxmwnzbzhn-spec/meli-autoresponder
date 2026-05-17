@@ -1,0 +1,2927 @@
+{
+  "_meta": {
+    "description": "AUTO suggestions. Revisar y mover entradas validas a sku_to_mlm.json"
+  },
+  "by_mlm": {
+    "MLM5297087174": {
+      "sku": "BOSE-XX",
+      "title": "Altavoz Bluetooth De Estantería Bose Soundlink Home Silver Color Light Silver",
+      "account": "Wilbert",
+      "status": "active"
+    },
+    "MLM5337919282": {
+      "sku": "JBL-CLIP5-CAMUFLAJE",
+      "title": "Altavoz Bluetooth Jbl Clip 5 Ultraportátil Con Gsport Color Squad",
+      "account": "Wilbert",
+      "status": "active"
+    },
+    "MLM2911241921": {
+      "sku": "JBL-CHARGE6-NEGRO",
+      "title": "Jbl Charge 6 Bocina Bluetooth Ip67 Reacondicionada Negro",
+      "account": "Wilbert",
+      "status": "active"
+    },
+    "MLM2931612611": {
+      "sku": "JBL-CLIP4-AZUL",
+      "title": "Bocina Portátil Jbl Clip 4 Bluetooth, Azul",
+      "account": "Wilbert",
+      "status": "active"
+    },
+    "MLM2914422351": {
+      "sku": "JBL-GO4-ROJO",
+      "title": "Jbl Go 4 - Altavoz Ultraportátil Bluetooth Color Rojo",
+      "account": "Wilbert",
+      "status": "active"
+    },
+    "MLM5337919270": {
+      "sku": "JBL-CLIP5-XX",
+      "title": "Bocina Jbl Clip 5 Portátil Con Bluetooth Waterproof Camuflada",
+      "account": "Wilbert",
+      "status": "active"
+    },
+    "MLM2910806845": {
+      "sku": "JBL-GO3-NEGRO",
+      "title": "Bocina Jbl Go 3 Jblgo3 Portátil Con Bluetooth Waterproof Negra Negro",
+      "account": "Wilbert",
+      "status": "active"
+    },
+    "MLM5347216886": {
+      "sku": "JBL-FLIP7-XX",
+      "title": "Bocina Bluetooth Portátil Flip 7 Calidad Espejo Ip67 30w",
+      "account": "Wilbert",
+      "status": "active"
+    },
+    "MLM5337919290": {
+      "sku": "JBL-CLIP5-CAMUFLAJE",
+      "title": "Altavoz Bluetooth Portátil Camuflado Jbl Clip 5 Verde Musgo",
+      "account": "Wilbert",
+      "status": "active"
+    },
+    "MLM2910768325": {
+      "sku": "JBL-GO4-ROSA",
+      "title": "Parlante Bluetooth Jbl Go 4 Portátil Rosa",
+      "account": "Wilbert",
+      "status": "active"
+    },
+    "MLM2910457917": {
+      "sku": "JBL-GO4-AQUA",
+      "title": "Bocina Jbl Go 4 Jblgo4 Portátil Con Bluetooth Waterproof Celeste",
+      "account": "Wilbert",
+      "status": "active"
+    },
+    "MLM2910806881": {
+      "sku": "JBL-GO3-NEGRO",
+      "title": "Parlante Bluetooth Jbl Go 3 Color Negro",
+      "account": "Wilbert",
+      "status": "active"
+    },
+    "MLM5297098664": {
+      "sku": "BOSE-NEGRO",
+      "title": "Altavoz Bose Soundlink Home, Altavoz De Estantería Bluetooth Negro",
+      "account": "Wilbert",
+      "status": "active"
+    },
+    "MLM2910768335": {
+      "sku": "JBL-GO4-ROSA",
+      "title": "Jbl Go 4 - Altavoz Bluetooth Ultraportátil Rosa",
+      "account": "Wilbert",
+      "status": "active"
+    },
+    "MLM2910768333": {
+      "sku": "JBL-GO3-NEGRO",
+      "title": "Parlante Jbl Go 3 Jblgo3 Portátil Con Bluetooth Waterproof Negro",
+      "account": "Wilbert",
+      "status": "active"
+    },
+    "MLM2910768369": {
+      "sku": "JBL-GO4-ROJO",
+      "title": "Altavoz Bluetooth Jbl Go 4 Portátil Impermeable En Rojo",
+      "account": "Wilbert",
+      "status": "active"
+    },
+    "MLM2931612609": {
+      "sku": "JBL-CLIP5-NEGRO",
+      "title": "Altavoz Bluetooth Jbl Clip 5 Color Negro Naranja Black/orange",
+      "account": "Wilbert",
+      "status": "active"
+    },
+    "MLM2932676401": {
+      "sku": "UNCLASSIFIED",
+      "title": "Bocina Bluetooth Portátil 30w Ip67 Acabado Espejo Bass Pro",
+      "account": "Wilbert",
+      "status": "active"
+    },
+    "MLM5346655686": {
+      "sku": "JBL-GO4-XX",
+      "title": "Bocina Bluetooth Portátil Go 4 Ip67 Oem 1.1 Espejo",
+      "account": "Wilbert",
+      "status": "active"
+    },
+    "MLM2910806871": {
+      "sku": "JBL-CLIP5-AZUL",
+      "title": "Parlante Jbl Clip 5 Portátil Con Bluetooth Waterproof Azul",
+      "account": "Wilbert",
+      "status": "active"
+    },
+    "MLM2910806853": {
+      "sku": "JBL-CLIP5-NEGRO",
+      "title": "Bocina Jbl Audio Clip 5 Clip 5 Portátil Con Bluetooth Waterproof Negra Negro",
+      "account": "Wilbert",
+      "status": "paused"
+    },
+    "MLM2931341689": {
+      "sku": "JBL-CLIP5-NEGRO",
+      "title": "Altavoz Bluetooth Ultraportátil Jbl Clip 5 Ip67 Proof, Color Negro-naranja",
+      "account": "Wilbert",
+      "status": "active"
+    },
+    "MLM5351731608": {
+      "sku": "UNCLASSIFIED",
+      "title": "Bocina Jbl Modelo Padrão Portátil Waterproof Camuflaje - Bueno (Reacondicionado)",
+      "account": "Wilbert",
+      "status": "active"
+    },
+    "MLM5295549238": {
+      "sku": "JBL-GRIP-NEGRO",
+      "title": "Parlante Jbl Grip Portátil Con Bluetooth Waterproof Negra Negro",
+      "account": "Wilbert",
+      "status": "paused"
+    },
+    "MLM2910457937": {
+      "sku": "JBL-GO4-NEGRO",
+      "title": "Bocina Jbl Go4 Portátil Con Bluetooth Waterproof Negra Negro",
+      "account": "Wilbert",
+      "status": "paused"
+    },
+    "MLM2910457933": {
+      "sku": "JBL-GO4-AZUL-MARINO",
+      "title": "Bocina Jbl Go 4 Go 4 Portátil Con Bluetooth Waterproof Azul",
+      "account": "Wilbert",
+      "status": "paused"
+    },
+    "MLM2910457983": {
+      "sku": "JBL-CLIP5-NEGRO",
+      "title": "Bocina Portátil Jbl Clip 5 Potencia De Salida 7w Color Negro",
+      "account": "Wilbert",
+      "status": "paused"
+    },
+    "MLM2910457977": {
+      "sku": "JBL-CLIP5-NEGRO",
+      "title": "Bocina Portátil Jbl Clip 5 Bluetooth Negro",
+      "account": "Wilbert",
+      "status": "paused"
+    },
+    "MLM5295460002": {
+      "sku": "JBL-GRIP-NEGRO",
+      "title": "Altavoz Bluetooth Portátil Jbl Grip Con Luz - Negro",
+      "account": "Wilbert",
+      "status": "paused"
+    },
+    "MLM2937969761": {
+      "sku": "XB100",
+      "title": "Sony Srs-xb100 Altavoz De Viaje Inalámbrico Bluetooth Port Color Negro",
+      "account": "Wilbert",
+      "status": "active"
+    },
+    "MLM2910880769": {
+      "sku": "JBL-CLIP5-NEGRO",
+      "title": "Altavoz Impermeable Negro Jbl Clip 5",
+      "account": "Wilbert",
+      "status": "paused"
+    },
+    "MLM5351937060": {
+      "sku": "JBL-GO4-XX",
+      "title": "Mini Altavoz Inalámbrico Portátil Go 4 Camuflado",
+      "account": "Wilbert",
+      "status": "active"
+    },
+    "MLM5295749840": {
+      "sku": "JBL-CHARGE6-AZUL",
+      "title": "Jbl Charge 6 Bocina Bluetooth Ip67 Reacondicionada Azul",
+      "account": "Wilbert",
+      "status": "paused"
+    },
+    "MLM2910768361": {
+      "sku": "JBL-CLIP5-NEGRO",
+      "title": "Bocina Jbl Audio Clip 5 Clip 5 Portátil Con Bluetooth Waterproof Negra Negro",
+      "account": "Wilbert",
+      "status": "paused"
+    },
+    "MLM5347886456": {
+      "sku": "JBL-CHARGE6-NEGRO",
+      "title": "Parlante Jbl Charge 6 Bluetooth Negro Portátil Negro",
+      "account": "Wilbert",
+      "status": "paused"
+    },
+    "MLM2910880717": {
+      "sku": "JBL-GO4-NEGRO",
+      "title": "Bocina Jbl Go 4 Jblgo4 Portátil Con Bluetooth Waterproof Negra Negro",
+      "account": "Wilbert",
+      "status": "paused"
+    },
+    "MLM2910768379": {
+      "sku": "JBL-GO4-AZUL-MARINO",
+      "title": "Altavoz Bluetooth Azul Impermeable Jbl Go4",
+      "account": "Wilbert",
+      "status": "paused"
+    },
+    "MLM5354755946": {
+      "sku": "JBL-GO4-ROJO",
+      "title": "Bocina Jbl Go 4 Jblgo4 Portátil Con Bluetooth Waterproof Roja Rojo",
+      "account": "Wilbert",
+      "status": "active"
+    },
+    "MLM2910768375": {
+      "sku": "JBL-GO4-AZUL-MARINO",
+      "title": "Bocina Portátil Jbl Go 4 Bluetooth, Azul",
+      "account": "Wilbert",
+      "status": "paused"
+    },
+    "MLM2910457991": {
+      "sku": "JBL-CLIP5-NEGRO",
+      "title": "Altavoz Impermeable Negro Jbl Clip 5",
+      "account": "Wilbert",
+      "status": "paused"
+    },
+    "MLM5351547624": {
+      "sku": "JBL-CHARGE6-ROJO",
+      "title": "Jbl Charge 6 Bocina Portátil Bluetooth Resistente Al Agua - Bueno (Reacondiciona",
+      "account": "Wilbert",
+      "status": "paused"
+    },
+    "MLM2894631211": {
+      "sku": "JBL-CHARGE6-AZUL",
+      "title": "Bocina Jbl Charge 6 Bluetooth Ip67 Portatil Reacondicionada Azul",
+      "account": "Juan",
+      "status": "paused"
+    },
+    "MLM2907632461": {
+      "sku": "JBL-CHARGE6-CAMUFLAJE",
+      "title": "Bocina Jbl Charge 6 Bluetooth Ip67 Portatil Reacondicionada Camuflaje",
+      "account": "Juan",
+      "status": "paused"
+    },
+    "MLM2894654315": {
+      "sku": "JBL-CHARGE6-NEGRO",
+      "title": "Bocina Jbl Charge 6 Bluetooth Ip67 Portatil Reacondicionada Negro",
+      "account": "Juan",
+      "status": "paused"
+    },
+    "MLM2894660069": {
+      "sku": "JBL-FLIP7-ROJO",
+      "title": "Bocina Jbl Flip 7 Bluetooth Ip67 Portatil Reacondicionada Rojo",
+      "account": "Juan",
+      "status": "paused"
+    },
+    "MLM2894618113": {
+      "sku": "JBL-CHARGE6-ROJO",
+      "title": "Bocina Jbl Charge 6 Bluetooth Ip67 Portatil Reacondicionada Rojo",
+      "account": "Juan",
+      "status": "paused"
+    },
+    "MLM2894623799": {
+      "sku": "JBL-FLIP7-MORADO",
+      "title": "Bocina Jbl Flip 7 Bluetooth Ip67 Portatil Reacondicionada Morado",
+      "account": "Juan",
+      "status": "paused"
+    },
+    "MLM2894660533": {
+      "sku": "JBL-FLIP7-NEGRO",
+      "title": "Bocina Jbl Flip 7 Bluetooth Ip67 Portatil Reacondicionada Negro",
+      "account": "Juan",
+      "status": "paused"
+    },
+    "MLM2883448187": {
+      "sku": "JBL-GO4-XX",
+      "title": "Bocina Jbl Go 4 Bluetooth Portatil Ip67 Nueva Original Color",
+      "account": "Juan",
+      "status": "paused"
+    },
+    "MLM2890793871": {
+      "sku": "JBL-GO4-AQUA",
+      "title": "Bocina Jbl Go 4 Jblgo4 Portátil Con Bluetooth Waterproof Celeste",
+      "account": "Juan",
+      "status": "paused"
+    },
+    "MLM5244765752": {
+      "sku": "JBL-GO4-XX",
+      "title": "Bocina Jbl Go 4 Bluetooth Ip67 Reacondicionada Excelente",
+      "account": "Juan",
+      "status": "paused"
+    },
+    "MLM2890818973": {
+      "sku": "JBL-GO4-ROJO",
+      "title": "Bocina Jbl Go 4 Jblgo4 Portátil Con Bluetooth Waterproof Roja Rojo",
+      "account": "Juan",
+      "status": "paused"
+    },
+    "MLM5280635546": {
+      "sku": "JBL-GO4-ROJO",
+      "title": "Jbl Go 4 - Altavoz Ultraportátil Bluetooth Color Rojo",
+      "account": "Juan",
+      "status": "paused"
+    },
+    "MLM2904707285": {
+      "sku": "JBL-GO4-XX",
+      "title": "Jbl Go 4 Bocina Bluetooth Caja Abierta Color Sorpresa Color Sorpresa",
+      "account": "Juan",
+      "status": "paused"
+    },
+    "MLM2890793859": {
+      "sku": "JBL-GO4-AZUL-MARINO",
+      "title": "Bocina Jbl Go 4 Jblgo4 Portátil Con Bluetooth Waterproof Azul",
+      "account": "Juan",
+      "status": "paused"
+    },
+    "MLM2890856611": {
+      "sku": "JBL-GO4-CAMUFLAJE",
+      "title": "Bocina Portátil Jbl Go 4 Bluetooth, Camuflaje. Color Camuflaje",
+      "account": "Juan",
+      "status": "paused"
+    },
+    "MLM5246077448": {
+      "sku": "JBL-GO4-ROSA",
+      "title": "Altavoz Bluetooth Jbl Go 4 Rosa Rosa Chicle",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM2891189903": {
+      "sku": "JBL-GRIP-NEGRO",
+      "title": "Altavoz Bluetooth Portátil Jbl Grip Con Luz - Negro",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM5246077488": {
+      "sku": "JBL-GO4-AZUL-MARINO",
+      "title": "Bocina Portátil Jbl Go 4 Bluetooth, Azul",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM2904767915": {
+      "sku": "JBL-GO3-NEGRO",
+      "title": "Altavoz Jbl Go 3 De 4,2 Vatios Rms Con Bluetooth, Color Negro",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM5281123246": {
+      "sku": "JBL-CLIP5-NEGRO",
+      "title": "Bocina Portátil Jbl Clip 5 Bluetooth Negro",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM5246052128": {
+      "sku": "JBL-GO4-AZUL-MARINO",
+      "title": "Altavoz Portátil Jbl Go4 Go 4 00000000 Con Bluetooth Azul Impermeable",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM5246052052": {
+      "sku": "JBL-GO4-AZUL-MARINO",
+      "title": "Parlante Jbl Go4 Bt Azul Mm906jbl75 Azul Marino",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM5246077470": {
+      "sku": "JBL-GO4-AZUL-MARINO",
+      "title": "Altavoz Bluetooth Ultraportátil Impermeable Jbl Go 4, Color Azul",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM5246052070": {
+      "sku": "JBL-GO4-AZUL-MARINO",
+      "title": "Bocina Portátil Jbl Go 4 Bluetooth, Azul",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM2891178511": {
+      "sku": "XB100",
+      "title": "Sony Srs-xb100 Altavoz De Viaje Inalámbrico Bluetooth Port Color Negro",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM2891189849": {
+      "sku": "JBL-GO4-AZUL-MARINO",
+      "title": "Altavoz Portátil Jbl Go 4 Con Bluetooth Color Azul",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM2891178577": {
+      "sku": "JBL-GO4-AZUL-MARINO",
+      "title": "Altavoz Bluetooth V5.3 Jbl Go 4 Con Garantía De Color Azul Jbl Go4 Jbl Go4 Azul",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM2891178589": {
+      "sku": "JBL-GO4-AZUL-MARINO",
+      "title": "Jbl Go4 Speaker Color Azul",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM2891178545": {
+      "sku": "JBL-GO4-ROSA",
+      "title": "Jbl Go 4 - Altavoz Bluetooth Ultraportátil Rosa",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM2891178583": {
+      "sku": "JBL-GO4-AZUL-MARINO",
+      "title": "Parlantes Portátil Jbl Go 4 Speaker Color Azul Jblgo4bluam",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM2891178603": {
+      "sku": "JBL-GO4-ROJO",
+      "title": "Altavoz Bluetooth Jbl Go 4 Portátil Impermeable En Rojo",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM2891178563": {
+      "sku": "JBL-GO4-ROJO",
+      "title": "Jbl Go 4 - Altavoz Ultraportátil Bluetooth Color Rojo",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM2891178553": {
+      "sku": "JBL-GO4-ROSA",
+      "title": "Parlante Bluetooth Jbl Go 4 Portátil Rosa",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM2891178657": {
+      "sku": "JBL-GRIP-NEGRO",
+      "title": "Parlante Jbl Grip Portátil Con Bluetooth Waterproof Negra Negro",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM5281123238": {
+      "sku": "JBL-CLIP5-MORADO",
+      "title": "Parlante Jbl Audio Clip 5 Clip 5 Portátil Con Bluetooth Waterproof Morado",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM2904767871": {
+      "sku": "JBL-GO4-NEGRO",
+      "title": "Jbl Bocina Bluetooth Go 4 Negro",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM2904765913": {
+      "sku": "JBL-CLIP5-ROSA",
+      "title": "Jbl Clip 5 - Altavoz Bluetooth Ultraportátil, Resistente Al Color Rosa",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM2904704679": {
+      "sku": "JBL-GO4-NEGRO",
+      "title": "Bocina Jbl Go4 Portátil Con Bluetooth Waterproof Negra Negro",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM2904767891": {
+      "sku": "JBL-GO3-NEGRO",
+      "title": "Parlante Jbl Go 3 Jblgo3 Portátil Con Bluetooth Waterproof Negro",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM2904704703": {
+      "sku": "JBL-GO4-AZUL-MARINO",
+      "title": "Bocina Jbl Go 4 Jblgo4 Portátil Con Bluetooth Waterproof Azul Acero",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM2904765841": {
+      "sku": "JBL-CLIP5-NEGRO",
+      "title": "Parlante Jbl Clip 5 Portátil Bluetooth Impermeable Altavoz Color Negro",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM2904704727": {
+      "sku": "JBL-GO3-NEGRO",
+      "title": "Parlante Bluetooth Jbl Go 3 Negro",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM2904767905": {
+      "sku": "JBL-GO3-XX",
+      "title": "Bocina Jbl Go 3 Portátil Con Bluetooth Waterproof Black",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM2904704725": {
+      "sku": "JBL-GO4-ROJO",
+      "title": "Altavoz Impermeable Go 4 Jbl, Color Rojo",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM2904765881": {
+      "sku": "JBL-CLIP5-XX",
+      "title": "Bocina Jbl Clip 5 Portátil Con Bluetooth Waterproof Camuflada",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM2904704755": {
+      "sku": "JBL-GO3-NEGRO",
+      "title": "Bocina Jbl Go 3 Jblgo3 Portátil Con Bluetooth Waterproof Negra Negro",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM2904767843": {
+      "sku": "JBL-GO4-ROJO",
+      "title": "Bocina Jbl Go 4 Jblgo4 Portátil Con Bluetooth Waterproof Roja",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM2904767803": {
+      "sku": "JBL-GO4-NEGRO",
+      "title": "Altavoz Bluetooth Ultraportátil Impermeable Jbl Go 4, Color Negro",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM2904765865": {
+      "sku": "JBL-CLIP5-AZUL",
+      "title": "Altavoz Portátil Impermeable Jbl Clip 5 Con Correa De Color Azul",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM2904767823": {
+      "sku": "JBL-GO4-NEGRO",
+      "title": "Altavoz Portátil Jbl Go4 Con Bluetooth Impermeable Negro",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM2904767723": {
+      "sku": "JBL-GO4-NEGRO",
+      "title": "Parlante Jbl Go Jbl Go 4 Go4 Portátil Con Bluetooth Waterproof Negro",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM2904767773": {
+      "sku": "JBL-GO4-NEGRO",
+      "title": "Jbl Go 4 - Altavoz Bluetooth Ultraportátil De Color Negro",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM2904767763": {
+      "sku": "JBL-GO4-ROJO",
+      "title": "Jbl Go 4 - Altavoz Ultraportátil Bluetooth Color Rojo",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM2904767759": {
+      "sku": "JBL-GO4-NEGRO",
+      "title": "Parlante Inalámbrico Jbl Go 4 Bluetooth Ip67 Negro",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM2904767855": {
+      "sku": "JBL-GO4-NEGRO",
+      "title": "Bocina Jbl Go 4 Jblgo4 Portátil Con Bluetooth Waterproof Negra Negro",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM2904693329": {
+      "sku": "JBL-GO4-AZUL-MARINO",
+      "title": "Parlante Jbl Go 4 Portátil Bluetooth Waterproof Color Azul",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM2904693425": {
+      "sku": "JBL-GO4-ROJO",
+      "title": "Jbl Bocina Bluetooth Go 4 Rojo",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM2904693461": {
+      "sku": "JBL-GO3-NEGRO",
+      "title": "Jbl Go3 Black Negro",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM2904693421": {
+      "sku": "JBL-GO4-XX",
+      "title": "Parlante Jbl Audio Jbl Jblgo4 Portátil Con Bluetooth Waterproof Black Y Orange B",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM2904702703": {
+      "sku": "JBL-CLIP5-MORADO",
+      "title": "Parlante Jbl Clip 5 Portátil Con Bluetooth Waterproof Violeta",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM2904704645": {
+      "sku": "JBL-GO4-AZUL-MARINO",
+      "title": "Parlantes Portátil Jbl Go 4 Speaker Color Azul Jblgo4bluam",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM2904702689": {
+      "sku": "JBL-CLIP5-NEGRO",
+      "title": "Altavoz Portátil Jbl Clip 5 Con Bluetooth 7w Rms Negro",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM2904702663": {
+      "sku": "JBL-CLIP5-NEGRO",
+      "title": "Bocina Jbl Jbl Clip 5 Jbl Clip 5 Portátil Con Bluetooth Waterproof Altavoz Jbl C",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM2904693265": {
+      "sku": "JBL-GO4-NEGRO",
+      "title": "Parlante Jbl Go 4 Color Negro",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM2904700925": {
+      "sku": "JBL-CLIP5-ROJO",
+      "title": "Parlante Jbl Clip 5 Portátil | Bluetooth Waterproof - Cover Color Rojo",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM2904704661": {
+      "sku": "JBL-GO4-AZUL-MARINO",
+      "title": "Altavoz Bluetooth V5.3 Jbl Go 4 Con Garantía De Color Azul Jbl Go4 Jbl Go4 Azul",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM2904702707": {
+      "sku": "JBL-CLIP5-MORADO",
+      "title": "Parlante Portátil Jbl Clip 5 Bluetooth, Color Violeta",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM2904693275": {
+      "sku": "JBL-GO4-AZUL-MARINO",
+      "title": "Bocina Portátil Jbl Go 4 Bluetooth, Azul",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM2904704639": {
+      "sku": "JBL-GO4-AZUL-MARINO",
+      "title": "Jbl Go 4 - Altavoz Ultraportátil Bluetooth Color Azul",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM2904704625": {
+      "sku": "JBL-GO4-AZUL-MARINO",
+      "title": "Bocina Jbl Go 4 Go 4 Portátil Con Bluetooth Waterproof Azul",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM2904693403": {
+      "sku": "JBL-GO4-AQUA",
+      "title": "Bocina Jbl Go 4 Jblgo4 Portátil Con Bluetooth Waterproof Celeste",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM2904693269": {
+      "sku": "JBL-GO4-AZUL-MARINO",
+      "title": "Parlante Jbl Go 4 Color Azul",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM2904693439": {
+      "sku": "JBL-GO3-NEGRO",
+      "title": "Parlante Bluetooth Jbl Go 3 Color Negro",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM2904693443": {
+      "sku": "JBL-GO3-NEGRO",
+      "title": "Bocina Jbl Portátil Jbl Go 3 Jblgo3blkam Portátil Con Bluetooth Waterproof Negra",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM2904702693": {
+      "sku": "JBL-CLIP5-AZUL",
+      "title": "Parlante Jbl Clip 5 Portátil Con Bluetooth Waterproof Azul",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM2904693257": {
+      "sku": "JBL-GO4-NEGRO",
+      "title": "Bocina Jbl Go Jbl Go 4 Go4 Portátil Con Bluetooth Waterproof Negra Negro",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM2904691275": {
+      "sku": "JBL-CLIP5-NEGRO",
+      "title": "Jbl Clip 5 Portátil A Prueba De Polvo, Color Negro",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM2904678397": {
+      "sku": "JBL-CLIP5-MORADO",
+      "title": "Altavoz Bluetooth Portátil Jbl Clip 5, Resistente Al Agua, Color Violeta",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM2904691291": {
+      "sku": "JBL-CLIP5-NEGRO",
+      "title": "Bocina Jbl Audio Clip 5 Clip 5 Portátil Con Bluetooth Waterproof Negra Negro",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM2904691287": {
+      "sku": "JBL-CLIP5-NEGRO",
+      "title": "Altavoz Impermeable Negro Jbl Clip 5",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM2904678413": {
+      "sku": "JBL-CLIP5-MORADO",
+      "title": "Jbl Clip 5 Altavoces Bluetooth Ultra Portátiles Morado Ews Púrpura",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM2904687747": {
+      "sku": "JBL-CLIP5-AZUL",
+      "title": "Bocina Portátil Jbl Clip 5 Bluetooth Azul",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM2904691313": {
+      "sku": "JBL-CLIP5-XX",
+      "title": "Bocina Jbl Clip 5 Portátil Con Bluetooth Waterproof Púrpura",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM2904680305": {
+      "sku": "JBL-GO4-AZUL-MARINO",
+      "title": "Bocina Jbl Go Jbl Go 4 Go4 Portátil Con Bluetooth Waterproof Jbl Go4 Azul",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM2904691353": {
+      "sku": "JBL-CLIP5-ROSA",
+      "title": "Jbl Clip 5: Bluetooth Ultraportátil, Resistente Al Agua Y Al Color Rosa",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM2904687737": {
+      "sku": "JBL-CLIP5-ROJO",
+      "title": "Bocina Portátil Jbl Clip 5 Bluetooth Rojo",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM2904680319": {
+      "sku": "JBL-GO4-ROSA",
+      "title": "Jbl Go 4 - Altavoz Bluetooth Ultraportátil Rosa",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM2904680479": {
+      "sku": "JBL-GO3-NEGRO",
+      "title": "Bocina Jbl Grab And Go Go 3 Portátil Con Bluetooth Waterproof Negra Negro",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM2904680329": {
+      "sku": "JBL-GO4-AZUL-MARINO",
+      "title": "Bocina Portátil Jbl Go 4 Bluetooth, Azul",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM2904691267": {
+      "sku": "JBL-CLIP5-NEGRO",
+      "title": "Altavoz Impermeable Negro Jbl Clip 5",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM2904678453": {
+      "sku": "JBL-CLIP5-NEGRO",
+      "title": "Jbl Clip 5 - Altavoz Bluetooth Ultraportátil, Impermeable Y Negro",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM2904680381": {
+      "sku": "JBL-GO4-NEGRO",
+      "title": "Altavoz Portátil Jbl Go4 Con Bluetooth Impermeable Negro",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM2904680353": {
+      "sku": "JBL-GO4-ROJO",
+      "title": "Parlante Jbl Go 4 Portátil Bluetooth Waterproof Color Rojo",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM2904680453": {
+      "sku": "JBL-GO3-NEGRO",
+      "title": "Altavoz Portátil Jbl Portable Jbl Go 3 Eco Con Bluetooth Resistente Al Agua Negr",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM2904680391": {
+      "sku": "JBL-GO4-NEGRO",
+      "title": "Bocina Jbl Go Jblgo4blk Go4 Portátil Con Bluetooth Waterproof Negra Negro",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM2904674811": {
+      "sku": "JBL-CLIP5-XX",
+      "title": "Bocina Jbl Audio Clip 5 Clip 5 Portátil Con Bluetooth Waterproof Camuflada",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM2911242617": {
+      "sku": "JBL-FLIP7-XX",
+      "title": "Jbl Flip 7 Original Bocina Bluetooth Ip68 Caja Abierta",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM2906041435": {
+      "sku": "BOSE-NEGRO",
+      "title": "Altavoz Bose Soundlink Home, Altavoz De Estantería Bluetooth Negro",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM2904676579": {
+      "sku": "JBL-CLIP5-NEGRO",
+      "title": "Bocina Portátil Jbl Clip 5 Potencia De Salida 7w Color Negro",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM2904678377": {
+      "sku": "JBL-CLIP5-NEGRO",
+      "title": "Bocina Jbl Audio Clip 5 Clip 5 Portátil Con Bluetooth Waterproof Negra Negro",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM2906016765": {
+      "sku": "BOSE-XX",
+      "title": "Altavoz Bluetooth De Estantería Bose Soundlink Home Silver Color Light Silver",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM2904678391": {
+      "sku": "JBL-CLIP5-AZUL",
+      "title": "Altavoz Portátil Clip 5 Bluetooth Azul",
+      "account": "Raymundo",
+      "status": "paused"
+    },
+    "MLM2220287371": {
+      "sku": "UNCLASSIFIED",
+      "title": "Secador De Cabello Profesional Iónico Motor Digital Asva",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2886136351": {
+      "sku": "UNCLASSIFIED",
+      "title": "Bocina Bluetooth Portatil Impermeable Ip67 Bass 35w Morado Morado",
+      "account": "Asva",
+      "status": "active"
+    },
+    "MLM2378074801": {
+      "sku": "UNCLASSIFIED",
+      "title": "Flor De Nopal Extrait De Parfum 100 Ml Perfume Original",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM3506962466": {
+      "sku": "UNCLASSIFIED",
+      "title": "Secadora Digital Profesional Iónica 4 Velocidades Asva Negro",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2886030837": {
+      "sku": "UNCLASSIFIED",
+      "title": "Bocina Bluetooth Portatil Impermeable Ip67 Bass 35w Rojo Rojo",
+      "account": "Asva",
+      "status": "active"
+    },
+    "MLM2217768365": {
+      "sku": "UNCLASSIFIED",
+      "title": "Devoluciones No Recogidas, Caja Sorpresa",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2378087893": {
+      "sku": "UNCLASSIFIED",
+      "title": "Perfume Unisex Lv Perfume Studio Flor De Nopal Eau De Parfum 100ml Floral Dulce",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM3545177574": {
+      "sku": "UNCLASSIFIED",
+      "title": "Secadora Digital Profesional Iónica 4 Velocidades Asva Rosa Claro",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2378152257": {
+      "sku": "UNCLASSIFIED",
+      "title": "Perfume Mexicano Tlaloc Intenso Extrait De Parfum 100 Ml Hom",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2914949767": {
+      "sku": "UNCLASSIFIED",
+      "title": "Secadora Digital Profesional Iónica 4 Velocidades Asva Rosa Claro",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2914949769": {
+      "sku": "UNCLASSIFIED",
+      "title": "Secadora Digital Profesional Iónica 4 Velocidades Asva Negro",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2378152211": {
+      "sku": "UNCLASSIFIED",
+      "title": "Perfume Mexicano Alma De Tenochtitlán Extrait De Parfum 100",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM3503455096": {
+      "sku": "UNCLASSIFIED",
+      "title": "Secadora De Cabello Digital Iónica Profesional Asva Electronics  4 Velocidades, ",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM5356938548": {
+      "sku": "DASHCAM-ASV-DC170",
+      "title": "Dashcam Asva Electronics Dvr-3 Con 3 Cámaras Y Pantalla Lcd 4 Pulgadas | Grabaci",
+      "account": "Asva",
+      "status": "active"
+    },
+    "MLM2228418487": {
+      "sku": "UNCLASSIFIED",
+      "title": "Secadora De Cabello Digital Iónica Profesional Asva Electronics  4 Velocidades, ",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2914949771": {
+      "sku": "UNCLASSIFIED",
+      "title": "Secadora Digital Profesional Iónica 4 Velocidades Asva Blanco",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM3849137034": {
+      "sku": "UNCLASSIFIED",
+      "title": "Perfume Mexicano Alma De Tenochtitlán Extrait De Parfum 100 Ml Hombre Amaderado ",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2914949773": {
+      "sku": "UNCLASSIFIED",
+      "title": "Secadora Digital Profesional Iónica 4 Velocidades Asva Azul",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2199725889": {
+      "sku": "DASHCAM-ASV-DC170",
+      "title": "Asva Electronics Dashcam 4k 10.26  Bluetooth Gps",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2378074941": {
+      "sku": "UNCLASSIFIED",
+      "title": "Perfume Mexicano Tlaloc Intenso Extrait De Parfum 100 Ml Hombre Amaderado Frutal",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4299746142": {
+      "sku": "UNCLASSIFIED",
+      "title": "Conjunto Seamless Premium Push Up Moldeador Mujer Rosa Xl/xxl",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4299746636": {
+      "sku": "UNCLASSIFIED",
+      "title": "Enterizo Seamless Premium Con Borde Anatómico Moldeador Blanco M",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM3849902442": {
+      "sku": "UNCLASSIFIED",
+      "title": "Cámara De Acción Deportiva Cámara Deportiva Sumergible Hd 1080p Wifi Batería Neg",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4299744920": {
+      "sku": "UNCLASSIFIED",
+      "title": "Conjunto Deportivo Animal Print Rosa Seamless Push Up Mujer Rosa L",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2406690589": {
+      "sku": "UNCLASSIFIED",
+      "title": "Pantalla Carplay Y Android Auto Inalámbrica 7 Asva Electronics Con Bluetooth, Gp",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4299232046": {
+      "sku": "UNCLASSIFIED",
+      "title": "Conjunto Deportivo Seamless Rosa Premium Push Up S",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4299742804": {
+      "sku": "UNCLASSIFIED",
+      "title": "Short Deportivo Seamless Premium De Compresión Con Push Up Gris Cemento S",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4299742716": {
+      "sku": "UNCLASSIFIED",
+      "title": "Conjunto Deportivo Seamless Premium Push Up Gris Oscuro M",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4299233600": {
+      "sku": "UNCLASSIFIED",
+      "title": "Enterizo Body Rojo Seamless Moldeador Push Up Gym Mujer S Negro",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4299744922": {
+      "sku": "UNCLASSIFIED",
+      "title": "Conjunto Deportivo Animal Print Seamless Push Up Mujer Negro L",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4299742636": {
+      "sku": "UNCLASSIFIED",
+      "title": "Falda Deportiva Premium Con Short Integrado Moldeador Negro S",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4299234366": {
+      "sku": "UNCLASSIFIED",
+      "title": "Conjunto Body  Seamless Gris Premium Moldeador Push Up Mujer Gris Oxford M",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4299746600": {
+      "sku": "UNCLASSIFIED",
+      "title": "Enterizo Deportivo Corto Mujer Con Tirantes Cruzados Rosa S",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4299742718": {
+      "sku": "UNCLASSIFIED",
+      "title": "Conjunto Deportivo Seamless Premium Push Up Verde Menta M",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4299746432": {
+      "sku": "UNCLASSIFIED",
+      "title": "Enterizo Deportivo Corto Mujer Con Tirantes Cruzados Cafe M",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4299746138": {
+      "sku": "UNCLASSIFIED",
+      "title": "Conjunto Seamless Premium Push Up Moldeador Mujer Naranja M/l",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4299745522": {
+      "sku": "UNCLASSIFIED",
+      "title": "Conjunto Body  Seamless Gris Premium Moldeador Push Up Mujer Moka L",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4299742802": {
+      "sku": "UNCLASSIFIED",
+      "title": "Short Deportivo Seamless Premium De Compresión Con Push Up Gris Cemento M",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4299234364": {
+      "sku": "UNCLASSIFIED",
+      "title": "Conjunto Body  Seamless Gris Premium Moldeador Push Up Mujer Gris Oxford S",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4299233598": {
+      "sku": "UNCLASSIFIED",
+      "title": "Enterizo Body Rojo Seamless Moldeador Push Up Gym Mujer Rojo M",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4299231414": {
+      "sku": "UNCLASSIFIED",
+      "title": "Conjunto Deportivo Seamless Premium Push Up Rosa S",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4299180162": {
+      "sku": "UNCLASSIFIED",
+      "title": "Conjunto Deportivo Seamless Premium Rojo Push Up S",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4299179770": {
+      "sku": "UNCLASSIFIED",
+      "title": "Short Deportivo Seamless Premium De Compresión Con Push Up Negro S",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4299218636": {
+      "sku": "UNCLASSIFIED",
+      "title": "Conjunto Deportivo Seamless Premium Push Up Azul M",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4299218780": {
+      "sku": "UNCLASSIFIED",
+      "title": "Short Deportivo Seamless Premium De Compresión Con Push Up Gris Cemento L",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4299195920": {
+      "sku": "UNCLASSIFIED",
+      "title": "Conjunto Body  Seamless Gris Premium Moldeador Push Up Mujer Rosa Pálido S",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4299195224": {
+      "sku": "UNCLASSIFIED",
+      "title": "Conjunto Deportivo Animal Print Rosa Seamless Push Up Mujer Rosa S",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4299221782": {
+      "sku": "UNCLASSIFIED",
+      "title": "Conjunto Body  Seamless Gris Premium Moldeador Push Up Mujer Azul M",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4299195054": {
+      "sku": "UNCLASSIFIED",
+      "title": "Enterizo Body Rojo Seamless Moldeador Push Up Gym Mujer Rojo S",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4299231500": {
+      "sku": "UNCLASSIFIED",
+      "title": "Short Deportivo Seamless Premium De Compresión Con Push Up Negro M",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4299218566": {
+      "sku": "UNCLASSIFIED",
+      "title": "Falda Deportiva Premium Con Short Integrado Moldeador Gris M",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4299231322": {
+      "sku": "UNCLASSIFIED",
+      "title": "Falda Deportiva Premium Con Short Integrado Moldeador Gris S",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4299195226": {
+      "sku": "UNCLASSIFIED",
+      "title": "Conjunto Deportivo Animal Print Rosa Seamless Push Up Mujer Morado M",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4299192782": {
+      "sku": "UNCLASSIFIED",
+      "title": "Conjunto Deportivo Seamless Premium Push Up Naranja S",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4299195056": {
+      "sku": "UNCLASSIFIED",
+      "title": "Enterizo Body Rojo Seamless Moldeador Push Up Gym Mujer Verde Botella S",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4299195058": {
+      "sku": "UNCLASSIFIED",
+      "title": "Enterizo Body Rojo Seamless Moldeador Push Up Gym Mujer Aqua S",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4299182798": {
+      "sku": "UNCLASSIFIED",
+      "title": "Enterizo Seamless Moldeador Mujer Push Up Gym No Transparent Azul M",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4299192712": {
+      "sku": "UNCLASSIFIED",
+      "title": "Falda Deportiva Premium Con Short Integrado Moldeador Azul Marino M",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4299182450": {
+      "sku": "UNCLASSIFIED",
+      "title": "Conjunto Body  Seamless Gris Premium Moldeador Push Up Mujer Rosa Pálido L",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4299180062": {
+      "sku": "UNCLASSIFIED",
+      "title": "Leggings Deportivos Seamless Rosa Fucsia Premium Fucsia S",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4299179674": {
+      "sku": "UNCLASSIFIED",
+      "title": "Conjunto Deportivo Seamless Premium Push Up Naranja M",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4299141432": {
+      "sku": "UNCLASSIFIED",
+      "title": "Short Deportivo Seamless Premium De Compresión Con Push Up Rosa M",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4299154784": {
+      "sku": "UNCLASSIFIED",
+      "title": "Conjunto Deportivo Seamless Rosa Pastel Premium Push Up M",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4299154106": {
+      "sku": "UNCLASSIFIED",
+      "title": "Falda Deportiva Premium Con Short Integrado Moldeador Negro L",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4299156376": {
+      "sku": "UNCLASSIFIED",
+      "title": "Enterizo Body Seamless Moldeador Push Up Gym Mujer Negro L",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4299156378": {
+      "sku": "UNCLASSIFIED",
+      "title": "Enterizo Body Seamless Moldeador Push Up Gym Mujer Negro M",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4299167260": {
+      "sku": "UNCLASSIFIED",
+      "title": "Conjunto Deportivo Seamless Premium Push Up Cafe S",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4299169412": {
+      "sku": "UNCLASSIFIED",
+      "title": "Conjunto Deportivo Animal Print Seamless Push Up Mujer Azul L",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4299167212": {
+      "sku": "UNCLASSIFIED",
+      "title": "Short Deportivo Seamless Premium De Compresión Con Push Up Rosa S",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4299169410": {
+      "sku": "UNCLASSIFIED",
+      "title": "Conjunto Deportivo Animal Print Rosa Seamless Push Up Mujer Vino S",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4299167424": {
+      "sku": "UNCLASSIFIED",
+      "title": "Leggings Animal Print Seamless De Alto Rendimiento Gris Oscuro S",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4299179768": {
+      "sku": "UNCLASSIFIED",
+      "title": "Short Deportivo Seamless Premium De Compresión Con Push Up Rosa L",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4299154108": {
+      "sku": "UNCLASSIFIED",
+      "title": "Falda Deportiva Premium Con Short Integrado Moldeador Blanco M",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4299143274": {
+      "sku": "UNCLASSIFIED",
+      "title": "Enterizo Deportivo Seamless Premium Push Up Moldeador Rojo M",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4299167688": {
+      "sku": "UNCLASSIFIED",
+      "title": "Conjunto Deportivo Seamless Rosa Pastel Premium Push Up S",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4299143486": {
+      "sku": "UNCLASSIFIED",
+      "title": "Enterizo Body Seamless Moldeador Push Up Gym Mujer Verde Botella M",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4299143642": {
+      "sku": "UNCLASSIFIED",
+      "title": "Conjunto Deportivo Animal Print Rosa Seamless Push Up Mujer Morado S",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4299141802": {
+      "sku": "UNCLASSIFIED",
+      "title": "Conjunto Deportivo Seamless Premium Rojo Push Up L",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4299167544": {
+      "sku": "UNCLASSIFIED",
+      "title": "Conjunto Deportivo Seamless Naranja Premium Push Up S",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4299143644": {
+      "sku": "UNCLASSIFIED",
+      "title": "Conjunto Deportivo Animal Print Rosa Seamless Push Up Mujer Morado L",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4298999796": {
+      "sku": "UNCLASSIFIED",
+      "title": "Conjunto Deportivo Seamless Rosa Premium Push Up L",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4298974272": {
+      "sku": "UNCLASSIFIED",
+      "title": "Conjunto Deportivo Seamless Rosa Pastel Premium Push Up L",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4299102818": {
+      "sku": "UNCLASSIFIED",
+      "title": "Conjunto Deportivo Seamless Premium Push Up Gris Oscuro S",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4299102810": {
+      "sku": "UNCLASSIFIED",
+      "title": "Conjunto Deportivo Seamless Premium Push Up Negro S",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4299130470": {
+      "sku": "UNCLASSIFIED",
+      "title": "Conjunto Deportivo Animal Print Seamless Push Up Mujer Vino M",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4299115496": {
+      "sku": "UNCLASSIFIED",
+      "title": "Conjunto Deportivo Seamless Premium Push Up Negro M",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4299117862": {
+      "sku": "UNCLASSIFIED",
+      "title": "Conjunto Deportivo Animal Print Seamless Push Up Mujer Negro M",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4299117366": {
+      "sku": "UNCLASSIFIED",
+      "title": "Enterizo Deportivo Seamless Premium Push Up Moldeador Rojo S",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4299130004": {
+      "sku": "UNCLASSIFIED",
+      "title": "Enterizo Deportivo Seamless Premium Push Up Moldeador Rojo L",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4299103248": {
+      "sku": "UNCLASSIFIED",
+      "title": "Conjunto Deportivo Seamless Naranja Premium Push Up L",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4298974210": {
+      "sku": "UNCLASSIFIED",
+      "title": "Conjunto Deportivo Seamless Premium Rojo Push Up M",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4299104958": {
+      "sku": "UNCLASSIFIED",
+      "title": "Enterizo Body Seamless Moldeador Push Up Gym Mujer Verde Botella L",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4299077186": {
+      "sku": "UNCLASSIFIED",
+      "title": "Leggings Animal Print Seamless De Alto Rendimiento Gris Oscuro M",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4299104954": {
+      "sku": "UNCLASSIFIED",
+      "title": "Enterizo Body Rojo Seamless Moldeador Push Up Gym Mujer Rojo L",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4299130472": {
+      "sku": "UNCLASSIFIED",
+      "title": "Conjunto Deportivo Animal Print Rosa Seamless Push Up Mujer Vino L",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4299128596": {
+      "sku": "UNCLASSIFIED",
+      "title": "Conjunto Deportivo Seamless Naranja Premium Push Up M",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4299128540": {
+      "sku": "UNCLASSIFIED",
+      "title": "Leggings Deportivos Seamless Rosa Fucsia Premium Fucsia M",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4298999156": {
+      "sku": "UNCLASSIFIED",
+      "title": "Falda Deportiva Premium Con Short Integrado Moldeador Blanco L",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4299077244": {
+      "sku": "UNCLASSIFIED",
+      "title": "Leggings Deportivos Seamless Rosa Fucsia Premium Fucsia L",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4298999530": {
+      "sku": "UNCLASSIFIED",
+      "title": "Leggings Animal Print Seamless De Alto Rendimiento Gris Oscuro L",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2534941279": {
+      "sku": "UNCLASSIFIED",
+      "title": "Faja Moldeadora Seamless Premium Push Up · Compresión Café S/m",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4298973726": {
+      "sku": "UNCLASSIFIED",
+      "title": "Conjunto Deportivo Seamless Premium Push Up Rosa M",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4298973706": {
+      "sku": "UNCLASSIFIED",
+      "title": "Falda Deportiva Premium Con Short Integrado Moldeador Blanco S",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4298973658": {
+      "sku": "UNCLASSIFIED",
+      "title": "Falda Deportiva Premium Con Short Integrado Moldeador Azul Marino L",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2534953009": {
+      "sku": "UNCLASSIFIED",
+      "title": "Conjunto Seamless Premium Push Up Moldeador Mujer Negro Xl/xxl",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2534940087": {
+      "sku": "UNCLASSIFIED",
+      "title": "Conjunto Seamless Premium Push Up Moldeador Mujer Naranja Xl/xxl",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2534940603": {
+      "sku": "UNCLASSIFIED",
+      "title": "Enterizo Seamless Premium Con Borde Anatómico Moldeador Verde Claro G",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2534940437": {
+      "sku": "UNCLASSIFIED",
+      "title": "Enterizo Deportivo Corto Mujer Con Tirantes Cruzados Rosa L",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2534940645": {
+      "sku": "UNCLASSIFIED",
+      "title": "Enterizo Seamless Premium Con Borde Anatómico Moldeador Gris Oscuro M",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2534954351": {
+      "sku": "UNCLASSIFIED",
+      "title": "Enterizo Seamless Escultural De Alto Rendimiento Cafe S",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2534953511": {
+      "sku": "UNCLASSIFIED",
+      "title": "Enterizo Seamless Premium Con Borde Anatómico Moldeador Verde Claro M",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2534940439": {
+      "sku": "UNCLASSIFIED",
+      "title": "Enterizo Deportivo Corto Mujer Con Tirantes Cruzados Negro M",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2534940619": {
+      "sku": "UNCLASSIFIED",
+      "title": "Enterizo Seamless Premium Con Borde Anatómico Moldeador Verde Claro S",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4298973660": {
+      "sku": "UNCLASSIFIED",
+      "title": "Falda Deportiva Premium Con Short Integrado Moldeador Azul Marino S",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2534928573": {
+      "sku": "UNCLASSIFIED",
+      "title": "Enterizo Seamless Escultural De Alto Rendimiento Rosa M",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2534927835": {
+      "sku": "UNCLASSIFIED",
+      "title": "Enterizo Deportivo Corto Mujer Con Tirantes Cruzados Negro S",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2534953003": {
+      "sku": "UNCLASSIFIED",
+      "title": "Conjunto Seamless Premium Push Up Moldeador Mujer Negro M/l",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2534928579": {
+      "sku": "UNCLASSIFIED",
+      "title": "Enterizo Seamless Escultural De Alto Rendimiento Cafe M",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4298973820": {
+      "sku": "UNCLASSIFIED",
+      "title": "Short Deportivo Seamless Premium De Compresión Con Push Up Negro L",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2534927415": {
+      "sku": "UNCLASSIFIED",
+      "title": "Conjunto Seamless Premium Push Up Moldeador Mujer Azul M/l",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2534901879": {
+      "sku": "UNCLASSIFIED",
+      "title": "Conjunto Seamless Negro Moldeador Mujer Push Up Gym Negro S",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2534901899": {
+      "sku": "UNCLASSIFIED",
+      "title": "Conjunto Seamless Negro Moldeador Mujer Push Up Gym Negro L",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2534889919": {
+      "sku": "UNCLASSIFIED",
+      "title": "Faja Moldeadora Seamless Premium Push Up · Compresión Negro L/xl",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2534875125": {
+      "sku": "UNCLASSIFIED",
+      "title": "Conjunto Body  Seamless Gris Premium Moldeador Push Up Mujer Rosa Pálido M",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2534927093": {
+      "sku": "UNCLASSIFIED",
+      "title": "Enterizo Seamless Moldeador Mujer Push Up Gym No Transparent Rosa M",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2534890031": {
+      "sku": "UNCLASSIFIED",
+      "title": "Enterizo Seamless Escultural De Alto Rendimiento Negro S",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2534914811": {
+      "sku": "UNCLASSIFIED",
+      "title": "Enterizo Deportivo Corto Mujer Con Tirantes Cruzados Negro L",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2534914257": {
+      "sku": "UNCLASSIFIED",
+      "title": "Enterizo Seamless Moldeador Mujer Push Up Gym No Transparent Azul L",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2534927409": {
+      "sku": "UNCLASSIFIED",
+      "title": "Conjunto Seamless Premium Push Up Moldeador Mujer Rosa M/l",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2534890037": {
+      "sku": "UNCLASSIFIED",
+      "title": "Enterizo Seamless Escultural De Alto Rendimiento Cafe G",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2534888171": {
+      "sku": "UNCLASSIFIED",
+      "title": "Conjunto Body  Seamless Gris Premium Moldeador Push Up Mujer Azul S",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2534901419": {
+      "sku": "UNCLASSIFIED",
+      "title": "Enterizo Seamless Moldeador Mujer Push Up Gym No Transparent Fucsia S",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2534875129": {
+      "sku": "UNCLASSIFIED",
+      "title": "Conjunto Body  Seamless Gris Premium Moldeador Push Up Mujer Moka S",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2534927095": {
+      "sku": "UNCLASSIFIED",
+      "title": "Enterizo Seamless Moldeador Mujer Push Up Gym No Transparent Gris S",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2534876841": {
+      "sku": "UNCLASSIFIED",
+      "title": "Enterizo Seamless Escultural De Alto Rendimiento Rosa G",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2534876775": {
+      "sku": "UNCLASSIFIED",
+      "title": "Faja Moldeadora Seamless Premium Push Up · Compresión Negro S/m",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2534914985": {
+      "sku": "UNCLASSIFIED",
+      "title": "Enterizo Seamless Premium Con Borde Anatómico Moldeador Negro G",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2534902915": {
+      "sku": "UNCLASSIFIED",
+      "title": "Enterizo Seamless Escultural De Alto Rendimiento Rosa S",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2534875127": {
+      "sku": "UNCLASSIFIED",
+      "title": "Conjunto Body  Seamless Gris Premium Moldeador Push Up Mujer Moka M",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2534876525": {
+      "sku": "UNCLASSIFIED",
+      "title": "Set Seamless Escultural De Alto Rendimiento Rojo M",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2534824883": {
+      "sku": "UNCLASSIFIED",
+      "title": "Enterizo Seamless Premium Con Borde Anatómico Moldeador Negro S",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2534864195": {
+      "sku": "UNCLASSIFIED",
+      "title": "Enterizo Seamless Escultural De Alto Rendimiento Negro G",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2534824555": {
+      "sku": "UNCLASSIFIED",
+      "title": "Conjunto Seamless Negro Moldeador Mujer Push Up Gym Negro M",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2534811823": {
+      "sku": "UNCLASSIFIED",
+      "title": "Conjunto Seamless Premium Push Up Moldeador Mujer Camel Xl/xxl",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2534863827": {
+      "sku": "UNCLASSIFIED",
+      "title": "Set Seamless Escultural De Alto Rendimiento S/m",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2534849479": {
+      "sku": "UNCLASSIFIED",
+      "title": "Conjunto Body  Seamless Gris Premium Moldeador Push Up Mujer Gris Oxford L",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2534824143": {
+      "sku": "UNCLASSIFIED",
+      "title": "Enterizo Seamless Moldeador Mujer Push Up Gym No Transparent Fucsia L",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2534812347": {
+      "sku": "UNCLASSIFIED",
+      "title": "Enterizo Seamless Premium Con Borde Anatómico Moldeador Blanco S",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2534850585": {
+      "sku": "UNCLASSIFIED",
+      "title": "Enterizo Seamless Premium Con Borde Anatómico Moldeador Gris Oscuro S",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2534837641": {
+      "sku": "UNCLASSIFIED",
+      "title": "Enterizo Animal Print Seamless Moldeador Push Up Mujer Gym Negro L",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2534863475": {
+      "sku": "UNCLASSIFIED",
+      "title": "Enterizo Seamless Premium Con Borde Anatómico Moldeador Gris Oscuro G",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2534824897": {
+      "sku": "UNCLASSIFIED",
+      "title": "Enterizo Seamless Premium Con Borde Anatómico Moldeador Blanco G",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2534863259": {
+      "sku": "UNCLASSIFIED",
+      "title": "Enterizo Deportivo Corto Mujer Con Tirantes Cruzados Rosa M",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2534812125": {
+      "sku": "UNCLASSIFIED",
+      "title": "Enterizo Deportivo Corto Mujer Con Tirantes Cruzados Cafe S",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2534824497": {
+      "sku": "UNCLASSIFIED",
+      "title": "Enterizo Animal Print Seamless Moldeador Push Up Mujer Gym Negro M",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2534837075": {
+      "sku": "UNCLASSIFIED",
+      "title": "Enterizo Seamless Moldeador Mujer Push Up Gym No Transparent Rosa L",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2534824389": {
+      "sku": "UNCLASSIFIED",
+      "title": "Conjunto Seamless Premium Push Up Moldeador Mujer Camel M/l",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2534811923": {
+      "sku": "UNCLASSIFIED",
+      "title": "Enterizo Animal Print Seamless Moldeador Push Up Mujer Gym Negro S",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2534837421": {
+      "sku": "UNCLASSIFIED",
+      "title": "Conjunto Seamless Premium Push Up Moldeador Mujer Jade M/l",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2534825561": {
+      "sku": "UNCLASSIFIED",
+      "title": "Enterizo Seamless Escultural De Alto Rendimiento Negro M",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2534800493": {
+      "sku": "UNCLASSIFIED",
+      "title": "Faja Moldeadora Seamless Premium Push Up · Compresión Beige L/xl",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2534800417": {
+      "sku": "UNCLASSIFIED",
+      "title": "Faja Moldeadora Seamless Premium Push Up · Compresión Beige S/m",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2534733869": {
+      "sku": "UNCLASSIFIED",
+      "title": "Conjunto Deportivo Seamless Premium Push Up Cafe M",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2534799235": {
+      "sku": "UNCLASSIFIED",
+      "title": "Conjunto Seamless Premium Push Up Moldeador Mujer Jade Xl/xxl",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2534799741": {
+      "sku": "UNCLASSIFIED",
+      "title": "Enterizo Seamless Premium Con Borde Anatómico Moldeador Negro M",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2534799229": {
+      "sku": "UNCLASSIFIED",
+      "title": "Conjunto Seamless Premium Push Up Moldeador Mujer Azul Xl/xxl",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2534811523": {
+      "sku": "UNCLASSIFIED",
+      "title": "Enterizo Seamless Moldeador Mujer Push Up Gym No Transparent Fucsia M",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2534811123": {
+      "sku": "UNCLASSIFIED",
+      "title": "Conjunto Body  Seamless Gris Premium Moldeador Push Up Mujer Azul L",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2534810519": {
+      "sku": "UNCLASSIFIED",
+      "title": "Conjunto Deportivo Animal Print Rosa Seamless Push Up Mujer Rosa M",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2534800427": {
+      "sku": "UNCLASSIFIED",
+      "title": "Faja Moldeadora Seamless Premium Push Up · Compresión Café L/xl",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2534799535": {
+      "sku": "UNCLASSIFIED",
+      "title": "Enterizo Deportivo Corto Mujer Con Tirantes Cruzados Cafe L",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2534733871": {
+      "sku": "UNCLASSIFIED",
+      "title": "Conjunto Deportivo Seamless Premium Push Up Azul S",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2534797987": {
+      "sku": "UNCLASSIFIED",
+      "title": "Conjunto Deportivo Animal Print Seamless Push Up Mujer Azul S",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2534797985": {
+      "sku": "UNCLASSIFIED",
+      "title": "Conjunto Deportivo Animal Print Seamless Push Up Mujer Negro S",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2534798911": {
+      "sku": "UNCLASSIFIED",
+      "title": "Enterizo Seamless Moldeador Mujer Push Up Gym No Transparent Gris M",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2534733873": {
+      "sku": "UNCLASSIFIED",
+      "title": "Conjunto Deportivo Seamless Premium Push Up Verde Menta S",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2534798923": {
+      "sku": "UNCLASSIFIED",
+      "title": "Enterizo Seamless Moldeador Mujer Push Up Gym No Transparent Rosa S",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2534734427": {
+      "sku": "UNCLASSIFIED",
+      "title": "Conjunto Deportivo Seamless Rosa Premium Push Up M",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2534737797": {
+      "sku": "UNCLASSIFIED",
+      "title": "Enterizo Seamless Moldeador Mujer Push Up Gym No Transparent Azul S",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2534736037": {
+      "sku": "UNCLASSIFIED",
+      "title": "Conjunto Deportivo Animal Print Seamless Push Up Mujer Azul M",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4315432628": {
+      "sku": "UNCLASSIFIED",
+      "title": "Enterizo Body Seamless Moldeador Push Up Gym Mujer Verde Botella S",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4315429830": {
+      "sku": "UNCLASSIFIED",
+      "title": "Corsé Moldeador Premium Reductivo Con Estructura De Lujo Negro L",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4315429828": {
+      "sku": "UNCLASSIFIED",
+      "title": "Corsé Moldeador Premium Reductivo Con Estructura De Lujo Negro M",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2541128805": {
+      "sku": "UNCLASSIFIED",
+      "title": "Enterizo Body Seamless Moldeador Push Up Gym Mujer Aqua S",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2541057767": {
+      "sku": "UNCLASSIFIED",
+      "title": "Enterizo Seamless Premium Sculpt Fit  Moldea Glúteo Gris G",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2534733783": {
+      "sku": "UNCLASSIFIED",
+      "title": "Falda Deportiva Premium Con Short Integrado Moldeador Gris L",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2534733781": {
+      "sku": "UNCLASSIFIED",
+      "title": "Falda Deportiva Premium Con Short Integrado Moldeador Negro M",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4315571990": {
+      "sku": "UNCLASSIFIED",
+      "title": "Corsé Moldeador Premium Reductivo Con Estructura De Lujo Negro S",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4315429832": {
+      "sku": "UNCLASSIFIED",
+      "title": "Corsé Moldeador Premium Reductivo Con Estructura De Lujo Beige M",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4316993302": {
+      "sku": "UNCLASSIFIED",
+      "title": "Enterizo Seamless Premium Sculpt Fit  Moldea Glúteo Negro S",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2541171811": {
+      "sku": "UNCLASSIFIED",
+      "title": "Conjunto Deportivo Animal Print Seamless Push Up Mujer Negro L",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2541198619": {
+      "sku": "UNCLASSIFIED",
+      "title": "Enterizo Seamless Premium Sculpt Fit  Moldea Glúteo Negro M",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2541180381": {
+      "sku": "UNCLASSIFIED",
+      "title": "Enterizo Body Seamless Moldeador Push Up Gym Mujer Negro S",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2541134695": {
+      "sku": "UNCLASSIFIED",
+      "title": "Enterizo Seamless Premium Sculpt Fit  Moldea Glúteo Negro G",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2541173583": {
+      "sku": "UNCLASSIFIED",
+      "title": "Enterizo Seamless Premium Sculpt Fit  Moldea Glúteo Cafe S",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2541096219": {
+      "sku": "UNCLASSIFIED",
+      "title": "Enterizo Seamless Premium Sculpt Fit  Moldea Glúteo Cafe M",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2541057787": {
+      "sku": "UNCLASSIFIED",
+      "title": "Enterizo Seamless Premium Sculpt Fit  Moldea Glúteo Cafe G",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2541186299": {
+      "sku": "UNCLASSIFIED",
+      "title": "Enterizo Seamless Premium Sculpt Fit  Moldea Glúteo Gris M",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2541155737": {
+      "sku": "UNCLASSIFIED",
+      "title": "Enterizo Body Seamless Moldeador Push Up Gym Mujer Aqua M",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2541121749": {
+      "sku": "UNCLASSIFIED",
+      "title": "Enterizo Seamless Premium Sculpt Fit  Moldea Glúteo Gris S",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2543229027": {
+      "sku": "UNCLASSIFIED",
+      "title": "Faja Moldeadora Seamless Premium Push Up · Compresión Beige S",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2543305825": {
+      "sku": "UNCLASSIFIED",
+      "title": "Faja Moldeadora Seamless Premium Push Up · Compresión Beige M",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4320432384": {
+      "sku": "UNCLASSIFIED",
+      "title": "Enterizo Seamless Premium Fucsia Moldeador Athleisure Rosa L",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4320354388": {
+      "sku": "UNCLASSIFIED",
+      "title": "Enterizo Seamless Premium Fucsia Moldeador Athleisure Fucsia L",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2543255135": {
+      "sku": "UNCLASSIFIED",
+      "title": "Faja Moldeadora Seamless Premium Push Up · Compresión Beige L",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4320444736": {
+      "sku": "UNCLASSIFIED",
+      "title": "Faja Moldeadora Seamless Premium Push Up · Compresión Negro L",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4320432386": {
+      "sku": "UNCLASSIFIED",
+      "title": "Enterizo Seamless Premium Fucsia Moldeador Athleisure Azul L",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4320483968": {
+      "sku": "UNCLASSIFIED",
+      "title": "Enterizo Seamless Premium Fucsia Moldeador Athleisure Azul M",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2543091083": {
+      "sku": "UNCLASSIFIED",
+      "title": "Enterizo Seamless Premium Fucsia Moldeador Athleisure Negro M",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4320509906": {
+      "sku": "UNCLASSIFIED",
+      "title": "Enterizo Seamless Premium Fucsia Moldeador Athleisure Fucsia S",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4320432132": {
+      "sku": "UNCLASSIFIED",
+      "title": "Faja Moldeadora Seamless Premium Push Up · Compresión Negro M",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4320380272": {
+      "sku": "UNCLASSIFIED",
+      "title": "Enterizo Seamless Premium Fucsia Moldeador Athleisure Fucsia M",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4320599274": {
+      "sku": "UNCLASSIFIED",
+      "title": "Enterizo Seamless Premium Fucsia Moldeador Athleisure Rosa M",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2540807009": {
+      "sku": "UNCLASSIFIED",
+      "title": "Corsé Moldeador Premium Reductivo Con Estructura De Lujo Beige L",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2540807079": {
+      "sku": "UNCLASSIFIED",
+      "title": "Corsé Moldeador Premium Reductivo Con Estructura De Lujo Beige S",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4320509638": {
+      "sku": "UNCLASSIFIED",
+      "title": "Faja Moldeadora Seamless Premium Push Up · Compresión Negro S",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4320290362": {
+      "sku": "UNCLASSIFIED",
+      "title": "Enterizo Seamless Premium Fucsia Moldeador Athleisure Negro S",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4320496664": {
+      "sku": "UNCLASSIFIED",
+      "title": "Enterizo Seamless Premium Fucsia Moldeador Athleisure Azul S",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4320354386": {
+      "sku": "UNCLASSIFIED",
+      "title": "Enterizo Seamless Premium Fucsia Moldeador Athleisure Rosa S",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4320213122": {
+      "sku": "UNCLASSIFIED",
+      "title": "Enterizo Seamless Premium Fucsia Moldeador Athleisure Negro L",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2592601259": {
+      "sku": "UNCLASSIFIED",
+      "title": "Sultan Ember Eau De Parfum 100 Ml Oriental Especiado The Alchemia Lab",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4398819036": {
+      "sku": "UNCLASSIFIED",
+      "title": "Tira Led Asva Electronics 500 Rgb 3m",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2592360377": {
+      "sku": "UNCLASSIFIED",
+      "title": "Tzukan Eau De Parfum 100 Ml | Aroma Fresco Aromático Con Toques Dulces Y Amadera",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2545335629": {
+      "sku": "UNCLASSIFIED",
+      "title": "Kit Cielo Estrellado Tiras Led Rgb 500 Puntas 4 Salidas Rgb",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2592715211": {
+      "sku": "UNCLASSIFIED",
+      "title": "Himalayan Spirit Eau De Parfum 100 Ml | Aroma Fresco Amaderado Con Toques Minera",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2546625511": {
+      "sku": "UNCLASSIFIED",
+      "title": "Set Seamless Escultural De Alto Rendimiento Rojo L",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2592740671": {
+      "sku": "UNCLASSIFIED",
+      "title": "Obsidian Aura Eau De Parfum 100 Ml | Fragancia Amaderada Oriental Con Manzana Es",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2592715459": {
+      "sku": "UNCLASSIFIED",
+      "title": "Floral Virtue Eau De Parfum 100 Ml | Fragancia Floral Romántica Con Rosa, Peonía",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2547065747": {
+      "sku": "UNCLASSIFIED",
+      "title": "Set Seamless Escultural De Alto Rendimiento Rojo S",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2594259115": {
+      "sku": "UNCLASSIFIED",
+      "title": "Nordic Valor Eau De Parfum 100 Ml | Fragancia Aromática Fresca Con Menta, Lavand",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2592664137": {
+      "sku": "UNCLASSIFIED",
+      "title": "The Alchemia Lab Eau De Parfum 100ml Elegant Vice Jazmín Cacao",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2592715389": {
+      "sku": "UNCLASSIFIED",
+      "title": "Crystal Grace Eau De Parfum 100 Ml | Fragancia Floral Frutal Con Granada, Peonía",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2592603209": {
+      "sku": "UNCLASSIFIED",
+      "title": "Perfume Lv Perfume Studio Xibalba Royal Unisex Amaderado 100 Ml Árabe",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2567815455": {
+      "sku": "UNCLASSIFIED",
+      "title": "Corsé Moldeador Premium Reductivo Con Estructura De Lujo M Negro",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2592360045": {
+      "sku": "UNCLASSIFIED",
+      "title": "Golden Tempest Eau De Parfum 100 Ml | Aroma Ambarado Especiado Con Incienso Y Ma",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4436177528": {
+      "sku": "UNCLASSIFIED",
+      "title": "Oud Cherry Eau De Parfum 100 Ml | Fragancia Dulce Amaderada Con Cereza Oscura, C",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2592360231": {
+      "sku": "UNCLASSIFIED",
+      "title": "Golden Bloom Eau De Parfum 100 Ml | Fragancia Floral Lumínica Con Cítricos, Peon",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2594564705": {
+      "sku": "UNCLASSIFIED",
+      "title": "Velvet Cloud Eau De Parfum 100 Ml | Aroma Dulce Cremoso Con Almizcles Aéreos, Co",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4436268412": {
+      "sku": "UNCLASSIFIED",
+      "title": "Emerald Whisper Eau De Parfum 100 Ml | Aroma Verde Fresco Con Toques Herbales Y ",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4435340086": {
+      "sku": "UNCLASSIFIED",
+      "title": "Gentle Code Eau De Parfum 100 Ml | Aroma Fresco Acuático Con Notas Dulces Y Amad",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2594259089": {
+      "sku": "UNCLASSIFIED",
+      "title": "Royal Ember Eau De Parfum 100 Ml | Fragancia Ambarada Dulce Con Tabaco, Vainilla",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2605184973": {
+      "sku": "UNCLASSIFIED",
+      "title": "Obsidian Eclipse Eau De Parfum 100 Ml Hombre Intenso",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2605094839": {
+      "sku": "UNCLASSIFIED",
+      "title": "Noble Drive Eau De Parfum 100 Ml Hombre Fresco Amaderado",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM5235934108": {
+      "sku": "UNCLASSIFIED",
+      "title": "Bocina Bluetooth Portatil Compacta Ip67 Bass Aqua Aqua",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4690616060": {
+      "sku": "UNCLASSIFIED",
+      "title": "Conjunto Deportivo Seamless Push Up Top Y Short Mujer Gris S/m S/m",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4690447714": {
+      "sku": "UNCLASSIFIED",
+      "title": "Conjunto Deportivo Seamless Push Up Top Y Short Mujer Gris L/xl L/xl",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM5235934150": {
+      "sku": "UNCLASSIFIED",
+      "title": "Bocina Bluetooth Portatil Compacta Ip67 Bass Camuflaje Camuflaje",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4703037442": {
+      "sku": "UNCLASSIFIED",
+      "title": "Conjunto Deportivo Seamless Premium Push Up Verde Menta L",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4667267622": {
+      "sku": "UNCLASSIFIED",
+      "title": "Inferno Flame Eau De Parfum 100 Ml Hombre Ambarado",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4703124410": {
+      "sku": "UNCLASSIFIED",
+      "title": "Conjunto Deportivo Seamless Premium Push Up Verde Manchado S",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2699958881": {
+      "sku": "UNCLASSIFIED",
+      "title": "Candy Muse Eau De Parfum 100 Ml Fragancia Dulce Femenina",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4690064748": {
+      "sku": "UNCLASSIFIED",
+      "title": "Conjunto Deportivo Seamless Push Up Top Y Short Mujer Rosa S/m S/m",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2598943053": {
+      "sku": "UNCLASSIFIED",
+      "title": "Aqua De Vida Eau De Parfum 100 Ml | Fragancia Cítrica Acuática Ultrafresca Con T",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4470852744": {
+      "sku": "UNCLASSIFIED",
+      "title": "Inferno Flame Eau De Parfum 100 Ml Hombre Ambarado",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2605081655": {
+      "sku": "UNCLASSIFIED",
+      "title": "Candy Muse Eau De Parfum 100 Ml Fragancia Dulce Femenina",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM5235934132": {
+      "sku": "UNCLASSIFIED",
+      "title": "Bocina Bluetooth Portatil Compacta Ip67 Bass Negro Negro",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4703266876": {
+      "sku": "UNCLASSIFIED",
+      "title": "Conjunto Deportivo Seamless Premium Push Up Verde Manchado L",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4690422606": {
+      "sku": "UNCLASSIFIED",
+      "title": "Conjunto Deportivo Seamless Push Up Top Y Short Mujer Rosa L/xl L/xl",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM5235946486": {
+      "sku": "UNCLASSIFIED",
+      "title": "Bocina Bluetooth Portatil Compacta Ip67 Bass Rojo Rojo",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM4703176028": {
+      "sku": "UNCLASSIFIED",
+      "title": "Conjunto Deportivo Seamless Premium Push Up Verde Manchado M",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM5233480022": {
+      "sku": "UNCLASSIFIED",
+      "title": "Bocina Bluetooth Portatil Impermeable Ip67 Bass 35w Negro Negro",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2914855053": {
+      "sku": "UNCLASSIFIED",
+      "title": "Set De 3 Perfumes Árabes De Lujo Premium Unisex · Fragancias Orientales Intensas",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2886523677": {
+      "sku": "UNCLASSIFIED",
+      "title": "Bocina Bluetooth Portatil Compacta Ip67 Bass Rosa Rosa",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM5233454100": {
+      "sku": "UNCLASSIFIED",
+      "title": "Bocina Bluetooth Portatil Impermeable Ip67 Bass 35w Azul Azul",
+      "account": "Asva",
+      "status": "paused"
+    },
+    "MLM2886523697": {
+      "sku": "UNCLASSIFIED",
+      "title": "Bocina Bluetooth Portatil Compacta Ip67 Bass Azul Azul",
+      "account": "Asva",
+      "status": "paused"
+    }
+  },
+  "by_sku": {
+    "BOSE-XX": [
+      "MLM5297087174",
+      "MLM2906016765"
+    ],
+    "JBL-CLIP5-CAMUFLAJE": [
+      "MLM5337919282",
+      "MLM5337919290"
+    ],
+    "JBL-CHARGE6-NEGRO": [
+      "MLM2911241921",
+      "MLM5347886456",
+      "MLM2894654315"
+    ],
+    "JBL-CLIP4-AZUL": [
+      "MLM2931612611"
+    ],
+    "JBL-GO4-ROJO": [
+      "MLM2914422351",
+      "MLM2910768369",
+      "MLM5354755946",
+      "MLM2890818973",
+      "MLM5280635546",
+      "MLM2891178603",
+      "MLM2891178563",
+      "MLM2904704725",
+      "MLM2904767843",
+      "MLM2904767763",
+      "MLM2904693425",
+      "MLM2904680353"
+    ],
+    "JBL-CLIP5-XX": [
+      "MLM5337919270",
+      "MLM2904765881",
+      "MLM2904691313",
+      "MLM2904674811"
+    ],
+    "JBL-GO3-NEGRO": [
+      "MLM2910806845",
+      "MLM2910806881",
+      "MLM2910768333",
+      "MLM2904767915",
+      "MLM2904767891",
+      "MLM2904704727",
+      "MLM2904704755",
+      "MLM2904693461",
+      "MLM2904693439",
+      "MLM2904693443",
+      "MLM2904680479",
+      "MLM2904680453"
+    ],
+    "JBL-FLIP7-XX": [
+      "MLM5347216886",
+      "MLM2911242617"
+    ],
+    "JBL-GO4-ROSA": [
+      "MLM2910768325",
+      "MLM2910768335",
+      "MLM5246077448",
+      "MLM2891178545",
+      "MLM2891178553",
+      "MLM2904680319"
+    ],
+    "JBL-GO4-AQUA": [
+      "MLM2910457917",
+      "MLM2890793871",
+      "MLM2904693403"
+    ],
+    "BOSE-NEGRO": [
+      "MLM5297098664",
+      "MLM2906041435"
+    ],
+    "JBL-CLIP5-NEGRO": [
+      "MLM2931612609",
+      "MLM2910806853",
+      "MLM2931341689",
+      "MLM2910457983",
+      "MLM2910457977",
+      "MLM2910880769",
+      "MLM2910768361",
+      "MLM2910457991",
+      "MLM5281123246",
+      "MLM2904765841",
+      "MLM2904702689",
+      "MLM2904702663",
+      "MLM2904691275",
+      "MLM2904691291",
+      "MLM2904691287",
+      "MLM2904691267",
+      "MLM2904678453",
+      "MLM2904676579",
+      "MLM2904678377"
+    ],
+    "UNCLASSIFIED": [
+      "MLM2932676401",
+      "MLM5351731608",
+      "MLM2220287371",
+      "MLM2886136351",
+      "MLM2378074801",
+      "MLM3506962466",
+      "MLM2886030837",
+      "MLM2217768365",
+      "MLM2378087893",
+      "MLM3545177574",
+      "MLM2378152257",
+      "MLM2914949767",
+      "MLM2914949769",
+      "MLM2378152211",
+      "MLM3503455096",
+      "MLM2228418487",
+      "MLM2914949771",
+      "MLM3849137034",
+      "MLM2914949773",
+      "MLM2378074941",
+      "MLM4299746142",
+      "MLM4299746636",
+      "MLM3849902442",
+      "MLM4299744920",
+      "MLM2406690589",
+      "MLM4299232046",
+      "MLM4299742804",
+      "MLM4299742716",
+      "MLM4299233600",
+      "MLM4299744922",
+      "MLM4299742636",
+      "MLM4299234366",
+      "MLM4299746600",
+      "MLM4299742718",
+      "MLM4299746432",
+      "MLM4299746138",
+      "MLM4299745522",
+      "MLM4299742802",
+      "MLM4299234364",
+      "MLM4299233598",
+      "MLM4299231414",
+      "MLM4299180162",
+      "MLM4299179770",
+      "MLM4299218636",
+      "MLM4299218780",
+      "MLM4299195920",
+      "MLM4299195224",
+      "MLM4299221782",
+      "MLM4299195054",
+      "MLM4299231500",
+      "MLM4299218566",
+      "MLM4299231322",
+      "MLM4299195226",
+      "MLM4299192782",
+      "MLM4299195056",
+      "MLM4299195058",
+      "MLM4299182798",
+      "MLM4299192712",
+      "MLM4299182450",
+      "MLM4299180062",
+      "MLM4299179674",
+      "MLM4299141432",
+      "MLM4299154784",
+      "MLM4299154106",
+      "MLM4299156376",
+      "MLM4299156378",
+      "MLM4299167260",
+      "MLM4299169412",
+      "MLM4299167212",
+      "MLM4299169410",
+      "MLM4299167424",
+      "MLM4299179768",
+      "MLM4299154108",
+      "MLM4299143274",
+      "MLM4299167688",
+      "MLM4299143486",
+      "MLM4299143642",
+      "MLM4299141802",
+      "MLM4299167544",
+      "MLM4299143644",
+      "MLM4298999796",
+      "MLM4298974272",
+      "MLM4299102818",
+      "MLM4299102810",
+      "MLM4299130470",
+      "MLM4299115496",
+      "MLM4299117862",
+      "MLM4299117366",
+      "MLM4299130004",
+      "MLM4299103248",
+      "MLM4298974210",
+      "MLM4299104958",
+      "MLM4299077186",
+      "MLM4299104954",
+      "MLM4299130472",
+      "MLM4299128596",
+      "MLM4299128540",
+      "MLM4298999156",
+      "MLM4299077244",
+      "MLM4298999530",
+      "MLM2534941279",
+      "MLM4298973726",
+      "MLM4298973706",
+      "MLM4298973658",
+      "MLM2534953009",
+      "MLM2534940087",
+      "MLM2534940603",
+      "MLM2534940437",
+      "MLM2534940645",
+      "MLM2534954351",
+      "MLM2534953511",
+      "MLM2534940439",
+      "MLM2534940619",
+      "MLM4298973660",
+      "MLM2534928573",
+      "MLM2534927835",
+      "MLM2534953003",
+      "MLM2534928579",
+      "MLM4298973820",
+      "MLM2534927415",
+      "MLM2534901879",
+      "MLM2534901899",
+      "MLM2534889919",
+      "MLM2534875125",
+      "MLM2534927093",
+      "MLM2534890031",
+      "MLM2534914811",
+      "MLM2534914257",
+      "MLM2534927409",
+      "MLM2534890037",
+      "MLM2534888171",
+      "MLM2534901419",
+      "MLM2534875129",
+      "MLM2534927095",
+      "MLM2534876841",
+      "MLM2534876775",
+      "MLM2534914985",
+      "MLM2534902915",
+      "MLM2534875127",
+      "MLM2534876525",
+      "MLM2534824883",
+      "MLM2534864195",
+      "MLM2534824555",
+      "MLM2534811823",
+      "MLM2534863827",
+      "MLM2534849479",
+      "MLM2534824143",
+      "MLM2534812347",
+      "MLM2534850585",
+      "MLM2534837641",
+      "MLM2534863475",
+      "MLM2534824897",
+      "MLM2534863259",
+      "MLM2534812125",
+      "MLM2534824497",
+      "MLM2534837075",
+      "MLM2534824389",
+      "MLM2534811923",
+      "MLM2534837421",
+      "MLM2534825561",
+      "MLM2534800493",
+      "MLM2534800417",
+      "MLM2534733869",
+      "MLM2534799235",
+      "MLM2534799741",
+      "MLM2534799229",
+      "MLM2534811523",
+      "MLM2534811123",
+      "MLM2534810519",
+      "MLM2534800427",
+      "MLM2534799535",
+      "MLM2534733871",
+      "MLM2534797987",
+      "MLM2534797985",
+      "MLM2534798911",
+      "MLM2534733873",
+      "MLM2534798923",
+      "MLM2534734427",
+      "MLM2534737797",
+      "MLM2534736037",
+      "MLM4315432628",
+      "MLM4315429830",
+      "MLM4315429828",
+      "MLM2541128805",
+      "MLM2541057767",
+      "MLM2534733783",
+      "MLM2534733781",
+      "MLM4315571990",
+      "MLM4315429832",
+      "MLM4316993302",
+      "MLM2541171811",
+      "MLM2541198619",
+      "MLM2541180381",
+      "MLM2541134695",
+      "MLM2541173583",
+      "MLM2541096219",
+      "MLM2541057787",
+      "MLM2541186299",
+      "MLM2541155737",
+      "MLM2541121749",
+      "MLM2543229027",
+      "MLM2543305825",
+      "MLM4320432384",
+      "MLM4320354388",
+      "MLM2543255135",
+      "MLM4320444736",
+      "MLM4320432386",
+      "MLM4320483968",
+      "MLM2543091083",
+      "MLM4320509906",
+      "MLM4320432132",
+      "MLM4320380272",
+      "MLM4320599274",
+      "MLM2540807009",
+      "MLM2540807079",
+      "MLM4320509638",
+      "MLM4320290362",
+      "MLM4320496664",
+      "MLM4320354386",
+      "MLM4320213122",
+      "MLM2592601259",
+      "MLM4398819036",
+      "MLM2592360377",
+      "MLM2545335629",
+      "MLM2592715211",
+      "MLM2546625511",
+      "MLM2592740671",
+      "MLM2592715459",
+      "MLM2547065747",
+      "MLM2594259115",
+      "MLM2592664137",
+      "MLM2592715389",
+      "MLM2592603209",
+      "MLM2567815455",
+      "MLM2592360045",
+      "MLM4436177528",
+      "MLM2592360231",
+      "MLM2594564705",
+      "MLM4436268412",
+      "MLM4435340086",
+      "MLM2594259089",
+      "MLM2605184973",
+      "MLM2605094839",
+      "MLM5235934108",
+      "MLM4690616060",
+      "MLM4690447714",
+      "MLM5235934150",
+      "MLM4703037442",
+      "MLM4667267622",
+      "MLM4703124410",
+      "MLM2699958881",
+      "MLM4690064748",
+      "MLM2598943053",
+      "MLM4470852744",
+      "MLM2605081655",
+      "MLM5235934132",
+      "MLM4703266876",
+      "MLM4690422606",
+      "MLM5235946486",
+      "MLM4703176028",
+      "MLM5233480022",
+      "MLM2914855053",
+      "MLM2886523677",
+      "MLM5233454100",
+      "MLM2886523697"
+    ],
+    "JBL-GO4-XX": [
+      "MLM5346655686",
+      "MLM5351937060",
+      "MLM2883448187",
+      "MLM5244765752",
+      "MLM2904707285",
+      "MLM2904693421"
+    ],
+    "JBL-CLIP5-AZUL": [
+      "MLM2910806871",
+      "MLM2904765865",
+      "MLM2904702693",
+      "MLM2904687747",
+      "MLM2904678391"
+    ],
+    "JBL-GRIP-NEGRO": [
+      "MLM5295549238",
+      "MLM5295460002",
+      "MLM2891189903",
+      "MLM2891178657"
+    ],
+    "JBL-GO4-NEGRO": [
+      "MLM2910457937",
+      "MLM2910880717",
+      "MLM2904767871",
+      "MLM2904704679",
+      "MLM2904767803",
+      "MLM2904767823",
+      "MLM2904767723",
+      "MLM2904767773",
+      "MLM2904767759",
+      "MLM2904767855",
+      "MLM2904693265",
+      "MLM2904693257",
+      "MLM2904680381",
+      "MLM2904680391"
+    ],
+    "JBL-GO4-AZUL-MARINO": [
+      "MLM2910457933",
+      "MLM2910768379",
+      "MLM2910768375",
+      "MLM2890793859",
+      "MLM5246077488",
+      "MLM5246052128",
+      "MLM5246052052",
+      "MLM5246077470",
+      "MLM5246052070",
+      "MLM2891189849",
+      "MLM2891178577",
+      "MLM2891178589",
+      "MLM2891178583",
+      "MLM2904704703",
+      "MLM2904693329",
+      "MLM2904704645",
+      "MLM2904704661",
+      "MLM2904693275",
+      "MLM2904704639",
+      "MLM2904704625",
+      "MLM2904693269",
+      "MLM2904680305",
+      "MLM2904680329"
+    ],
+    "XB100": [
+      "MLM2937969761",
+      "MLM2891178511"
+    ],
+    "JBL-CHARGE6-AZUL": [
+      "MLM5295749840",
+      "MLM2894631211"
+    ],
+    "JBL-CHARGE6-ROJO": [
+      "MLM5351547624",
+      "MLM2894618113"
+    ],
+    "JBL-CHARGE6-CAMUFLAJE": [
+      "MLM2907632461"
+    ],
+    "JBL-FLIP7-ROJO": [
+      "MLM2894660069"
+    ],
+    "JBL-FLIP7-MORADO": [
+      "MLM2894623799"
+    ],
+    "JBL-FLIP7-NEGRO": [
+      "MLM2894660533"
+    ],
+    "JBL-GO4-CAMUFLAJE": [
+      "MLM2890856611"
+    ],
+    "JBL-CLIP5-MORADO": [
+      "MLM5281123238",
+      "MLM2904702703",
+      "MLM2904702707",
+      "MLM2904678397",
+      "MLM2904678413"
+    ],
+    "JBL-CLIP5-ROSA": [
+      "MLM2904765913",
+      "MLM2904691353"
+    ],
+    "JBL-GO3-XX": [
+      "MLM2904767905"
+    ],
+    "JBL-CLIP5-ROJO": [
+      "MLM2904700925",
+      "MLM2904687737"
+    ],
+    "DASHCAM-ASV-DC170": [
+      "MLM5356938548",
+      "MLM2199725889"
+    ]
+  }
+}
