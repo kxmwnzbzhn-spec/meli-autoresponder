@@ -1,0 +1,14 @@
+code,razon_social,rfc,contacto_nombre,contacto_email,contacto_telefono,banco_nombre,banco_cuenta,banco_clabe,divisa_default,dias_credito,pais,notas
+jbl_distribuidor_mx,Importador JBL Mexico (placeholder),,,,,,,,USD,30,MX,Reemplazar razon_social y contacto reales antes de prod. Bocinas JBL Go/Clip/Charge/Flip
+sony_distribuidor_mx,Sony Mexico (placeholder),,,,,,,,USD,30,MX,Sony XB100 y line completa
+bose_distribuidor_mx,Bose Mexico (placeholder),,,,,,,,USD,30,MX,Bose Soundlink Mini/Flex/Color
+xiaomi_distribuidor_mx,Xiaomi Mexico (placeholder),,,,,,,,USD,30,MX,Redmi Buds + accesorios
+parfums_creed_mx,Distribuidor Creed Mexico (placeholder),,,,,,,,EUR,15,MX,Aventus y line Creed
+parfums_dior_mx,Distribuidor Dior Mexico (placeholder),,,,,,,,EUR,15,MX,Sauvage y line Dior
+lattafa_mx,Distribuidor Lattafa Mexico (placeholder),,,,,,,,USD,15,MX,Khamrah y Lattafa line
+armaf_mx,Distribuidor Armaf Mexico (placeholder),,,,,,,,USD,15,MX,Armaf Club de Nuit y line
+initio_mx,Distribuidor Initio Mexico (placeholder),,,,,,,,EUR,30,MX,Initio Side Effect y line nicho
+ropa_seamless_mx,Mayorista ropa deportiva seamless (placeholder),,,,,,,,USD,15,MX,Conjuntos seamless mujer
+generic_mirror_distribuidor,Distribuidor calidad espejo 1:1 (placeholder),,,,,,,,USD,15,MX,Productos espejo - condition=generic_mirror obligatorio
+fletes_locales,Fletes locales CDMX (placeholder),,,,,,,,MXN,0,MX,Solo flete intra-CDMX
+agente_aduanal,Agente aduanal importacion (placeholder),,,,,,,,MXN,30,MX,Importaciones desde China/USA

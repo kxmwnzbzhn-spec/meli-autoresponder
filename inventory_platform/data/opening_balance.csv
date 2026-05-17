@@ -1,0 +1,8 @@
+sku,warehouse,unit_cost_mxn
+# Template — reemplaza/extiende con tu costo histórico real por SKU
+# Si un SKU no aparece aquí y corres con --default-cost N, se aplica N
+# Si un SKU no aparece y no hay --default-cost, se skipea (alerta luego)
+# Ejemplos:
+# JBL-GO4-NEGRO,bodega_main,520.00
+# JBL-CLIP5-ROJO,bodega_main,780.00
+# PERF-DIOR-SAUVAGE-100ML,bodega_main,2200.00
