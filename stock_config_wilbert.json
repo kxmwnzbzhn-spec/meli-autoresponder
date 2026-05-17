@@ -358,12 +358,14 @@
     "floor_locked_by_user": true
   },
   "MLM2911238257": {
-    "title": "Sony Srs-xb100 Altavoz De Viaje Inal\u00e1mbrico Bluetooth Port Color Negro",
-    "min_visible": 1,
-    "real_stock": 10,
-    "master_stock": 10,
-    "auto_replenish": true,
-    "active": true
+    "closed": true,
+    "active": false,
+    "auto_replenish": false,
+    "agotado": true,
+    "real_stock": 0,
+    "master_stock": 0,
+    "available_quantity": 0,
+    "title": "CERRADA - clonada como MLM2937969761"
   },
   "MLM5297087174": {
     "title": "Altavoz Bluetooth De Estanter\u00eda Bose Soundlink Home Silver Color Light Silver",
@@ -1090,5 +1092,16 @@
     "master_stock": 0,
     "available_quantity": 0,
     "min_visible": 0
+  },
+  "MLM2937969761": {
+    "title": "Sony XB100 Negro (clone Wilbert)",
+    "real_stock": 15,
+    "master_stock": 15,
+    "min_visible": 1,
+    "available_quantity": 1,
+    "auto_replenish": true,
+    "active": true,
+    "floor_price": 499,
+    "ceiling_price": 699
   }
 }
