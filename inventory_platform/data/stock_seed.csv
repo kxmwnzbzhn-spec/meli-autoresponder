@@ -1,0 +1,18 @@
+sku,warehouse,physical_count,unit_cost_mxn
+# Template — reemplaza con tu conteo físico mañana
+# Columnas:
+#   sku            = identificador del producto (debe existir en tabla products)
+#   warehouse      = bodega_main (default) | devolucion | transito | dañado
+#   physical_count = unidades contadas (entero >= 0)
+#   unit_cost_mxn  = costo unitario estimado en MXN (para opening_balance cost_layer)
+#
+# Reglas:
+# - SKUs con 0 unidades NO se incluyen en cost_layer pero sí se registra un stock_movement type=initial_seed (auditoría)
+# - SKUs con stock>0 pero unit_cost_mxn=0 → COGS futuro será 0, war pricing no podrá calcular margen
+# - Mejor estimación que vacío: usa costo aproximado, lo ajustamos cuando llegue PO real
+#
+# Ejemplos:
+# JBL-GO4-NEGRO,bodega_main,45,520.00
+# JBL-CLIP5-ROJO,bodega_main,18,780.00
+# PERF-DIOR-SAUVAGE-100ML,bodega_main,12,2200.00
+# CABLE-USB-C-1M,bodega_main,150,28.00
