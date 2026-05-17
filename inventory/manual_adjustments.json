@@ -1,0 +1,7 @@
+{
+  "_meta": {
+    "description": "Log inmutable de ajustes manuales: devoluciones fisicas no-MELI, mermas, transferencias, reposicion proveedor",
+    "policy": "Append-only. Para revertir, agrega entrada nueva con tipo='reverse' y ref al id original."
+  },
+  "entries": []
+}
