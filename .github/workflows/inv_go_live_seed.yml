@@ -1,0 +1,42 @@
+name: inv_go_live_seed
+on:
+  workflow_dispatch:
+    inputs:
+      csv_path:
+        description: 'CSV con conteo físico (default: inventory_platform/data/stock_seed.csv)'
+        required: false
+        default: 'inventory_platform/data/stock_seed.csv'
+      batch:
+        description: 'snapshot_batch UUID a aplicar (default: latest)'
+        required: false
+        default: 'latest'
+      warehouse_default:
+        description: 'Warehouse default si no se especifica en CSV'
+        required: false
+        default: 'bodega_main'
+      dry_run:
+        description: 'Solo simular (no escribe DB)'
+        required: false
+        default: 'true'
+        type: choice
+        options: ['true', 'false']
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install psycopg2-binary requests
+      - env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          ARGS="--csv '${{ inputs.csv_path }}' --batch '${{ inputs.batch }}' --warehouse-default '${{ inputs.warehouse_default }}'"
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            ARGS="$ARGS --dry-run"
+          fi
+          eval python inventory_platform/scripts/go_live_seed.py $ARGS
