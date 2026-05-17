@@ -1,0 +1,4 @@
+{
+  "_meta": {"description": "Listings MELI vendidos pero sin SKU mapeado. Revisar y agregar a sku_to_mlm.json."},
+  "pending": []
+}
