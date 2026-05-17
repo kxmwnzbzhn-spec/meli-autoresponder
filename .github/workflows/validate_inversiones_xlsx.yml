@@ -1,0 +1,18 @@
+name: validate_inversiones_xlsx
+on:
+  workflow_dispatch: {}
+  schedule:
+    - cron: '0 14 * * 1'  # Lunes 08:00 CDMX
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - run: pip install requests openpyxl
+      - env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python scripts/validate_inversiones.py
