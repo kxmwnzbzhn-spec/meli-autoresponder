@@ -1,4 +1,4 @@
-"""Procesa un evento MELI: fetch order details, decrement stock, alert."""
+"""Procesa un evento MELI: fetch order details, decrement stock, register COGS, alert."""
 import os,sys,json,requests,psycopg2
 CID=os.environ["MELI_APP_ID"]; CS=os.environ["MELI_APP_SECRET"]
 DSN=os.environ["SUPABASE_DB_URL"]
@@ -63,7 +63,25 @@ if etopic=="orders_v2" and eres.startswith("/orders/"):
             cur.execute("SELECT apply_stock_delta(%s,%s,%s,%s,%s,%s,%s,%s,%s)",
                 (sku,'bodega_main',-qty,'sale',eid,str(o.get("id")),mlm,aid,f"order {o.get('id')}"))
             mid=cur.fetchone()[0]
-            decrements.append((sku,qty,mid))
+
+            # --- Sprint 1: COGS registration ---
+            # Llamar consume_cost después de stock OK. Si falla (no hay cost_layer),
+            # NO abortar venta — capturar advertencia y seguir. Stock ya decrementó.
+            cogs_total=None
+            try:
+                cur.execute("SELECT consume_cost(%s,%s,%s,%s,%s)",
+                    (sku,'bodega_main',qty,str(o.get("id")),mid))
+                cogs_total=float(cur.fetchone()[0] or 0)
+            except psycopg2.errors.RaiseException as ce:
+                err=str(ce)[:300]
+                tg(f"⚠️ COGS no registrado: `{sku}` qty={qty} order=`{o.get('id')}`\n{err}")
+                cur.execute("UPDATE events SET processing_error = COALESCE(processing_error,'') || %s WHERE id=%s",
+                    (f" cogs_warn:{sku}",eid))
+            except Exception as ce:
+                err=str(ce)[:300]
+                tg(f"⚠️ COGS error inesperado: `{sku}` order=`{o.get('id')}`\n{err}")
+
+            decrements.append((sku,qty,mid,cogs_total))
         except psycopg2.errors.RaiseException as e:
             tg(f"⚠️ OVERSELL detectado!\nSKU `{sku}` mlm `{mlm}`\nOrden `{o.get('id')}` qty={qty}\n{str(e)[:200]}")
             cur.execute("ROLLBACK")
@@ -71,13 +89,17 @@ if etopic=="orders_v2" and eres.startswith("/orders/"):
             conn.commit(); sys.exit(2)
     cur.execute("UPDATE events SET processing_status='done', processed_at=NOW(), account_id=%s WHERE id=%s",(aid,eid))
     # Check low stock
-    for sku,_,_ in decrements:
+    for sku,_,_,_ in decrements:
         cur.execute("""SELECT p.alert_threshold, COALESCE(SUM(s.qty),0) FROM products p LEFT JOIN stock s ON s.sku=p.sku AND s.warehouse='bodega_main' WHERE p.sku=%s GROUP BY p.alert_threshold""",(sku,))
         r=cur.fetchone()
         if r and r[1] is not None and r[1]<=(r[0] or 5):
             tg(f"⚠️ Stock bajo: `{sku}` quedan {r[1]} (alerta<{r[0]})")
     conn.commit()
-    tg(f"✓ Venta {nick}: "+", ".join(f"{s} ×{q}" for s,q,_ in decrements))
+    # Mensaje de venta con cogs si disponible
+    def _fmt(s,q,mid,cogs):
+        base=f"{s} ×{q}"
+        return f"{base} (cogs ${cogs:.0f})" if cogs else base
+    tg(f"✓ Venta {nick}: "+", ".join(_fmt(*d) for d in decrements))
     print(f"✓ processed {len(decrements)} decrements")
 elif etopic=="items":
     # MELI ack: item changed status. Refresh listings.last_sync etc.
