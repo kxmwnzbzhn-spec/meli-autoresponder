@@ -1,0 +1,13 @@
+{
+  "name": "meli-webhook-worker",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev",
+    "secrets:setup": "wrangler secret put SUPABASE_URL && wrangler secret put SUPABASE_SERVICE_KEY && wrangler secret put GH_TOKEN && wrangler secret put ADMIN_KEY"
+  },
+  "devDependencies": {
+    "wrangler": "^3.0.0"
+  }
+}
