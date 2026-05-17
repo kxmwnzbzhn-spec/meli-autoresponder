@@ -1,5 +1,5 @@
 {
-  "date": "16/05/2026",
+  "date": "17/05/2026",
   "claims": [
     {
       "claim_id": 5511915568,
@@ -71,6 +71,24 @@
       "status": "opened",
       "date_created": "2026-05-07T00:45:02.000-04:00",
       "claim_url": "https://www.mercadolibre.com.mx/reclamos/MLM/5508233353/",
+      "processed": false
+    },
+    {
+      "claim_id": 5513267475,
+      "account": "CLARIBEL",
+      "nickname": "CX20260420180750",
+      "order_id": 2000016142507470,
+      "product": "Bocina Jbl Go 4 Jblgo4 Portátil Con Bluetooth Waterproof Celeste",
+      "buyer": "MORELOSMADISON20230628150946",
+      "buyer_id": 1410192920,
+      "amount": 479.0,
+      "reason_id": "PDD9949",
+      "reason_label": "PDD9949",
+      "type": "mediations",
+      "stage": "dispute",
+      "status": "opened",
+      "date_created": "2026-05-16T19:56:52.000-04:00",
+      "claim_url": "https://www.mercadolibre.com.mx/reclamos/MLM/5513267475/",
       "processed": false
     },
     {
@@ -146,24 +164,6 @@
       "processed": false
     },
     {
-      "claim_id": 5512827748,
-      "account": "RAYMUNDO",
-      "nickname": "RG20260415180857",
-      "order_id": 46971867498,
-      "product": "",
-      "buyer": "",
-      "buyer_id": "",
-      "amount": "",
-      "reason_id": "PNR9561",
-      "reason_label": "PNR9561",
-      "type": "mediations",
-      "stage": "dispute",
-      "status": "opened",
-      "date_created": "2026-05-15T19:48:45.000-04:00",
-      "claim_url": "https://www.mercadolibre.com.mx/reclamos/MLM/5512827748/",
-      "processed": false
-    },
-    {
       "claim_id": 5510579663,
       "account": "RAYMUNDO",
       "nickname": "RG20260415180857",
@@ -180,7 +180,61 @@
       "date_created": "2026-05-11T20:58:30.000-04:00",
       "claim_url": "https://www.mercadolibre.com.mx/reclamos/MLM/5510579663/",
       "processed": false
+    },
+    {
+      "claim_id": 5513177949,
+      "account": "RAYMUNDO",
+      "nickname": "RG20260415180857",
+      "order_id": 2000016248779772,
+      "product": "Bocina Jbl Go4 Portátil Con Bluetooth Waterproof Negra Negro",
+      "buyer": "FMARQUEZDELFIN49840",
+      "buyer_id": 1773729868,
+      "amount": 548.0,
+      "reason_id": "PDD9949",
+      "reason_label": "PDD9949",
+      "type": "mediations",
+      "stage": "dispute",
+      "status": "opened",
+      "date_created": "2026-05-16T16:19:37.000-04:00",
+      "claim_url": "https://www.mercadolibre.com.mx/reclamos/MLM/5513177949/",
+      "processed": false
+    },
+    {
+      "claim_id": 5513068299,
+      "account": "RAYMUNDO",
+      "nickname": "RG20260415180857",
+      "order_id": 2000016227042022,
+      "product": "Altavoz Bluetooth Portátil Jbl Grip Con Luz - Negro",
+      "buyer": "BLANCASAPOLONIOJESUS",
+      "buyer_id": 199004700,
+      "amount": 1019.0,
+      "reason_id": "PDD9949",
+      "reason_label": "PDD9949",
+      "type": "mediations",
+      "stage": "dispute",
+      "status": "opened",
+      "date_created": "2026-05-16T12:12:29.000-04:00",
+      "claim_url": "https://www.mercadolibre.com.mx/reclamos/MLM/5513068299/",
+      "processed": false
+    },
+    {
+      "claim_id": 5513329575,
+      "account": "RAYMUNDO",
+      "nickname": "RG20260415180857",
+      "order_id": 2000016245923814,
+      "product": "Bocina Jbl Go 4 Jblgo4 Portátil Con Bluetooth Waterproof Roja Rojo",
+      "buyer": "GJ20250105225423",
+      "buyer_id": 2194656395,
+      "amount": 449.0,
+      "reason_id": "PDD9943",
+      "reason_label": "no es original",
+      "type": "mediations",
+      "stage": "dispute",
+      "status": "opened",
+      "date_created": "2026-05-16T23:58:12.000-04:00",
+      "claim_url": "https://www.mercadolibre.com.mx/reclamos/MLM/5513329575/",
+      "processed": false
     }
   ],
-  "total": 10
+  "total": 13
 }
