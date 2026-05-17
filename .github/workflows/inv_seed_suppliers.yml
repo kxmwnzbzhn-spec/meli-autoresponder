@@ -1,0 +1,21 @@
+name: inv_seed_suppliers
+on:
+  workflow_dispatch:
+    inputs:
+      csv_path:
+        description: 'Ruta del CSV (default: inventory_platform/data/suppliers_seed.csv)'
+        required: false
+        default: 'inventory_platform/data/suppliers_seed.csv'
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install psycopg2-binary
+      - env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: python inventory_platform/scripts/seed_suppliers.py "${{ inputs.csv_path }}"

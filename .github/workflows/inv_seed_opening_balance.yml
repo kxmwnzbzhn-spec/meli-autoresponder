@@ -1,0 +1,39 @@
+name: inv_seed_opening_balance
+on:
+  workflow_dispatch:
+    inputs:
+      csv_path:
+        description: 'CSV con sku,warehouse,unit_cost_mxn (default: inventory_platform/data/opening_balance.csv)'
+        required: false
+        default: 'inventory_platform/data/opening_balance.csv'
+      default_cost:
+        description: 'Costo MXN default para SKUs sin entrada en CSV (vacío = skip)'
+        required: false
+        default: ''
+      dry_run:
+        description: 'Solo simular (no escribe a DB)'
+        required: false
+        default: 'false'
+        type: choice
+        options: ['false', 'true']
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install psycopg2-binary
+      - env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          ARGS="--csv '${{ inputs.csv_path }}'"
+          if [ -n "${{ inputs.default_cost }}" ]; then
+            ARGS="$ARGS --default-cost ${{ inputs.default_cost }}"
+          fi
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            ARGS="$ARGS --dry-run"
+          fi
+          eval python inventory_platform/scripts/seed_opening_balance.py $ARGS
