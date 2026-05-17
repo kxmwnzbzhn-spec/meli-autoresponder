@@ -1,0 +1,23 @@
+name: weekly_backup_inventory
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 6 * * 1'  # Lunes 00:00 CDMX
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          set -e
+          DATE=$(date +%G-W%V)
+          mkdir -p inventory/backups
+          cp inventory/inventory_master.json inventory/backups/inventory_${DATE}.json
+          cp inventory/sku_to_mlm.json inventory/backups/sku_to_mlm_${DATE}.json
+          git config user.email "bot@elite-market"
+          git config user.name "Inventory Bot"
+          git add inventory/backups/
+          git commit -m "weekly backup ${DATE}" || true
+          git push
