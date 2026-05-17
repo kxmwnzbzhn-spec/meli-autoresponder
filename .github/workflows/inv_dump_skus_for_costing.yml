@@ -1,0 +1,31 @@
+name: inv_dump_skus_for_costing
+on:
+  workflow_dispatch: {}
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install psycopg2-binary
+      - env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: python inventory_platform/scripts/dump_skus_for_costing.py > /tmp/skus_full.csv
+
+      - name: Upload SKUs CSV artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: skus-for-costing
+          path: /tmp/skus_full.csv
+          retention-days: 7
+
+      - name: Resumen
+        run: |
+          echo "=== Total SKUs ==="
+          wc -l /tmp/skus_full.csv
+          echo ""
+          echo "=== Primeras 20 filas ==="
+          head -21 /tmp/skus_full.csv
