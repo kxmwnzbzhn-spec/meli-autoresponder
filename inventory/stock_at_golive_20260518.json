@@ -1,0 +1,25 @@
+{
+  "_meta": {
+    "golive_date": "2026-05-18",
+    "description": "Stock real disponible al cierre del go-live. Esta es la fuente de verdad de cuánto podemos vender. Si un SKU llega a 0 vendido = pausar todas las listings asociadas.",
+    "policy": "INMUTABLE. Para ajustes posteriores usar manual_adjustments.json. NO modificar este archivo.",
+    "total_units": 5016
+  },
+  "skus": {
+    "SONY-XB100-NEGRO":      {"initial": 1422, "modelo": "Sony XB100",    "color": "Negro",            "match_patterns": ["xb100","xb-100","srs-xb100","sony srs"]},
+    "JBL-GO4-AQUA":          {"initial": 704,  "modelo": "JBL Go 4",      "color": "Aqua/Celeste",     "match_patterns": ["go 4 aqua","go4 aqua","go 4 celeste","go4 celeste","aqua"]},
+    "JBL-GO3-NEGRO":         {"initial": 495,  "modelo": "JBL Go 3",      "color": "Negro",            "match_patterns": ["go 3","go3"]},
+    "JBL-CLIP5-AZUL":        {"initial": 421,  "modelo": "JBL Clip 5",    "color": "Azul",             "match_patterns": ["clip 5 azul","clip5 azul"]},
+    "JBL-GO4-CAMUFLAJE":     {"initial": 389,  "modelo": "JBL Go 4",      "color": "Camuflaje",        "match_patterns": ["go 4 camuflaj","go4 camuflaj","go 4 camo","go 4 camuflad"]},
+    "JBL-CLIP5-CAMUFLAJE":   {"initial": 240,  "modelo": "JBL Clip 5",    "color": "Camuflaje",        "match_patterns": ["clip 5 camuflaj","clip5 camuflaj","clip 5 camo","clip 5 squad","clip 5 verde musg"]},
+    "JBL-CLIP5-CELESTE":     {"initial": 240,  "modelo": "JBL Clip 5",    "color": "Celeste (azul/rosa)", "match_patterns": ["clip 5 celeste","clip 5 sky","clip 5 azul rosa"]},
+    "JBL-FLIP7-ROJO":        {"initial": 200,  "modelo": "JBL Flip 7",    "color": "Rojo",             "match_patterns": ["flip 7 rojo","flip7 rojo","flip 7 roja"]},
+    "JBL-CLIP5-ROSA":        {"initial": 200,  "modelo": "JBL Clip 5",    "color": "Rosa",             "match_patterns": ["clip 5 rosa","clip5 rosa","clip 5 pink"]},
+    "JBL-GO4-ROJO":          {"initial": 198,  "modelo": "JBL Go 4",      "color": "Rojo",             "match_patterns": ["go 4 rojo","go4 rojo","go 4 roja"]},
+    "JBL-CLIP5-MORADO":      {"initial": 185,  "modelo": "JBL Clip 5",    "color": "Morado",           "match_patterns": ["clip 5 morad","clip5 morad","clip 5 violet","clip 5 purpur"]},
+    "JBL-GO4-ROSA":          {"initial": 170,  "modelo": "JBL Go 4",      "color": "Rosa",             "match_patterns": ["go 4 rosa","go4 rosa","go 4 pink"]},
+    "BOSE-SOUNDLINK-BLANCO": {"initial": 77,   "modelo": "Bose Soundlink","color": "Blanco",           "match_patterns": ["bose.*blanc","soundlink.*blanc","silver"]},
+    "BOSE-SOUNDLINK-NEGRO":  {"initial": 65,   "modelo": "Bose Soundlink","color": "Negro",            "match_patterns": ["bose.*negr","soundlink.*negr","bose home neg"]},
+    "JBL-CLIP5-NEGRO":       {"initial": 10,   "modelo": "JBL Clip 5",    "color": "Negro",            "match_patterns": ["clip 5 negr","clip5 negr"], "alert_low_already": true}
+  }
+}
