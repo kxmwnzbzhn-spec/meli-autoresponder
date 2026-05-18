@@ -343,8 +343,9 @@
     "master_stock": 10,
     "auto_replenish": true,
     "active": true,
-    "floor_price": 349,
-    "ceiling_price": 599
+    "floor_price": 399,
+    "ceiling_price": 399,
+    "floor_locked_by_user": true
   },
   "MLM5295549238": {
     "title": "Parlante Jbl Grip Port\u00e1til Con Bluetooth Waterproof Negra Negro",
