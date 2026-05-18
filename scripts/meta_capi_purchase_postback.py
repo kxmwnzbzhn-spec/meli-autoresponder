@@ -18,6 +18,10 @@ WHITELIST_ITEMS = {
         "name": "Bocina Bluetooth Portatil Impermeable Ip67 Bass 35w Morado",
         "category": "SPK35W_MORADO_V1"
     },
+    "MLM3545177574": {
+        "name": "Secadora ASVA Ionica Motor Digital 4 Velocidades",
+        "category": "SECADORA_ASVA_V1"
+    },
     "MLM5356938548": {
         "name": "Dashcam Asva Electronics DVR-3 con 3 camaras y pantalla",
         "category": "DASHCAM_DVR3_V1"
@@ -130,4 +134,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
