@@ -7,89 +7,93 @@ def tok(rt):
     return requests.post("https://api.mercadolibre.com/oauth/token",data={"grant_type":"refresh_token","client_id":CID,"client_secret":CS,"refresh_token":rt},timeout=15).json().get("access_token")
 
 TW=tok(RT_W); TD=tok(RT_D)
+print(f"TW={'OK' if TW else 'FAIL'} TD={'OK' if TD else 'FAIL'}")
 if not TD:
-    print("ERR: Dilcie token failed"); raise SystemExit(1)
+    print("ERR Dilcie auth"); raise SystemExit(1)
 HW={"Authorization":f"Bearer {TW}"}
 HD={"Authorization":f"Bearer {TD}","Content-Type":"application/json"}
 
-# Verify Dilcie account is active
+# Verify Dilcie active
 me=requests.get("https://api.mercadolibre.com/users/me",headers={"Authorization":f"Bearer {TD}"}).json()
-print(f"Dilcie status: uid={me.get('id')} nick={me.get('nickname')} site={me.get('site_id')}")
+print(f"Dilcie: uid={me.get('id')} nick={me.get('nickname')}")
 if not me.get("id"):
-    print(f"ERR Dilcie not active: {me}"); raise SystemExit(1)
-
-def upload_pic(t,u):
-    img=requests.get(u,timeout=20)
-    if img.status_code!=200: return None
-    files={"file":("p.jpg",img.content,"image/jpeg")}
-    r=requests.post("https://api.mercadolibre.com/pictures/items/upload",headers={"Authorization":f"Bearer {t}"},files=files)
-    return r.json().get("id") if r.status_code<300 else None
+    print(f"ERR: {me}"); raise SystemExit(1)
 
 ITEMS=["MLM2910806845","MLM2914422351","MLM2910768325","MLM2910806881","MLM2910457917",
        "MLM2910768333","MLM2910768335","MLM2910806871","MLM2910768369","MLM5351937060",
        "MLM5354755946","MLM5297098664","MLM2931341689","MLM5297087174","MLM2931612609",
        "MLM2931612611","MLM2937969761","MLM5337919270","MLM5337919290"]
 
-results=[]
-batch_size=5
-for batch_idx in range(0, len(ITEMS), batch_size):
-    batch=ITEMS[batch_idx:batch_idx+batch_size]
-    print(f"\n=== BATCH {batch_idx//batch_size+1} (items {batch_idx+1}-{batch_idx+len(batch)}) ===")
-    for wb_id in batch:
+def safe_get(url,headers,tries=3):
+    for i in range(tries):
         try:
-            g=requests.get(f"https://api.mercadolibre.com/items/{wb_id}",headers=HW,timeout=15).json()
-            title=g.get("title","")
-            cat=g.get("category_id")
-            cpid=g.get("catalog_product_id")
-            price=int(g.get("price",0))
-            cond=g.get("condition","new")
-            ltype=g.get("listing_type_id") or "gold_pro"
-            pics=[(p.get("url") or p.get("secure_url")) for p in (g.get("pictures") or [])][:8]
-            print(f"\n  {wb_id} '{title[:50]}' ${price} cpid={cpid} cond={cond}")
-            
-            body={
-                "title":title,"category_id":cat,"price":price,"currency_id":"MXN",
-                "available_quantity":g.get("available_quantity",1) or 1,
-                "buying_mode":"buy_it_now","listing_type_id":ltype,"condition":cond,
-                "sale_terms":[{"id":"WARRANTY_TYPE","value_name":"Garantía del vendedor"},{"id":"WARRANTY_TIME","value_name":"90 días"}],
-            }
-            if cpid:
-                body["catalog_listing"]=True
-                body["catalog_product_id"]=cpid
+            r=requests.get(url,headers=headers,timeout=20)
+            if r.status_code==200:
+                d=r.json()
+                if isinstance(d,dict): return d
+                print(f"    WARN: response type={type(d).__name__} val={str(d)[:200]}")
             else:
-                # tradicional - upload pics
-                pic_ids=[]
-                for u in pics:
-                    pid=upload_pic(TD,u)
-                    if pid: pic_ids.append(pid)
-                if pic_ids: body["pictures"]=[{"id":p} for p in pic_ids]
-                body["shipping"]={"mode":"me2","local_pick_up":False,"free_shipping":True,"logistic_type":"drop_off"}
-            r=requests.post("https://api.mercadolibre.com/items",headers=HD,json=body,timeout=30)
-            if r.status_code<300:
-                new=r.json()
-                nid=new.get("id")
-                print(f"    ✓ NEW_ID={nid} ${new.get('price')} {new.get('status')}")
-                results.append({"src":wb_id,"new":nid,"price":price,"title":title[:40]})
-            else:
-                err=r.json() if r.text.startswith("{") else {"e":r.text[:200]}
-                cause=err.get("cause",[{}])[0].get("code") if isinstance(err.get("cause"),list) and err.get("cause") else err.get("message","?")
-                print(f"    ✗ http={r.status_code} cause={cause}")
-                results.append({"src":wb_id,"err":str(cause)[:200],"http":r.status_code})
+                print(f"    WARN: http={r.status_code} body={r.text[:200]}")
         except Exception as e:
-            print(f"    ✗ exception: {e}")
-            results.append({"src":wb_id,"err":str(e)[:150]})
-        time.sleep(0.8)
-    # Sleep between batches
-    if batch_idx+batch_size<len(ITEMS):
-        print(f"  --- sleeping 3s antes de siguiente batch ---")
+            print(f"    WARN: try {i+1} exception {e}")
+        time.sleep(1+i)
+    return None
+
+results=[]
+for idx,wb_id in enumerate(ITEMS,1):
+    print(f"\n[{idx}/19] {wb_id}")
+    g=safe_get(f"https://api.mercadolibre.com/items/{wb_id}",HW)
+    if not g:
+        print(f"  ✗ no data")
+        results.append({"src":wb_id,"err":"no data"})
+        continue
+    title=g.get("title","")
+    cat=g.get("category_id")
+    cpid=g.get("catalog_product_id")
+    price=int(g.get("price") or 0)
+    cond=g.get("condition","new")
+    ltype=g.get("listing_type_id") or "gold_pro"
+    print(f"  '{title[:55]}' ${price} cpid={cpid}")
+    
+    body={
+        "title":title,"category_id":cat,"price":price,"currency_id":"MXN",
+        "available_quantity":1,
+        "buying_mode":"buy_it_now","listing_type_id":ltype,"condition":cond,
+        "sale_terms":[
+            {"id":"WARRANTY_TYPE","value_name":"Garantía del vendedor"},
+            {"id":"WARRANTY_TIME","value_name":"90 días"}
+        ],
+    }
+    if cpid:
+        body["catalog_listing"]=True
+        body["catalog_product_id"]=cpid
+    
+    try:
+        r=requests.post("https://api.mercadolibre.com/items",headers=HD,json=body,timeout=30)
+        if r.status_code<300:
+            new=r.json()
+            nid=new.get("id")
+            print(f"  ✓ NEW_ID={nid} ${new.get('price')}")
+            results.append({"src":wb_id,"new":nid,"price":price,"title":title[:40]})
+        else:
+            err_txt=r.text[:300]
+            print(f"  ✗ http={r.status_code} {err_txt}")
+            results.append({"src":wb_id,"http":r.status_code,"err":err_txt})
+    except Exception as e:
+        print(f"  ✗ exception {e}")
+        results.append({"src":wb_id,"err":str(e)[:150]})
+    
+    time.sleep(0.8)
+    if idx%5==0 and idx<len(ITEMS):
+        print(f"\n--- batch sleep 3s ---")
         time.sleep(3)
 
 print("\n=== SUMMARY ===")
 ok=[r for r in results if r.get("new")]
-err=[r for r in results if r.get("err")]
-print(f"OK: {len(ok)}/{len(results)}  ERR: {len(err)}")
+print(f"OK: {len(ok)}/{len(results)}")
+print("\n--- CLONADAS ---")
 for r in results:
-    if r.get("new"):
-        print(f"  ✓ {r['src']} → {r['new']} ${r['price']}")
-    else:
-        print(f"  ✗ {r['src']}: {r.get('err','?')[:80]}")
+    if r.get("new"): print(f"  {r['src']} → {r['new']}  ${r['price']}  '{r['title']}'")
+print("\n--- FALLIDAS ---")
+for r in results:
+    if not r.get("new"): print(f"  {r['src']}: {r.get('err','?')[:120]}")
