@@ -1,18 +1,19 @@
 sku,warehouse,physical_count,unit_cost_mxn
-# Template — reemplaza con tu conteo físico mañana
-# Columnas:
-#   sku            = identificador del producto (debe existir en tabla products)
-#   warehouse      = bodega_main (default) | devolucion | transito | dañado
-#   physical_count = unidades contadas (entero >= 0)
-#   unit_cost_mxn  = costo unitario estimado en MXN (para opening_balance cost_layer)
-#
-# Reglas:
-# - SKUs con 0 unidades NO se incluyen en cost_layer pero sí se registra un stock_movement type=initial_seed (auditoría)
-# - SKUs con stock>0 pero unit_cost_mxn=0 → COGS futuro será 0, war pricing no podrá calcular margen
-# - Mejor estimación que vacío: usa costo aproximado, lo ajustamos cuando llegue PO real
-#
-# Ejemplos:
-# JBL-GO4-NEGRO,bodega_main,45,520.00
-# JBL-CLIP5-ROJO,bodega_main,18,780.00
-# PERF-DIOR-SAUVAGE-100ML,bodega_main,12,2200.00
-# CABLE-USB-C-1M,bodega_main,150,28.00
+# Go-live conteo físico 2026-05-18 — Sr. Luis Vargas
+# Costos calculados: USD FOB × 18.50 (TC) × 1.30 (landing factor)
+# JBL-GO3-NEGRO usa estimación $6 USD (modelo anterior al Go4)
+SONY-XB100-NEGRO,bodega_main,1422,233.28
+JBL-CLIP5-AZUL,bodega_main,440,324.68
+JBL-GO4-CAMUFLAJE,bodega_main,400,218.85
+JBL-CLIP5-MORADO,bodega_main,185,324.68
+JBL-CLIP5-NEGRO,bodega_main,40,324.68
+JBL-CLIP5-CAMUFLAJE,bodega_main,240,324.68
+JBL-CLIP5-CELESTE,bodega_main,240,324.68
+JBL-CLIP5-ROSA,bodega_main,200,324.68
+JBL-FLIP7-ROJO,bodega_main,200,202.02
+JBL-GO4-ROSA,bodega_main,250,218.85
+JBL-GO4-AQUA,bodega_main,722,218.85
+BOSE-NEGRO,bodega_main,67,1394.90
+BOSE-BLANCO,bodega_main,77,1394.90
+JBL-GO3-NEGRO,bodega_main,600,144.30
+JBL-GO4-ROJO,bodega_main,300,218.85
