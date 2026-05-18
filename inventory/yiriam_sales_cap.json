@@ -1,0 +1,8 @@
+{
+  "cap": 50,
+  "date": "2026-05-18",
+  "triggered": false,
+  "paused_count": 0,
+  "active_at_trigger": [],
+  "_notes": "Cap diario de ventas Yiriam. Cuando se alcanza, pausa TODO. Reset auto al cambiar de día. NO reactiva auto."
+}
