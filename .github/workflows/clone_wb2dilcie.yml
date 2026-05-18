@@ -1,0 +1,17 @@
+name: clone_wb2dilcie
+on: { workflow_dispatch: {}, push: { paths: [.github/workflows/clone_wb2dilcie.yml] } }
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - run: pip install requests
+      - env:
+          MELI_REFRESH_TOKEN_WILBERT: ${{ secrets.MELI_REFRESH_TOKEN_WILBERT }}
+          MELI_REFRESH_TOKEN_DILCIE: ${{ secrets.MELI_REFRESH_TOKEN_DILCIE }}
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+        run: python scripts/clone_wb2dilcie.py
