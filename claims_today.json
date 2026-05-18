@@ -1,5 +1,5 @@
 {
-  "date": "17/05/2026",
+  "date": "18/05/2026",
   "claims": [
     {
       "claim_id": 5511915568,
@@ -53,24 +53,6 @@
       "status": "opened",
       "date_created": "2026-05-07T19:15:52.000-04:00",
       "claim_url": "https://www.mercadolibre.com.mx/reclamos/MLM/5508650129/",
-      "processed": false
-    },
-    {
-      "claim_id": 5508233353,
-      "account": "JUAN",
-      "nickname": "HFCBHDGAE33468",
-      "order_id": 2000016192004904,
-      "product": "Bocina Jbl Charge 6 Bluetooth Ip67 Portatil Reacondicionada Azul",
-      "buyer": "RAMONES MONCHO",
-      "buyer_id": 409595816,
-      "amount": 399.0,
-      "reason_id": "PDD9955",
-      "reason_label": "PDD9955",
-      "type": "mediations",
-      "stage": "dispute",
-      "status": "opened",
-      "date_created": "2026-05-07T00:45:02.000-04:00",
-      "claim_url": "https://www.mercadolibre.com.mx/reclamos/MLM/5508233353/",
       "processed": false
     },
     {
@@ -233,6 +215,24 @@
       "status": "opened",
       "date_created": "2026-05-16T23:58:12.000-04:00",
       "claim_url": "https://www.mercadolibre.com.mx/reclamos/MLM/5513329575/",
+      "processed": false
+    },
+    {
+      "claim_id": 5513690565,
+      "account": "RAYMUNDO",
+      "nickname": "RG20260415180857",
+      "order_id": 2000016244450608,
+      "product": "Bocina Portátil Jbl Go 4 Bluetooth, Camuflaje. Color Camuflaje",
+      "buyer": "MAAR692288",
+      "buyer_id": 312363433,
+      "amount": 442.0,
+      "reason_id": "PDD9949",
+      "reason_label": "PDD9949",
+      "type": "mediations",
+      "stage": "dispute",
+      "status": "opened",
+      "date_created": "2026-05-17T23:58:29.000-04:00",
+      "claim_url": "https://www.mercadolibre.com.mx/reclamos/MLM/5513690565/",
       "processed": false
     }
   ],
