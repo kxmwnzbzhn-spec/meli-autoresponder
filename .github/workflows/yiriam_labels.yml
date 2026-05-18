@@ -12,7 +12,7 @@ jobs:
       - run: pip install requests pypdf reportlab openpyxl pdf2image Pillow -q
       - env:
           MELI_APP_SECRET:                ${{ secrets.MELI_APP_SECRET }}
-          MELI_REFRESH_TOKEN_USER1668:    ${{ secrets.MELI_REFRESH_TOKEN_USER1668 }}
+          MELI_REFRESH_TOKEN_YC_NEW:      ${{ secrets.MELI_REFRESH_TOKEN_YC_NEW }}
         run: python scripts/yiriam_labels.py
       - uses: actions/upload-artifact@v4
         if: always()
