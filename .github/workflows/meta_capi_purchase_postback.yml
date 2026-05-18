@@ -1,24 +1,20 @@
-name: meta-capi-purchase-postback
+name: Meta CAPI Purchase Postback
 on:
   workflow_dispatch:
   schedule:
-    - cron: '*/5 * * * *'
-concurrency:
-  group: meta-capi-purchase-postback
-  cancel-in-progress: false
+    - cron: "5 * * * *"
 jobs:
   postback:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: { python-version: "3.11" }
-      - run: pip install requests -q
-      - env:
-          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
-          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
-          MELI_REFRESH_TOKEN_USER1668: ${{ secrets.MELI_REFRESH_TOKEN_USER1668 }}
-          META_CAPI_ACCESS_TOKEN: ${{ secrets.META_CAPI_ACCESS_TOKEN }}
-          META_TEST_EVENT_CODE: ${{ secrets.META_TEST_EVENT_CODE }}
-        run: python scripts/meta_capi_purchase_postback.py
+      - run: pip install requests
+      - run: python scripts/meta_capi_purchase_postback.py
+        env:
+          MELI_APP_ID:                  ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET:              ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_USER1668:  ${{ secrets.MELI_REFRESH_TOKEN_USER1668 }}
+          MELI_REFRESH_TOKEN_YC_NEW:    ${{ secrets.MELI_REFRESH_TOKEN_YC_NEW }}
+          META_CAPI_ACCESS_TOKEN:       ${{ secrets.META_CAPI_ACCESS_TOKEN }}
