@@ -1,0 +1,29 @@
+name: YC Replenish Audifonos
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "*/5 * * * *"
+jobs:
+  replenish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - run: pip install requests
+      - run: python scripts/yc_replenish_audifonos.py
+        env:
+          MELI_APP_ID:                  ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET:              ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_YC_NEW:    ${{ secrets.MELI_REFRESH_TOKEN_YC_NEW }}
+          LOOP_ITERATIONS:              "9"
+          LOOP_SLEEP:                   "30"
+      - name: Persist stock counter
+        run: |
+          git config user.name "yc-replenish-bot"
+          git config user.email "bot@sonix.mx"
+          git add scripts/stock_yc_audifonos.json
+          git diff --staged --quiet || git commit -m "stock: YC audifonos counter update"
+          git push || true
