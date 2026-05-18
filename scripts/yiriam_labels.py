@@ -14,9 +14,9 @@ from PIL import ImageOps
 
 APP_ID="5211907102822632"
 APP_SECRET=os.environ["MELI_APP_SECRET"]
-RT = os.environ.get("MELI_REFRESH_TOKEN_USER1668") or os.environ.get("MELI_REFRESH_TOKEN_YIRIAM")
+RT = os.environ.get("MELI_REFRESH_TOKEN_YC_NEW") or os.environ.get("MELI_REFRESH_TOKEN_YIRIAM")
 if not RT:
-    raise SystemExit("No hay token para Yiriam (probé USER1668 y YIRIAM)")
+    raise SystemExit("No hay token para Yiriam=YC_NEW")
 TZ = timezone(timedelta(hours=-6))
 PAGE_W=4*72; PAGE_H=6*72
 ALLOWED_SUBS = {"printed", "ready_to_print"}
