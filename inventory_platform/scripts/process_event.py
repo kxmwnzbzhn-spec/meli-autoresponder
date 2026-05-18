@@ -54,11 +54,18 @@ if etopic=="orders_v2" and eres.startswith("/orders/"):
     for it in (o.get("order_items") or []):
         item=it.get("item",{})
         mlm=item.get("id"); qty=int(it.get("quantity",0) or 0)
-        cur.execute("SELECT sku FROM listings WHERE mlm_id=%s",(mlm,))
+        # Variation-aware: si MELI mandó variation_id, intentar lookup por (mlm,vid) primero
+        variation_id = item.get("variation_id")
+        if variation_id:
+            cur.execute("SELECT resolve_sku(%s,%s)",(mlm,int(variation_id)))
+        else:
+            cur.execute("SELECT resolve_sku(%s,NULL)",(mlm,))
         row=cur.fetchone()
-        if not row:
-            print(f"unmapped MLM {mlm}"); continue
-        sku=row[0]
+        sku = row[0] if row else None
+        if not sku:
+            print(f"unmapped MLM {mlm} variation_id={variation_id}")
+            tg(f"⚠️ MLM no mapeado: `{mlm}` variation={variation_id} order=`{o.get('id')}`")
+            continue
         try:
             cur.execute("SELECT apply_stock_delta(%s,%s,%s,%s,%s,%s,%s,%s,%s)",
                 (sku,'bodega_main',-qty,'sale',eid,str(o.get("id")),mlm,aid,f"order {o.get('id')}"))
