@@ -45,11 +45,57 @@ if not golive or not avail:
 patterns={sku:[re.compile(p,re.I) for p in v["match_patterns"]] for sku,v in golive["skus"].items()}
 
 def classify(title):
-    t=title or ""
-    for sku,rxs in patterns.items():
-        for rx in rxs:
-            if rx.search(t): return sku
+    t=(title or "").lower()
+    # 2-pass: modelo + color
+    modelos=[
+        ("xb100",["xb100","xb-100","srs-xb100"]),
+        ("flip7",["flip 7","flip7"]),
+        ("clip5",["clip 5","clip5"]),
+        ("clip7",["clip 7","clip7"]),
+        ("charge6",["charge 6","charge6"]),
+        ("go4",["go 4","go4"]),
+        ("go3",["go 3","go3"]),
+        ("bose",["bose","soundlink"]),
+    ]
+    modelo=None
+    for m,kws in modelos:
+        if any(k in t for k in kws):
+            modelo=m; break
+    if not modelo: return None
+    # color (en orden de especificidad: largos primero)
+    if modelo=="xb100": return "SONY-XB100-NEGRO"
+    if modelo=="charge6": return None  # no en SKU golive
+    if modelo=="clip7": return None  # no en SKU golive
+    color=None
+    color_rx=[
+        (["camuflaj","camo","squad","verde musg"], "CAMUFLAJE"),
+        (["aqua","celeste"], "AQUA"),
+        (["azul marino","azul oscuro"], "AZUL-MARINO"),
+        (["azul"], "AZUL"),
+        (["morad","violet","purpur","púrp"], "MORADO"),
+        (["rosa","pink"], "ROSA"),
+        (["roj"], "ROJO"),
+        (["blanc","silver"], "BLANCO"),
+        (["negr"], "NEGRO"),
+    ]
+    for kws,c in color_rx:
+        if any(k in t for k in kws): color=c; break
+    if not color: return None
+    # Map modelo+color → SKU
+    M={"go4":"JBL-GO4","go3":"JBL-GO3","clip5":"JBL-CLIP5","flip7":"JBL-FLIP7","bose":"BOSE-SOUNDLINK"}
+    if modelo=="go4" and color=="AZUL": color="AQUA"  # tratamos azul plain de go4 como aqua/celeste
+    if modelo=="go4" and color=="AZUL-MARINO": return None  # no en SKU golive
+    if modelo=="go3" and color!="NEGRO": return None
+    if modelo=="bose" and color=="NEGRO": return "BOSE-SOUNDLINK-NEGRO"
+    if modelo=="bose" and color=="BLANCO": return "BOSE-SOUNDLINK-BLANCO"
+    if modelo=="flip7" and color=="ROJO": return "JBL-FLIP7-ROJO"
+    if modelo=="flip7": return None
+    sku=f"{M[modelo]}-{color}"
+    # Verify SKU exists in golive
+    if sku in golive["skus"]: return sku
+    # Try AQUA fallback for Go4 with no color
     return None
+
 
 # Reset sold counter on each run (full recount since golive)
 sold_by_sku={sku:0 for sku in golive["skus"]}
