@@ -1,0 +1,35 @@
+name: sku_oversell_monitor
+on:
+  workflow_dispatch: {}
+  schedule:
+    - cron: '*/5 * * * *'
+concurrency:
+  group: sku_oversell_monitor
+  cancel-in-progress: false
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - run: pip install requests
+      - env:
+          MELI_REFRESH_TOKEN_WILBERT: ${{ secrets.MELI_REFRESH_TOKEN_WILBERT }}
+          MELI_REFRESH_TOKEN_YC_NEW: ${{ secrets.MELI_REFRESH_TOKEN_YC_NEW }}
+          MELI_REFRESH_TOKEN_JUAN: ${{ secrets.MELI_REFRESH_TOKEN_JUAN }}
+          MELI_REFRESH_TOKEN_RAYMUNDO: ${{ secrets.MELI_REFRESH_TOKEN_RAYMUNDO }}
+          MELI_REFRESH_TOKEN_CLARIBEL: ${{ secrets.MELI_REFRESH_TOKEN_CLARIBEL }}
+          MELI_REFRESH_TOKEN_ASVA: ${{ secrets.MELI_REFRESH_TOKEN_ASVA }}
+          MELI_REFRESH_TOKEN_MILDRED: ${{ secrets.MELI_REFRESH_TOKEN_MILDRED }}
+          MELI_REFRESH_TOKEN_DILCIE: ${{ secrets.MELI_REFRESH_TOKEN_DILCIE }}
+          MELI_REFRESH_TOKEN_BREN: ${{ secrets.MELI_REFRESH_TOKEN_BREN }}
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python scripts/sku_oversell_monitor.py
