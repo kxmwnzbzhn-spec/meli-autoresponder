@@ -63,23 +63,35 @@ UPDATE products
 DROP FUNCTION IF EXISTS resolve_sale_target(text, bigint);
 CREATE OR REPLACE FUNCTION resolve_sale_target(p_mlm_id text, p_variation_id bigint DEFAULT NULL)
 RETURNS TABLE(sku text, warehouse text)
-LANGUAGE sql STABLE AS $$
-    -- Prioridad: 1) listing_variations por (mlm, vid)
-    SELECT lv.sku, lv.warehouse_default
-      FROM listing_variations lv
-     WHERE lv.mlm_id = p_mlm_id
-       AND lv.variation_id = p_variation_id
-     LIMIT 1
-    UNION ALL
-    -- 2) fallback a listings (single-variation)
-    SELECT l.sku, l.warehouse_default
+LANGUAGE plpgsql STABLE AS $$
+DECLARE
+    r_sku       text;
+    r_warehouse text;
+BEGIN
+    -- Prioridad 1: listing_variations por (mlm, vid)
+    IF p_variation_id IS NOT NULL THEN
+        SELECT lv.sku, lv.warehouse_default INTO r_sku, r_warehouse
+          FROM listing_variations lv
+         WHERE lv.mlm_id = p_mlm_id
+           AND lv.variation_id = p_variation_id
+         LIMIT 1;
+        IF r_sku IS NOT NULL THEN
+            sku := r_sku; warehouse := r_warehouse;
+            RETURN NEXT;
+            RETURN;
+        END IF;
+    END IF;
+
+    -- Prioridad 2: listings (single-variation)
+    SELECT l.sku, l.warehouse_default INTO r_sku, r_warehouse
       FROM listings l
      WHERE l.mlm_id = p_mlm_id
-       AND NOT EXISTS (
-           SELECT 1 FROM listing_variations lv2
-            WHERE lv2.mlm_id = p_mlm_id AND lv2.variation_id = p_variation_id
-       )
      LIMIT 1;
+    IF r_sku IS NOT NULL THEN
+        sku := r_sku; warehouse := r_warehouse;
+        RETURN NEXT;
+    END IF;
+END;
 $$;
 
 COMMENT ON FUNCTION resolve_sale_target(text, bigint) IS
