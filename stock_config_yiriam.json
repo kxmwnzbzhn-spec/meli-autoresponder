@@ -76,13 +76,13 @@
   },
   "MLM5353104620": {
     "title": "Orientica Royal Amber",
-    "real_stock": 11,
+    "real_stock": 10,
     "master_stock": 11,
     "min_visible": 1,
     "available_quantity": 1,
     "auto_replenish": true,
     "active": true,
-    "last_sold": 0
+    "last_sold": 1
   },
   "MLM2935286557": {
     "title": "Lattafa Confession",
