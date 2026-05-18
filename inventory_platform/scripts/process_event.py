@@ -54,21 +54,21 @@ if etopic=="orders_v2" and eres.startswith("/orders/"):
     for it in (o.get("order_items") or []):
         item=it.get("item",{})
         mlm=item.get("id"); qty=int(it.get("quantity",0) or 0)
-        # Variation-aware: si MELI mandó variation_id, intentar lookup por (mlm,vid) primero
+        # Variation + warehouse aware: resolve_sale_target → (sku, warehouse)
         variation_id = item.get("variation_id")
         if variation_id:
-            cur.execute("SELECT resolve_sku(%s,%s)",(mlm,int(variation_id)))
+            cur.execute("SELECT sku, warehouse FROM resolve_sale_target(%s,%s)",(mlm,int(variation_id)))
         else:
-            cur.execute("SELECT resolve_sku(%s,NULL)",(mlm,))
+            cur.execute("SELECT sku, warehouse FROM resolve_sale_target(%s,NULL)",(mlm,))
         row=cur.fetchone()
-        sku = row[0] if row else None
-        if not sku:
+        if not row or not row[0]:
             print(f"unmapped MLM {mlm} variation_id={variation_id}")
             tg(f"⚠️ MLM no mapeado: `{mlm}` variation={variation_id} order=`{o.get('id')}`")
             continue
+        sku, sale_warehouse = row[0], row[1]
         try:
             cur.execute("SELECT apply_stock_delta(%s,%s,%s,%s,%s,%s,%s,%s,%s)",
-                (sku,'bodega_main',-qty,'sale',eid,str(o.get("id")),mlm,aid,f"order {o.get('id')}"))
+                (sku,sale_warehouse,-qty,'sale',eid,str(o.get("id")),mlm,aid,f"order {o.get('id')}"))
             mid=cur.fetchone()[0]
 
             # --- Sprint 1: COGS registration ---
@@ -77,7 +77,7 @@ if etopic=="orders_v2" and eres.startswith("/orders/"):
             cogs_total=None
             try:
                 cur.execute("SELECT consume_cost(%s,%s,%s,%s,%s)",
-                    (sku,'bodega_main',qty,str(o.get("id")),mid))
+                    (sku,sale_warehouse,qty,str(o.get("id")),mid))
                 cogs_total=float(cur.fetchone()[0] or 0)
             except psycopg2.errors.RaiseException as ce:
                 err=str(ce)[:300]
