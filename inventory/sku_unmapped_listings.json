@@ -1,4 +1,157 @@
 {
-  "_meta": {"description": "Listings MELI vendidos pero sin SKU mapeado. Revisar y agregar a sku_to_mlm.json."},
-  "pending": []
+  "_meta": {
+    "description": "Listings MELI vendidos pero sin SKU mapeado. Revisar y agregar a sku_to_mlm.json."
+  },
+  "pending": [
+    {
+      "mlm": "MLM2910768325",
+      "title": "Parlante Bluetooth Jbl Go 4 Portátil Rosa",
+      "qty_seen": 21,
+      "first_seen": "2026-05-18"
+    },
+    {
+      "mlm": "MLM2910806881",
+      "title": "Parlante Bluetooth Jbl Go 3 Color Negro",
+      "qty_seen": 27,
+      "first_seen": "2026-05-18"
+    },
+    {
+      "mlm": "MLM2910768333",
+      "title": "Parlante Jbl Go 3 Jblgo3 Portátil Con Bluetooth Waterproof Negro",
+      "qty_seen": 3,
+      "first_seen": "2026-05-18"
+    },
+    {
+      "mlm": "MLM2914422351",
+      "title": "Jbl Go 4 - Altavoz Ultraportátil Bluetooth Color Rojo",
+      "qty_seen": 31,
+      "first_seen": "2026-05-18"
+    },
+    {
+      "mlm": "MLM2910457917",
+      "title": "Bocina Jbl Go 4 Jblgo4 Portátil Con Bluetooth Waterproof Celeste",
+      "qty_seen": 8,
+      "first_seen": "2026-05-18"
+    },
+    {
+      "mlm": "MLM2910806871",
+      "title": "Parlante Jbl Clip 5 Portátil Con Bluetooth Waterproof Azul",
+      "qty_seen": 9,
+      "first_seen": "2026-05-18"
+    },
+    {
+      "mlm": "MLM2910806845",
+      "title": "Bocina Jbl Go 3 Jblgo3 Portátil Con Bluetooth Waterproof Negra Negro",
+      "qty_seen": 14,
+      "first_seen": "2026-05-18"
+    },
+    {
+      "mlm": "MLM2931341689",
+      "title": "Altavoz Bluetooth Ultraportátil Jbl Clip 5 Ip67 Proof, Color Negro-naranja",
+      "qty_seen": 1,
+      "first_seen": "2026-05-18"
+    },
+    {
+      "mlm": "MLM2910768369",
+      "title": "Altavoz Bluetooth Jbl Go 4 Portátil Impermeable En Rojo",
+      "qty_seen": 4,
+      "first_seen": "2026-05-18"
+    },
+    {
+      "mlm": "MLM2910768335",
+      "title": "Jbl Go 4 - Altavoz Bluetooth Ultraportátil Rosa",
+      "qty_seen": 4,
+      "first_seen": "2026-05-18"
+    },
+    {
+      "mlm": "MLM5354755946",
+      "title": "Bocina Jbl Go 4 Jblgo4 Portátil Con Bluetooth Waterproof Roja Rojo",
+      "qty_seen": 7,
+      "first_seen": "2026-05-18"
+    },
+    {
+      "mlm": "MLM5347216886",
+      "title": "Bocina Bluetooth Portátil Flip 7 Calidad Espejo Ip67 30w",
+      "qty_seen": 1,
+      "first_seen": "2026-05-18"
+    },
+    {
+      "mlm": "MLM5346655686",
+      "title": "Bocina Bluetooth Portátil Go 4 Ip67 Oem 1.1 Espejo",
+      "qty_seen": 8,
+      "first_seen": "2026-05-18"
+    },
+    {
+      "mlm": "MLM2911241921",
+      "title": "Jbl Charge 6 Bocina Bluetooth Ip67 Reacondicionada Negro",
+      "qty_seen": 2,
+      "first_seen": "2026-05-18"
+    },
+    {
+      "mlm": "MLM2911238257",
+      "title": "Sony Srs-xb100 Altavoz De Viaje Inalámbrico Bluetooth Port Color Negro",
+      "qty_seen": 4,
+      "first_seen": "2026-05-18"
+    },
+    {
+      "mlm": "MLM5351937060",
+      "title": "Mini Altavoz Inalámbrico Portátil Go 4 Camuflado",
+      "qty_seen": 4,
+      "first_seen": "2026-05-18"
+    },
+    {
+      "mlm": "MLM2916921741",
+      "title": "Perfume Para Hombre Lattafa Asad Zanzibar, 100 Ml",
+      "qty_seen": 1,
+      "first_seen": "2026-05-18"
+    },
+    {
+      "mlm": "MLM2916921745",
+      "title": "Perfume Lattafa Musaman Edp 100ml Unisex",
+      "qty_seen": 1,
+      "first_seen": "2026-05-18"
+    },
+    {
+      "mlm": "MLM2916898793",
+      "title": "Gucci Flora Gorgeous Gardenia 100ml",
+      "qty_seen": 1,
+      "first_seen": "2026-05-18"
+    },
+    {
+      "mlm": "MLM2932676401",
+      "title": "Bocina Bluetooth Portátil 30w Ip67 Acabado Espejo Bass Pro",
+      "qty_seen": 1,
+      "first_seen": "2026-05-18"
+    },
+    {
+      "mlm": "MLM2916672931",
+      "title": "Marshmallow Blush Edp 100 Ml Para Mujer",
+      "qty_seen": 1,
+      "first_seen": "2026-05-18"
+    },
+    {
+      "mlm": "MLM5297098664",
+      "title": "Altavoz Bose Soundlink Home, Altavoz De Estantería Bluetooth Negro",
+      "qty_seen": 1,
+      "first_seen": "2026-05-18"
+    },
+    {
+      "mlm": "MLM2886136351",
+      "title": "Bocina Bluetooth Portatil Impermeable Ip67 Bass 35w Morado Morado",
+      "qty_seen": 4,
+      "first_seen": "2026-05-18"
+    },
+    {
+      "mlm": "MLM2886030837",
+      "title": "Bocina Bluetooth Portatil Impermeable Ip67 Bass 35w Rojo Rojo",
+      "qty_seen": 14,
+      "first_seen": "2026-05-18"
+    },
+    {
+      "mlm": "MLM5233454100",
+      "title": "Bocina Bluetooth Portatil Impermeable Ip67 Bass 35w Azul Azul",
+      "qty_seen": 4,
+      "first_seen": "2026-05-18"
+    }
+  ]
 }
