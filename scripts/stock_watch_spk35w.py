@@ -26,13 +26,10 @@ variants = {
 
 print(f"=== Stock Watch @ {datetime.now().isoformat()[:19]} ===")
 for color, mid in variants.items():
-    r = requests.get(f"https://api.mercadolibre.com/items/{mid}?attributes=id,price,available_quantity,sold_quantity,status,permalink,pictures", headers=h, timeout=15).json()
+    r = requests.get(f"https://api.mercadolibre.com/items/{mid}?attributes=id,price,available_quantity,sold_quantity,status", headers=h, timeout=15).json()
     badge = " 🚨" if (mid == CURRENT and r.get('available_quantity', 0) == 0) else ""
     badge += " ⚠️" if (mid == CURRENT and r.get('available_quantity', 0) <= 3) else ""
     print(f"  {color:<8} ({mid}) | status:{r.get('status'):<10} | qty:{r.get('available_quantity'):<3} | sold:{r.get('sold_quantity'):<3} | ${r.get('price')}{badge}")
-    pics = r.get("pictures",[]) or []
-    print(f"      PIC1: {pics[0].get(chr(115)+chr(101)+chr(99)+chr(117)+chr(114)+chr(101)+chr(95)+chr(117)+chr(114)+chr(108),'') if pics else '-'}")
-    print(f"      LINK: {r.get('permalink','-')}")
 
 # Alerta si rojo qty=0
 rojo_data = requests.get(f"https://api.mercadolibre.com/items/{CURRENT}", headers=h, timeout=15).json()
