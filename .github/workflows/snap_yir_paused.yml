@@ -1,0 +1,26 @@
+name: snap_yir_paused
+on: { workflow_dispatch: {}, push: { paths: [.github/workflows/snap_yir_paused.yml] } }
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - run: pip install requests
+      - env:
+          MELI_REFRESH_TOKEN_YC_NEW: ${{ secrets.MELI_REFRESH_TOKEN_YC_NEW }}
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+        run: |
+          python scripts/snap_yir_paused.py
+          # Commit snap_out
+          git config user.email bot@elite-market
+          git config user.name "Bot"
+          mkdir -p inventory
+          cp /tmp/snap_out.json inventory/yiriam_pause_snapshot_20260518.json
+          git add inventory/yiriam_pause_snapshot_20260518.json
+          git commit -m "snapshot yir paused 18-may emergency" || true
+          git push || true
