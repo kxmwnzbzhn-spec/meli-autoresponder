@@ -1,20 +1,27 @@
-name: Stock Watch SPK35W
+name: stock-watch-spk35w
 on:
   workflow_dispatch:
   schedule:
-    - cron: "*/30 * * * *"
+    - cron: '*/30 * * * *'
+concurrency:
+  group: stock-watch-spk35w
+  cancel-in-progress: false
 jobs:
   watch:
     runs-on: ubuntu-latest
+    timeout-minutes: 3
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: { python-version: "3.11" }
-      - run: pip install requests
-      - run: python scripts/stock_watch_spk35w.py
-        env:
-          MELI_APP_ID:                ${{ secrets.MELI_APP_ID }}
-          MELI_APP_SECRET:            ${{ secrets.MELI_APP_SECRET }}
+      - run: pip install requests -q
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
           MELI_REFRESH_TOKEN_USER1668: ${{ secrets.MELI_REFRESH_TOKEN_USER1668 }}
-          MELI_REFRESH_TOKEN_YC_NEW:   ${{ secrets.MELI_REFRESH_TOKEN_YC_NEW }}
-          MELI_REFRESH_TOKEN_WILBERT:  ${{ secrets.MELI_REFRESH_TOKEN_WILBERT }}
+        run: python scripts/stock_watch_spk35w.py
+
+
+
+
+
