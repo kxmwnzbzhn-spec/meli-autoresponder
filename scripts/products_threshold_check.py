@@ -24,7 +24,7 @@ PRODUCTS = [
         "creatives": ["1465424488963019", "1689643888842798", "1287935986778987"]
     },
     {
-        "mlm": "MLM3545177574", "name": "Secadora ASVA", "seller": 1668713481,
+        "mlm": "MLM2940986501", "name": "Secadora ASVA", "seller": 1668713481,
         "current_adset": "120245394392190238", "campaign": "120245394293630238",
         "creatives": []
     },
