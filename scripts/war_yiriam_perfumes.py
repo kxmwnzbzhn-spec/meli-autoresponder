@@ -6,6 +6,11 @@ CID=os.environ["MELI_APP_ID"]; CS=os.environ["MELI_APP_SECRET"]
 API="https://api.mercadolibre.com"
 MIN_FLOOR=200
 
+# Per-item floor overrides (user-locked, war respeta)
+FLOOR_OVERRIDE={
+  "MLM5363034834":349,
+}
+
 ITEMS=[
   "MLM5291774150","MLM5291785036","MLM2909183147","MLM2916942827",
   "MLM2940047221","MLM5363034834","MLM5363034838","MLM2940047227","MLM5363034842",
@@ -43,7 +48,7 @@ for iid in ITEMS:
         p=requests.get(f"{API}/items/{iid}/price_to_win?version=v2",headers=H,timeout=15).json()
         ptw=p.get("price_to_win")
         if not ptw: continue
-        target=max(int(ptw)-1,MIN_FLOOR)
+        target=max(int(ptw)-1, FLOOR_OVERRIDE.get(iid,MIN_FLOOR))
         if target!=cur:
             r=requests.put(f"{API}/items/{iid}",headers=HJ,json={"price":target},timeout=15)
             acts.append(f"{iid} '{title}' ${cur}→${target} ptw={ptw} http={r.status_code}")
