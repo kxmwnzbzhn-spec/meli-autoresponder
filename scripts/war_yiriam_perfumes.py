@@ -94,11 +94,14 @@ for iid in ITEMS:
                         low_comp=comps[0]
                 except: pass
             if low_comp:
-                # Subir a low_comp - 1 (max-up), cap ceiling
+                # Max-up: solo SUBIR si hay upside; cuando winning nunca bajamos voluntariamente
                 t=int(low_comp)-1
-                target=min(t,ceil)
-                target=max(target,floor)
-                reason=f"winning low_comp={low_comp} → ${target}"
+                t=min(t,ceil); t=max(t,floor)
+                if t > cur:
+                    target=t
+                    reason=f"max-up winning low_comp={low_comp} → ${target}"
+                else:
+                    reason=f"winning cur=${cur} ya >= low_comp-1=${t} → hold"
             else:
                 # Sin competencia → mantener
                 reason=f"winning sin comp → hold ${cur}"
