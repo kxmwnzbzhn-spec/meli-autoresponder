@@ -3,14 +3,14 @@
     "version": "1.0",
     "description": "Inventory master — verdad unica para stock fisico de Elite Market",
     "created": "2026-05-17",
-    "last_sync": "2026-05-18T08:55:34.487468Z",
+    "last_sync": "2026-05-19T08:41:48.607757Z",
     "policy": "Cada SKU canonico tiene 1 entrada. NUNCA se elimina; productos descontinuados se mueven a inventory_master_archive.json. Cambios via daily_sync_inventory.py o manual_adjustments.json.",
     "stock_bodega_total": 0,
     "stock_devolucion_total": 0
   },
   "_last_order_id_per_account": {
     "Wilbert": "2000016484736310",
-    "Yiriam": null,
+    "Yiriam": "2000016501522166",
     "Juan": null,
     "Raymundo": null,
     "Claribel": null,
