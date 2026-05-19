@@ -21,6 +21,7 @@ REPO="kxmwnzbzhn-spec/meli-autoresponder"
 WAR_WF_ID=277666461  # war_yiriam_perfumes
 
 DO_NOT_REACTIVATE={
+  "MLM5353056250",  # paused permanent
   "MLM2909179597",  # paused 19-may
   "MLM5291788552",
   "MLM5291776046",
