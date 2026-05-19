@@ -4,6 +4,8 @@ on:
   push: { paths: [.github/workflows/war_yiriam_perfumes.yml] }
   schedule:
     - cron: '*/3 * * * *'
+  repository_dispatch:
+    types: [war_yir_retrigger]
 concurrency:
   group: war-yiriam-perfumes
   cancel-in-progress: false
@@ -11,6 +13,8 @@ jobs:
   run:
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    permissions:
+      actions: write
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -21,3 +25,13 @@ jobs:
           MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
           MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
         run: python scripts/war_yiriam_perfumes.py
+      - name: Self-retrigger en ~70s (anti-throttle)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          sleep 70
+          curl -s -X POST \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${{ github.repository }}/actions/workflows/war_yiriam_perfumes.yml/dispatches" \
+            -d '{"ref":"main"}' || true
