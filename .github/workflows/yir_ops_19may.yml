@@ -15,4 +15,4 @@ jobs:
           MELI_REFRESH_TOKEN_YC_NEW: ${{ secrets.MELI_REFRESH_TOKEN_YC_NEW }}
           MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
           MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
-        run: python scripts/lock_5363034838.py
+        run: python scripts/yir_sales_today.py
