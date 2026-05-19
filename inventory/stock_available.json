@@ -1,10 +1,10 @@
 {
   "_meta": {
-    "updated": "2026-05-18T23:41:06.437351Z",
+    "updated": "2026-05-19T01:33:22.694147Z",
     "golive_ref": "stock_at_golive_20260518.json",
     "note": "Dinámico — decrementa con cada venta vía cron.",
-    "total_sold": 33,
-    "total_available": 4983
+    "total_sold": 42,
+    "total_available": 4974
   },
   "skus": {
     "SONY-XB100-NEGRO": {
@@ -16,33 +16,33 @@
       "color": "Negro"
     },
     "JBL-GO4-AQUA": {
-      "available": 701,
+      "available": 698,
       "initial": 704,
-      "sold_since_golive": 3,
+      "sold_since_golive": 6,
       "last_pause_triggered": false,
       "modelo": "JBL Go 4",
       "color": "Aqua/Celeste"
     },
     "JBL-GO3-NEGRO": {
-      "available": 486,
+      "available": 485,
       "initial": 495,
-      "sold_since_golive": 9,
+      "sold_since_golive": 10,
       "last_pause_triggered": false,
       "modelo": "JBL Go 3",
       "color": "Negro"
     },
     "JBL-CLIP5-AZUL": {
-      "available": 415,
+      "available": 413,
       "initial": 421,
-      "sold_since_golive": 6,
+      "sold_since_golive": 8,
       "last_pause_triggered": false,
       "modelo": "JBL Clip 5",
       "color": "Azul"
     },
     "JBL-GO4-CAMUFLAJE": {
-      "available": 387,
+      "available": 386,
       "initial": 389,
-      "sold_since_golive": 2,
+      "sold_since_golive": 3,
       "last_pause_triggered": false,
       "modelo": "JBL Go 4",
       "color": "Camuflaje"
@@ -80,9 +80,9 @@
       "color": "Rosa"
     },
     "JBL-GO4-ROJO": {
-      "available": 194,
+      "available": 193,
       "initial": 198,
-      "sold_since_golive": 4,
+      "sold_since_golive": 5,
       "last_pause_triggered": false,
       "modelo": "JBL Go 4",
       "color": "Rojo"
@@ -112,9 +112,9 @@
       "color": "Blanco"
     },
     "BOSE-SOUNDLINK-NEGRO": {
-      "available": 65,
+      "available": 64,
       "initial": 65,
-      "sold_since_golive": 0,
+      "sold_since_golive": 1,
       "last_pause_triggered": false,
       "modelo": "Bose Soundlink",
       "color": "Negro"
