@@ -8,6 +8,7 @@ CID=os.environ["MELI_APP_ID"]; CS=os.environ["MELI_APP_SECRET"]
 API="https://api.mercadolibre.com"
 
 DO_NOT_REACTIVATE={
+  "MLM5353056250",
   "MLM2909179597",
   "MLM5291788552",
   "MLM5291776046",
