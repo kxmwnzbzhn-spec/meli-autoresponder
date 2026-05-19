@@ -1,32 +1,32 @@
 {
   "_meta": {
-    "updated": "2026-05-19T17:17:29.397198Z",
+    "updated": "2026-05-19T19:19:38.989596Z",
     "golive_ref": "stock_at_golive_20260518.json",
     "note": "Dinámico — decrementa con cada venta vía cron.",
-    "total_sold": 115,
-    "total_available": 4901
+    "total_sold": 140,
+    "total_available": 4876
   },
   "skus": {
     "SONY-XB100-NEGRO": {
-      "available": 1419,
+      "available": 1416,
       "initial": 1422,
-      "sold_since_golive": 3,
+      "sold_since_golive": 6,
       "last_pause_triggered": false,
       "modelo": "Sony XB100",
       "color": "Negro"
     },
     "JBL-GO4-AQUA": {
-      "available": 687,
+      "available": 683,
       "initial": 704,
-      "sold_since_golive": 17,
+      "sold_since_golive": 21,
       "last_pause_triggered": false,
       "modelo": "JBL Go 4",
       "color": "Aqua/Celeste"
     },
     "JBL-GO3-NEGRO": {
-      "available": 471,
+      "available": 467,
       "initial": 495,
-      "sold_since_golive": 24,
+      "sold_since_golive": 28,
       "last_pause_triggered": false,
       "modelo": "JBL Go 3",
       "color": "Negro"
@@ -72,33 +72,33 @@
       "color": "Rojo"
     },
     "JBL-CLIP5-ROSA": {
-      "available": 199,
+      "available": 198,
       "initial": 200,
-      "sold_since_golive": 1,
+      "sold_since_golive": 2,
       "last_pause_triggered": false,
       "modelo": "JBL Clip 5",
       "color": "Rosa"
     },
     "JBL-GO4-ROJO": {
-      "available": 181,
+      "available": 175,
       "initial": 198,
-      "sold_since_golive": 17,
+      "sold_since_golive": 23,
       "last_pause_triggered": false,
       "modelo": "JBL Go 4",
       "color": "Rojo"
     },
     "JBL-CLIP5-MORADO": {
-      "available": 179,
+      "available": 178,
       "initial": 185,
-      "sold_since_golive": 6,
+      "sold_since_golive": 7,
       "last_pause_triggered": false,
       "modelo": "JBL Clip 5",
       "color": "Morado"
     },
     "JBL-GO4-ROSA": {
-      "available": 138,
+      "available": 132,
       "initial": 170,
-      "sold_since_golive": 32,
+      "sold_since_golive": 38,
       "last_pause_triggered": false,
       "modelo": "JBL Go 4",
       "color": "Rosa"
