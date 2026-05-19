@@ -1,0 +1,22 @@
+name: wilbert-yiriam-combo
+on: { workflow_dispatch: }
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: sudo apt-get install -y poppler-utils
+      - run: pip install requests pypdf reportlab pdf2image Pillow -q
+      - env:
+          MELI_APP_SECRET:                ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_WILBERT:     ${{ secrets.MELI_REFRESH_TOKEN_WILBERT }}
+          MELI_REFRESH_TOKEN_YC_NEW:      ${{ secrets.MELI_REFRESH_TOKEN_YC_NEW }}
+        run: python scripts/wilbert_yiriam_combo.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: wilbert-yiriam-combo
+          path: ETIQUETAS_WILBERT_YIRIAM_POR_PRODUCTO.pdf
