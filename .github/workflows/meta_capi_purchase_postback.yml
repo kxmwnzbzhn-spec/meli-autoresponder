@@ -17,4 +17,5 @@ jobs:
           MELI_APP_SECRET:              ${{ secrets.MELI_APP_SECRET }}
           MELI_REFRESH_TOKEN_USER1668:  ${{ secrets.MELI_REFRESH_TOKEN_USER1668 }}
           MELI_REFRESH_TOKEN_YC_NEW:    ${{ secrets.MELI_REFRESH_TOKEN_YC_NEW }}
+          MELI_REFRESH_TOKEN_WILBERT:   ${{ secrets.MELI_REFRESH_TOKEN_WILBERT }}
           META_CAPI_ACCESS_TOKEN:       ${{ secrets.META_CAPI_ACCESS_TOKEN }}
