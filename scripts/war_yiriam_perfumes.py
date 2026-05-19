@@ -28,7 +28,7 @@ ITEMS=[
   "MLM2940047233","MLM5363023022",
   "MLM5363147400","MLM5363034850","MLM5363023026","MLM5363034852","MLM5363147404",
   "MLM2940047245","MLM5363147408","MLM5363023032","MLM5363147410","MLM5363034856",
-  "MLM5363147416","MLM2940047249","MLM5363147422","MLM5363034860",
+  "MLM5363147416","MLM2940047249","MLM5363147422","MLM5363034860","MLM5353056250",
   "MLM2940662359","MLM5364336572","MLM5364336602",
 ]
 
@@ -94,14 +94,14 @@ for iid in ITEMS:
                         low_comp=comps[0]
                 except: pass
             if low_comp:
-                # Max-up: solo SUBIR si hay upside; cuando winning nunca bajamos voluntariamente
-                t=int(low_comp)-1
+                # Max-up con margen anti-ghost (Lider Platino oculto): low_comp - 5
+                t=int(low_comp)-5
                 t=min(t,ceil); t=max(t,floor)
                 if t > cur:
                     target=t
-                    reason=f"max-up winning low_comp={low_comp} → ${target}"
+                    reason=f"max-up winning low_comp={low_comp} (-5) → ${target}"
                 else:
-                    reason=f"winning cur=${cur} ya >= low_comp-1=${t} → hold"
+                    reason=f"winning cur=${cur} ya >= low_comp-5=${t} → hold"
             else:
                 # Sin competencia → mantener
                 reason=f"winning sin comp → hold ${cur}"
