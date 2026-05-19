@@ -22,7 +22,7 @@ SELLERS = [
 WHITELIST_ITEMS = {
     "MLM2886030837": {"seller": 1668713481, "name": "Bocina Bluetooth 35w Rojo",        "category": "SPK35W_ROJO_V1"},
     "MLM2886136351": {"seller": 1668713481, "name": "Bocina Bluetooth 35w Morado",      "category": "SPK35W_MORADO_V1"},
-    "MLM3545177574": {"seller": 1668713481, "name": "Secadora ASVA Ionica Motor Digital","category": "SECADORA_ASVA_V1"},
+    "MLM2940986501": {"seller": 1668713481, "name": "Secadora ASVA Ionica Motor Digital","category": "SECADORA_ASVA_V1"},
     "MLM5356938548": {"seller": 1668713481, "name": "Dashcam ASVA DVR-3",                "category": "DASHCAM_DVR3_V1"},
     "MLM2940664057": {"seller": 3364413125, "name": "Audifonos Bluetooth In-Ear Negro", "category": "AUDIFONOS_BT_V1"},
     "MLM5346655686": {"seller": 3367276814, "name": "Bocina Bluetooth Portatil Go4 IP67",    "category": "SPK_GO4_V1"},
