@@ -1,8 +1,9 @@
 {
   "cap": 50,
   "date": "2026-05-18",
-  "triggered": false,
+  "triggered": true,
   "paused_count": 0,
   "active_at_trigger": [],
-  "_notes": "Cap diario de ventas Yiriam. Cuando se alcanza, pausa TODO. Reset auto al cambiar de día. NO reactiva auto."
+  "_notes": "Cap diario de ventas Yiriam. Cuando se alcanza, pausa TODO. Reset auto al cambiar de día. NO reactiva auto.",
+  "triggered_at": "2026-05-19T04:34:09.129656Z"
 }
