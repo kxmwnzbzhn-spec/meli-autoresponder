@@ -14,12 +14,13 @@ MIN_FLOOR=200
 # Per-item floor (no bajar de aquí)
 FLOOR_OVERRIDE={
   "MLM5363034834":349,
+  "MLM5363034838":899,  # locked
 }
 
 # Per-item ceiling (no subir de aquí, default 9999)
 CEILING_OVERRIDE={
   # Locks específicos si necesitas tope estricto
-  # "MLMxxx": 999,
+  "MLM5363034838":899,  # locked
 }
 
 ITEMS=[
