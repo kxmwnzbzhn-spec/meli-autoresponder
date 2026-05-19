@@ -1,23 +1,51 @@
+"""
+Stock watcher para SPK35W variantes.
+Si ROJO qty=0, marca alerta. Si MORADO qty<5, marca alerta.
+Corre cada 30 min via cron.
+"""
 import os, requests, json
+from datetime import datetime
+
 tok = requests.post("https://api.mercadolibre.com/oauth/token", data={
-    "grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],
-    "client_secret":os.environ["MELI_APP_SECRET"],"refresh_token":os.environ["MELI_REFRESH_TOKEN_WILBERT"]}, timeout=20).json()
+    "grant_type": "refresh_token",
+    "client_id": os.environ["MELI_APP_ID"],
+    "client_secret": os.environ["MELI_APP_SECRET"],
+    "refresh_token": os.environ["MELI_REFRESH_TOKEN_USER1668"]
+}, timeout=20).json()
 h = {"Authorization": f"Bearer {tok['access_token']}"}
-# Get 1 paid order
-r = requests.get("https://api.mercadolibre.com/orders/search", params={"seller":3367276814,"order.status":"paid","limit":3,"sort":"date_desc"}, headers=h, timeout=20).json()
-for o in r.get("results",[])[:2]:
-    print(f"=== ORDER {o.get('id')} ===")
-    print(json.dumps({k:v for k,v in o.items() if k in ['buyer','shipping','billing_info','date_created','total_amount']}, indent=2, ensure_ascii=False, default=str)[:2000])
-    print()
-    # Try fetching the order via individual endpoint
-    oid = o.get('id')
-    r2 = requests.get(f"https://api.mercadolibre.com/orders/{oid}", headers=h, timeout=20).json()
-    print(f"  Individual order endpoint extras (buyer detail): {json.dumps(r2.get('buyer',{}), indent=2, ensure_ascii=False, default=str)[:500]}")
-    # Try shipping details
-    ship_id = (o.get('shipping') or {}).get('id')
-    if ship_id:
-        r3 = requests.get(f"https://api.mercadolibre.com/shipments/{ship_id}", headers=h, timeout=20)
-        if r3.status_code == 200:
-            sd = r3.json()
-            ra = sd.get('receiver_address') or {}
-            print(f"  Shipment receiver_address: name={ra.get('receiver_name')} phone={ra.get('receiver_phone')} zip={ra.get('zip_code')} city={(ra.get('city') or {}).get('name')}")
+
+CURRENT = "MLM2886030837"  # Rojo
+FALLBACK = "MLM2886136351"  # Morado
+
+variants = {
+    "ROJO":    "MLM2886030837",
+    "MORADO":  "MLM2886136351",
+    "AZUL":    "MLM5233454100",
+    "NEGRO":   "MLM5233480022"
+}
+
+print(f"=== Stock Watch @ {datetime.now().isoformat()[:19]} ===")
+for color, mid in variants.items():
+    r = requests.get(f"https://api.mercadolibre.com/items/{mid}?attributes=id,price,available_quantity,sold_quantity,status", headers=h, timeout=15).json()
+    badge = " 🚨" if (mid == CURRENT and r.get('available_quantity', 0) == 0) else ""
+    badge += " ⚠️" if (mid == CURRENT and r.get('available_quantity', 0) <= 3) else ""
+    print(f"  {color:<8} ({mid}) | status:{r.get('status'):<10} | qty:{r.get('available_quantity'):<3} | sold:{r.get('sold_quantity'):<3} | ${r.get('price')}{badge}")
+
+# Alerta si rojo qty=0
+rojo_data = requests.get(f"https://api.mercadolibre.com/items/{CURRENT}", headers=h, timeout=15).json()
+if rojo_data.get('available_quantity', 0) == 0 and rojo_data.get('status') == 'paused':
+    print(f"\n🚨🚨🚨 ROJO AGOTADO — TRIGGER SWITCH TO MORADO 🚨🚨🚨")
+    print(f"Acciones manuales requeridas:")
+    print(f"  1. Update landing sonixmx.com.mx → link al MORADO")
+    print(f"  2. Update workflow CAPI whitelist: ROJO→MORADO")
+    print(f"  3. Update product photos en landing")
+    print(f"  4. Compradores 30d audience sigue válida")
+elif rojo_data.get('available_quantity', 0) <= 3:
+    print(f"\n⚠️ ROJO bajo stock ({rojo_data.get('available_quantity')}). Prepararse para switch.")
+else:
+    print(f"\n✓ Rojo stock OK: {rojo_data.get('available_quantity')}")
+
+
+
+
+
