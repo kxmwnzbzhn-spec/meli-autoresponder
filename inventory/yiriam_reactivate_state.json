@@ -1,4 +1,7 @@
 {
-  "last_run": null,
-  "_note": "reset por dry-run accidental, listo para cron 6am Mérida"
+  "last_run": "2026-05-19",
+  "_note": "reset por dry-run accidental, listo para cron 6am Mérida",
+  "reactivated_count": 31,
+  "error_count": 0,
+  "timestamp": "2026-05-19T12:03:48.327580+00:00"
 }
