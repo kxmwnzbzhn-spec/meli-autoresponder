@@ -9,6 +9,7 @@ Si >= cap → pausa todos los items active, marca triggered=true, alerta.
 NO reactiva automáticamente — usuario lo hace cuando quiera.
 """
 import os,requests,json,base64,datetime as dt
+from datetime import timezone, timedelta
 
 RT=os.environ["MELI_REFRESH_TOKEN_YC_NEW"]
 CID=os.environ["MELI_APP_ID"]; CS=os.environ["MELI_APP_SECRET"]
@@ -44,7 +45,8 @@ else:
     cfg={"cap":50,"date":"","triggered":False,"paused_count":0,"active_at_trigger":[]}
     cfg_sha=None
 
-today=dt.date.today().isoformat()
+TZ_CDMX=timezone(timedelta(hours=-6))
+today=dt.datetime.now(TZ_CDMX).date().isoformat()
 # Reset si cambió el día
 if cfg.get("date")!=today:
     cfg={"cap":cfg.get("cap",50),"date":today,"triggered":False,"paused_count":0,"active_at_trigger":[]}
