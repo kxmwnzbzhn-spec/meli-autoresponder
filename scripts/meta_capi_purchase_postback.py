@@ -15,6 +15,7 @@ LOOKBACK_HOURS = 24
 SELLERS = [
     {"id": 1668713481, "name": "ASVA",    "token_env": "MELI_REFRESH_TOKEN_USER1668"},
     {"id": 3364413125, "name": "YC",      "token_env": "MELI_REFRESH_TOKEN_YC_NEW"},
+    {"id": 3367276814, "name": "WILBERT", "token_env": "MELI_REFRESH_TOKEN_WILBERT"},
 ]
 
 # Whitelist global: cada item conoce a qué seller pertenece
@@ -24,6 +25,7 @@ WHITELIST_ITEMS = {
     "MLM3545177574": {"seller": 1668713481, "name": "Secadora ASVA Ionica Motor Digital","category": "SECADORA_ASVA_V1"},
     "MLM5356938548": {"seller": 1668713481, "name": "Dashcam ASVA DVR-3",                "category": "DASHCAM_DVR3_V1"},
     "MLM2940664057": {"seller": 3364413125, "name": "Audifonos Bluetooth In-Ear Negro", "category": "AUDIFONOS_BT_V1"},
+    "MLM5346655686": {"seller": 3367276814, "name": "Bocina Bluetooth Portatil Go4 IP67",    "category": "SPK_GO4_V1"},
 }
 
 def meli_token(token_env):
