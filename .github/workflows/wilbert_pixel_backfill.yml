@@ -1,0 +1,26 @@
+name: Wilbert Pixel Backfill
+on:
+  workflow_dispatch:
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - run: pip install requests
+      - run: python scripts/wilbert_pixel_backfill.py
+        env:
+          MELI_APP_ID:                ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET:            ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_WILBERT: ${{ secrets.MELI_REFRESH_TOKEN_WILBERT }}
+          META_CAPI_ACCESS_TOKEN:     ${{ secrets.META_CAPI_ACCESS_TOKEN }}
+      - name: Commit audience JSON
+        run: |
+          git config user.name "wilbert-backfill-bot"
+          git config user.email "bot@sonix.mx"
+          git add scripts/wilbert_buyers_30d.json
+          git diff --staged --quiet || git commit -m "data: Wilbert 30d buyers audience JSON"
+          git push || true
