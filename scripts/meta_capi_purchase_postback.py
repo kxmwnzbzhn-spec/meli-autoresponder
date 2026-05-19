@@ -1,7 +1,11 @@
 """
-Meli Orders → Meta CAPI Purchase post-back (MULTI-SELLER).
-Itera sobre N cuentas Meli, todas alimentando el MISMO pixel Meta.
-Whitelist por item con seller_id implícito vía SELLERS config.
+Meli Orders → Meta CAPI Purchase post-back · MODO ALL-SALES.
+Manda Purchase event al pixel POR CADA orden paid de cualquier seller en SELLERS,
+sin filtrar por whitelist. WHITELIST_ITEMS solo se usa para mapear category amigable;
+items fuera de la whitelist se mandan con category="OTHER" pero igual alimentan el pixel.
+
+Razón: más volumen de Purchase events = mejor pixel profile = cold start más rápido
+para futuras campañas + atribución modelada más precisa para las activas.
 """
 import os, requests, json, hashlib, sys
 from datetime import datetime, timedelta, timezone
@@ -11,27 +15,27 @@ META_GRAPH = "https://graph.facebook.com/v21.0"
 PIXEL_ID = "1520455545762550"
 LOOKBACK_HOURS = 24
 
-# Cada seller: id en Meli + nombre del env var con su refresh_token
 SELLERS = [
     {"id": 1668713481, "name": "ASVA",    "token_env": "MELI_REFRESH_TOKEN_USER1668"},
     {"id": 3364413125, "name": "YC",      "token_env": "MELI_REFRESH_TOKEN_YC_NEW"},
     {"id": 3367276814, "name": "WILBERT", "token_env": "MELI_REFRESH_TOKEN_WILBERT"},
 ]
 
-# Whitelist global: cada item conoce a qué seller pertenece
+# Solo metadata amigable para items que conocemos.
+# Items fuera de esta tabla igual se mandan al pixel, pero con category="OTHER".
 WHITELIST_ITEMS = {
-    "MLM2886030837": {"seller": 1668713481, "name": "Bocina Bluetooth 35w Rojo",        "category": "SPK35W_ROJO_V1"},
-    "MLM2886136351": {"seller": 1668713481, "name": "Bocina Bluetooth 35w Morado",      "category": "SPK35W_MORADO_V1"},
-    "MLM2940986501": {"seller": 1668713481, "name": "Secadora ASVA Ionica Motor Digital","category": "SECADORA_ASVA_V1"},
-    "MLM5356938548": {"seller": 1668713481, "name": "Dashcam ASVA DVR-3",                "category": "DASHCAM_DVR3_V1"},
-    "MLM2940664057": {"seller": 3364413125, "name": "Audifonos Bluetooth In-Ear Negro", "category": "AUDIFONOS_BT_V1"},
-    "MLM5346655686": {"seller": 3367276814, "name": "Bocina Bluetooth Portatil Go4 IP67",    "category": "SPK_GO4_V1"},
+    "MLM2886030837": {"name": "Bocina Bluetooth 35w Rojo",        "category": "SPK35W_ROJO_V1"},
+    "MLM2886136351": {"name": "Bocina Bluetooth 35w Morado",      "category": "SPK35W_MORADO_V1"},
+    "MLM2940986501": {"name": "Secadora ASVA Ionica Motor Digital","category": "SECADORA_ASVA_V1"},
+    "MLM5356938548": {"name": "Dashcam ASVA DVR-3",                "category": "DASHCAM_DVR3_V1"},
+    "MLM2940664057": {"name": "Audifonos Bluetooth In-Ear Negro", "category": "AUDIFONOS_BT_V1"},
+    "MLM5346655686": {"name": "Bocina Bluetooth Portatil Go4 IP67","category": "SPK_GO4_V1"},
 }
 
 def meli_token(token_env):
     rt = os.environ.get(token_env)
     if not rt:
-        print(f"WARN: {token_env} not set, skipping this seller"); return None
+        print(f"WARN: {token_env} not set, skipping"); return None
     r = requests.post(f"{API_MELI}/oauth/token", data={
         "grant_type": "refresh_token",
         "client_id": os.environ["MELI_APP_ID"],
@@ -51,9 +55,6 @@ def collect_events_for_seller(seller, since):
     if not tok: return []
     h = {"Authorization": f"Bearer {tok}"}
     seller_id = seller["id"]
-    seller_whitelist = {iid: meta for iid, meta in WHITELIST_ITEMS.items() if meta["seller"] == seller_id}
-    if not seller_whitelist:
-        print(f"  [{seller['name']}] no items in whitelist, skip"); return []
 
     all_orders = []
     offset = 0
@@ -71,20 +72,31 @@ def collect_events_for_seller(seller, since):
         offset += 50
     print(f"  [{seller['name']}] orders pulled: {len(all_orders)}")
 
-    target = []
-    for o in all_orders:
-        for it in o.get("order_items", []):
-            iid = (it.get("item") or {}).get("id")
-            if iid in seller_whitelist:
-                target.append((o, it, iid)); break
-    print(f"  [{seller['name']}] orders matching whitelist: {len(target)}")
-
     events = []
-    for o, item, iid in target:
+    items_in_whitelist = 0
+    items_other = 0
+    for o in all_orders:
         oid = o["id"]; ot = o["date_created"]
         dt = datetime.fromisoformat(ot.replace("Z", "+00:00")) if "Z" in ot else datetime.fromisoformat(ot)
         event_time = int(dt.timestamp())
         if (datetime.now(timezone.utc).timestamp() - event_time) > 7 * 86400: continue
+
+        items = o.get("order_items", []) or []
+        if not items: continue
+        first = items[0]
+        iid = (first.get("item") or {}).get("id") or "UNKNOWN"
+        title = ((first.get("item") or {}).get("title") or "")[:80]
+
+        if iid in WHITELIST_ITEMS:
+            meta = WHITELIST_ITEMS[iid]
+            content_name = meta["name"]
+            content_category = meta["category"]
+            items_in_whitelist += 1
+        else:
+            content_name = title or f"Meli {iid}"
+            content_category = "OTHER"
+            items_other += 1
+
         buyer = o.get("buyer", {}) or {}
         addr = (o.get("shipping", {}) or {}).get("receiver_address", {}) or {}
         ud = {"country": [sha256_hash("mx")]}
@@ -95,19 +107,24 @@ def collect_events_for_seller(seller, since):
         if city: ud["ct"] = [sha256_hash(city)]
         if state: ud["st"] = [sha256_hash(state)]
 
-        meta = seller_whitelist[iid]
+        total_qty = sum(int(it.get("quantity", 1)) for it in items)
+
         events.append({
             "event_name": "Purchase", "event_time": event_time,
             "event_id": f"meli_order_{oid}", "action_source": "physical_store",
             "user_data": ud,
             "custom_data": {
                 "currency": "MXN", "value": float(o["total_amount"]),
-                "content_ids": [iid], "content_name": meta["name"],
-                "content_type": "product", "num_items": int(item.get("quantity", 1)),
-                "content_category": meta["category"]
+                "content_ids": [iid], "content_name": content_name,
+                "content_type": "product", "num_items": total_qty,
+                "content_category": content_category
             }
         })
+    print(f"  [{seller['name']}] events: {len(events)} (whitelist={items_in_whitelist}, other={items_other})")
     return events
+
+def chunk(lst, n):
+    for i in range(0, len(lst), n): yield lst[i:i+n]
 
 def main():
     capi_token = os.environ.get("META_CAPI_ACCESS_TOKEN")
@@ -115,26 +132,33 @@ def main():
     test_code = os.environ.get("META_TEST_EVENT_CODE", "")
 
     since = (datetime.now(timezone.utc) - timedelta(hours=LOOKBACK_HOURS)).strftime("%Y-%m-%dT%H:%M:%S.000-00:00")
-    print(f"=== Multi-seller CAPI post-back | since={since} | pixel={PIXEL_ID} ===")
-    print(f"Sellers in scope: {[s['name'] for s in SELLERS]}")
-    print(f"Whitelist items: {len(WHITELIST_ITEMS)}")
+    print(f"=== ALL-SALES CAPI post-back | since={since} | pixel={PIXEL_ID} ===")
+    print(f"Sellers in scope: {[s['name'] for s in SELLERS]}\n")
 
     all_events = []
     for seller in SELLERS:
-        print(f"\n--- Seller: {seller['name']} ({seller['id']}) ---")
+        print(f"--- Seller: {seller['name']} ({seller['id']}) ---")
         all_events.extend(collect_events_for_seller(seller, since))
 
     if not all_events:
         print("\nNo events to send. Done."); return
 
-    print(f"\nSending {len(all_events)} Purchase events to pixel {PIXEL_ID}...")
-    payload = {"data": all_events}
-    if test_code: payload["test_event_code"] = test_code
-    r = requests.post(f"{META_GRAPH}/{PIXEL_ID}/events",
-                      params={"access_token": capi_token}, json=payload, timeout=30)
-    print(f"Meta CAPI HTTP {r.status_code}")
-    try: print(json.dumps(r.json(), indent=2))
-    except: print(r.text[:500])
+    # Meta CAPI accepts up to 1000 events per request — batch para evitar payload too big
+    print(f"\nTotal events to send: {len(all_events)}")
+    success_chunks = 0
+    for batch in chunk(all_events, 500):
+        payload = {"data": batch}
+        if test_code: payload["test_event_code"] = test_code
+        r = requests.post(f"{META_GRAPH}/{PIXEL_ID}/events",
+                          params={"access_token": capi_token}, json=payload, timeout=30)
+        print(f"  batch {len(batch)} events → HTTP {r.status_code}")
+        if r.status_code == 200:
+            success_chunks += 1
+            try: print(f"    events_received: {r.json().get('events_received','?')}")
+            except: pass
+        else:
+            print(f"    err: {r.text[:300]}")
+    print(f"\nDone. Batches success: {success_chunks}")
 
 if __name__ == "__main__":
     main()
