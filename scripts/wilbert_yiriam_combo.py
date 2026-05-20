@@ -19,7 +19,14 @@ ACCOUNTS = [
 TZ = timezone(timedelta(hours=-6))
 PAGE_W=4*72; PAGE_H=6*72
 ALLOWED_SUBS = {"printed", "ready_to_print"}
-EXCLUDE_MODELS = {"Grip"}  # Modelos a excluir
+# Exclusiones por cuenta: model exacto o substring del título
+EXCLUDE_BY_ACC = {
+    "Wilbert": {
+        "models": {"Grip"},
+        "title_contains": {"mandarin sky"},
+    },
+    "Yiriam": {"models": set(), "title_contains": set()},
+}
 USED_LISTINGS = {"MLM2911205487", "MLM5295749840", "MLM2911241939"}
 
 
@@ -213,12 +220,16 @@ for acc_name, rt in ACCOUNTS:
             st=sh.get("status"); sub=sh.get("substatus")
             if st!="ready_to_ship" or sub not in ALLOWED_SUBS: continue
             items=ord_o.get("order_items",[])
-            comp_lines=[]; has_used=False; skip_grip=False
+            comp_lines=[]; has_used=False; skip_excl=False
+            excl = EXCLUDE_BY_ACC.get(acc_name, {"models": set(), "title_contains": set()})
             for it in items:
                 io_obj = it.get("item") or {}
                 title_cln, model = clean_title(io_obj, H)
-                if model in EXCLUDE_MODELS:
-                    skip_grip=True
+                raw_title = (io_obj.get("title") or "").lower()
+                if model in excl["models"]:
+                    skip_excl = True
+                if any(sub in raw_title for sub in excl["title_contains"]):
+                    skip_excl = True
                 qty = it.get("quantity",1)
                 iid = io_obj.get("id") or ""
                 cond = get_condition(io_obj, H)
@@ -227,10 +238,9 @@ for acc_name, rt in ACCOUNTS:
                     comp_lines.append(f"USADO {title_cln} x{qty}")
                 else:
                     comp_lines.append(f"{title_cln} x{qty}")
-                # Si solo es el modelo (sin color), warning
                 if title_cln == model:
                     no_color_warns.append((sid, ord_o.get("id"), io_obj.get("id"), io_obj.get("variation_id"), io_obj.get("title","")[:60]))
-            if skip_grip:
+            if skip_excl:
                 excluded_grip += 1; continue
             buyer=(ord_o.get("buyer") or {}).get("nickname","?")
             all_shipments.append({"sid":sid,"account":acc_name,"token":at,
@@ -241,7 +251,7 @@ for acc_name, rt in ACCOUNTS:
             time.sleep(0.04)
         except Exception as e:
             print(f"  err {sid}: {str(e)[:80]}")
-    print(f"  matches: {matches} (excluidos Grip: {excluded_grip})")
+    print(f"  matches: {matches} (excluidos por filtro cuenta: {excluded_grip})")
     if no_color_warns:
         print(f"  *** AVISO: {len(no_color_warns)} items sin color detectado:")
         for w in no_color_warns[:10]:
