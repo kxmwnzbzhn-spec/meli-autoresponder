@@ -10,6 +10,14 @@ CID=os.environ["MELI_APP_ID"]; CS=os.environ["MELI_APP_SECRET"]
 API="https://api.mercadolibre.com"
 MIN_FLOOR=200
 
+# PAUSED_LOCK: items que NO se reactivan ni tocan (el usuario los pausó manual)
+PAUSED_LOCK={
+  "MLM5363023022","MLM2940047227","MLM5291785036","MLM2940047233",
+  "MLM2940047221","MLM2940662359","MLM5363034838","MLM5291774150",
+  "MLM2916942827","MLM2909183147","MLM5363034852","MLM5364336572",
+  "MLM5364336602","MLM5291774160","MLM5291786710",
+}
+
 FLOOR_OVERRIDE={"MLM5363034834":349,"MLM2940047227":349}
 CEILING_OVERRIDE={"MLM5363034838":899}
 
@@ -30,6 +38,8 @@ HJ={"Authorization":f"Bearer {T}","Content-Type":"application/json"}
 
 acts=[]
 for iid in ITEMS:
+    if iid in PAUSED_LOCK:
+        acts.append(f"LOCKED {iid} skip"); continue
     try:
         g=requests.get(f"{API}/items/{iid}",headers=H,timeout=15).json()
         if not g.get("id"): continue
