@@ -11,7 +11,7 @@ API="https://api.mercadolibre.com"
 MIN_FLOOR=200
 
 # PAUSED_LOCK: items que NO se reactivan ni tocan (el usuario los pausó manual)
-PAUSED_LOCK=set()
+PAUSED_LOCK={"MLM5353056250",}  # categoría perfumes pausada por user
 
 FLOOR_OVERRIDE={"MLM5363034834":349,"MLM2940047227":349}
 CEILING_OVERRIDE={"MLM5363034838":899}
