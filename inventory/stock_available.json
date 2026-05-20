@@ -1,10 +1,10 @@
 {
   "_meta": {
-    "updated": "2026-05-20T04:38:34.418683Z",
+    "updated": "2026-05-20T08:03:42.552338Z",
     "golive_ref": "stock_at_golive_20260518.json",
     "note": "Dinámico — decrementa con cada venta vía cron.",
-    "total_sold": 185,
-    "total_available": 4831
+    "total_sold": 186,
+    "total_available": 4830
   },
   "skus": {
     "SONY-XB100-NEGRO": {
@@ -96,9 +96,9 @@
       "color": "Morado"
     },
     "JBL-GO4-ROSA": {
-      "available": 124,
+      "available": 123,
       "initial": 170,
-      "sold_since_golive": 46,
+      "sold_since_golive": 47,
       "last_pause_triggered": false,
       "modelo": "JBL Go 4",
       "color": "Rosa"
