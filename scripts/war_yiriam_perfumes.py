@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
-"""War Yiriam V3 - más agresivo:
-- Si winning y cur > low_comp + 10: FORCE drop a low_comp-2 (no holdear desfasados)
-- Si winning y cur <= low_comp + 10: hold (estamos justo en el tope)
-- Si competing/losing/sharing: bajar a ptw-2 (más margen que -1)
-- Si not_listed: log warning (no podemos competir sin CPID)
+"""War Yiriam V4 — FIX bug FORCE DROP reputation win.
+Si PTW v2 dice winning → confiar en MELI. NO dropear aunque cur > low_ext.
+Solo max-up hasta low_ext-5 si hay headroom real.
+Si competing/losing → ptw-2.
 """
 import os, time, requests
 RT=os.environ["MELI_REFRESH_TOKEN_YC_NEW"]
@@ -22,6 +21,7 @@ ITEMS=[
   "MLM2940047245","MLM5363147408","MLM5363023032","MLM5363147410","MLM5363034856",
   "MLM5363147416","MLM2940047249","MLM5363147422","MLM5363034860","MLM5353056250",
   "MLM2940662359","MLM5364336572","MLM5364336602",
+  "MLM5291774160","MLM5291772416","MLM5291786710","MLM5291786706","MLM5291788562",
 ]
 
 T=requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token","client_id":CID,"client_secret":CS,"refresh_token":RT},timeout=15).json()["access_token"]
@@ -50,69 +50,56 @@ for iid in ITEMS:
             acts.append(f"REACT_QTY {iid} http={r2.status_code}")
             if r2.status_code<300: st="active"
         if st!="active": continue
-
         if not cpid:
-            acts.append(f"{iid} '{title}' WARN sin_cpid cur=${cur}")
+            acts.append(f"{iid} '{title}' sin_cpid")
             continue
 
-        # PTW
         p=requests.get(f"{API}/items/{iid}/price_to_win?version=v2",headers=H,timeout=10).json()
-        ptw=p.get("price_to_win")
-        ptw_st=(p.get("status") or "").lower()
+        ptw=p.get("price_to_win"); ptw_st=(p.get("status") or "").lower()
 
-        # low_comp via /products/{cpid}/items (REALITY CHECK)
-        low_comp=None
+        low_ext=None
         try:
             pr=requests.get(f"{API}/products/{cpid}/items?limit=20",headers=H,timeout=10).json()
             results=pr.get("results") or pr.get("listings") or []
-            comps=[]
+            xc=[]
             for rr in results:
                 rid=rr.get("item_id") or rr.get("id")
                 rp=rr.get("price")
                 rst=(rr.get("status") or "active").lower()
                 rq=rr.get("available_quantity",1)
                 if rid and rid!=iid and rp and rst=="active" and rq>0:
-                    comps.append(rp)
-            comps.sort()
-            if comps: low_comp=comps[0]
+                    xc.append(rp)
+            xc.sort()
+            if xc: low_ext=xc[0]
         except: pass
 
-        target=None
-        reason=""
-
+        target=None; reason=""
         if ptw_st=="not_listed":
-            acts.append(f"{iid} '{title}' WARN not_listed cur=${cur} cpid={cpid} — sin buy box")
-            continue
-
-        if ptw_st in ("winning","sharing_first_place"):
-            if low_comp:
-                lc=int(low_comp)
-                # Si estamos MUY por arriba (>+10): FORCE drop
-                if cur > lc + 10:
-                    target=lc-2
-                    target=max(target,floor); target=min(target,ceil)
-                    reason=f"OVERPRICED winning cur=${cur} >> low_comp=${lc}+10 → DROP ${target}"
+            # forzar reindex con pequeño bump (alternancia +/-1 cada corrida)
+            bump=cur-1 if cur>floor else cur+1
+            target=bump
+            reason=f"not_listed reindex_bump → ${target}"
+        elif ptw_st in ("winning","sharing_first_place"):
+            # CONFIAR EN MELI: solo max-up si hay headroom. NUNCA dropear.
+            if low_ext:
+                can_up=int(low_ext)-5
+                can_up=min(can_up,ceil); can_up=max(can_up,floor)
+                if can_up > cur:
+                    target=can_up
+                    reason=f"max-up winning low_ext={low_ext} (-5) → ${target}"
                 else:
-                    # estamos justo o subir si hay headroom
-                    can_up=lc-5
-                    can_up=min(can_up,ceil); can_up=max(can_up,floor)
-                    if can_up > cur:
-                        target=can_up
-                        reason=f"max-up winning low_comp={lc} (-5) → ${target}"
-                    else:
-                        reason=f"winning cur=${cur} ya >= low_comp-5=${can_up} → hold"
+                    reason=f"winning cur=${cur} hold (low_ext={low_ext})"
             else:
                 reason=f"winning sin comp → hold ${cur}"
         elif ptw_st in ("competing","losing"):
             if ptw:
-                target=max(int(ptw)-2, floor)
-                target=min(target,ceil)
+                target=max(int(ptw)-2, floor); target=min(target,ceil)
                 reason=f"{ptw_st} ptw={ptw}-2 → ${target}"
-            elif low_comp:
-                target=max(int(low_comp)-2,floor); target=min(target,ceil)
-                reason=f"{ptw_st} via low_comp={low_comp}-2 → ${target}"
+            elif low_ext:
+                target=max(int(low_ext)-2,floor); target=min(target,ceil)
+                reason=f"{ptw_st} via low_ext={low_ext}-2 → ${target}"
             else:
-                reason=f"{ptw_st} sin info → hold"
+                reason=f"{ptw_st} sin info hold"
         else:
             reason=f"st={ptw_st} skip"
 
@@ -121,9 +108,9 @@ for iid in ITEMS:
             acts.append(f"{iid} '{title}' ${cur}→${target} [{reason}] http={r.status_code}")
         else:
             acts.append(f"{iid} '{title}' hold ${cur} [{reason}]")
-        time.sleep(0.3)
+        time.sleep(0.25)
     except Exception as e:
         acts.append(f"ERR {iid}: {e}")
 
-print(f"war-yiriam-v3: {len(acts)} actions")
+print(f"war-yiriam-v4: {len(acts)} actions")
 for a in acts: print(f"  {a}")
