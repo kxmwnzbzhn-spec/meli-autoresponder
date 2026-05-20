@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
   push: { paths: [.github/workflows/war_yiriam_perfumes.yml] }
   schedule:
-    - cron: '*/3 * * * *'
+    - cron: '* * * * *'
   repository_dispatch:
     types: [war_yir_retrigger]
 concurrency:
@@ -25,11 +25,11 @@ jobs:
           MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
           MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
         run: python scripts/war_yiriam_perfumes.py
-      - name: Self-retrigger en ~70s (anti-throttle)
+      - name: Self-retrigger ~30s (anti-throttle)
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          sleep 70
+          sleep 30
           curl -s -X POST \
             -H "Authorization: Bearer $GH_TOKEN" \
             -H "Accept: application/vnd.github+json" \
