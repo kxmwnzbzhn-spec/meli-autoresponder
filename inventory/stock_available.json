@@ -1,32 +1,32 @@
 {
   "_meta": {
-    "updated": "2026-05-20T00:17:17.483014Z",
+    "updated": "2026-05-20T04:38:34.418683Z",
     "golive_ref": "stock_at_golive_20260518.json",
     "note": "Dinámico — decrementa con cada venta vía cron.",
-    "total_sold": 166,
-    "total_available": 4850
+    "total_sold": 185,
+    "total_available": 4831
   },
   "skus": {
     "SONY-XB100-NEGRO": {
-      "available": 1412,
+      "available": 1411,
       "initial": 1422,
-      "sold_since_golive": 10,
+      "sold_since_golive": 11,
       "last_pause_triggered": false,
       "modelo": "Sony XB100",
       "color": "Negro"
     },
     "JBL-GO4-AQUA": {
-      "available": 679,
+      "available": 675,
       "initial": 704,
-      "sold_since_golive": 25,
+      "sold_since_golive": 29,
       "last_pause_triggered": false,
       "modelo": "JBL Go 4",
       "color": "Aqua/Celeste"
     },
     "JBL-GO3-NEGRO": {
-      "available": 460,
+      "available": 456,
       "initial": 495,
-      "sold_since_golive": 35,
+      "sold_since_golive": 39,
       "last_pause_triggered": false,
       "modelo": "JBL Go 3",
       "color": "Negro"
@@ -40,9 +40,9 @@
       "color": "Azul"
     },
     "JBL-GO4-CAMUFLAJE": {
-      "available": 384,
+      "available": 383,
       "initial": 389,
-      "sold_since_golive": 5,
+      "sold_since_golive": 6,
       "last_pause_triggered": false,
       "modelo": "JBL Go 4",
       "color": "Camuflaje"
@@ -80,9 +80,9 @@
       "color": "Rosa"
     },
     "JBL-GO4-ROJO": {
-      "available": 172,
+      "available": 167,
       "initial": 198,
-      "sold_since_golive": 26,
+      "sold_since_golive": 31,
       "last_pause_triggered": false,
       "modelo": "JBL Go 4",
       "color": "Rojo"
@@ -96,9 +96,9 @@
       "color": "Morado"
     },
     "JBL-GO4-ROSA": {
-      "available": 127,
+      "available": 124,
       "initial": 170,
-      "sold_since_golive": 43,
+      "sold_since_golive": 46,
       "last_pause_triggered": false,
       "modelo": "JBL Go 4",
       "color": "Rosa"
@@ -112,9 +112,9 @@
       "color": "Blanco"
     },
     "BOSE-SOUNDLINK-NEGRO": {
-      "available": 64,
+      "available": 63,
       "initial": 65,
-      "sold_since_golive": 1,
+      "sold_since_golive": 2,
       "last_pause_triggered": false,
       "modelo": "Bose Soundlink",
       "color": "Negro"
