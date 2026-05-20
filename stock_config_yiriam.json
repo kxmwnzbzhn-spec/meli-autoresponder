@@ -106,13 +106,13 @@
   },
   "MLM5353056250": {
     "title": "Armaf Island Bliss",
-    "real_stock": 3,
+    "real_stock": 2,
     "master_stock": 12,
     "min_visible": 1,
     "available_quantity": 1,
     "auto_replenish": true,
     "active": true,
-    "last_sold": 10
+    "last_sold": 11
   },
   "MLM5353056406": {
     "title": "Lady Million Gold",
