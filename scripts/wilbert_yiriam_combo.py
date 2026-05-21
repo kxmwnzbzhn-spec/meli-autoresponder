@@ -15,6 +15,7 @@ APP_SECRET=os.environ["MELI_APP_SECRET"]
 ACCOUNTS = [
     ("Wilbert", os.environ.get("MELI_REFRESH_TOKEN_WILBERT")),
     ("Yiriam",  os.environ.get("MELI_REFRESH_TOKEN_YC_NEW")),
+    ("Asva",    os.environ.get("MELI_REFRESH_TOKEN_ASVA")),
 ]
 TZ = timezone(timedelta(hours=-6))
 PAGE_W=4*72; PAGE_H=6*72
@@ -23,9 +24,10 @@ ALLOWED_SUBS = {"printed", "ready_to_print"}
 EXCLUDE_BY_ACC = {
     "Wilbert": {
         "models": {"Grip"},
-        "title_contains": {"mandarin sky"},
+        "title_contains": {"mandarin", "aqua"},
     },
     "Yiriam": {"models": set(), "title_contains": set()},
+    "Asva":   {"models": set(), "title_contains": set()},
 }
 USED_LISTINGS = {"MLM2911205487", "MLM5295749840", "MLM2911241939"}
 
@@ -226,9 +228,11 @@ for acc_name, rt in ACCOUNTS:
                 io_obj = it.get("item") or {}
                 title_cln, model = clean_title(io_obj, H)
                 raw_title = (io_obj.get("title") or "").lower()
+                resolved = title_cln.lower()  # incluye color del variant
                 if model in excl["models"]:
                     skip_excl = True
-                if any(sub in raw_title for sub in excl["title_contains"]):
+                # busca substrings en título crudo Y en el producto resuelto (color)
+                if any(sub in raw_title or sub in resolved for sub in excl["title_contains"]):
                     skip_excl = True
                 qty = it.get("quantity",1)
                 iid = io_obj.get("id") or ""
