@@ -14,6 +14,7 @@ jobs:
           MELI_APP_SECRET:                ${{ secrets.MELI_APP_SECRET }}
           MELI_REFRESH_TOKEN_WILBERT:     ${{ secrets.MELI_REFRESH_TOKEN_WILBERT }}
           MELI_REFRESH_TOKEN_YC_NEW:      ${{ secrets.MELI_REFRESH_TOKEN_YC_NEW }}
+          MELI_REFRESH_TOKEN_ASVA:        ${{ secrets.MELI_REFRESH_TOKEN_ASVA }}
         run: python scripts/wilbert_yiriam_combo.py
       - uses: actions/upload-artifact@v4
         if: always()
