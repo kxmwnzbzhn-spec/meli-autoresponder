@@ -3,7 +3,7 @@ on: { workflow_dispatch: {}, push: { paths: [.github/workflows/yir_ops_19may.yml
 jobs:
   run:
     runs-on: ubuntu-latest
-    timeout-minutes: 3
+    timeout-minutes: 8
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -12,4 +12,5 @@ jobs:
       - env:
           MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
           MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
-        run: python scripts/find_app_owner.py
+          MELI_REFRESH_TOKEN_YC_NEW: ${{ secrets.MELI_REFRESH_TOKEN_YC_NEW }}
+        run: python scripts/yir_war_status.py
