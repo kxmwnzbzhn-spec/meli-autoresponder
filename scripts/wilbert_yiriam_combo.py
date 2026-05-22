@@ -96,6 +96,7 @@ def get_variant_color(item_obj, H):
 
 def get_model(title):
     t=(title or "").strip()
+    tl_full = t.lower()
     for w in ["Bocina ","bocina ","Parlante ","parlante ","Altavoz ","altavoz ","Speaker ","speaker ",
               "JBL ","jbl ","Jbl ","Sony ","SONY ","Bose ","BOSE "]:
         t=t.replace(w,"")
@@ -108,17 +109,24 @@ def get_model(title):
     if "grip" in tl: return "Grip"
     if "xb100" in tl: return "Sony XB100"
     if "soundlink" in tl: return "Bose SoundLink"
+    # Listado JBL genérico en portugués: "Modelo Padrão" = modelo estándar
+    if "modelo padrão" in tl_full or "modelo padrao" in tl_full or "padrão" in tl_full:
+        return "JBL Impermeable"
     return t[:30]
 
 
 def clean_title(item_obj, H):
     title = item_obj.get("title","")
+    tl = title.lower()
     model = get_model(title)
     color = get_variant_color(item_obj, H)
     if not color:
-        # Último recurso: parsear título
         color = _parse_color_map(title)
-    return f"{model} {color}" if color else model, model
+    base = f"{model} {color}" if color else model
+    # Sufijo (Reacond.) si el título lo indica
+    if "reacondicionado" in tl or "reacond" in tl:
+        base = f"{base} (Reacond.)"
+    return base, model
 
 
 _COND_CACHE={}
