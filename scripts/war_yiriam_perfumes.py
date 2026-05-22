@@ -22,8 +22,8 @@ PAUSED_LOCK={"MLM5353056250"}
 
 # Pisos por item (no bajar de aquí)
 FLOOR_OVERRIDE={
-  "MLM5363034834":349,
-  "MLM2940047227":349,
+  "MLM5390346898":349,
+  "MLM5390372034":349,
   "MLM5364336572":899,
 }
 # Techos por item (no subir de aquí)
