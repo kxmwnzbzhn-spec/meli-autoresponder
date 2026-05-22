@@ -15,7 +15,6 @@ APP_SECRET=os.environ["MELI_APP_SECRET"]
 ACCOUNTS = [
     ("Wilbert", os.environ.get("MELI_REFRESH_TOKEN_WILBERT")),
     ("Yiriam",  os.environ.get("MELI_REFRESH_TOKEN_YC_NEW")),
-    ("Asva",    os.environ.get("MELI_REFRESH_TOKEN_ASVA")),
 ]
 TZ = timezone(timedelta(hours=-6))
 PAGE_W=4*72; PAGE_H=6*72
@@ -158,31 +157,50 @@ def detect_content_bbox(pdf_bytes, page_idx=0):
 
 def render_header(s, header_h):
     has_used = bool(s.get("has_used"))
+    n_prods = s.get("n_prods", len(s.get("comp_lines",[])))
+    multi = n_prods > 1
     usado_strip = 14 if has_used else 0
-    total_h = header_h + usado_strip
+    multi_strip = 14 if multi else 0
+    total_h = header_h + usado_strip + multi_strip
     buf=io.BytesIO()
     c=canvas.Canvas(buf, pagesize=(PAGE_W, PAGE_H))
     cx = PAGE_W/2.0
+    # banda amarilla (datos + productos)
     c.setFillColor(Color(1, 0.96, 0.74))
     c.rect(0, PAGE_H-total_h, PAGE_W, header_h, fill=1, stroke=0)
+    top = PAGE_H
+    # banda roja USADO (si aplica) — arriba del todo
     if has_used:
         c.setFillColorRGB(0.85, 0.13, 0.13)
-        c.rect(0, PAGE_H-usado_strip, PAGE_W, usado_strip, fill=1, stroke=0)
+        c.rect(0, top-usado_strip, PAGE_W, usado_strip, fill=1, stroke=0)
         c.setFillColorRGB(1,1,1)
         c.setFont("Helvetica-Bold", 9)
-        c.drawCentredString(cx, PAGE_H-11, "*** PRODUCTO USADO ***")
-    yellow_top = PAGE_H - usado_strip
+        c.drawCentredString(cx, top-11, "*** PRODUCTO USADO ***")
+        top -= usado_strip
+    # banda naranja MULTIPRODUCTO (si aplica)
+    if multi:
+        c.setFillColorRGB(0.90, 0.49, 0.13)
+        c.rect(0, top-multi_strip, PAGE_W, multi_strip, fill=1, stroke=0)
+        c.setFillColorRGB(1,1,1)
+        c.setFont("Helvetica-Bold", 9)
+        c.drawCentredString(cx, top-11, f">>> ENVIO CON {n_prods} PRODUCTOS <<<")
+        top -= multi_strip
+    yellow_top = top
     c.setFillColorRGB(0,0,0)
     c.setFont("Helvetica-Bold", 7.5)
     c.drawCentredString(cx, yellow_top-11, f"[{s['account'].upper()}] {s['buyer'][:30]} | Ship:{s['sid']}")
-    big = s["comp_lines"][:4]; n=len(big); lh=16
+    big = s["comp_lines"][:6]; n=len(big)
+    # font/line-height adaptan al número de productos
+    if n <= 2: fs, lh = 14, 16
+    elif n <= 4: fs, lh = 12, 14
+    else: fs, lh = 10, 12
     block_top=yellow_top-18; block_bot=PAGE_H-total_h+4
     block_h=block_top-block_bot; text_h=n*lh
-    first_y = block_top - (block_h - text_h)/2.0 - 12
-    c.setFont("Helvetica-Bold", 14)
+    first_y = block_top - (block_h - text_h)/2.0 - fs*0.8
+    c.setFont("Helvetica-Bold", fs)
     y=first_y
     for line in big:
-        c.drawCentredString(cx, y, line[:30]); y-=lh
+        c.drawCentredString(cx, y, line[:34]); y-=lh
     c.showPage(); c.save()
     buf.seek(0)
     return PdfReader(buf).pages[0]
@@ -211,45 +229,48 @@ for acc_name, rt in ACCOUNTS:
         if not res: break
         orders.extend(res); offset+=len(res)
         if offset>=r.get("paging",{}).get("total",0): break
+    # AGRUPA todas las órdenes por shipment_id (un envío/pack puede tener varias órdenes)
     obs={}
     for o in orders:
         sid=(o.get("shipping") or {}).get("id")
-        if sid: obs[sid]=o
+        if sid: obs.setdefault(sid, []).append(o)
     matches=0; excluded_grip=0; no_color_warns=[]
-    for sid, ord_o in obs.items():
+    for sid, ord_list in obs.items():
         try:
             sh=requests.get(f"https://api.mercadolibre.com/shipments/{sid}",headers=H,timeout=10).json()
-            st=sh.get("status"); sub=sh.get("substatus")
-            if st!="ready_to_ship" or sub not in ALLOWED_SUBS: continue
-            items=ord_o.get("order_items",[])
-            comp_lines=[]; has_used=False; skip_excl=False
+            st=sh.get("status"); substat=sh.get("substatus")
+            if st!="ready_to_ship" or substat not in ALLOWED_SUBS: continue
             excl = EXCLUDE_BY_ACC.get(acc_name, {"models": set(), "title_contains": set()})
-            for it in items:
-                io_obj = it.get("item") or {}
-                title_cln, model = clean_title(io_obj, H)
-                raw_title = (io_obj.get("title") or "").lower()
-                resolved = title_cln.lower()  # incluye color del variant
-                if model in excl["models"]:
-                    skip_excl = True
-                # busca substrings en título crudo Y en el producto resuelto (color)
-                if any(sub in raw_title or sub in resolved for sub in excl["title_contains"]):
-                    skip_excl = True
-                qty = it.get("quantity",1)
-                iid = io_obj.get("id") or ""
-                cond = get_condition(io_obj, H)
-                if iid in USED_LISTINGS or cond == "used":
-                    has_used=True
-                    comp_lines.append(f"USADO {title_cln} x{qty}")
-                else:
-                    comp_lines.append(f"{title_cln} x{qty}")
-                if title_cln == model:
-                    no_color_warns.append((sid, ord_o.get("id"), io_obj.get("id"), io_obj.get("variation_id"), io_obj.get("title","")[:60]))
+            # Junta TODOS los items de TODAS las órdenes del envío (packs)
+            comp_lines=[]; has_used=False; skip_excl=False
+            for ord_o in ord_list:
+                for it in ord_o.get("order_items", []):
+                    io_obj = it.get("item") or {}
+                    title_cln, model = clean_title(io_obj, H)
+                    raw_title = (io_obj.get("title") or "").lower()
+                    resolved = title_cln.lower()
+                    if model in excl["models"]:
+                        skip_excl = True
+                    if any(kw in raw_title or kw in resolved for kw in excl["title_contains"]):
+                        skip_excl = True
+                    qty = it.get("quantity",1)
+                    iid = io_obj.get("id") or ""
+                    cond = get_condition(io_obj, H)
+                    if iid in USED_LISTINGS or cond == "used":
+                        has_used=True
+                        comp_lines.append(f"USADO {title_cln} x{qty}")
+                    else:
+                        comp_lines.append(f"{title_cln} x{qty}")
+                    if title_cln == model:
+                        no_color_warns.append((sid, ord_o.get("id"), io_obj.get("id"), io_obj.get("variation_id"), io_obj.get("title","")[:60]))
             if skip_excl:
                 excluded_grip += 1; continue
-            buyer=(ord_o.get("buyer") or {}).get("nickname","?")
+            buyer=(ord_list[0].get("buyer") or {}).get("nickname","?")
+            n_prods = len(comp_lines)
             all_shipments.append({"sid":sid,"account":acc_name,"token":at,
                                   "comp_lines":comp_lines,"buyer":buyer,
-                                  "has_used":has_used,"substatus":sub,
+                                  "has_used":has_used,"substatus":substat,
+                                  "n_prods":n_prods,
                                   "tracking":sh.get("tracking_number","")})
             matches+=1
             time.sleep(0.04)
@@ -262,7 +283,11 @@ for acc_name, rt in ACCOUNTS:
             print(f"     sid={w[0]} order={w[1]} item={w[2]} var={w[3]} title={w[4]!r}")
 
 print(f"\nTotal shipments seleccionados: {len(all_shipments)}")
-# Sort por producto (USADO primero)
+multi = [s for s in all_shipments if s.get("n_prods",1) > 1]
+print(f"Envíos con MÚLTIPLES productos: {len(multi)}")
+for s in multi:
+    print(f"   sid={s['sid']} [{s['account']}] ({s['n_prods']} prods): {' + '.join(s['comp_lines'])}")
+# Sort por producto (USADO primero, luego multiproducto agrupado, luego por producto)
 all_shipments.sort(key=lambda s: (0 if s["has_used"] else 1, "/".join(s["comp_lines"]), s["sid"]))
 
 
@@ -290,8 +315,8 @@ for s in all_shipments:
                 lbl_x0=float(box.left)+float(cx0)
                 lbl_y0=float(box.bottom)+float(cy0)
                 lbl_w=float(cw); lbl_h=float(ch)
-            n_lines=min(len(s["comp_lines"]),4)
-            header_h = 22 + n_lines*16
+            n_lines=min(len(s["comp_lines"]),6)
+            header_h = 22 + n_lines*15
             label_area_h = PAGE_H - header_h
             new_page = PageObject.create_blank_page(width=PAGE_W, height=PAGE_H)
             sx = PAGE_W/lbl_w; sy = label_area_h/lbl_h
