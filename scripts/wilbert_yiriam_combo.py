@@ -101,18 +101,18 @@ def get_model(title):
               "JBL ","jbl ","Jbl ","Sony ","SONY ","Bose ","BOSE "]:
         t=t.replace(w,"")
     tl=t.lower()
-    if "go 4" in tl or "go4" in tl: return "Go 4"
-    if "go 3" in tl or "go3" in tl: return "Go 3"
-    if "clip 5" in tl or "clip5" in tl: return "Clip 5"
-    if "charge 6" in tl or "charge6" in tl: return "Charge 6"
-    if "flip 7" in tl or "flip7" in tl: return "Flip 7"
+    if "go 4" in tl or "go4" in tl: return "Go4"
+    if "go 3" in tl or "go3" in tl: return "Go3"
+    if "clip 5" in tl or "clip5" in tl: return "Clip5"
+    if "charge 6" in tl or "charge6" in tl: return "Charge6"
+    if "flip 7" in tl or "flip7" in tl: return "Flip7"
     if "grip" in tl: return "Grip"
-    if "xb100" in tl: return "Sony XB100"
-    if "soundlink" in tl: return "Bose SoundLink"
+    if "xb100" in tl: return "XB100"
+    if "soundlink" in tl: return "SoundLink"
     # Listado JBL genérico en portugués: "Modelo Padrão" = modelo estándar
     if "modelo padrão" in tl_full or "modelo padrao" in tl_full or "padrão" in tl_full:
         return "JBL Impermeable"
-    return t[:30]
+    return t[:24]
 
 
 def clean_title(item_obj, H):
@@ -264,11 +264,12 @@ for acc_name, rt in ACCOUNTS:
                     qty = it.get("quantity",1)
                     iid = io_obj.get("id") or ""
                     cond = get_condition(io_obj, H)
+                    # Formato reducido en español: "{cant} {Modelo} {Color}"
                     if iid in USED_LISTINGS or cond == "used":
                         has_used=True
-                        comp_lines.append(f"USADO {title_cln} x{qty}")
+                        comp_lines.append(f"USADO {qty} {title_cln}")
                     else:
-                        comp_lines.append(f"{title_cln} x{qty}")
+                        comp_lines.append(f"{qty} {title_cln}")
                     if title_cln == model:
                         no_color_warns.append((sid, ord_o.get("id"), io_obj.get("id"), io_obj.get("variation_id"), io_obj.get("title","")[:60]))
             if skip_excl:
