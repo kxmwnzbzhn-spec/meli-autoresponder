@@ -1,4 +1,5 @@
 import os,requests,json,time
+import meli_token
 
 ACCOUNTS={
     "JUAN":os.environ.get("MELI_REFRESH_TOKEN"),
@@ -71,7 +72,7 @@ for label,rt in ACCOUNTS.items():
         print(f"\n=== {label}: sin refresh_token, skip ===")
         continue
     try:
-        r=requests.post("https://api.mercadolibre.com/oauth/token",data={"grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],"client_secret":os.environ["MELI_APP_SECRET"],"refresh_token":rt},timeout=20).json()
+        r=meli_token.refresh(rt).json()
     except Exception as e:
         print(f"\n=== {label}: ERROR refresh ({e}) ==="); continue
     if "access_token" not in r:

@@ -9,6 +9,7 @@ para futuras campañas + atribución modelada más precisa para las activas.
 """
 import os, requests, json, hashlib, sys
 from datetime import datetime, timedelta, timezone
+import meli_token
 
 API_MELI = "https://api.mercadolibre.com"
 META_GRAPH = "https://graph.facebook.com/v21.0"
@@ -43,12 +44,7 @@ def meli_token(token_env):
     rt = os.environ.get(token_env)
     if not rt:
         print(f"WARN: {token_env} not set, skipping"); return None
-    r = requests.post(f"{API_MELI}/oauth/token", data={
-        "grant_type": "refresh_token",
-        "client_id": os.environ["MELI_APP_ID"],
-        "client_secret": os.environ["MELI_APP_SECRET"],
-        "refresh_token": rt
-    }, timeout=20)
+    r = meli_token.refresh(rt)
     if r.status_code != 200:
         print(f"ERR refresh {token_env}: {r.status_code} {r.text[:200]}"); return None
     return r.json()["access_token"]

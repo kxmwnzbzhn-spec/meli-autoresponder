@@ -2,6 +2,7 @@
 """Recorre cada cuenta, busca items en blacklist y los pausa.
 Si el item no es del seller actual, lo ignora (no es nuestro)."""
 import os, requests, json
+import meli_token
 API="https://api.mercadolibre.com"
 APP_ID=os.environ["MELI_APP_ID"]; APP_SECRET=os.environ["MELI_APP_SECRET"]
 
@@ -20,8 +21,7 @@ print(f"Blacklist: {ITEMS}")
 
 def refresh(rt):
     try:
-        r=requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token",
-            "client_id":APP_ID,"client_secret":APP_SECRET,"refresh_token":rt},timeout=20)
+        r=meli_token.refresh(rt)
         return r.json().get("access_token")
     except: return None
 

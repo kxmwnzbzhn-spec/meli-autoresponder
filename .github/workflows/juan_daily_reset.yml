@@ -14,6 +14,7 @@ jobs:
       - run: python scripts/juan_daily_reset.py
         env:
           MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          TOKEN_SHARED: ${{ secrets.TOKEN_SHARED }}
           MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
           MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}

@@ -7,6 +7,7 @@ Mapea cada venta a SKU canónico via match_patterns. Decrementa available.
 Si available <= 0 → identifica TODAS las listings (todas las cuentas) cuyo título match con ese SKU y las pausa.
 """
 import os,json,base64,re,requests,datetime as dt
+import meli_token
 
 CID=os.environ["MELI_APP_ID"]; CS=os.environ["MELI_APP_SECRET"]
 GHT=os.environ["GH_TOKEN"]
@@ -22,7 +23,7 @@ def tg(m):
 
 def tok(rt):
     if not rt: return None
-    r=requests.post("https://api.mercadolibre.com/oauth/token",data={"grant_type":"refresh_token","client_id":CID,"client_secret":CS,"refresh_token":rt}).json()
+    r=meli_token.refresh(rt).json()
     return r.get("access_token")
 
 ACCOUNTS=[("Wilbert","MELI_REFRESH_TOKEN_WILBERT"),("Yiriam","MELI_REFRESH_TOKEN_YC_NEW"),("Juan","MELI_REFRESH_TOKEN_JUAN"),("Raymundo","MELI_REFRESH_TOKEN_RAYMUNDO"),("Claribel","MELI_REFRESH_TOKEN_CLARIBEL"),("Asva","MELI_REFRESH_TOKEN_ASVA"),("Mildred","MELI_REFRESH_TOKEN_MILDRED"),("Dilcie","MELI_REFRESH_TOKEN_DILCIE"),("Bren","MELI_REFRESH_TOKEN_BREN")]

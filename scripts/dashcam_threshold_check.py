@@ -8,18 +8,14 @@ Output prints structured status that scheduled task reads.
 """
 import os, requests, json, sys
 from datetime import datetime, timezone, timedelta
+import meli_token
 
 DASHCAM_MLM = "MLM5356938548"
 SELLER_ID = 1668713481
 THRESHOLD_7D = 25
 THRESHOLD_14D = 50
 
-tok = requests.post("https://api.mercadolibre.com/oauth/token", data={
-    "grant_type": "refresh_token",
-    "client_id": os.environ["MELI_APP_ID"],
-    "client_secret": os.environ["MELI_APP_SECRET"],
-    "refresh_token": os.environ["MELI_REFRESH_TOKEN_USER1668"]
-}, timeout=20).json()
+tok = meli_token.refresh(os.environ["MELI_REFRESH_TOKEN_USER1668"]).json()
 h = {"Authorization": f"Bearer {tok['access_token']}"}
 
 now = datetime.now(timezone.utc)

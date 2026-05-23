@@ -4,6 +4,7 @@ Cron: 22:00 CDMX. Tira por Telegram el conteo por cuenta.
 import os, requests
 from datetime import datetime, timedelta, timezone
 from collections import defaultdict
+import meli_token
 
 APP_ID="5211907102822632"
 APP_SECRET=os.environ["MELI_APP_SECRET"]
@@ -28,9 +29,7 @@ END  =START+timedelta(days=1)
 print(f"Devoluciones hoy: {TODAY} CDMX")
 
 def tok(rt):
-    r=requests.post("https://api.mercadolibre.com/oauth/token",data={
-        "grant_type":"refresh_token","client_id":APP_ID,
-        "client_secret":APP_SECRET,"refresh_token":rt}).json()
+    r=meli_token.refresh(rt).json()
     return r.get("access_token")
 
 results = {}

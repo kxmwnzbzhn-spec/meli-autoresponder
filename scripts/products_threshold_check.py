@@ -6,6 +6,7 @@ Itera múltiples sellers (Meli accounts) → un solo pixel Meta.
 """
 import os, requests, sys
 from datetime import datetime, timezone, timedelta
+import meli_token
 
 SELLERS = {
     1668713481: "MELI_REFRESH_TOKEN_USER1668",  # ASVA
@@ -40,10 +41,7 @@ THRESHOLD_7D, THRESHOLD_14D = 25, 50
 def get_token(token_env):
     rt = os.environ.get(token_env)
     if not rt: return None
-    r = requests.post("https://api.mercadolibre.com/oauth/token", data={
-        "grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],
-        "client_secret":os.environ["MELI_APP_SECRET"],"refresh_token":rt
-    }, timeout=20).json()
+    r = meli_token.refresh(rt).json()
     return r.get("access_token")
 
 # Cache tokens por seller

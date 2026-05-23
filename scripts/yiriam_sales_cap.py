@@ -10,6 +10,7 @@ NO reactiva automáticamente — usuario lo hace cuando quiera.
 """
 import os,requests,json,base64,datetime as dt
 from datetime import timezone, timedelta
+import meli_token
 
 RT=os.environ["MELI_REFRESH_TOKEN_YC_NEW"]
 CID=os.environ["MELI_APP_ID"]; CS=os.environ["MELI_APP_SECRET"]
@@ -24,7 +25,7 @@ def tg(msg):
         except: pass
 
 # Auth MELI
-T=requests.post("https://api.mercadolibre.com/oauth/token",data={"grant_type":"refresh_token","client_id":CID,"client_secret":CS,"refresh_token":RT}).json().get("access_token")
+T=meli_token.refresh(RT).json().get("access_token")
 if not T:
     print("AUTH_FAIL"); raise SystemExit(1)
 H={"Authorization":f"Bearer {T}"}

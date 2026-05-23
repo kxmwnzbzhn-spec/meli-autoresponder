@@ -13,6 +13,7 @@ Lógica:
 """
 import os,requests,json,base64,datetime as dt
 from datetime import timezone, timedelta
+import meli_token
 RT=os.environ["MELI_REFRESH_TOKEN_YC_NEW"]
 CID=os.environ["MELI_APP_ID"]; CS=os.environ["MELI_APP_SECRET"]
 GHT=os.environ["GH_TOKEN"]
@@ -55,7 +56,7 @@ if state.get("last_run")==today:
     raise SystemExit(0)
 
 # Auth MELI
-T=requests.post("https://api.mercadolibre.com/oauth/token",data={"grant_type":"refresh_token","client_id":CID,"client_secret":CS,"refresh_token":RT}).json().get("access_token")
+T=meli_token.refresh(RT).json().get("access_token")
 H={"Authorization":f"Bearer {T}"}
 HJ={"Authorization":f"Bearer {T}","Content-Type":"application/json"}
 me=requests.get("https://api.mercadolibre.com/users/me",headers=H).json()

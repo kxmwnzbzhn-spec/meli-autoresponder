@@ -3,6 +3,7 @@
 NO toca precios (eso lo hace war_yiriam_perfumes).
 Diseñado para correr cada ~30s con self-retrigger."""
 import os, requests, time
+import meli_token
 RT=os.environ["MELI_REFRESH_TOKEN_YC_NEW"]
 CID=os.environ["MELI_APP_ID"]; CS=os.environ["MELI_APP_SECRET"]
 API="https://api.mercadolibre.com"
@@ -21,7 +22,7 @@ DO_NOT_REACTIVATE={
   "MLM5363023018",
 }
 
-T=requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token","client_id":CID,"client_secret":CS,"refresh_token":RT},timeout=15).json()["access_token"]
+T=meli_token.refresh(RT).json()["access_token"]
 H={"Authorization":f"Bearer {T}"}
 HJ={"Authorization":f"Bearer {T}","Content-Type":"application/json"}
 

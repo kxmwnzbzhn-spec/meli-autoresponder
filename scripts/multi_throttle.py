@@ -8,6 +8,7 @@ Multi-account daily sales throttle.
 """
 import os, requests, json, time
 from datetime import datetime, timezone, timedelta
+import meli_token
 
 APP_ID = os.environ["MELI_APP_ID"]
 APP_SECRET = os.environ["MELI_APP_SECRET"]
@@ -61,9 +62,7 @@ for label, env_var, daily_limit in THROTTLED_ACCOUNTS:
         print(f"[{label}] sin token — skip"); continue
     
     try:
-        r = requests.post("https://api.mercadolibre.com/oauth/token", data={
-            "grant_type":"refresh_token","client_id":APP_ID,"client_secret":APP_SECRET,"refresh_token":RT
-        }).json()
+        r = meli_token.refresh(RT).json()
         H = {"Authorization":f"Bearer {r['access_token']}","Content-Type":"application/json"}
         me = requests.get("https://api.mercadolibre.com/users/me", headers=H, timeout=10).json()
         USER_ID = me["id"]

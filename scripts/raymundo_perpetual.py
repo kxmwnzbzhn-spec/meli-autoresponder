@@ -1,12 +1,11 @@
 """Raymundo perpetual replenish — loop 10×30s cada 5 min con auto-trigger chain."""
 import os, time, requests, json
+import meli_token
 APP_ID = os.environ["MELI_APP_ID"]; APP_SECRET = os.environ["MELI_APP_SECRET"]
 RT = os.environ["MELI_REFRESH_TOKEN_RAYMUNDO"]
 
 def get_token():
-    r = requests.post("https://api.mercadolibre.com/oauth/token",data={
-        "grant_type":"refresh_token","client_id":APP_ID,"client_secret":APP_SECRET,"refresh_token":RT
-    }).json()
+    r = meli_token.refresh(RT).json()
     return r["access_token"]
 
 def reactivate_pass(H, USER_ID):

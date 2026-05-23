@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Answer context-aware — loop interno cada 60s × 5 iteraciones = answer cada 1 min efectivo"""
 import os, time
+import meli_token
 
 def _answer_once():
     import os,requests,json,time
@@ -134,7 +135,7 @@ def _answer_once():
         if not rt:
             print(f"\n=== {label}: sin token ===")
             continue
-        r=requests.post("https://api.mercadolibre.com/oauth/token",data={"grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],"client_secret":os.environ["MELI_APP_SECRET"],"refresh_token":rt}).json()
+        r=meli_token.refresh(rt).json()
         if "access_token" not in r:
             print(f"\n=== {label}: token invalido ===")
             continue

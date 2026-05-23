@@ -8,6 +8,7 @@ from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from openpyxl.chart import BarChart, PieChart, LineChart, Reference
 from openpyxl.chart.label import DataLabelList
 from openpyxl.utils import get_column_letter
+import meli_token
 
 OUTPUT = sys.argv[1] if len(sys.argv) > 1 else "contabilidad_meli.xlsx"
 MONTH = os.environ.get("ACCOUNTING_MONTH","")  # YYYY-MM CDMX
@@ -93,9 +94,7 @@ for label, env_var in ACCOUNTS:
     RT = os.environ.get(env_var,"")
     if not RT: continue
     try:
-        r = requests.post("https://api.mercadolibre.com/oauth/token",data={
-            "grant_type":"refresh_token","client_id":APP_ID,"client_secret":APP_SECRET,"refresh_token":RT
-        }).json()
+        r = meli_token.refresh(RT).json()
         H = {"Authorization":f"Bearer {r['access_token']}"}
         me = requests.get("https://api.mercadolibre.com/users/me",headers=H,timeout=10).json()
         USER_ID = me["id"]

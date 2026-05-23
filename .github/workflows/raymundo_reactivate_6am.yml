@@ -17,6 +17,7 @@ jobs:
       - run: python scripts/raymundo_reactivate_6am.py
         env:
           MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          TOKEN_SHARED: ${{ secrets.TOKEN_SHARED }}
           MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
           MELI_REFRESH_TOKEN_RAYMUNDO: ${{ secrets.MELI_REFRESH_TOKEN_RAYMUNDO }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}

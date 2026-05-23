@@ -7,15 +7,14 @@ Multiple items pueden apuntar a la misma línea — el stock se decrementa de la
 Loop: cada 30s checa si hay items pausados o con qty<1, los repone si la línea tiene stock.
 """
 import os, time, requests, json
+import meli_token
 
 APP_ID = os.environ["MELI_APP_ID"]
 APP_SECRET = os.environ["MELI_APP_SECRET"]
 RT = os.environ["MELI_REFRESH_TOKEN_WILBERT"]
 
 def get_token():
-    r = requests.post("https://api.mercadolibre.com/oauth/token",data={
-        "grant_type":"refresh_token","client_id":APP_ID,"client_secret":APP_SECRET,"refresh_token":RT
-    }).json()
+    r = meli_token.refresh(RT).json()
     return r["access_token"]
 
 def load_lines():

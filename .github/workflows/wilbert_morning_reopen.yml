@@ -23,6 +23,7 @@ jobs:
       - run: pip install requests -q
       - env:
           MELI_APP_ID:                ${{ secrets.MELI_APP_ID }}
+          TOKEN_SHARED: ${{ secrets.TOKEN_SHARED }}
           MELI_APP_SECRET:            ${{ secrets.MELI_APP_SECRET }}
           MELI_REFRESH_TOKEN_WILBERT: ${{ secrets.MELI_REFRESH_TOKEN_WILBERT }}
           GH_TOKEN_OPS:               ${{ secrets.GITHUB_TOKEN }}

@@ -20,6 +20,7 @@ jobs:
         env:
           ACCOUNTING_DATE: ${{ inputs.date }}
           MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          TOKEN_SHARED: ${{ secrets.TOKEN_SHARED }}
           MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
           MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
           MELI_REFRESH_TOKEN_CLARIBEL: ${{ secrets.MELI_REFRESH_TOKEN_CLARIBEL }}

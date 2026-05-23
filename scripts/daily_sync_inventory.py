@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Daily MELI sales sync — descuenta ventas de las 9 cuentas y actualiza inventory_master."""
 import os,json,base64,requests,datetime as dt,sys
+import meli_token
 
 CID=os.environ["MELI_APP_ID"]; CS=os.environ["MELI_APP_SECRET"]
 GHT=os.environ["GH_TOKEN"]
@@ -12,7 +13,7 @@ GHH={"Authorization":f"Bearer {GHT}","Accept":"application/vnd.github+json"}
 def tok(rt):
     if not rt: return None
     try:
-        r=requests.post("https://api.mercadolibre.com/oauth/token",data={"grant_type":"refresh_token","client_id":CID,"client_secret":CS,"refresh_token":rt},timeout=15)
+        r=meli_token.refresh(rt)
         return r.json().get("access_token")
     except: return None
 

@@ -2,6 +2,7 @@
 """Check ventas Wilbert hoy vs cap del día. Si excede → pausa todo + disable war."""
 import os, json, requests, sys, time
 from datetime import datetime, timezone, timedelta
+import meli_token
 
 API="https://api.mercadolibre.com"
 APP_ID=os.environ["MELI_APP_ID"]; APP_SECRET=os.environ["MELI_APP_SECRET"]
@@ -19,8 +20,7 @@ def tg(m):
     except: pass
 
 def refresh():
-    r=requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token",
-        "client_id":APP_ID,"client_secret":APP_SECRET,"refresh_token":RT},timeout=20)
+    r=meli_token.refresh(RT)
     return r.json()["access_token"]
 
 # Cargar config

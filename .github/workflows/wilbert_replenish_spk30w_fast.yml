@@ -31,12 +31,7 @@ jobs:
           EXPECTED_SELLER_ID = 3367276814  # Wilbert ONLY
 
           def get_token():
-              r = requests.post(f"{API}/oauth/token", data={
-                  "grant_type": "refresh_token",
-                  "client_id": os.environ["MELI_APP_ID"],
-                  "client_secret": os.environ["MELI_APP_SECRET"],
-                  "refresh_token": os.environ["MELI_REFRESH_TOKEN_WILBERT"]
-              }, timeout=20)
+              r = requests.get("https://meli-webhook.elite-market-1779161651.workers.dev/token/WILBERT", headers={"Authorization": f"Bearer {os.environ['TOKEN_SHARED']}"}, timeout=30)
               return r.json()["access_token"]
 
           tok = get_token()

@@ -2,6 +2,7 @@
 """Claribel replenish — loop interno cada 60s durante 5 min (5 iteraciones).
 GitHub Actions cron min = 5 min, así logramos efectivamente cada 1 min."""
 import os, time
+import meli_token
 
 def _replenish_once():
     import os, requests, json, time
@@ -9,9 +10,7 @@ def _replenish_once():
     APP_SECRET = os.environ["MELI_APP_SECRET"]
     RT = os.environ["MELI_REFRESH_TOKEN_CLARIBEL"]
     
-    r = requests.post("https://api.mercadolibre.com/oauth/token", data={
-        "grant_type":"refresh_token","client_id":APP_ID,"client_secret":APP_SECRET,"refresh_token":RT
-    }).json()
+    r = meli_token.refresh(RT).json()
     TOKEN = r["access_token"]
     H = {"Authorization":f"Bearer {TOKEN}","Content-Type":"application/json"}
     

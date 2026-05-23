@@ -7,6 +7,7 @@ Lógica corregida:
   - sin ptw → subir hacia ceiling
 """
 import os, time, json, requests, re
+import meli_token
 
 # Cargar config Wilbert con overrides per-item
 try:
@@ -42,9 +43,7 @@ UP_STEP_PCT = 0.05  # +10% por corrida cuando solos
 MAX_UP = 30         # tope de subida por corrida ($)
 
 def refresh():
-    r = requests.post(f"{API}/oauth/token", data={
-        "grant_type":"refresh_token","client_id":APP_ID,
-        "client_secret":APP_SECRET,"refresh_token":RT}, timeout=20)
+    r = meli_token.refresh(RT)
     r.raise_for_status()
     return r.json()["access_token"]
 

@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Raymundo replenish — loop interno cada 60s × 5 iter = cada 1 min efectivo"""
 import os, time
+import meli_token
 def _replenish_once():
     import os,requests,json
-    r=requests.post("https://api.mercadolibre.com/oauth/token",data={"grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],"client_secret":os.environ["MELI_APP_SECRET"],"refresh_token":os.environ["MELI_REFRESH_TOKEN_RAYMUNDO"]}).json()
+    r=meli_token.refresh(os.environ["MELI_REFRESH_TOKEN_RAYMUNDO"]).json()
     TOKEN=r["access_token"]
     H={"Authorization":f"Bearer {TOKEN}","Content-Type":"application/json"}
     

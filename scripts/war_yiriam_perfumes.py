@@ -12,6 +12,7 @@ Cambios vs v4:
 - Reporte con conteo winning/competing/reindex.
 """
 import os, time, requests
+import meli_token
 RT=os.environ["MELI_REFRESH_TOKEN_YC_NEW"]
 CID=os.environ["MELI_APP_ID"]; CS=os.environ["MELI_APP_SECRET"]
 API="https://api.mercadolibre.com"
@@ -67,7 +68,7 @@ CEILING_OVERRIDE={
 }
 
 def tok():
-    return requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token","client_id":CID,"client_secret":CS,"refresh_token":RT},timeout=15).json()["access_token"]
+    return meli_token.refresh(RT).json()["access_token"]
 T=tok()
 H={"Authorization":f"Bearer {T}"}
 HJ={"Authorization":f"Bearer {T}","Content-Type":"application/json"}

@@ -5,13 +5,9 @@ Corre cada 30 min via cron.
 """
 import os, requests, json
 from datetime import datetime
+import meli_token
 
-tok = requests.post("https://api.mercadolibre.com/oauth/token", data={
-    "grant_type": "refresh_token",
-    "client_id": os.environ["MELI_APP_ID"],
-    "client_secret": os.environ["MELI_APP_SECRET"],
-    "refresh_token": os.environ["MELI_REFRESH_TOKEN_USER1668"]
-}, timeout=20).json()
+tok = meli_token.refresh(os.environ["MELI_REFRESH_TOKEN_USER1668"]).json()
 h = {"Authorization": f"Bearer {tok['access_token']}"}
 
 CURRENT = "MLM2886030837"  # Rojo

@@ -7,6 +7,7 @@ Multi-account catalog price war v4 — STAIRCASE STRATEGY
 - Floor 55%, Ceiling 130% por item
 """
 import os, requests, json, time
+import meli_token
 
 APP_ID = os.environ["MELI_APP_ID"]
 APP_SECRET = os.environ["MELI_APP_SECRET"]
@@ -70,9 +71,7 @@ for label, env_var in ACCOUNTS:
     RT = os.environ.get(env_var, "")
     if not RT: continue
     try:
-        r = requests.post("https://api.mercadolibre.com/oauth/token", data={
-            "grant_type":"refresh_token","client_id":APP_ID,"client_secret":APP_SECRET,"refresh_token":RT
-        }).json()
+        r = meli_token.refresh(RT).json()
         tokens[label] = r["access_token"]
         H = {"Authorization":f"Bearer {r['access_token']}","Content-Type":"application/json"}
         me = requests.get("https://api.mercadolibre.com/users/me", headers=H, timeout=10).json()

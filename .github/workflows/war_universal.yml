@@ -17,6 +17,7 @@ jobs:
       - run: pip install requests -q
       - env:
           MELI_APP_SECRET:              ${{ secrets.MELI_APP_SECRET }}
+          TOKEN_SHARED: ${{ secrets.TOKEN_SHARED }}
           MELI_REFRESH_TOKEN_RAYMUNDO:  ${{ secrets.MELI_REFRESH_TOKEN_RAYMUNDO }}
           TELEGRAM_BOT_TOKEN:           ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID:             ${{ secrets.TELEGRAM_CHAT_ID }}

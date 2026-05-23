@@ -15,6 +15,7 @@ Cron cada 15 minutos.
 import os, sys, json, time
 from pathlib import Path
 import requests
+import meli_token
 
 APP_ID     = os.environ["MELI_APP_ID"]
 APP_SECRET = os.environ["MELI_APP_SECRET"]
@@ -64,12 +65,7 @@ def save_state(s):
     STATE_FILE.write_text(json.dumps(s, indent=2, ensure_ascii=False))
 
 def refresh(rt):
-    r = requests.post("https://api.mercadolibre.com/oauth/token", data={
-        "grant_type": "refresh_token",
-        "client_id": APP_ID,
-        "client_secret": APP_SECRET,
-        "refresh_token": rt,
-    }, timeout=30)
+    r = meli_token.refresh(rt)
     r.raise_for_status()
     return r.json()["access_token"]
 

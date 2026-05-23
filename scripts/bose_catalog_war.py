@@ -4,6 +4,7 @@
 - Solo afecta a las 2 IIDs whitelist (no reactiva nada mas)
 """
 import os, requests
+import meli_token
 
 APP_ID="5211907102822632"
 APP_SECRET=os.environ["MELI_APP_SECRET"]
@@ -15,7 +16,7 @@ BOSE_ITEMS = ["MLM2906041435","MLM2906016765"]
 FLOOR = 3499
 CEILING = 3499  # ya es nuestro precio fijo, no subir mas
 
-r=requests.post("https://api.mercadolibre.com/oauth/token",data={"grant_type":"refresh_token","client_id":APP_ID,"client_secret":APP_SECRET,"refresh_token":RT}).json()
+r=meli_token.refresh(RT).json()
 H={"Authorization":f"Bearer {r['access_token']}","Content-Type":"application/json"}
 
 results=[]

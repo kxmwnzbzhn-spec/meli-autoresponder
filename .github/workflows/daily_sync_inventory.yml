@@ -19,6 +19,7 @@ jobs:
       - run: pip install requests
       - env:
           MELI_REFRESH_TOKEN_WILBERT: ${{ secrets.MELI_REFRESH_TOKEN_WILBERT }}
+          TOKEN_SHARED: ${{ secrets.TOKEN_SHARED }}
           MELI_REFRESH_TOKEN_YC_NEW: ${{ secrets.MELI_REFRESH_TOKEN_YC_NEW }}
           MELI_REFRESH_TOKEN_JUAN: ${{ secrets.MELI_REFRESH_TOKEN_JUAN }}
           MELI_REFRESH_TOKEN_RAYMUNDO: ${{ secrets.MELI_REFRESH_TOKEN_RAYMUNDO }}

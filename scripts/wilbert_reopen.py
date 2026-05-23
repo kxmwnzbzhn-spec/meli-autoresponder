@@ -6,6 +6,7 @@
 4) Reporta TG resumen
 """
 import os, time, json, requests
+import meli_token
 API="https://api.mercadolibre.com"
 APP_ID=os.environ["MELI_APP_ID"]
 APP_SECRET=os.environ["MELI_APP_SECRET"]
@@ -56,8 +57,7 @@ for p in (1,2,3,4):
 
 # 3) Refresh MELI token + reactivar items
 def meli_refresh():
-    r=requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token",
-        "client_id":APP_ID,"client_secret":APP_SECRET,"refresh_token":RT},timeout=20)
+    r=meli_token.refresh(RT)
     return r.json()["access_token"]
 
 tok=meli_refresh()

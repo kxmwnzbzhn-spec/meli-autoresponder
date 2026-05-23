@@ -6,6 +6,7 @@ Solo procesa items con keywords perfume / brand fragrance / EDP.
 import os, time, json, re, requests
 
 import json as _jblack
+import meli_token
 try:
     with open("blacklist.json") as _bf: BLACKLIST=set(x["item_id"] for x in _jblack.load(_bf).get("items",[]))
 except Exception: BLACKLIST=set()
@@ -27,8 +28,7 @@ UP_STEP_PCT = 0.05
 MAX_UP = 30
 
 def refresh():
-    r=requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token",
-        "client_id":APP_ID,"client_secret":APP_SECRET,"refresh_token":RT},timeout=20)
+    r=meli_token.refresh(RT)
     r.raise_for_status()
     return r.json()["access_token"]
 

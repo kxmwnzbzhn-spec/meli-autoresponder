@@ -17,6 +17,7 @@ Lógica por item:
    - si ptw < floor → quedarse en floor
 """
 import os, requests, json, time
+import meli_token
 
 APP_ID = "5211907102822632"
 APP_SECRET = os.environ["MELI_APP_SECRET"]
@@ -42,10 +43,7 @@ try:
 except Exception as _e:
     print(f"[CFG] no item floors loaded: {_e}")
 
-r = requests.post("https://api.mercadolibre.com/oauth/token", data={
-    "grant_type":"refresh_token","client_id":APP_ID,
-    "client_secret":APP_SECRET,"refresh_token":RT,
-})
+r = meli_token.refresh(RT)
 H = {"Authorization": f"Bearer {r.json()['access_token']}", "Content-Type":"application/json"}
 me = requests.get("https://api.mercadolibre.com/users/me", headers=H).json()
 uid = me['id']

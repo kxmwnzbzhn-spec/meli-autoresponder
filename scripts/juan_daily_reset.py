@@ -1,4 +1,5 @@
 import os, requests, json, sys, time
+import meli_token
 APP_ID = "5211907102822632"
 APP_SECRET = os.getenv("MELI_APP_SECRET","")
 RT = os.getenv("MELI_REFRESH_TOKEN","")
@@ -16,9 +17,7 @@ VISIBLE = 1  # only show 1 piece on MELI
 with open("stock_config.json") as f:
     stock = json.load(f)
 
-r = requests.post("https://api.mercadolibre.com/oauth/token", data={
-    "grant_type":"refresh_token","client_id":APP_ID,"client_secret":APP_SECRET,"refresh_token":RT
-})
+r = meli_token.refresh(RT)
 at = r.json()["access_token"]
 H = {"Authorization":f"Bearer {at}", "Content-Type":"application/json"}
 

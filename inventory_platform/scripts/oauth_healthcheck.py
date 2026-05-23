@@ -12,6 +12,7 @@ Uso:
         python oauth_healthcheck.py
 """
 import os, sys, requests, psycopg2
+import meli_token
 
 DSN = os.environ["SUPABASE_DB_URL"]
 CID = os.environ["MELI_APP_ID"]
@@ -43,13 +44,7 @@ def check_account(nick: str, secret_name: str) -> dict:
 
     # 1. Refresh
     try:
-        r = requests.post(
-            "https://api.mercadolibre.com/oauth/token",
-            data={"grant_type": "refresh_token",
-                  "client_id": CID, "client_secret": CS,
-                  "refresh_token": rt},
-            timeout=20,
-        )
+        r = meli_token.refresh(rt)
     except Exception as e:
         return {"ok": False, "nick": nick, "status": "refresh_error", "error": str(e)}
 

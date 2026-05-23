@@ -17,6 +17,7 @@ jobs:
       - run: pip install requests -q
       - env:
           MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          TOKEN_SHARED: ${{ secrets.TOKEN_SHARED }}
           MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
           MELI_REFRESH_TOKEN_USER1668: ${{ secrets.MELI_REFRESH_TOKEN_USER1668 }}
         run: python scripts/stock_watch_spk35w.py

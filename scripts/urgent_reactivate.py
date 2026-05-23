@@ -1,15 +1,14 @@
 #!/usr/bin/env python3
 """Safety-net: reactivar items pausados Claribel. Loop 10×30s = check cada 30s durante 5 min."""
 import os, time, requests, json
+import meli_token
 
 APP_ID = os.environ["MELI_APP_ID"]
 APP_SECRET = os.environ["MELI_APP_SECRET"]
 RT = os.environ["MELI_REFRESH_TOKEN_CLARIBEL"]
 
 def get_token():
-    r = requests.post("https://api.mercadolibre.com/oauth/token",data={
-        "grant_type":"refresh_token","client_id":APP_ID,"client_secret":APP_SECRET,"refresh_token":RT
-    }).json()
+    r = meli_token.refresh(RT).json()
     return r["access_token"]
 
 def reactivate_pass(H, USER_ID):

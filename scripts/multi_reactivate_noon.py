@@ -5,6 +5,7 @@ Reactiva los items pausados por throttle en todas las cuentas (NO ASVA).
 """
 import os, requests, json, time
 from datetime import datetime, timezone, timedelta
+import meli_token
 
 APP_ID = os.environ["MELI_APP_ID"]
 APP_SECRET = os.environ["MELI_APP_SECRET"]
@@ -42,9 +43,7 @@ for label, env_var in THROTTLED_ACCOUNTS:
     if not RT:
         print(f"  sin token — skip"); continue
     
-    r = requests.post("https://api.mercadolibre.com/oauth/token", data={
-        "grant_type":"refresh_token","client_id":APP_ID,"client_secret":APP_SECRET,"refresh_token":RT
-    }).json()
+    r = meli_token.refresh(RT).json()
     H = {"Authorization":f"Bearer {r['access_token']}","Content-Type":"application/json"}
     
     reactivated = 0

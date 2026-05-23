@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """Yir replenish — respeta stock_config_yiriam.json real_stock."""
 import os,requests,time,json,base64
+import meli_token
 
 RT=os.environ["MELI_REFRESH_TOKEN_YC_NEW"]
 CID=os.environ["MELI_APP_ID"]; CS=os.environ["MELI_APP_SECRET"]
 GHT=os.environ.get("GH_TOKEN","")
-T=requests.post("https://api.mercadolibre.com/oauth/token",data={"grant_type":"refresh_token","client_id":CID,"client_secret":CS,"refresh_token":RT}).json()["access_token"]
+T=meli_token.refresh(RT).json()["access_token"]
 H={"Authorization":f"Bearer {T}"}
 HJ={"Authorization":f"Bearer {T}","Content-Type":"application/json"}
 

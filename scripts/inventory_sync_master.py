@@ -20,6 +20,7 @@ inventario_master.json estructura:
 """
 import os, requests, json, time, re
 from datetime import datetime, timezone, timedelta
+import meli_token
 
 APP_ID = os.environ["MELI_APP_ID"]; APP_SECRET = os.environ["MELI_APP_SECRET"]
 TG_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN","")
@@ -66,9 +67,7 @@ for label, env_var in ACCOUNTS:
     RT = os.environ.get(env_var,"")
     if not RT: continue
     try:
-        r = requests.post("https://api.mercadolibre.com/oauth/token",
-            data={"grant_type":"refresh_token","client_id":APP_ID,"client_secret":APP_SECRET,"refresh_token":RT},
-            timeout=15).json()
+        r = meli_token.refresh(RT).json()
         me = requests.get("https://api.mercadolibre.com/users/me",
             headers={"Authorization":f"Bearer {r['access_token']}"},timeout=10).json()
         account_tokens[label] = {"token": r["access_token"], "user_id": me["id"], "nick": me.get("nickname","")}

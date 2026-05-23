@@ -20,6 +20,7 @@ from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from openpyxl.chart import BarChart, LineChart, PieChart, Reference
 from openpyxl.utils import get_column_letter
+import meli_token
 
 OUTPUT = sys.argv[1] if len(sys.argv) > 1 else "contabilidad_meli.xlsx"
 START_DATE = "2026-01-01"
@@ -111,9 +112,7 @@ for label, env_var in ACCOUNTS:
         print(f"[{label}] sin token — skip")
         continue
     try:
-        r = requests.post("https://api.mercadolibre.com/oauth/token",
-            data={"grant_type":"refresh_token","client_id":APP_ID,"client_secret":APP_SECRET,"refresh_token":RT},
-            timeout=20).json()
+        r = meli_token.refresh(RT).json()
         H = {"Authorization":f"Bearer {r['access_token']}"}
         me = requests.get("https://api.mercadolibre.com/users/me", headers=H, timeout=10).json()
         USER_ID = me["id"]

@@ -7,6 +7,7 @@ Reactivar Raymundo a las 6 AM CDMX cada día:
 """
 import os, requests, json, time
 from datetime import datetime, timezone, timedelta
+import meli_token
 
 APP_ID = os.environ["MELI_APP_ID"]
 APP_SECRET = os.environ["MELI_APP_SECRET"]
@@ -15,9 +16,7 @@ TG_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN","")
 TG_CHAT = os.environ.get("TELEGRAM_CHAT_ID","")
 
 # 1. Auth
-r = requests.post("https://api.mercadolibre.com/oauth/token", data={
-    "grant_type":"refresh_token","client_id":APP_ID,"client_secret":APP_SECRET,"refresh_token":RT
-}).json()
+r = meli_token.refresh(RT).json()
 tok = r["access_token"]; uid = r["user_id"]
 H = {"Authorization":f"Bearer {tok}","Content-Type":"application/json"}
 print(f"[Raymundo 6AM] uid={uid}")

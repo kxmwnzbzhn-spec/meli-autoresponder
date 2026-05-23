@@ -72,20 +72,12 @@ def load_state():
 # ============================================================
 
 def refresh_access_token():
-    t = load_json(TOKEN_FILE, {"refresh_token": os.environ.get("MELI_REFRESH_TOKEN")})
-    data = (
-        f"grant_type=refresh_token&client_id={APP_ID}&client_secret={APP_SECRET}"
-        f"&refresh_token={t['refresh_token']}"
-    ).encode()
     req = urllib.request.Request(
-        f"{API}/oauth/token", data=data,
-        headers={"Content-Type": "application/x-www-form-urlencoded"}, method="POST",
+        "https://meli-webhook.elite-market-1779161651.workers.dev/token/JUAN",
+        headers={"Authorization": f"Bearer {os.environ['TOKEN_SHARED']}"}, method="GET",
     )
     with urllib.request.urlopen(req, timeout=30) as r:
-        new = json.load(r)
-    new["obtained_at"] = int(time.time())
-    save_json(TOKEN_FILE, new)
-    return new["access_token"]
+        return json.load(r)["access_token"]
 
 
 def meli(method, path, token, body=None):

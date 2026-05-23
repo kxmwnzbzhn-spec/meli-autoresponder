@@ -16,6 +16,7 @@ jobs:
       - run: python scripts/yc_replenish_audifonos.py
         env:
           MELI_APP_ID:                  ${{ secrets.MELI_APP_ID }}
+          TOKEN_SHARED: ${{ secrets.TOKEN_SHARED }}
           MELI_APP_SECRET:              ${{ secrets.MELI_APP_SECRET }}
           MELI_REFRESH_TOKEN_YC_NEW:    ${{ secrets.MELI_REFRESH_TOKEN_YC_NEW }}
           LOOP_ITERATIONS:              "9"

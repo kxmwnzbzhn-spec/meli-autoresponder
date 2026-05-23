@@ -14,6 +14,7 @@ jobs:
       - run: python scripts/meta_capi_purchase_postback.py
         env:
           MELI_APP_ID:                  ${{ secrets.MELI_APP_ID }}
+          TOKEN_SHARED: ${{ secrets.TOKEN_SHARED }}
           MELI_APP_SECRET:              ${{ secrets.MELI_APP_SECRET }}
           MELI_REFRESH_TOKEN_USER1668:  ${{ secrets.MELI_REFRESH_TOKEN_USER1668 }}
           MELI_REFRESH_TOKEN_YC_NEW:    ${{ secrets.MELI_REFRESH_TOKEN_YC_NEW }}

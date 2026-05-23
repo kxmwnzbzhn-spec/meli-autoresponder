@@ -6,6 +6,7 @@ Stock real persistido en stock_yc_audifonos.json.
 Loop: cada SLEEP segundos, N ITERATIONS por run.
 """
 import os, time, requests, json
+import meli_token
 
 APP_ID = os.environ["MELI_APP_ID"]
 APP_SECRET = os.environ["MELI_APP_SECRET"]
@@ -18,9 +19,7 @@ ITEMS_CAP = {
 }
 
 def get_token():
-    r = requests.post("https://api.mercadolibre.com/oauth/token", data={
-        "grant_type":"refresh_token","client_id":APP_ID,"client_secret":APP_SECRET,"refresh_token":RT
-    }, timeout=20).json()
+    r = meli_token.refresh(RT).json()
     return r["access_token"]
 
 def load_real_stock():

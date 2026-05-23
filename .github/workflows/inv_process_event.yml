@@ -22,6 +22,7 @@ jobs:
           RESOURCE: ${{ github.event.client_payload.resource }}
           USER_ID: ${{ github.event.client_payload.user_id }}
           MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          TOKEN_SHARED: ${{ secrets.TOKEN_SHARED }}
           MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
           MELI_REFRESH_TOKEN_WILBERT: ${{ secrets.MELI_REFRESH_TOKEN_WILBERT }}
           MELI_REFRESH_TOKEN_YC_NEW: ${{ secrets.MELI_REFRESH_TOKEN_YC_NEW }}

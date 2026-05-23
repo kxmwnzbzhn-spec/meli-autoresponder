@@ -1,5 +1,6 @@
 """Procesa un evento MELI: fetch order details, decrement stock, register COGS, alert."""
 import os,sys,json,requests,psycopg2
+import meli_token
 CID=os.environ["MELI_APP_ID"]; CS=os.environ["MELI_APP_SECRET"]
 DSN=os.environ["SUPABASE_DB_URL"]
 TG_TOKEN=os.environ.get("TELEGRAM_BOT_TOKEN"); TG_CHAT=os.environ.get("TELEGRAM_CHAT_ID")
@@ -24,7 +25,7 @@ def tok_for_account(cur,user_id):
     aid,nick,secret_name=row
     rt=os.environ.get(secret_name,"")
     if not rt: return aid,nick,None
-    r=requests.post("https://api.mercadolibre.com/oauth/token",data={"grant_type":"refresh_token","client_id":CID,"client_secret":CS,"refresh_token":rt}).json()
+    r=meli_token.refresh(rt).json()
     return aid,nick,r.get("access_token")
 
 conn=psycopg2.connect(DSN); cur=conn.cursor()

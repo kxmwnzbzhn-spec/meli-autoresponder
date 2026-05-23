@@ -3,6 +3,7 @@
 import os, requests, json, sys
 from datetime import datetime, timezone, timedelta
 from collections import defaultdict
+import meli_token
 
 APP_ID = os.environ["MELI_APP_ID"]; APP_SECRET = os.environ["MELI_APP_SECRET"]
 TG_TOKEN = os.environ["TELEGRAM_BOT_TOKEN"]; TG_CHAT = os.environ["TELEGRAM_CHAT_ID"]
@@ -40,9 +41,7 @@ for label, env_var in ACCOUNTS:
     RT = os.environ.get(env_var,"")
     if not RT: continue
     try:
-        r = requests.post("https://api.mercadolibre.com/oauth/token",data={
-            "grant_type":"refresh_token","client_id":APP_ID,"client_secret":APP_SECRET,"refresh_token":RT
-        }).json()
+        r = meli_token.refresh(RT).json()
         H = {"Authorization":f"Bearer {r['access_token']}"}
         me = requests.get("https://api.mercadolibre.com/users/me",headers=H,timeout=10).json()
         USER_ID = me["id"]
