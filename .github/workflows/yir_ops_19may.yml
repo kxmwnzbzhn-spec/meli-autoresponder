@@ -3,7 +3,7 @@ on: { workflow_dispatch: {}, push: { paths: [.github/workflows/yir_ops_19may.yml
 jobs:
   run:
     runs-on: ubuntu-latest
-    timeout-minutes: 3
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -12,5 +12,16 @@ jobs:
       - env:
           MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
           MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_ASVA: ${{ secrets.MELI_REFRESH_TOKEN_ASVA }}
           MELI_REFRESH_TOKEN_YC_NEW: ${{ secrets.MELI_REFRESH_TOKEN_YC_NEW }}
-        run: python scripts/close_348596.py
+          MELI_REFRESH_TOKEN_WILBERT: ${{ secrets.MELI_REFRESH_TOKEN_WILBERT }}
+          MELI_REFRESH_TOKEN_RAYMUNDO: ${{ secrets.MELI_REFRESH_TOKEN_RAYMUNDO }}
+          MELI_REFRESH_TOKEN_JUAN: ${{ secrets.MELI_REFRESH_TOKEN_JUAN }}
+          MELI_REFRESH_TOKEN_CLARIBEL: ${{ secrets.MELI_REFRESH_TOKEN_CLARIBEL }}
+          MELI_REFRESH_TOKEN_BREN: ${{ secrets.MELI_REFRESH_TOKEN_BREN }}
+          MELI_REFRESH_TOKEN_ANGEL: ${{ secrets.MELI_REFRESH_TOKEN_ANGEL }}
+          MELI_REFRESH_TOKEN_ASGARI: ${{ secrets.MELI_REFRESH_TOKEN_ASGARI }}
+          MELI_REFRESH_TOKEN_RMAYCHI: ${{ secrets.MELI_REFRESH_TOKEN_RMAYCHI }}
+          MELI_REFRESH_TOKEN_AH: ${{ secrets.MELI_REFRESH_TOKEN_AH }}
+          MELI_REFRESH_TOKEN_MC: ${{ secrets.MELI_REFRESH_TOKEN_MC }}
+        run: python scripts/verify_swap.py
