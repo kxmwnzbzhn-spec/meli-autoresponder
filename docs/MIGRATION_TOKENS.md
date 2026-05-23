@@ -1,26 +1,8 @@
-# MIGRACION APP NUEVA (ASVA) — refresh tokens recolectados
-App nueva: client_id=2008666770714005 / secret=ozH8GBhh7iKqUnuuISosXASmc0CwQVU4
-Dueña: ASVA. redirect_uri=https://www.google.com
+# MIGRACION APP — COMPLETADA 2026-05-23
+App vieja (JUAN, client_id 5211907102822632) → App nueva (ASVA, client_id 2008666770714005)
+12/12 cuentas re-autorizadas y verificadas. Tokens viven en GitHub Secrets (encriptados).
+Plaintext eliminado por seguridad.
 
-## TOKENS NUEVOS (app 2008666770714005) — 12 cuentas:
-
-### Cuentas existentes (mapean a secrets actuales):
-- ASVA       (1668713481): TG-6a1208f7b77dc600010beb0a-1668713481
-- YC_NEW     (3364413125): TG-6a120a947e0a000001c255a8-3364413125
-- WILBERT    (3367276814): TG-6a120a9653b2a10001df9154-3367276814
-- RAYMUNDO   (3338633403): TG-6a120a98cc4ec70001fb3dcd-3338633403
-- JUAN       (2681696373): TG-6a120a9d37f5e40001a800f1-2681696373
-- CLARIBEL   (3348766821): TG-6a120a97ecea440001801248-3348766821
-- BREN       (2400722448): TG-6a120a956212470001a7f20d-2400722448
-
-### Cuentas NUEVAS (necesitan secret nuevo si se integran):
-- RM_MAYCHI  (3294280577): TG-6a120a991eb82800013539e1-3294280577  (RM20260326141639)
-- ANGEL      (3009687392): TG-6a120a9ae4cfde00017cca1b-3009687392  (AN20251122121541)
-- ASGARI     (3246557656): TG-6a120a9ca0571e0001767b93-3246557656  (VM20260305110413)
-- NEW_AH     (3417664339): TG-6a120a94f5a2700001a6c0a2-3417664339  (AH20260521180841)
-- NEW_MC     (3419500448): TG-6a120a9ba21f540001e76e4b-3419500448  (MC20260521190745)
-
-### NO re-autorizadas (siguen en app vieja, romperán al hacer swap):
-- DILCIE (3355056011)
-- MILDRED
-- MG20260424
+Cuentas activas en app nueva: ASVA, YC_NEW, WILBERT, RAYMUNDO, JUAN, CLARIBEL, BREN,
+ANGEL, ASGARI, RMAYCHI, AH, MC.
+Dadas de baja (no migradas): DILCIE, MILDRED, MG20260424.
