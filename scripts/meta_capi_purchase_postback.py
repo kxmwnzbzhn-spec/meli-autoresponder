@@ -32,6 +32,13 @@ WHITELIST_ITEMS = {
     "MLM5346655686": {"name": "Bocina Bluetooth Portatil Go4 IP67","category": "SPK_GO4_V1"},
 }
 
+# PERFUME_BLACKLIST — SKUs TAL que NO van al pixel Sonix.
+# Los maneja tal-meli-pipeline al pixel TAL 2062725974505434 (atribución separada).
+PERFUME_BLACKLIST = {
+    "MLM4436177528",  # Oud Cherry (TAL)
+    "MLM5374718702",  # Dark Oud Cacao (TAL)
+}
+
 def meli_token(token_env):
     rt = os.environ.get(token_env)
     if not rt:
@@ -86,6 +93,9 @@ def collect_events_for_seller(seller, since):
         first = items[0]
         iid = (first.get("item") or {}).get("id") or "UNKNOWN"
         title = ((first.get("item") or {}).get("title") or "")[:80]
+
+        if iid in PERFUME_BLACKLIST:
+            continue  # perfume TAL → pixel TAL via tal-meli-pipeline, NO al pixel Sonix
 
         if iid in WHITELIST_ITEMS:
             meta = WHITELIST_ITEMS[iid]
