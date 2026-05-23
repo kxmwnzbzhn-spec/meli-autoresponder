@@ -1,10 +1,10 @@
 {
   "_meta": {
-    "updated": "2026-05-23T00:16:48.531847Z",
+    "updated": "2026-05-23T04:09:26.794258Z",
     "golive_ref": "stock_at_golive_20260518.json",
     "note": "Dinámico — decrementa con cada venta vía cron.",
-    "total_sold": 548,
-    "total_available": 4468
+    "total_sold": 566,
+    "total_available": 4450
   },
   "skus": {
     "SONY-XB100-NEGRO": {
@@ -24,25 +24,25 @@
       "color": "Aqua/Celeste"
     },
     "JBL-GO3-NEGRO": {
-      "available": 397,
+      "available": 395,
       "initial": 495,
-      "sold_since_golive": 98,
+      "sold_since_golive": 100,
       "last_pause_triggered": false,
       "modelo": "JBL Go 3",
       "color": "Negro"
     },
     "JBL-CLIP5-AZUL": {
-      "available": 383,
+      "available": 382,
       "initial": 421,
-      "sold_since_golive": 38,
+      "sold_since_golive": 39,
       "last_pause_triggered": false,
       "modelo": "JBL Clip 5",
       "color": "Azul"
     },
     "JBL-GO4-CAMUFLAJE": {
-      "available": 363,
+      "available": 358,
       "initial": 389,
-      "sold_since_golive": 26,
+      "sold_since_golive": 31,
       "last_pause_triggered": false,
       "modelo": "JBL Go 4",
       "color": "Camuflaje"
@@ -80,25 +80,25 @@
       "color": "Rosa"
     },
     "JBL-GO4-ROJO": {
-      "available": 108,
+      "available": 101,
       "initial": 198,
-      "sold_since_golive": 90,
+      "sold_since_golive": 97,
       "last_pause_triggered": false,
       "modelo": "JBL Go 4",
       "color": "Rojo"
     },
     "JBL-CLIP5-MORADO": {
-      "available": 166,
+      "available": 165,
       "initial": 185,
-      "sold_since_golive": 19,
+      "sold_since_golive": 20,
       "last_pause_triggered": false,
       "modelo": "JBL Clip 5",
       "color": "Morado"
     },
     "JBL-GO4-ROSA": {
-      "available": 34,
+      "available": 32,
       "initial": 170,
-      "sold_since_golive": 136,
+      "sold_since_golive": 138,
       "last_pause_triggered": false,
       "modelo": "JBL Go 4",
       "color": "Rosa"
