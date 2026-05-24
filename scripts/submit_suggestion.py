@@ -38,7 +38,7 @@ except Exception as e:
 
 attrs = [
     {"id": "BRAND", "value_name": "The Alchemia Lab"},          # CORRECCIÓN
-    {"id": "MPN", "values": [{"name": "TAL-FDN-100ML"}]},       # CORRECCIÓN
+    {"id": "MPN", "values": [{"value_name": "TAL-FDN-100ML"}]},       # CORRECCIÓN
     {"id": "LINE", "value_name": "Mexico En La Piel"},
     {"id": "PERFUME_NAME", "value_name": "Flor De Nopal"},
     {"id": "VERSION", "value_name": "Original"},
@@ -54,8 +54,8 @@ attrs = [
     {"id": "IS_ALCOHOL_FREE", "value_name": "No"},
     {"id": "IS_SET", "value_name": "No"},
     {"id": "INCLUDES_CASE", "value_name": "Sí"},
-    {"id": "OLFACTORY_FAMILIES", "values": [{"name": "Gourmand"}]},
-    {"id": "OLFACTORY_NOTES", "values": [{"name": n} for n in NOTES]},
+    {"id": "OLFACTORY_FAMILIES", "values": [{"value_name": "Gourmand"}]},
+    {"id": "OLFACTORY_NOTES", "values": [{"value_name": n} for n in NOTES]},
 ]
 if dur_val:
     attrs.append({"id": "APPROXIMATE_DURATION", "value_name": dur_val})
