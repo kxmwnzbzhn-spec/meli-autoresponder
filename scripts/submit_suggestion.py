@@ -12,33 +12,33 @@ PICS = ["897724-MLM112154514469_052026","840560-MLM112155272235_052026",
 
 p = requests.get(f"{API}/products/{CPID}", headers=H, timeout=20).json()
 
-CHANGES = {"BRAND": "The Alchemia Lab", "MPN": "TAL-FDN-100ML"}
-attrs = []
+# base: todos los atributos existentes (excepto BRAND/MPN) por value_id
+base = []
 for a in (p.get("attributes") or []):
     aid = a.get("id")
-    if aid in CHANGES:                               # valor nuevo (sin id, MELI lo crea)
-        attrs.append({"id": aid, "value_name": CHANGES[aid]})
-        continue
+    if aid in ("BRAND", "MPN"): continue
     vals = a.get("values") or []
-    if vals and all(v.get("id") for v in vals):      # mirror por value_id (multi o single)
-        attrs.append({"id": aid, "values": [{"id": v["id"]} for v in vals]})
+    if vals and all(v.get("id") for v in vals):
+        base.append({"id": aid, "values": [{"id": v["id"]} for v in vals]})
     elif a.get("value_id"):
-        attrs.append({"id": aid, "value_id": a["value_id"]})
-    elif a.get("value_name"):
-        attrs.append({"id": aid, "value_name": a["value_name"]})
+        base.append({"id": aid, "value_id": a["value_id"]})
 
-print(f"attrs a enviar: {len(attrs)}  (BRAND/MPN como valor nuevo)")
-body = {"domain_id": DOM, "catalog_product_id": CPID, "type": "edit",
-        "attributes": attrs, "pictures": [{"id": p_} for p_ in PICS]}
-r = requests.post(f"{API}/catalog_suggestions", headers=HJ, json=body, timeout=40)
-print("http=", r.status_code)
-try:
-    j = r.json()
+def brand_mpn(fmt):
+    if fmt == "name":
+        return [{"id":"BRAND","values":[{"name":"The Alchemia Lab"}]},
+                {"id":"MPN","values":[{"name":"TAL-FDN-100ML"}]}]
+    if fmt == "value_name":
+        return [{"id":"BRAND","values":[{"value_name":"The Alchemia Lab"}]},
+                {"id":"MPN","values":[{"value_name":"TAL-FDN-100ML"}]}]
+
+for fmt in ("name", "value_name"):
+    body = {"domain_id": DOM, "catalog_product_id": CPID, "type": "edit",
+            "attributes": base + brand_mpn(fmt), "pictures": [{"id": x} for x in PICS]}
+    r = requests.post(f"{API}/catalog_suggestions", headers=HJ, json=body, timeout=40)
+    j = r.json() if r.headers.get("content-type","").startswith("application/json") else r.text
     cs = j.get("cause") if isinstance(j, dict) else None
-    if cs:
-        for c in cs: print("  cause:", c.get("code"), c.get("message","")[:90])
-    else:
-        print(json.dumps(j, ensure_ascii=False)[:600])
-except Exception:
-    print(r.text[:600])
+    summ = " | ".join(f"{c.get('code')}:{c.get('message','')[:55]}" for c in cs) if cs else (json.dumps(j, ensure_ascii=False)[:200] if isinstance(j,dict) else str(j)[:200])
+    print(f"[fmt={fmt:11}] http={r.status_code}  {summ}")
+    if r.status_code < 300:
+        print("  >>> SUCCESS:", json.dumps(j, ensure_ascii=False)[:400]); break
 print("DONE")
