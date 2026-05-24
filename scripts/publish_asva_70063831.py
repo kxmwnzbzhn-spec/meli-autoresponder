@@ -25,7 +25,15 @@ if not cat and results:
     if comp:
         ci = requests.get(f"{API}/items/{comp}?attributes=category_id", headers=H, timeout=15).json()
         cat = ci.get("category_id")
+if not cat:
+    dd = requests.get(f"{API}/sites/MLM/domain_discovery/search",
+                      params={"limit": 1, "q": (p.get("name") or "")[:60]}, headers=H, timeout=15).json()
+    if isinstance(dd, list) and dd:
+        cat = dd[0].get("category_id")
+    print(f"domain_discovery -> category={cat} domain={dd[0].get('domain_id') if isinstance(dd,list) and dd else None}")
 print(f"category_id = {cat}")
+if not cat:
+    print("ABORT: no pude derivar category_id"); raise SystemExit(1)
 
 payload = {
     "site_id": "MLM", "price": PRICE, "currency_id": "MXN",
