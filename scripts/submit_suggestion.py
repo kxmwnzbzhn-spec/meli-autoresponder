@@ -31,14 +31,21 @@ def brand_mpn(fmt):
         return [{"id":"BRAND","values":[{"value_name":"The Alchemia Lab"}]},
                 {"id":"MPN","values":[{"value_name":"TAL-FDN-100ML"}]}]
 
-for fmt in ("name", "value_name"):
+TITLE = "Perfume The Alchemia Lab Flor de Nopal Mexico en la Piel Eau de Parfum 100 ml Unisex"
+trials = [
+    ("title_field",     {"title": TITLE}),
+    ("name_field",      {"name": TITLE}),
+    ("no_title",        {}),
+]
+for label, extra in trials:
     body = {"domain_id": DOM, "catalog_product_id": CPID, "type": "edit",
-            "attributes": base + brand_mpn(fmt), "pictures": [{"id": x} for x in PICS]}
+            "attributes": base + brand_mpn("name"), "pictures": [{"id": x} for x in PICS]}
+    body.update(extra)
     r = requests.post(f"{API}/catalog_suggestions", headers=HJ, json=body, timeout=40)
     j = r.json() if r.headers.get("content-type","").startswith("application/json") else r.text
     cs = j.get("cause") if isinstance(j, dict) else None
-    summ = " | ".join(f"{c.get('code')}:{c.get('message','')[:55]}" for c in cs) if cs else (json.dumps(j, ensure_ascii=False)[:200] if isinstance(j,dict) else str(j)[:200])
-    print(f"[fmt={fmt:11}] http={r.status_code}  {summ}")
+    summ = " | ".join(f"{c.get('code')}:{c.get('message','')[:55]}" for c in cs) if cs else (json.dumps(j, ensure_ascii=False)[:250] if isinstance(j,dict) else str(j)[:250])
+    print(f"[{label:12}] http={r.status_code}  {summ}")
     if r.status_code < 300:
-        print("  >>> SUCCESS:", json.dumps(j, ensure_ascii=False)[:400]); break
+        print("  >>> SUCCESS:", json.dumps(j, ensure_ascii=False)[:500]); break
 print("DONE")
