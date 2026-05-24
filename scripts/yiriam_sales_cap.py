@@ -18,6 +18,7 @@ GHT=os.environ["GH_TOKEN"]
 TG=os.environ.get("TELEGRAM_BOT_TOKEN"); TC=os.environ.get("TELEGRAM_CHAT_ID")
 REPO="kxmwnzbzhn-spec/meli-autoresponder"
 CFG_PATH="inventory/yiriam_sales_cap.json"
+KEEP_ACTIVE={"MLM5291774150","MLM5291785036","MLM5363034838","MLM2940662359","MLM2940047221","MLM2950827385","MLM2909183147","MLM5390372034","MLM2950790163","MLM2950801625","MLM5364336572","MLM2950827397","MLM2950827407","MLM5390371996","MLM2950790175","MLM2950801553"}  # NO pausar (orden usuario 2026-05); mantener activos hasta aviso
 
 def tg(msg):
     if TG and TC:
@@ -96,6 +97,8 @@ for st in ("active",):
 print(f"  {len(ids)} items active a pausar")
 paused=0; errs=0
 for iid in ids:
+    if iid in KEEP_ACTIVE:
+        print(f"    keep-active (whitelist usuario): {iid}"); continue
     r=requests.put(f"https://api.mercadolibre.com/items/{iid}",headers=HJ,json={"status":"paused"},timeout=15)
     if r.status_code<300: paused+=1
     else: errs+=1; print(f"    ✗ {iid} http={r.status_code}")
