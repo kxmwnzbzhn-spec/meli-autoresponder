@@ -12,7 +12,8 @@ cur = {a.get("id"): a.get("value_name") for a in (p.get("attributes") or [])}
 print("=== CURRENT PRODUCT ATTRS ===")
 for k, v in cur.items():
     print(f"  {k} = {v}")
-print("short_description:", json.dumps((p.get('short_description') or '')[:200], ensure_ascii=False))
+sd = p.get('short_description')
+print("short_description:", json.dumps(sd, ensure_ascii=False)[:300] if sd else "(vacio)")
 
 ts = requests.get(f"{API}/domains/{DOM}/technical_specs", headers=H, timeout=30).json()
 
