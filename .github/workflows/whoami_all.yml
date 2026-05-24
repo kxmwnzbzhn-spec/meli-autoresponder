@@ -13,5 +13,5 @@ jobs:
           MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
           MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
           TOKEN_SHARED: ${{ secrets.TOKEN_SHARED }}
-          MELI_REFRESH_TOKEN_ASVA: ${{ secrets.MELI_REFRESH_TOKEN_ASVA }}
-        run: python scripts/find_asva_hp.py
+          MELI_REFRESH_TOKEN_AH: ${{ secrets.MELI_REFRESH_TOKEN_AH }}
+        run: python scripts/pub_ah_buds2.py
