@@ -115,6 +115,21 @@
       "reason": "user delete - incorrecto",
       "added": "2026-05-08",
       "added_by": "Sr. Luis"
+    },
+    {
+      "item_id": "MLM2950801633",
+      "reason": "eliminada por usuario 2026-05, no republicar",
+      "account": "YC_NEW"
+    },
+    {
+      "item_id": "MLM2950801613",
+      "reason": "eliminada por usuario 2026-05, no republicar",
+      "account": "YC_NEW"
+    },
+    {
+      "item_id": "MLM2950827387",
+      "reason": "eliminada por usuario 2026-05, no republicar",
+      "account": "YC_NEW"
     }
   ],
   "user_product_ids": [],
