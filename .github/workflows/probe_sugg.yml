@@ -12,6 +12,6 @@ jobs:
       - env:
           MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
           MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
-          MELI_REFRESH_TOKEN_ASVA: ${{ secrets.MELI_REFRESH_TOKEN_ASVA }}
+          MELI_REFRESH_TOKEN_YC_NEW: ${{ secrets.MELI_REFRESH_TOKEN_YC_NEW }}
           TOKEN_SHARED: ${{ secrets.TOKEN_SHARED }}
-        run: python scripts/probe_sugg_detail.py
+        run: python scripts/del_3_yir.py
