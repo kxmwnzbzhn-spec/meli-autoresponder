@@ -14,4 +14,4 @@ jobs:
           MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
           MELI_REFRESH_TOKEN_ASVA: ${{ secrets.MELI_REFRESH_TOKEN_ASVA }}
           TOKEN_SHARED: ${{ secrets.TOKEN_SHARED }}
-        run: python scripts/submit_suggestion.py
+        run: python scripts/probe_rawattrs.py
