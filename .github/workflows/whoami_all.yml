@@ -14,15 +14,4 @@ jobs:
           MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
           TOKEN_SHARED: ${{ secrets.TOKEN_SHARED }}
           MELI_REFRESH_TOKEN_ASVA: ${{ secrets.MELI_REFRESH_TOKEN_ASVA }}
-          MELI_REFRESH_TOKEN_YC_NEW: ${{ secrets.MELI_REFRESH_TOKEN_YC_NEW }}
-          MELI_REFRESH_TOKEN_WILBERT: ${{ secrets.MELI_REFRESH_TOKEN_WILBERT }}
-          MELI_REFRESH_TOKEN_RAYMUNDO: ${{ secrets.MELI_REFRESH_TOKEN_RAYMUNDO }}
-          MELI_REFRESH_TOKEN_JUAN: ${{ secrets.MELI_REFRESH_TOKEN_JUAN }}
-          MELI_REFRESH_TOKEN_CLARIBEL: ${{ secrets.MELI_REFRESH_TOKEN_CLARIBEL }}
-          MELI_REFRESH_TOKEN_BREN: ${{ secrets.MELI_REFRESH_TOKEN_BREN }}
-          MELI_REFRESH_TOKEN_ANGEL: ${{ secrets.MELI_REFRESH_TOKEN_ANGEL }}
-          MELI_REFRESH_TOKEN_ASGARI: ${{ secrets.MELI_REFRESH_TOKEN_ASGARI }}
-          MELI_REFRESH_TOKEN_RMAYCHI: ${{ secrets.MELI_REFRESH_TOKEN_RMAYCHI }}
-          MELI_REFRESH_TOKEN_AH: ${{ secrets.MELI_REFRESH_TOKEN_AH }}
-          MELI_REFRESH_TOKEN_MC: ${{ secrets.MELI_REFRESH_TOKEN_MC }}
-        run: python scripts/whoami_all.py
+        run: python scripts/find_asva_hp.py
