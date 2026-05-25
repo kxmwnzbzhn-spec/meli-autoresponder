@@ -1,0 +1,24 @@
+name: product-checklist
+on: { workflow_dispatch: }
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests openpyxl -q
+      - env:
+          MELI_APP_SECRET:                ${{ secrets.MELI_APP_SECRET }}
+          MELI_APP_ID_NEW:                ${{ secrets.MELI_APP_ID_NEW }}
+          MELI_APP_SECRET_NEW:            ${{ secrets.MELI_APP_SECRET_NEW }}
+          MELI_REFRESH_TOKEN_WILBERT:     ${{ secrets.MELI_REFRESH_TOKEN_WILBERT }}
+          MELI_REFRESH_TOKEN_ASVA:        ${{ secrets.MELI_REFRESH_TOKEN_ASVA }}
+          MELI_REFRESH_TOKEN_YC_NEW:      ${{ secrets.MELI_REFRESH_TOKEN_YC_NEW }}
+        run: python scripts/product_checklist.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: checklist
+          path: CHECKLIST_PRODUCTOS.xlsx
