@@ -52,24 +52,27 @@ Q=[
 ("Billie Eilish","Billie Eilish Eilish perfume"),("Parfums de Marly Oriana","Parfums de Marly Oriana"),
 ("Mugler Angel Nova","Mugler Angel Nova"),
 ]
-print("LABEL\tCPID\tVENDIDOS\tPRECIO\tOFERTAS\tNOMBRE")
+print("LABEL\tCPID\tNOMBRE\tBUYBOX\tOFERTAS\tVENDIDOS_BB\tLINK")
 for label,q in Q:
     try:
-        r=requests.get(f"{API}/sites/MLM/search",params={"q":q,"limit":40},headers=H,timeout=20).json()
-        results=r.get("results",[])
-        agg={}
-        for it in results:
-            cp=it.get("catalog_product_id")
-            if not cp: continue
-            d=agg.setdefault(cp,{"sold":0,"price":[],"n":0,"name":it.get("title")})
-            d["sold"]+=(it.get("sold_quantity") or 0); d["n"]+=1; d["price"].append(it.get("price") or 0)
-        if not agg:
-            print(f"{label}\t-\t-\t-\t0\t(sin catálogo)"); time.sleep(0.25); continue
-        best=max(agg.items(), key=lambda kv: (kv[1]["sold"], kv[1]["n"]))
-        cp,d=best
-        pr=min([p for p in d["price"] if p]) if any(d["price"]) else "?"
-        print(f"{label}\t{cp}\t{d['sold']}\t{pr}\t{d['n']}\t{(d['name'] or '')[:55]}")
+        s=requests.get(f"{API}/products/search",params={"site_id":"MLM","status":"active","q":q},headers=H,timeout=20).json()
+        res=s.get("results") or []
+        if not res:
+            print(f"{label}\t-\t(sin catalogo)\t-\t0\t-\t-"); time.sleep(0.2); continue
+        top=res[0]; cp=top.get("id"); name=top.get("name")
+        it=requests.get(f"{API}/products/{cp}/items",headers=H,timeout=20).json()
+        offers=it.get("results") or []
+        prices=[o.get("price") for o in offers if o.get("price")]
+        bb=min(prices) if prices else "?"
+        sold="?"
+        if offers:
+            best=min(offers,key=lambda o:o.get("price") or 9e9)
+            iid=best.get("item_id")
+            if iid:
+                d=requests.get(f"{API}/items/{iid}?attributes=sold_quantity",headers=H,timeout=15).json()
+                sold=d.get("sold_quantity")
+        print(f"{label}\t{cp}\t{(name or '')[:45]}\t{bb}\t{len(offers)}\t{sold}\thttps://www.mercadolibre.com.mx/p/{cp}")
     except Exception as e:
-        print(f"{label}\tERR\t-\t-\t-\t{type(e).__name__}")
-    time.sleep(0.25)
+        print(f"{label}\tERR\t{type(e).__name__}\t-\t-\t-\t-")
+    time.sleep(0.2)
 print("DONE")
