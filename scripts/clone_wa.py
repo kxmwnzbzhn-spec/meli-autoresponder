@@ -13,26 +13,25 @@ for v in (s.get("variations") or []):
     for c in (v.get("attribute_combinations") or []):
         if (c.get("id")=="COLOR" or c.get("name")=="Color"): colors.append(c.get("value_name"))
 colors=list(dict.fromkeys(colors))
-variations=[{"attribute_combinations":[{"id":"COLOR","value_name":col}],"available_quantity":1,"price":299} for col in colors]
+GTINR=[{"id":"EMPTY_GTIN_REASON","value_id":"17055160"}]
+variations=[{"attribute_combinations":[{"id":"COLOR","value_name":col}],
+             "attributes":GTINR,"available_quantity":1,"price":299} for col in colors]
 payload={"site_id":"MLM","title":s.get("title"),"category_id":s.get("category_id"),
          "currency_id":"MXN","buying_mode":"buy_it_now","listing_type_id":s.get("listing_type_id") or "gold_special",
          "condition":s.get("condition") or "used",
-         "catalog_product_id":s.get("catalog_product_id"),"catalog_listing":False,
          "pictures":pics,
          "attributes":[{"id":"BRAND","value_name":"JBL"},{"id":"MODEL","value_name":"Go 4"}],
          "variations":variations}
-print("colors:",colors,"| pics:",len(pics),"| cat:",s.get("category_id"),"| cpid:",s.get("catalog_product_id"))
+print("colors:",colors,"| pics:",len(pics))
 r=requests.post(f"{API}/items",headers=HAJ,json=payload,timeout=60)
 print("publish http:",r.status_code)
 if r.status_code>=300:
-    print("body:",r.text[:500]); print("DONE"); raise SystemExit(0)
+    print("body:",r.text[:600]); print("DONE"); raise SystemExit(0)
 nid=r.json().get("id"); print("NEW:",nid,"status:",r.json().get("status"))
-# descripcion con aviso color aleatorio
 orig=sd.get("plain_text") or ""
 disc=("IMPORTANTE: El color se envia de forma ALEATORIA segun disponibilidad en almacen. "
       "NO se garantiza el envio de un color especifico.\n\n")
-body={"plain_text":disc+orig}
-rd=requests.post(f"{API}/items/{nid}/description",headers=HAJ,json=body,timeout=30)
+rd=requests.post(f"{API}/items/{nid}/description",headers=HAJ,json={"plain_text":disc+orig},timeout=30)
 print("description http:",rd.status_code)
 print("PERMALINK:",r.json().get("permalink"))
 print("DONE")
