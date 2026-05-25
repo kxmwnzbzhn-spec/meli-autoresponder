@@ -20,7 +20,7 @@ payload={"site_id":"MLM","title":s.get("title"),"category_id":s.get("category_id
          "currency_id":"MXN","buying_mode":"buy_it_now","listing_type_id":s.get("listing_type_id") or "gold_special",
          "condition":s.get("condition") or "used",
          "pictures":pics,
-         "attributes":[{"id":"BRAND","value_name":"JBL"},{"id":"MODEL","value_name":"Go 4"},{"id":"EMPTY_GTIN_REASON","value_name":"El producto no tiene código registrado"}],
+         "attributes":[{"id":"BRAND","value_name":"Genérico"},{"id":"EMPTY_GTIN_REASON","value_name":"El producto no tiene código registrado"}],
          "variations":variations}
 print("colors:",colors,"| pics:",len(pics))
 r=requests.post(f"{API}/items",headers=HAJ,json=payload,timeout=60)
