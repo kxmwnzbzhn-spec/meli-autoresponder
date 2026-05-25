@@ -10,6 +10,7 @@ jobs:
         with: { python-version: '3.11' }
       - run: pip install requests -q
       - env:
-          MELI_APP_SECRET:                ${{ secrets.MELI_APP_SECRET }}
+          MELI_APP_ID_NEW:                ${{ secrets.MELI_APP_ID_NEW }}
+          MELI_APP_SECRET_NEW:            ${{ secrets.MELI_APP_SECRET_NEW }}
           MELI_REFRESH_TOKEN_YC_NEW:      ${{ secrets.MELI_REFRESH_TOKEN_YC_NEW }}
         run: python scripts/yiriam_tokentest.py
