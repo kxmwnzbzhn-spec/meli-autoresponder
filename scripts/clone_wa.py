@@ -13,20 +13,20 @@ for v in (s.get("variations") or []):
     for c in (v.get("attribute_combinations") or []):
         if (c.get("id")=="COLOR" or c.get("name")=="Color"): colors.append(c.get("value_name"))
 colors=list(dict.fromkeys(colors))
-GTINR=[{"id":"EMPTY_GTIN_REASON","value_name":"El producto no tiene código registrado"}]
+GTINR=[]
 variations=[{"attribute_combinations":[{"id":"COLOR","value_name":col}],
-             "attributes":GTINR,"available_quantity":1,"price":299} for col in colors]
+             "available_quantity":1,"price":299} for col in colors]
 payload={"site_id":"MLM","title":s.get("title"),"category_id":s.get("category_id"),
          "currency_id":"MXN","buying_mode":"buy_it_now","listing_type_id":s.get("listing_type_id") or "gold_special",
          "condition":s.get("condition") or "used",
          "pictures":pics,
-         "attributes":[{"id":"BRAND","value_name":"Genérico"},{"id":"EMPTY_GTIN_REASON","value_name":"El producto no tiene código registrado"}],
+         "attributes":[{"id":"BRAND","value_name":"Genérico"},{"id":"MODEL","value_name":"Genérico"}],
          "variations":variations}
 print("colors:",colors,"| pics:",len(pics))
 r=requests.post(f"{API}/items",headers=HAJ,json=payload,timeout=60)
 print("publish http:",r.status_code)
 if r.status_code>=300:
-    print("body:",r.text[:600]); print("DONE"); raise SystemExit(0)
+    print("body:",r.text[:1500]); print("DONE"); raise SystemExit(0)
 nid=r.json().get("id"); print("NEW:",nid,"status:",r.json().get("status"))
 orig=sd.get("plain_text") or ""
 disc=("IMPORTANTE: El color se envia de forma ALEATORIA segun disponibilidad en almacen. "
