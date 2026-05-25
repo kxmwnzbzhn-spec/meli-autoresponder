@@ -52,7 +52,7 @@ Q=[
 ("Billie Eilish","Billie Eilish Eilish perfume"),("Parfums de Marly Oriana","Parfums de Marly Oriana"),
 ("Mugler Angel Nova","Mugler Angel Nova"),
 ]
-print("LABEL\tVEND\tCPID\tBUYBOX\tNOMBRE")
+print("LABEL\tVEND\tCPID\tBUYBOX\tNOMBRE", flush=True)
 for label,q in Q:
     best=(-1,None,"?","")
     try:
@@ -62,13 +62,14 @@ for label,q in Q:
             cp=c.get("id"); nm=c.get("name")
             try:
                 it=requests.get(f"{API}/products/{cp}/items",params={"limit":50},headers=H,timeout=12).json().get("results") or []
-            except: it=[]
+            except Exception:
+                it=[]
             pr=[o.get("price") for o in it if o.get("price")]
             n=len(it)
             if n>best[0]: best=(n,cp,(min(pr) if pr else "?"),nm)
             time.sleep(0.05)
-    except Exception as e:
+    except Exception:
         pass
-n,cp,bb,nm=best
-print(f"{label}\t{n if n>=0 else 0}\t{cp}\t{bb}\t{(nm or '')}")
+    n,cp,bb,nm=best
+    print(f"{label}\t{n if n>=0 else 0}\t{cp}\t{bb}\t{nm or ''}", flush=True)
 print("DONE")
