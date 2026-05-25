@@ -6,11 +6,11 @@ H={"Authorization":f"Bearer {AT}"}; HJ={**H,"Content-Type":"application/json"}
 p=requests.get(f"{API}/products/{CP}",headers=H,timeout=20).json()
 title=p.get("name")
 # categoria via domain_discovery
-cat=None
-dd=requests.get(f"{API}/sites/MLM/domain_discovery/search",params={"limit":1,"q":title},headers=H,timeout=15).json()
-if isinstance(dd,list) and dd: cat=dd[0].get("category_id")
-# buybox
 it=requests.get(f"{API}/products/{CP}/items",headers=H,timeout=15).json().get("results") or []
+cat=None
+if it:
+    ci=requests.get(f"{API}/items/{it[0].get('item_id')}?attributes=category_id",headers=H,timeout=12).json()
+    cat=ci.get("category_id")
 prices=[o.get("price") for o in it if o.get("price")]
 price=min(prices) if prices else 299
 # EMPTY_GTIN_REASON valido para la categoria
