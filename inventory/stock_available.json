@@ -1,10 +1,10 @@
 {
   "_meta": {
-    "updated": "2026-05-25T19:09:44.361865Z",
+    "updated": "2026-05-25T20:41:24.551056Z",
     "golive_ref": "stock_at_golive_20260518.json",
     "note": "Dinámico — decrementa con cada venta vía cron.",
-    "total_sold": 860,
-    "total_available": 4156
+    "total_sold": 874,
+    "total_available": 4142
   },
   "skus": {
     "SONY-XB100-NEGRO": {
@@ -16,33 +16,33 @@
       "color": "Negro"
     },
     "JBL-GO4-AQUA": {
-      "available": 561,
+      "available": 560,
       "initial": 704,
-      "sold_since_golive": 143,
+      "sold_since_golive": 144,
       "last_pause_triggered": false,
       "modelo": "JBL Go 4",
       "color": "Aqua/Celeste"
     },
     "JBL-GO3-NEGRO": {
-      "available": 347,
+      "available": 343,
       "initial": 495,
-      "sold_since_golive": 148,
+      "sold_since_golive": 152,
       "last_pause_triggered": false,
       "modelo": "JBL Go 3",
       "color": "Negro"
     },
     "JBL-CLIP5-AZUL": {
-      "available": 346,
+      "available": 343,
       "initial": 421,
-      "sold_since_golive": 75,
+      "sold_since_golive": 78,
       "last_pause_triggered": false,
       "modelo": "JBL Clip 5",
       "color": "Azul"
     },
     "JBL-GO4-CAMUFLAJE": {
-      "available": 312,
+      "available": 309,
       "initial": 389,
-      "sold_since_golive": 77,
+      "sold_since_golive": 80,
       "last_pause_triggered": false,
       "modelo": "JBL Go 4",
       "color": "Camuflaje"
@@ -80,9 +80,9 @@
       "color": "Rosa"
     },
     "JBL-GO4-ROJO": {
-      "available": 56,
+      "available": 53,
       "initial": 198,
-      "sold_since_golive": 142,
+      "sold_since_golive": 145,
       "last_pause_triggered": false,
       "modelo": "JBL Go 4",
       "color": "Rojo"
