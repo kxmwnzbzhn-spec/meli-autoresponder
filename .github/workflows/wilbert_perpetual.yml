@@ -6,8 +6,6 @@ on:
         description: 'gen counter'
         required: false
         default: '0'
-  schedule:
-    - cron: '*/5 * * * *'
 permissions:
   contents: write
   actions: write
