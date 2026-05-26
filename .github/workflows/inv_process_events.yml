@@ -1,0 +1,45 @@
+name: inv_process_events
+
+# Procesa eventos MELI pendientes -> stock + COGS
+# Triggers:
+#   - schedule cron cada 5 min (red de seguridad, garantiza throughput continuo)
+#   - workflow_dispatch (run manual)
+#   - repository_dispatch type 'meli_event' (lo dispara el Worker en cada webhook)
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: "max ordenes a procesar en este run"
+        required: false
+        default: "300"
+  repository_dispatch:
+    types: [meli_event]
+
+concurrency:
+  group: process-events
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - run: pip install psycopg2-binary requests
+      - name: process_event
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          TOKEN_READ_SECRET: ${{ secrets.TOKEN_READ_SECRET }}
+          WORKER_BASE: ${{ secrets.WORKER_BASE }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          LIMIT="${{ github.event.inputs.limit }}"
+          LIMIT="${LIMIT:-300}"
+          python inventory_platform/scripts/process_event.py \
+            --limit "$LIMIT" --max-seconds 420
