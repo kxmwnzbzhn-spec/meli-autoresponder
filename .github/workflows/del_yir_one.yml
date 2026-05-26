@@ -1,16 +1,14 @@
 name: del-yir-one
-on: { workflow_dispatch: {}, push: { paths: [.github/workflows/del_yir_one.yml] } }
+on: { workflow_dispatch: {} }
 jobs:
-  run:
+  go:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 3
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with: { python-version: "3.11" }
-      - run: pip install requests
+      - run: pip install requests -q
       - env:
           MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
           MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
           MELI_REFRESH_TOKEN_YC_NEW: ${{ secrets.MELI_REFRESH_TOKEN_YC_NEW }}
-        run: python scripts/del_2950790167.py
+        run: python3 scripts/del_yir.py
