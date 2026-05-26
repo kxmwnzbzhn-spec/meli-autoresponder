@@ -1,8 +1,6 @@
 name: wilbert-auto-replenish-5min
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '*/5 * * * *'
 concurrency:
   group: wilbert-replenish-5min
   cancel-in-progress: false
