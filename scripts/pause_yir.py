@@ -8,7 +8,7 @@ tok=requests.post(f"{API}/oauth/token",data={
 },timeout=20).json()
 T=tok["access_token"]
 H={"Authorization":f"Bearer {T}"}; HJ={**H,"Content-Type":"application/json"}
-sid="MLM5291774150"
+sid="MLM2950790163"
 g=requests.get(f"{API}/items/{sid}",headers=H,timeout=30).json()
 print(f"BEFORE: status={g.get('status')} sold={g.get('sold_quantity')} price={g.get('price')} title='{(g.get('title') or '')[:80]}'")
 r=requests.put(f"{API}/items/{sid}",headers=HJ,json={"status":"paused"},timeout=30)
