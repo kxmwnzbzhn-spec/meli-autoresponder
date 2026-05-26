@@ -19,7 +19,7 @@ API="https://api.mercadolibre.com"
 MIN_FLOOR=200
 
 # Items que NO se tocan (pausados manual por el usuario)
-PAUSED_LOCK=set()
+PAUSED_LOCK={"MLM2890938689"}
 
 # Pisos por item (no bajar de aquí)
 FLOOR_OVERRIDE={}
