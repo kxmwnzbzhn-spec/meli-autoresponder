@@ -1,8 +1,10 @@
 import os, requests, time, sys
-sys.path.insert(0, "scripts")
-import meli_token
+
+
 API="https://api.mercadolibre.com"
-T=meli_token.refresh(os.environ["MELI_REFRESH_TOKEN_RAYMUNDO"]).json()["access_token"]
+tok=requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],"client_secret":os.environ["MELI_APP_SECRET"],"refresh_token":os.environ["MELI_REFRESH_TOKEN_RAYMUNDO"]},timeout=20).json()
+T=tok["access_token"]
+print(f"NEW_RT_RAY={tok.get(\"refresh_token\")}")
 H={"Authorization":f"Bearer {T}"}; HJ={**H,"Content-Type":"application/json"}
 me=requests.get(f"{API}/users/me",headers=H,timeout=20).json()
 UID=me["id"]
