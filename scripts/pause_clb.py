@@ -1,23 +1,22 @@
 import os, requests
 import meli_token
-API="https://api.mercadolibre.com"
-IDS=("5244434174,2890996849,2890989785,2890989209,2890988575,2890987863,2890987765,2890976191,"
-     "2890975983,2890951427,2890950617,2890938767,2890938641,2890938557,2888494751,5245310498,"
-     "2890952081,2890840987,5245310490,5245746252,5245546822,5245546756").split(",")
-ids=["MLM"+i.strip() for i in IDS]
+IID="MLM5245310494"; PRICE=499; API="https://api.mercadolibre.com"
 AT=meli_token.refresh(os.environ["MELI_REFRESH_TOKEN_CLARIBEL"]).json()["access_token"]
 H={"Authorization":f"Bearer {AT}"}; HJ={**H,"Content-Type":"application/json"}
-ok=err=skip=0
-for iid in ids:
-    try:
-        b=requests.get(f"{API}/items/{iid}?attributes=status",headers=H,timeout=15).json()
-        st=b.get("status")
-        if st=="paused": print(f"  {iid} ya pausado"); skip+=1; continue
-        if st in ("closed","under_review"): print(f"  {iid} status={st} (no pauseable)"); skip+=1; continue
-        r=requests.put(f"{API}/items/{iid}",headers=HJ,json={"status":"paused"},timeout=15)
-        if r.status_code<300: print(f"  {iid} {st}->paused"); ok+=1
-        else: print(f"  {iid} ERR http={r.status_code} {r.text[:140]}"); err+=1
-    except Exception as e:
-        print(f"  {iid} EXC {type(e).__name__}: {e}"); err+=1
-print(f"\nOK={ok} SKIP={skip} ERR={err} total={len(ids)}")
+it=requests.get(f"{API}/items/{IID}",headers=H,timeout=20).json()
+print(f"{IID} '{(it.get('title') or '')[:40]}' status={it.get('status')} qty={it.get('available_quantity')} price={it.get('price')} vars={len(it.get('variations') or [])}")
+# set price
+rp=requests.put(f"{API}/items/{IID}",headers=HJ,json={"price":PRICE},timeout=15)
+print(f"  price->{PRICE}: {rp.status_code}")
+# var qty>=1
+vp=[{"id":v.get("id"),"available_quantity":1} for v in (it.get("variations") or []) if (v.get("available_quantity") or 0)<1]
+if vp:
+    r1=requests.put(f"{API}/items/{IID}",headers=HJ,json={"variations":vp},timeout=15)
+    print(f"  var qty: {r1.status_code}")
+body={"status":"active"}
+if not (it.get("variations") or []) and (it.get("available_quantity") or 0)<1: body["available_quantity"]=1
+r2=requests.put(f"{API}/items/{IID}",headers=HJ,json=body,timeout=15)
+print(f"  activate: {r2.status_code} {('' if r2.status_code<300 else r2.text[:200])}")
+f=requests.get(f"{API}/items/{IID}?attributes=status,price,available_quantity",headers=H,timeout=15).json()
+print(f"FINAL status={f.get('status')} price={f.get('price')} qty={f.get('available_quantity')}")
 print("DONE")
