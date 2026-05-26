@@ -1,214 +1,382 @@
-"""Procesa un evento MELI: fetch order details, decrement stock, register COGS, alert."""
-import os,sys,json,requests,psycopg2
-import meli_token
-CID=os.environ["MELI_APP_ID"]; CS=os.environ["MELI_APP_SECRET"]
-DSN=os.environ["SUPABASE_DB_URL"]
-TG_TOKEN=os.environ.get("TELEGRAM_BOT_TOKEN"); TG_CHAT=os.environ.get("TELEGRAM_CHAT_ID")
+"""process_event.py — Consumidor de eventos MELI → stock + COGS.
 
-event_id=os.environ.get("EVENT_ID")
-topic=os.environ.get("TOPIC")
-resource=os.environ.get("RESOURCE")
-user_id=os.environ.get("USER_ID")
+El Worker Cloudflare recibe webhooks y los persiste en `events` (processing_status='pending').
+Este script consume esos eventos pendientes y aplica el efecto en inventario:
 
-if not event_id:
-    print("no EVENT_ID"); sys.exit(1)
+  orders_v2 / orders  → por cada item de la orden PAGADA:
+      resolve_sale_target(mlm_id, variation_id) → (sku, warehouse)
+      apply_stock_delta(-qty, type='sale', order_id, ...) → movement_id
+      consume_cost(sku, warehouse, qty, order_id, movement_id) → COGS
+
+  post_purchase / claims → process_return(...) (devolución vuelve a inventario 'devolucion')
+
+Garantías:
+  • IDEMPOTENTE por order_id: si la orden ya tiene un movimiento 'sale' en
+    stock_movements, NO se vuelve a descontar (protege contra el go-live seed
+    y contra los multiples webhooks que MELI manda por la misma orden).
+  • Solo descuenta órdenes con status 'paid' (o 'partially_paid'). Webhooks de
+    órdenes no pagadas se marcan procesados sin tocar stock; cuando llegue el
+    webhook de pago, esa orden se procesa (aún no tiene movimiento 'sale').
+  • TOKENS: nunca llama /oauth/token. Lee el access_token vigente del Worker
+    (autoridad central) vía GET {WORKER_BASE}/token/{ACCOUNT}.
+  • --since permite un watermark de go-live para no procesar órdenes anteriores
+    al conteo físico.
+
+Uso:
+    SUPABASE_DB_URL=... TOKEN_READ_SECRET=... WORKER_BASE=https://meli-webhook...workers.dev \\
+        python process_event.py [--dry-run] [--limit N] [--max-seconds 280] \\
+        [--since 2026-05-23T00:00:00Z] [--topics orders_v2,orders]
+"""
+import os, sys, re, time, json, argparse, requests, psycopg2
+from datetime import datetime, timezone
+from concurrent.futures import ThreadPoolExecutor
+
+DSN = os.environ["SUPABASE_DB_URL"]
+WORKER_BASE = os.environ.get("WORKER_BASE", "https://meli-webhook.elite-market-1779161651.workers.dev").rstrip("/")
+TOKEN_READ_SECRET = os.environ.get("TOKEN_READ_SECRET", "")
+TG_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
+TG_CHAT = os.environ.get("TELEGRAM_CHAT_ID")
+
+PAID_STATUSES = {"paid", "partially_paid"}
+DEAD_STATUSES = {"cancelled", "invalid"}  # no descontar
+
 
 def tg(msg):
-    if not TG_TOKEN or not TG_CHAT: return
-    try: requests.post(f"https://api.telegram.org/bot{TG_TOKEN}/sendMessage",data={"chat_id":TG_CHAT,"text":msg,"parse_mode":"Markdown"},timeout=10)
-    except: pass
+    if not TG_TOKEN or not TG_CHAT:
+        print(f"[no telegram] {msg}"); return
+    try:
+        requests.post(f"https://api.telegram.org/bot{TG_TOKEN}/sendMessage",
+                      data={"chat_id": TG_CHAT, "text": msg, "parse_mode": "Markdown"}, timeout=10)
+    except Exception:
+        pass
 
-def tok_for_account(cur,user_id):
-    cur.execute("SELECT id, nickname, refresh_token_secret FROM accounts WHERE meli_user_id=%s",(user_id,))
-    row=cur.fetchone()
-    if not row: return None,None,None
-    aid,nick,secret_name=row
-    rt=os.environ.get(secret_name,"")
-    if not rt: return aid,nick,None
-    r=meli_token.refresh(rt).json()
-    return aid,nick,r.get("access_token")
 
-conn=psycopg2.connect(DSN); cur=conn.cursor()
-cur.execute("SELECT id, topic, resource, user_id, raw_payload, processing_status FROM events WHERE id=%s FOR UPDATE",(event_id,))
-row=cur.fetchone()
-if not row:
-    print(f"event {event_id} not found"); sys.exit(1)
-eid,etopic,eres,euser,payload,status=row
-if status=="done":
-    print(f"event {event_id} already done"); sys.exit(0)
+_token_cache = {}
+def get_token(account_upper):
+    """Lee access_token vigente del Worker (autoridad central). Cachea por run."""
+    if not account_upper:
+        return None
+    if account_upper in _token_cache:
+        return _token_cache[account_upper]
+    try:
+        r = requests.get(f"{WORKER_BASE}/token/{account_upper}",
+                         headers={"Authorization": f"Bearer {TOKEN_READ_SECRET}"}, timeout=30)
+        if r.status_code == 200:
+            tok = r.json().get("access_token")
+            _token_cache[account_upper] = tok
+            return tok
+    except Exception as e:
+        print(f"  token error {account_upper}: {str(e)[:120]}")
+    _token_cache[account_upper] = None
+    return None
 
-cur.execute("UPDATE events SET processing_status='processing', attempts=attempts+1 WHERE id=%s",(eid,))
 
-aid,nick,T=tok_for_account(cur,euser)
-if not T:
-    cur.execute("UPDATE events SET processing_status='error', processing_error=%s WHERE id=%s",("no auth",eid))
-    conn.commit(); sys.exit(1)
-H={"Authorization":f"Bearer {T}"}
+def order_id_from_resource(resource, raw_payload):
+    if resource:
+        m = re.search(r'(\d{6,})', resource)
+        if m:
+            return m.group(1)
+    if raw_payload:
+        rp = raw_payload
+        if isinstance(rp, str):
+            try: rp = json.loads(rp)
+            except: rp = {}
+        m = re.search(r'(\d{6,})', (rp or {}).get("resource", "") or "")
+        if m:
+            return m.group(1)
+    return None
 
-# Fetch resource details
-if etopic=="orders_v2" and eres.startswith("/orders/"):
-    o=requests.get(f"https://api.mercadolibre.com{eres}",headers=H).json()
-    if o.get("status") in ("cancelled","invalid"):
-        cur.execute("UPDATE events SET processing_status='skipped', processed_at=NOW(), processing_error='order cancelled' WHERE id=%s",(eid,))
-        conn.commit(); print("skipped: cancelled"); sys.exit(0)
-    decrements=[]
-    for it in (o.get("order_items") or []):
-        item=it.get("item",{})
-        mlm=item.get("id"); qty=int(it.get("quantity",0) or 0)
-        # Variation + warehouse aware: resolve_sale_target → (sku, warehouse)
-        variation_id = item.get("variation_id")
-        if variation_id:
-            cur.execute("SELECT sku, warehouse FROM resolve_sale_target(%s,%s)",(mlm,int(variation_id)))
-        else:
-            cur.execute("SELECT sku, warehouse FROM resolve_sale_target(%s,NULL)",(mlm,))
-        row=cur.fetchone()
-        if not row or not row[0]:
-            print(f"unmapped MLM {mlm} variation_id={variation_id}")
-            tg(f"⚠️ MLM no mapeado: `{mlm}` variation={variation_id} order=`{o.get('id')}`")
-            continue
-        sku, sale_warehouse = row[0], row[1]
+
+def fetch_order(order_id, token):
+    try:
+        r = requests.get(f"https://api.mercadolibre.com/orders/{order_id}",
+                         headers={"Authorization": f"Bearer {token}"}, timeout=25)
+        if r.status_code == 200:
+            return r.json()
+        return {"_http": r.status_code, "_body": r.text[:200]}
+    except Exception as e:
+        return {"_err": str(e)[:160]}
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument("--limit", type=int, default=0, help="máx órdenes distintas a procesar (0=sin límite)")
+    ap.add_argument("--max-seconds", type=int, default=280)
+    ap.add_argument("--since", default=None, help="ISO ts: ignora órdenes con date_created anterior (watermark go-live)")
+    ap.add_argument("--topics", default="orders_v2,orders")
+    args = ap.parse_args()
+
+    since_dt = None
+    if args.since:
         try:
-            cur.execute("SELECT apply_stock_delta(%s,%s,%s,%s,%s,%s,%s,%s,%s)",
-                (sku,sale_warehouse,-qty,'sale',eid,str(o.get("id")),mlm,aid,f"order {o.get('id')}"))
-            mid=cur.fetchone()[0]
-
-            # --- Sprint 1: COGS registration ---
-            # Llamar consume_cost después de stock OK. Si falla (no hay cost_layer),
-            # NO abortar venta — capturar advertencia y seguir. Stock ya decrementó.
-            cogs_total=None
-            try:
-                cur.execute("SELECT consume_cost(%s,%s,%s,%s,%s)",
-                    (sku,sale_warehouse,qty,str(o.get("id")),mid))
-                cogs_total=float(cur.fetchone()[0] or 0)
-            except psycopg2.errors.RaiseException as ce:
-                err=str(ce)[:300]
-                tg(f"⚠️ COGS no registrado: `{sku}` qty={qty} order=`{o.get('id')}`\n{err}")
-                cur.execute("UPDATE events SET processing_error = COALESCE(processing_error,'') || %s WHERE id=%s",
-                    (f" cogs_warn:{sku}",eid))
-            except Exception as ce:
-                err=str(ce)[:300]
-                tg(f"⚠️ COGS error inesperado: `{sku}` order=`{o.get('id')}`\n{err}")
-
-            decrements.append((sku,qty,mid,cogs_total))
-        except psycopg2.errors.RaiseException as e:
-            tg(f"⚠️ OVERSELL detectado!\nSKU `{sku}` mlm `{mlm}`\nOrden `{o.get('id')}` qty={qty}\n{str(e)[:200]}")
-            cur.execute("ROLLBACK")
-            cur.execute("UPDATE events SET processing_status='error', processing_error=%s WHERE id=%s",(f"oversell:{sku}",eid))
-            conn.commit(); sys.exit(2)
-    cur.execute("UPDATE events SET processing_status='done', processed_at=NOW(), account_id=%s WHERE id=%s",(aid,eid))
-    # Check low stock
-    for sku,_,_,_ in decrements:
-        cur.execute("""SELECT p.alert_threshold, COALESCE(SUM(s.qty),0) FROM products p LEFT JOIN stock s ON s.sku=p.sku AND s.warehouse='bodega_main' WHERE p.sku=%s GROUP BY p.alert_threshold""",(sku,))
-        r=cur.fetchone()
-        if r and r[1] is not None and r[1]<=(r[0] or 5):
-            tg(f"⚠️ Stock bajo: `{sku}` quedan {r[1]} (alerta<{r[0]})")
-    conn.commit()
-    # Mensaje de venta con cogs si disponible
-    def _fmt(s,q,mid,cogs):
-        base=f"{s} ×{q}"
-        return f"{base} (cogs ${cogs:.0f})" if cogs else base
-    tg(f"✓ Venta {nick}: "+", ".join(_fmt(*d) for d in decrements))
-    print(f"✓ processed {len(decrements)} decrements")
-elif etopic=="claims":
-    # Devolución MELI. Resource: /claims/{id} o /post-purchase/v1/claims/{id}
-    claim_id = eres.rstrip("/").split("/")[-1]
-    # Fetch claim detail (probar ambos endpoints)
-    c = None
-    for url in (f"https://api.mercadolibre.com/post-purchase/v2/claims/{claim_id}",
-                f"https://api.mercadolibre.com/post-purchase/v1/claims/{claim_id}",
-                f"https://api.mercadolibre.com{eres}"):
-        try:
-            r = requests.get(url, headers=H, timeout=20)
-            if r.status_code == 200:
-                c = r.json(); break
+            since_dt = datetime.fromisoformat(args.since.replace("Z", "+00:00"))
         except Exception:
-            continue
-    if not c:
-        cur.execute("UPDATE events SET processing_status='error', processing_error=%s WHERE id=%s",(f"claim fetch failed: {claim_id}",eid))
-        conn.commit(); sys.exit(1)
+            print(f"⚠ --since inválido: {args.since}"); since_dt = None
 
-    # ¿Es una devolución que resultó en producto físicamente devuelto?
-    # Reglas (conservadoras):
-    #   - status='closed'
-    #   - resolution.reason indica producto devuelto (varía: 'product_returned','returned','accept_return','refund_with_return',...)
-    status = c.get('status') or c.get('claim_status')
-    resolution = c.get('resolution') or {}
-    reason = resolution.get('reason') or resolution.get('applied_coverage') or ''
-    is_return = (
-        status == 'closed'
-        and (
-            'return' in reason.lower()
-            or reason in ('product_returned','returned','accept_return','refund_with_return')
-        )
+    topics = tuple(t.strip() for t in args.topics.split(",") if t.strip())
+    t0 = time.time()
+
+    conn = psycopg2.connect(DSN)
+    conn.autocommit = False
+    cur = conn.cursor()
+
+    # Mapa user_id(seller) → (account_id, NICK_UPPER)
+    cur.execute("SELECT id, nickname, meli_user_id FROM accounts WHERE active=true")
+    by_user = {}
+    for aid, nick, uid in cur.fetchall():
+        if uid is not None:
+            by_user[int(uid)] = (aid, (nick or "").upper())
+
+    # Eventos pendientes de órdenes, agrupados por order_id (procesa el más antiguo)
+    cur.execute(
+        """
+        SELECT id, resource, raw_payload, user_id, account_id, received_at
+          FROM events
+         WHERE topic = ANY(%s) AND processing_status = 'pending'
+         ORDER BY id ASC
+        """,
+        (list(topics),)
     )
-    if not is_return:
-        cur.execute("UPDATE events SET processing_status='skipped', processed_at=NOW(), processing_error=%s WHERE id=%s",
-                    (f"claim no-return: status={status} reason={reason}", eid))
-        conn.commit(); print(f"skipped claim {claim_id}: not a return"); sys.exit(0)
-
-    # Resolver order_id relacionado
-    order_id = None
-    # Diferentes lugares donde MELI guarda la referencia
-    if c.get('resource') and isinstance(c.get('resource'), dict):
-        order_id = c['resource'].get('id') if c['resource'].get('type') == 'order' else None
-    if not order_id:
-        order_id = c.get('order_id') or c.get('resource_id')
-    if not order_id and c.get('resources'):
-        for res in c['resources']:
-            if res.get('type') == 'order':
-                order_id = res.get('id'); break
-    if not order_id:
-        cur.execute("UPDATE events SET processing_status='error', processing_error=%s WHERE id=%s",
-                    (f"claim {claim_id} sin order_id resolvible", eid))
-        conn.commit(); sys.exit(1)
-
-    # Fetch order para obtener items y variations
-    o = requests.get(f"https://api.mercadolibre.com/orders/{order_id}", headers=H, timeout=20).json()
-    refund = (resolution.get('refund') or {}).get('amount') or o.get('total_amount')
-
-    processed = []
-    for it in (o.get('order_items') or []):
-        item = it.get('item', {})
-        mlm = item.get('id'); qty = int(it.get('quantity', 0) or 0)
-        variation_id = item.get('variation_id')
-        # Resolver SKU
-        if variation_id:
-            cur.execute("SELECT sku FROM resolve_sale_target(%s,%s)",(mlm,int(variation_id)))
-        else:
-            cur.execute("SELECT sku FROM resolve_sale_target(%s,NULL)",(mlm,))
-        row = cur.fetchone()
-        if not row or not row[0]:
-            tg(f"⚠️ Devolución MLM no mapeado: claim={claim_id} mlm={mlm}")
-            continue
-        sku = row[0]
-        # Llamar process_return
-        try:
-            cur.execute(
-                """SELECT process_return(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",
-                (claim_id, str(order_id), aid, mlm, int(variation_id) if variation_id else None,
-                 sku, qty, refund, status, reason,
-                 json.dumps(c), json.dumps(o))
-            )
-            result = cur.fetchone()[0]
-            processed.append({"sku": sku, "qty": qty, "result": result})
-        except Exception as e:
-            tg(f"⚠️ Devolución error: claim={claim_id} sku={sku}\n{str(e)[:200]}")
-            cur.execute("ROLLBACK")
-            cur.execute("UPDATE events SET processing_status='error', processing_error=%s WHERE id=%s",
-                        (f"return_err:{sku}",eid))
-            conn.commit(); sys.exit(2)
-
-    cur.execute("UPDATE events SET processing_status='done', processed_at=NOW(), account_id=%s WHERE id=%s",(aid,eid))
+    rows = cur.fetchall()
     conn.commit()
-    if processed:
-        items_str = ", ".join(f"{p['sku']} ×{p['qty']}" for p in processed)
-        tg(f"♻️ Devolución procesada `{nick}`: {items_str}\nClaim `{claim_id}` → +qty a *devolución*")
-    print(f"✓ claim {claim_id} processed {len(processed)} returns")
-elif etopic=="items":
-    # MELI ack: item changed status. Refresh listings.last_sync etc.
-    cur.execute("UPDATE events SET processing_status='done', processed_at=NOW(), account_id=%s WHERE id=%s",(aid,eid))
-    conn.commit(); print("items event noted")
-else:
-    cur.execute("UPDATE events SET processing_status='skipped', processed_at=NOW(), processing_error=%s WHERE id=%s",(f"unsupported topic {etopic}",eid))
-    conn.commit(); print(f"skipped topic {etopic}")
-cur.close(); conn.close()
+
+    # Agrupa event_ids por order_id
+    order_to_events = {}     # order_id -> [event_ids]
+    order_meta = {}          # order_id -> (user_id, account_id)
+    for ev_id, res, rp, uid, acc_id, rec in rows:
+        oid = order_id_from_resource(res, rp)
+        if not oid:
+            continue
+        order_to_events.setdefault(oid, []).append(ev_id)
+        if oid not in order_meta:
+            order_meta[oid] = (uid, acc_id)
+
+    distinct_orders = list(order_to_events.keys())
+    print(f"📥 eventos pending de órdenes: {len(rows)} | órdenes distintas: {len(distinct_orders)}")
+
+    # Órdenes ya con movimiento 'sale' (idempotencia global)
+    cur.execute("SELECT DISTINCT order_id FROM stock_movements WHERE order_id IS NOT NULL")
+    already_sold = set(r[0] for r in cur.fetchall())
+    conn.commit()
+
+    stats = dict(sold=0, units=0, cogs=0.0, skip_already=0, skip_unpaid=0,
+                 skip_cancelled=0, skip_unmapped=0, skip_notoken=0, oversell=0,
+                 fetch_fail=0, events_done=0, orders_done=0)
+    unmapped_samples = []
+    oversell_samples = []
+
+    # ---- Prefetch concurrente de órdenes (red en paralelo, DB serial) ----
+    candidates = [oid for oid in distinct_orders if oid not in already_sold]
+    if args.limit:
+        candidates = candidates[:args.limit]
+
+    def _resolve_nick(oid):
+        uid, _ = order_meta[oid]
+        if uid is not None and int(uid) in by_user:
+            return by_user[int(uid)][1]
+        return None
+
+    def _prefetch(oid):
+        nick = _resolve_nick(oid)
+        tok = get_token(nick) if nick else None
+        if not tok:
+            return (oid, None)
+        return (oid, fetch_order(oid, tok))
+
+    order_cache = {}
+    # warm el cache de tokens primero (serial, pocas cuentas) para evitar refresh duplicado
+    for oid in candidates[:50]:
+        nick = _resolve_nick(oid)
+        if nick:
+            get_token(nick)
+    with ThreadPoolExecutor(max_workers=24) as ex:
+        for oid, order in ex.map(_prefetch, candidates):
+            order_cache[oid] = order
+    print(f"🌐 órdenes pre-fetched: {sum(1 for v in order_cache.values() if v)}/{len(candidates)}")
+
+    processed_order_count = 0
+    for oid in distinct_orders:
+        if args.limit and processed_order_count >= args.limit:
+            break
+        if time.time() - t0 > args.max_seconds:
+            print("⏱ max-seconds alcanzado, corto aquí (re-run para continuar)")
+            break
+        processed_order_count += 1
+        ev_ids = order_to_events[oid]
+        uid, acc_id_evt = order_meta[oid]
+
+        def mark_events(status, err=None):
+            if args.dry_run:
+                return
+            cur.execute(
+                "UPDATE events SET processing_status=%s, processed_at=now(), processing_error=%s "
+                "WHERE id = ANY(%s)",
+                (status, (err or None), ev_ids)
+            )
+
+        # 1) Idempotencia: ya vendida (go-live seed o run previo)
+        if oid in already_sold:
+            stats["skip_already"] += 1
+            mark_events("done", "already_sold")
+            conn.commit()
+            continue
+
+        # 2) Token de la cuenta vendedora
+        acc_id, nick_upper = (None, None)
+        if uid is not None and int(uid) in by_user:
+            acc_id, nick_upper = by_user[int(uid)]
+        if acc_id_evt:
+            acc_id = acc_id_evt
+        token = get_token(nick_upper) if nick_upper else None
+        if not token:
+            stats["skip_notoken"] += 1
+            # NO marcamos done: queremos reintentar cuando haya token
+            conn.commit()
+            continue
+
+        # 3) Orden (del prefetch concurrente; fallback a fetch directo)
+        order = order_cache.get(oid)
+        if order is None:
+            order = fetch_order(oid, token)
+        status = (order or {}).get("status")
+        if not status:
+            stats["fetch_fail"] += 1
+            conn.commit()  # dejar pending para reintento
+            continue
+        if status in DEAD_STATUSES:
+            stats["skip_cancelled"] += 1
+            mark_events("done", f"order_{status}")
+            conn.commit()
+            continue
+        if status not in PAID_STATUSES:
+            stats["skip_unpaid"] += 1
+            mark_events("done", f"order_{status}_noop")  # se re-evaluará en el webhook de pago (aún sin sale)
+            conn.commit()
+            continue
+
+        # Watermark opcional
+        if since_dt:
+            dc = (order or {}).get("date_created")
+            try:
+                if dc and datetime.fromisoformat(dc.replace("Z", "+00:00")) < since_dt:
+                    stats["skip_already"] += 1
+                    mark_events("done", "before_watermark")
+                    conn.commit()
+                    continue
+            except Exception:
+                pass
+
+        # 4) Procesar items
+        items = (order or {}).get("order_items", []) or []
+        order_ok = True
+        order_units = 0
+        order_cogs = 0.0
+        for it in items:
+            itm = it.get("item", {}) or {}
+            mlm = itm.get("id")
+            vid = itm.get("variation_id")
+            qty = int(it.get("quantity") or 0)
+            if not mlm or qty <= 0:
+                continue
+            cur.execute("SELECT sku, warehouse FROM resolve_sale_target(%s, %s)",
+                        (mlm, int(vid) if vid else None))
+            tgt = cur.fetchone()
+            if not tgt or not tgt[0]:
+                stats["skip_unmapped"] += 1
+                if len(unmapped_samples) < 12:
+                    unmapped_samples.append(f"{oid}:{mlm}/{vid} x{qty}")
+                order_ok = False
+                continue
+            sku, wh = tgt
+
+            if args.dry_run:
+                order_units += qty
+                # COGS estimado no se calcula en dry-run
+                print(f"  [DRY] order {oid} {sku}@{wh} -{qty} (status={status})")
+                continue
+
+            # apply_stock_delta (lanza excepción si oversell)
+            try:
+                cur.execute(
+                    "SELECT apply_stock_delta(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
+                    (sku, wh, -qty, 'sale', ev_ids[0], oid, mlm, acc_id,
+                     'venta MELI (process_event)', 'process_event')
+                )
+                mov_id = cur.fetchone()[0]
+            except psycopg2.Error as e:
+                conn.rollback()
+                stats["oversell"] += 1
+                if len(oversell_samples) < 12:
+                    oversell_samples.append(f"{oid}:{sku} x{qty}")
+                # marca el evento con la razón pero no aborta el resto
+                cur.execute(
+                    "UPDATE events SET processing_status='error', processed_at=now(), processing_error=%s "
+                    "WHERE id = ANY(%s)",
+                    (f'oversell {sku}', ev_ids)
+                )
+                conn.commit()
+                order_ok = False
+                break
+
+            # consume_cost (COGS)
+            try:
+                cur.execute("SELECT consume_cost(%s,%s,%s,%s,%s)", (sku, wh, qty, oid, mov_id))
+                cogs = float(cur.fetchone()[0] or 0)
+            except Exception as e:
+                cogs = 0.0
+                print(f"  ⚠ COGS falló {sku} order={oid}: {str(e)[:100]}")
+            order_units += qty
+            order_cogs += cogs
+
+        if args.dry_run:
+            stats["sold"] += 1 if order_ok else 0
+            stats["units"] += order_units
+            continue
+
+        if order_ok:
+            mark_events("done")
+            stats["sold"] += 1
+            stats["units"] += order_units
+            stats["cogs"] += order_cogs
+            stats["orders_done"] += 1
+            stats["events_done"] += len(ev_ids)
+            conn.commit()
+        else:
+            # parcialmente no mapeada → marca skipped para no reintentar en loop infinito
+            cur.execute(
+                "UPDATE events SET processing_status='skipped', processed_at=now(), processing_error=%s "
+                "WHERE id = ANY(%s)",
+                ('unmapped_or_partial', ev_ids)
+            )
+            conn.commit()
+
+    # Reporte
+    lines = [
+        ("🧪 *process_event DRY-RUN*" if args.dry_run else "⚙️ *process_event*"),
+        f"Órdenes evaluadas: {processed_order_count}",
+        f"Vendidas/descontadas: {stats['sold']} ({stats['units']} units)",
+        (f"COGS registrado: ${stats['cogs']:,.2f}" if not args.dry_run else "COGS: (dry-run no calcula)"),
+        f"Saltadas ya-vendidas: {stats['skip_already']}",
+        f"Saltadas no-pagadas: {stats['skip_unpaid']}",
+        f"Canceladas: {stats['skip_cancelled']}",
+        f"Sin mapear (SKU): {stats['skip_unmapped']}",
+        f"Sin token: {stats['skip_notoken']}",
+        f"Oversell: {stats['oversell']}",
+        f"Fetch fail: {stats['fetch_fail']}",
+    ]
+    if unmapped_samples:
+        lines.append("Unmapped ej: " + ", ".join(unmapped_samples[:8]))
+    if oversell_samples:
+        lines.append("Oversell ej: " + ", ".join(oversell_samples[:8]))
+    msg = "\n".join(lines)
+    print("\n" + msg)
+    if not args.dry_run and (stats["sold"] or stats["oversell"]):
+        tg(msg)
+
+    cur.close()
+    conn.close()
+
+
+if __name__ == "__main__":
+    main()
