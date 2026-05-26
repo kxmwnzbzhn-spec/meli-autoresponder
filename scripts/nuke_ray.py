@@ -1,10 +1,13 @@
-import os, requests, time, sys
-
-
+import os, requests, time
 API="https://api.mercadolibre.com"
-tok=requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],"client_secret":os.environ["MELI_APP_SECRET"],"refresh_token":os.environ["MELI_REFRESH_TOKEN_RAYMUNDO"]},timeout=20).json()
+tok=requests.post(f"{API}/oauth/token",data={
+    "grant_type":"refresh_token",
+    "client_id":os.environ["MELI_APP_ID"],
+    "client_secret":os.environ["MELI_APP_SECRET"],
+    "refresh_token":os.environ["MELI_REFRESH_TOKEN_RAYMUNDO"]
+},timeout=20).json()
 T=tok["access_token"]
-print(f"NEW_RT_RAY={tok.get(\"refresh_token\")}")
+print(f"NEW_RT_RAY={tok.get('refresh_token')}")
 H={"Authorization":f"Bearer {T}"}; HJ={**H,"Content-Type":"application/json"}
 me=requests.get(f"{API}/users/me",headers=H,timeout=20).json()
 UID=me["id"]
@@ -42,10 +45,8 @@ def close_one(sid, attempts=4):
         return "ERR-CLOSE", f"{rc.status_code} {rc.text[:100]}"
     return "ERR-RATE","exhausted"
 
-# AUDIT
 ids=sorted(all_ids())
-print(f"\n=== AUDIT ===")
-print(f"total items (all statuses): {len(ids)}")
+print(f"\n=== AUDIT === total items (all statuses): {len(ids)}")
 by_st={}; with_sales=0; tot_sold=0
 for i in range(0, len(ids), 20):
     batch=",".join(ids[i:i+20])
@@ -59,9 +60,8 @@ for i in range(0, len(ids), 20):
             tot_sold+=sq
 for s,n in sorted(by_st.items(),key=lambda x:-x[1]):
     print(f"  {s}: {n}")
-print(f"items con ventas>0: {with_sales}  total_sold={tot_sold}")
+print(f"items con ventas>0: {with_sales}  total_sold_units={tot_sold}")
 
-# NUKE
 for pass_n in (1,2,3):
     ids=sorted(all_ids())
     open_ids=[]
@@ -73,16 +73,16 @@ for pass_n in (1,2,3):
                 open_ids.append(x["body"]["id"])
     print(f"\n=== PASS {pass_n}: scanned={len(ids)} pending_close={len(open_ids)} ===")
     if not open_ids:
-        print("✓ Raymundo limpio.")
+        print("Raymundo limpio.")
         break
     ok=err=0
     for i,sid in enumerate(open_ids,1):
         res,detail=close_one(sid)
         if res=="OK": ok+=1
         else: err+=1
-        if i%20==0 or res!="OK":
+        if res!="OK" or i%50==0:
             print(f"  [{i}/{len(open_ids)}] {sid} -> {res} {detail}")
-        time.sleep(0.4)
+        time.sleep(0.35)
     print(f"  pass{pass_n} ok={ok} err={err}")
     time.sleep(3)
 
@@ -94,7 +94,6 @@ for i in range(0, len(ids), 20):
     for x in r:
         if x.get("code")==200 and x["body"].get("status") not in ("closed","inactive"):
             still_open.append((x["body"]["id"], x["body"].get("status")))
-print(f"\n=== FINAL ===")
-print(f"total={len(ids)} still_open={len(still_open)}")
+print(f"\n=== FINAL === total={len(ids)} still_open={len(still_open)}")
 for s,st in still_open[:20]:
     print(f"  remaining: {s} {st}")
