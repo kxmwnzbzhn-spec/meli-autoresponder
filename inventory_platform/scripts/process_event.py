@@ -326,6 +326,14 @@ def main():
             except Exception as e:
                 cogs = 0.0
                 print(f"  ⚠ COGS falló {sku} order={oid}: {str(e)[:100]}")
+            # Capturar precio de venta (revenue) en el stock_movement
+            try:
+                unit_price = it.get("unit_price")
+                if unit_price is not None:
+                    cur.execute("UPDATE stock_movements SET sale_price_mxn=%s WHERE id=%s",
+                                (float(unit_price), mov_id))
+            except Exception:
+                pass
             order_units += qty
             order_cogs += cogs
 
