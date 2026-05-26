@@ -1,22 +1,23 @@
-import os, requests
+import os, requests, json
 import meli_token
-IID="MLM2911241921"; API="https://api.mercadolibre.com"
-AT=meli_token.refresh(os.environ["MELI_REFRESH_TOKEN_WILBERT"]).json()["access_token"]
-H={"Authorization":f"Bearer {AT}"}; HJ={**H,"Content-Type":"application/json"}
-it=requests.get(f"{API}/items/{IID}",headers=H,timeout=20).json()
-print(f"{IID} '{(it.get('title') or '')[:50]}' status={it.get('status')} qty={it.get('available_quantity')} vars={len(it.get('variations') or [])}")
-vars_payload=[]
-for v in (it.get("variations") or []):
-    cq=v.get("available_quantity") or 0
-    if cq<1: vars_payload.append({"id":v.get("id"),"available_quantity":1})
-if vars_payload:
-    r1=requests.put(f"{API}/items/{IID}",headers=HJ,json={"variations":vars_payload},timeout=20)
-    print(f"set var qty=1 ({len(vars_payload)} var) -> {r1.status_code} {('' if r1.status_code<300 else r1.text[:300])}")
-body={"status":"active"}
-if not (it.get("variations") or []) and (it.get("available_quantity") or 0)<1:
-    body["available_quantity"]=1
-r2=requests.put(f"{API}/items/{IID}",headers=HJ,json=body,timeout=20)
-print(f"set status=active -> {r2.status_code} {('' if r2.status_code<300 else r2.text[:300])}")
-fin=requests.get(f"{API}/items/{IID}?attributes=status,available_quantity,price",headers=H,timeout=15).json()
-print(f"FINAL status={fin.get('status')} qty={fin.get('available_quantity')} price={fin.get('price')}")
-print("DONE")
+API="https://api.mercadolibre.com"
+for ACC,UID in [("JUAN",2681696373),("RAYMUNDO",3338633403),("YC_NEW",3364413125),("AH",3417664339)]:
+    AT=meli_token.refresh(os.environ[f"MELI_REFRESH_TOKEN_{ACC}"]).json()["access_token"]
+    H={"Authorization":f"Bearer {AT}"}
+    print(f"\n### {ACC} (user_id {UID}) ###")
+    for path in [
+      f"/post-purchase/v1/claims/search?stage=claim&status=opened&players.role=respondent&players.user_id={UID}&limit=5",
+      f"/post-purchase/v2/claims/search?status=opened&player_role=respondent&user_id={UID}&limit=5",
+    ]:
+        r=requests.get(f"{API}{path}",headers=H,timeout=20)
+        ct=r.headers.get("content-type","")
+        print(f"  GET {path[:55]}... -> {r.status_code}")
+        if r.status_code<300 and "json" in ct:
+            j=r.json()
+            res=j.get("data") or j.get("results") or []
+            paging=j.get("paging") or {}
+            print(f"    total={paging.get('total','?')} returned={len(res)}")
+            for it in res[:2]:
+                print(f"    claim_id={it.get('id')} status={it.get('status')} reason={(it.get('reason_id') or it.get('reason'))}")
+            break
+print("\nDONE")
