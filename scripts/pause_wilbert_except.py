@@ -1,41 +1,34 @@
-import os, requests, time
+import os, requests, json
 import meli_token
-API="https://api.mercadolibre.com"
-ACCS=["JUAN","RAYMUNDO","YC_NEW","WILBERT","CLARIBEL","ASVA","BREN","ANGEL","ASGARI","RMAYCHI","AH","MC"]
-total_ok=0; total_skip=0; total_err=0
-for acc in ACCS:
-    env=f"MELI_REFRESH_TOKEN_{acc}"
-    rt=os.environ.get(env)
-    if not rt: print(f"\n### {acc}: (sin secret, skip)"); continue
-    AT=meli_token.refresh(rt).json().get("access_token")
-    if not AT: print(f"### {acc}: AUTH_FAIL"); continue
-    H={"Authorization":f"Bearer {AT}"}; HJ={**H,"Content-Type":"application/json"}
-    me=requests.get(f"{API}/users/me",headers=H,timeout=15).json(); uid=me.get("id")
-    # paginar abiertos
-    claims=[]; off=0
-    while True:
-        r=requests.get(f"{API}/post-purchase/v1/claims/search",params={"stage":"claim","status":"opened","players.role":"respondent","players.user_id":uid,"limit":50,"offset":off},headers=H,timeout=20).json()
-        data=r.get("data") or r.get("results") or []
-        claims+=data
-        if len(data)<50: break
-        off+=50
-    print(f"\n### {acc} (uid {uid}): {len(claims)} reclamos abiertos")
-    ok=skip=err=0
-    for cl in claims:
-        cid=cl.get("id")
-        d=requests.get(f"{API}/post-purchase/v1/claims/{cid}",headers=H,timeout=15).json()
-        seller_actions=[]
-        for p in (d.get("players") or []):
-            if p.get("role")=="respondent": seller_actions=[a.get("action") for a in (p.get("available_actions") or [])]
-        if "refund" not in seller_actions:
-            print(f"  SKIP {cid} reason={d.get('reason_id')} actions={seller_actions}"); skip+=1; continue
-        rp=requests.post(f"{API}/post-purchase/v1/claims/{cid}/actions/refund",headers=HJ,timeout=30)
-        if rp.status_code<300:
-            print(f"  REFUND OK {cid} reason={d.get('reason_id')}"); ok+=1
-        else:
-            print(f"  REFUND ERR {cid} http={rp.status_code} {rp.text[:200]}"); err+=1
-        time.sleep(0.2)
-    print(f"  -> {acc}: refund_ok={ok} skip={skip} err={err}")
-    total_ok+=ok; total_skip+=skip; total_err+=err
-print(f"\n========== TOTAL OK={total_ok} SKIP={total_skip} ERR={total_err}")
+CID="5512970703"; API="https://api.mercadolibre.com"
+AT=meli_token.refresh(os.environ["MELI_REFRESH_TOKEN_RAYMUNDO"]).json()["access_token"]
+H={"Authorization":f"Bearer {AT}"}; HJ={**H,"Content-Type":"application/json"}
+# detalle previo
+d0=requests.get(f"{API}/post-purchase/v1/claims/{CID}",headers=H,timeout=20).json()
+print(f"CLAIM {CID} status={d0.get('status')} type={d0.get('type')} reason={d0.get('reason_id')}")
+print("seller_actions:",[a.get("action") for p in (d0.get('players') or []) if p.get('role')=='respondent' for a in (p.get('available_actions') or [])])
+# variantes endpoint (stop al primer 2xx)
+attempts=[
+ ("POST","/post-purchase/v1/claims/{c}/refund", None),
+ ("POST","/post-purchase/v1/claims/{c}/transactions/refund", None),
+ ("POST","/post-purchase/v1/claims/{c}/actions", {"action":"refund"}),
+ ("POST","/post-purchase/v1/claims/{c}/players/respondent/actions", {"action":"refund"}),
+ ("POST","/post-purchase/v1/claims/{c}/expected_resolutions", {"type":"refund"}),
+ ("POST","/post-purchase/v1/claims/{c}/resolutions", {"type":"refund"}),
+ ("POST","/post-purchase/v1/claims/{c}/returns", {"type":"refund"}),
+ ("PUT","/post-purchase/v1/claims/{c}", {"resolution":{"type":"refund"}}),
+ ("PUT","/post-purchase/v1/claims/{c}", {"action":"refund"}),
+]
+success=None
+for method,path,body in attempts:
+    url=f"{API}{path.format(c=CID)}"
+    fn=requests.post if method=="POST" else requests.put
+    r=fn(url,headers=HJ,json=body,timeout=25) if body is not None else fn(url,headers=H,timeout=25)
+    print(f"  {method} {path.format(c=CID)[:60]:60} body={json.dumps(body) if body else '-':30} -> {r.status_code} {r.text[:140]}")
+    if r.status_code<300:
+        success=(method,path,body); break
+print("\nSUCCESS:", success)
+# verificar estado post
+d1=requests.get(f"{API}/post-purchase/v1/claims/{CID}",headers=H,timeout=15).json()
+print(f"POST status={d1.get('status')} stage={d1.get('stage')} resolution={d1.get('resolution')}")
 print("DONE")
