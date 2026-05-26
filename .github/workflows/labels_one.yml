@@ -1,0 +1,59 @@
+name: labels-one
+on:
+  workflow_dispatch:
+    inputs:
+      account:
+        description: 'Cuenta (Wilbert, Yiriam, Asva, Juan, Raymundo, Claribel, Bren, Angel, Asgari, Rmaychi, Ah, Mc)'
+        required: true
+        type: string
+      rt_secret_name:
+        description: 'Override del nombre del secret (opcional, default MELI_REFRESH_TOKEN_{ACCOUNT}). Para Yiriam usar MELI_REFRESH_TOKEN_YC_NEW.'
+        required: false
+        type: string
+        default: ''
+      exclude_models:
+        description: 'Modelos a excluir, separados por coma (ej: Grip)'
+        required: false
+        type: string
+        default: ''
+      exclude_title_contains:
+        description: 'Substrings a excluir del título o color, separados por coma (ej: mandarin,aqua)'
+        required: false
+        type: string
+        default: ''
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: sudo apt-get install -y poppler-utils
+      - run: pip install requests pypdf reportlab pdf2image Pillow -q
+      - env:
+          ACCOUNT:                  ${{ inputs.account }}
+          RT_SECRET_NAME:           ${{ inputs.rt_secret_name }}
+          EXCLUDE_MODELS:           ${{ inputs.exclude_models }}
+          EXCLUDE_TITLE_CONTAINS:   ${{ inputs.exclude_title_contains }}
+          MELI_APP_ID:              ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET:          ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_WILBERT:  ${{ secrets.MELI_REFRESH_TOKEN_WILBERT }}
+          MELI_REFRESH_TOKEN_YC_NEW:   ${{ secrets.MELI_REFRESH_TOKEN_YC_NEW }}
+          MELI_REFRESH_TOKEN_YIRIAM:   ${{ secrets.MELI_REFRESH_TOKEN_YC_NEW }}
+          MELI_REFRESH_TOKEN_JUAN:     ${{ secrets.MELI_REFRESH_TOKEN_JUAN }}
+          MELI_REFRESH_TOKEN_RAYMUNDO: ${{ secrets.MELI_REFRESH_TOKEN_RAYMUNDO }}
+          MELI_REFRESH_TOKEN_CLARIBEL: ${{ secrets.MELI_REFRESH_TOKEN_CLARIBEL }}
+          MELI_REFRESH_TOKEN_ASVA:     ${{ secrets.MELI_REFRESH_TOKEN_ASVA }}
+          MELI_REFRESH_TOKEN_BREN:     ${{ secrets.MELI_REFRESH_TOKEN_BREN }}
+          MELI_REFRESH_TOKEN_ANGEL:    ${{ secrets.MELI_REFRESH_TOKEN_ANGEL }}
+          MELI_REFRESH_TOKEN_ASGARI:   ${{ secrets.MELI_REFRESH_TOKEN_ASGARI }}
+          MELI_REFRESH_TOKEN_RMAYCHI:  ${{ secrets.MELI_REFRESH_TOKEN_RMAYCHI }}
+          MELI_REFRESH_TOKEN_AH:       ${{ secrets.MELI_REFRESH_TOKEN_AH }}
+          MELI_REFRESH_TOKEN_MC:       ${{ secrets.MELI_REFRESH_TOKEN_MC }}
+        run: python scripts/labels_one.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: labels-${{ inputs.account }}
+          path: ETIQUETAS_*.pdf
