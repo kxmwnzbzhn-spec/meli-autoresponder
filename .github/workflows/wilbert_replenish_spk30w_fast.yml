@@ -25,7 +25,6 @@ jobs:
           ITEM_ID = "MLM2932676401"
           MIN_VISIBLE = 1
           INTERVAL_SEC = 10
-          DURATION_SEC = 280  # 4m40s loop, deja buffer pre next cron
           EXPECTED_SELLER_ID = 3367276814  # Wilbert ONLY
 
           def get_token():
