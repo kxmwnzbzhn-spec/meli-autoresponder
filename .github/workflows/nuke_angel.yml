@@ -1,0 +1,14 @@
+name: nuke-angel
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install requests -q
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_ANGEL: ${{ secrets.MELI_REFRESH_TOKEN_ANGEL }}
+        run: python3 scripts/nuke_angel.py
