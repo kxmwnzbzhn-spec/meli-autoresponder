@@ -10,7 +10,8 @@ from reportlab.lib.colors import Color
 from pdf2image import convert_from_bytes
 from PIL import ImageOps
 
-APP_ID="5211907102822632"
+# App NUEVA — todos los tokens ya migrados
+APP_ID=os.environ.get("MELI_APP_ID","2008666770714005")
 APP_SECRET=os.environ["MELI_APP_SECRET"]
 ACCOUNTS = [
     ("Wilbert", os.environ.get("MELI_REFRESH_TOKEN_WILBERT")),
