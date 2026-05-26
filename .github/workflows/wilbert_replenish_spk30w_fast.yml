@@ -1,8 +1,6 @@
 name: wilbert-replenish-spk30w-fast
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '*/5 * * * *'  # GH min interval; each job loops internally cada 10s
 concurrency:
   group: wilbert-replenish-spk30w-fast
   cancel-in-progress: false
