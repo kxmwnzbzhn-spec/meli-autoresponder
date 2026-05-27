@@ -68,7 +68,15 @@ title=(pick.get("title") or "")[:60]
 cat=pick.get("category_id")
 price=pick.get("price")
 pictures=[{"source":p["secure_url"]} for p in (pick.get("pictures") or [])][:10]
-attrs=[{"id":a["id"],"value_name":a.get("value_name")} for a in (pick.get("attributes") or []) if a.get("value_name") and a.get("id") not in ("SELLER_SKU",)]
+attrs=[]
+for a in (pick.get("attributes") or []):
+    aid=a.get("id");
+    if aid in ("SELLER_SKU","IS_GAMER"): continue
+    if not a.get("value_name") and not a.get("value_id"): continue
+    o={"id":aid}
+    if a.get("value_id"): o["value_id"]=a["value_id"]
+    if a.get("value_name"): o["value_name"]=a["value_name"]
+    attrs.append(o)
 payload={
     "site_id":"MLM",
     "title":title,
