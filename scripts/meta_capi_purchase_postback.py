@@ -40,7 +40,7 @@ PERFUME_BLACKLIST = {
     "MLM5374718702",  # Dark Oud Cacao (TAL)
 }
 
-def meli_token(token_env):
+def get_meli_token(token_env):
     rt = os.environ.get(token_env)
     if not rt:
         print(f"WARN: {token_env} not set, skipping"); return None
@@ -54,7 +54,7 @@ def sha256_hash(value):
     return hashlib.sha256(str(value).lower().strip().encode()).hexdigest()
 
 def collect_events_for_seller(seller, since):
-    tok = meli_token(seller["token_env"])
+    tok = get_meli_token(seller["token_env"])
     if not tok: return []
     h = {"Authorization": f"Bearer {tok}"}
     seller_id = seller["id"]
