@@ -14,7 +14,7 @@ import meli_token
 API_MELI = "https://api.mercadolibre.com"
 META_GRAPH = "https://graph.facebook.com/v21.0"
 PIXEL_ID = "1520455545762550"
-LOOKBACK_HOURS = 24
+LOOKBACK_HOURS = 168
 
 SELLERS = [
     {"id": 1668713481, "name": "ASVA",    "token_env": "MELI_REFRESH_TOKEN_USER1668"},
