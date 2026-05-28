@@ -1,0 +1,60 @@
+name: inv_sync_stock_configs
+
+# Sincroniza los stock_config_*.json del repo contra el stock real en Supabase.
+# Permite que el motor existente de replenish/throttle/sales_cap del otro Cowork
+# respete automáticamente el stock físico unificado. Imposible sobrevender entre cuentas.
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"  # cada 5 minutos
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "preview sin escribir cambios"
+        required: false
+        default: "false"
+
+concurrency:
+  group: sync-stock-configs
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 1
+
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+
+      - run: pip install psycopg2-binary
+
+      - name: sync_supabase_to_meli_configs
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          DRY="${{ github.event.inputs.dry_run }}"
+          FLAGS=""
+          [ "$DRY" = "true" ] && FLAGS="--dry-run"
+          python inventory_platform/scripts/sync_supabase_to_meli_configs.py $FLAGS --repo-root .
+
+      - name: Commit changes
+        if: ${{ github.event.inputs.dry_run != 'true' }}
+        run: |
+          git config user.name  "supabase-sync-bot"
+          git config user.email "supabase-sync-bot@users.noreply.github.com"
+          if [ -n "$(git status --porcelain stock_config_*.json)" ]; then
+            git add stock_config_*.json
+            git commit -m "auto: sync stock_config_*.json from Supabase $(date -u +'%Y-%m-%d %H:%MZ')"
+            git push
+            echo "✓ commit pushed"
+          else
+            echo "✓ no changes to commit"
+          fi

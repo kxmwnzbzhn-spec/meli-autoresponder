@@ -1,0 +1,54 @@
+name: inv_sync_listings
+
+# Sincroniza publicaciones MELI con el stock real del sistema.
+# - Pausa listings cuyo SKU se queda sin stock (only-seeded por defecto: solo SKUs con conteo físico).
+# - Reactiva (opcional --auto-reactivate via input).
+# - Notifica por Telegram.
+
+on:
+  schedule:
+    - cron: "0 * * * *"   # cada hora en punto
+  workflow_dispatch:
+    inputs:
+      only_seeded:
+        description: "solo SKUs que tuvieron initial_seed (default true)"
+        required: false
+        default: "true"
+      auto_reactivate:
+        description: "reactivar paused cuando vuelve stock"
+        required: false
+        default: "false"
+      dry_run:
+        description: "preview sin escribir a MELI"
+        required: false
+        default: "false"
+
+concurrency:
+  group: sync-listings
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - run: pip install psycopg2-binary requests
+      - name: sync_listings
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          TOKEN_READ_SECRET: ${{ secrets.TOKEN_READ_SECRET }}
+          WORKER_BASE: ${{ secrets.WORKER_BASE }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          ONLY_SEEDED="${{ github.event.inputs.only_seeded }}"
+          AUTO_REACT="${{ github.event.inputs.auto_reactivate }}"
+          DRY="${{ github.event.inputs.dry_run }}"
+          FLAGS=""
+          [ "${ONLY_SEEDED:-true}" = "true" ] && FLAGS="$FLAGS --only-seeded"
+          [ "$AUTO_REACT" = "true" ] && FLAGS="$FLAGS --auto-reactivate"
+          [ "$DRY" = "true" ] && FLAGS="$FLAGS --dry-run"
+          python inventory_platform/scripts/sync_listings_with_stock.py $FLAGS --max-seconds 540
