@@ -1,0 +1,39 @@
+name: daily-etiquetas
+on:
+  schedule:
+    # 7 AM CDMX = 13:00 UTC (CDMX = UTC-6, sin DST permanente)
+    - cron: '0 13 * * *'
+  workflow_dispatch: {}
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - name: Install poppler
+        run: sudo apt-get update && sudo apt-get install -y poppler-utils
+      - name: Install Python deps
+        run: pip install requests pypdf reportlab pdf2image Pillow google-api-python-client google-auth google-auth-oauthlib -q
+      - name: Run daily etiquetas
+        env:
+          MELI_APP_ID:                ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET:            ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_YC_NEW:  ${{ secrets.MELI_REFRESH_TOKEN_YC_NEW }}
+          MELI_REFRESH_TOKEN_ASVA:    ${{ secrets.MELI_REFRESH_TOKEN_ASVA }}
+          GOOGLE_OAUTH_CLIENT_ID:     ${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}
+          GOOGLE_OAUTH_CLIENT_SECRET: ${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}
+          GOOGLE_OAUTH_REFRESH_TOKEN: ${{ secrets.GOOGLE_OAUTH_REFRESH_TOKEN }}
+          TELEGRAM_BOT_TOKEN:         ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID:           ${{ secrets.TELEGRAM_CHAT_ID }}
+          DRIVE_FOLDER_ID:            '1aIDN3iq6zwCacL57iamptvQCPoSDyRbL'
+        run: python scripts/daily_run.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: daily-etiquetas-${{ github.run_id }}
+          path: |
+            ETIQUETAS_*.pdf
+            run_log.txt
+          if-no-files-found: ignore
