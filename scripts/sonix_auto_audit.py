@@ -88,11 +88,14 @@ def graph_post(endpoint, data):
 
 
 def get_active_campaigns():
-    return graph_get(f"{ACCOUNT_ID}/campaigns", {
+    """Pull all campaigns, filter ACTIVE in Python to avoid Meta query format issues."""
+    all_camps = graph_get(f"{ACCOUNT_ID}/campaigns", {
         "fields": "id,name,status,effective_status,daily_budget,objective",
-        "effective_status": '["ACTIVE"]',
-        "limit": 50,
+        "limit": 100,
     }).get("data", [])
+    actives = [c for c in all_camps if c.get("effective_status") == "ACTIVE"]
+    print(f"  found {len(all_camps)} total campaigns, {len(actives)} ACTIVE")
+    return actives
 
 
 def get_campaign_insights(cid, time_range_str="today"):
