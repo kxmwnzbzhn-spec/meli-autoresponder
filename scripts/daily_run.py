@@ -289,27 +289,12 @@ def build_pdf(ships, at, out_path):
 # ============ GOOGLE DRIVE ============
 
 def drive_service():
-    """Prioriza Service Account (no expira). Fallback a OAuth user si SA falla."""
+    """Prioriza OAuth user (consume cuota del usuario). SA solo como fallback
+    (en Gmail personal no tiene cuota, así que upload falla con storageQuotaExceeded)."""
     from googleapiclient.discovery import build
-    from googleapiclient.errors import HttpError
     SCOPES = ["https://www.googleapis.com/auth/drive"]
     errors = []
-    # 1) Service Account
-    sa_json = os.environ.get("GOOGLE_SERVICE_ACCOUNT_JSON")
-    if sa_json:
-        try:
-            from google.oauth2 import service_account
-            info = json.loads(sa_json)
-            creds = service_account.Credentials.from_service_account_info(info, scopes=SCOPES)
-            svc = build("drive", "v3", credentials=creds, cache_discovery=False)
-            # Verify access to target folder
-            svc.files().get(fileId=DRIVE_FOLDER_ID, fields="id,name",
-                            supportsAllDrives=True).execute()
-            print(f"[drive] auth=SA email={info.get('client_email')}")
-            return svc
-        except Exception as e:
-            errors.append(f"SA: {str(e)[:200]}")
-    # 2) OAuth user delegation
+    # 1) OAuth user delegation
     cid = os.environ.get("GOOGLE_OAUTH_CLIENT_ID")
     csec = os.environ.get("GOOGLE_OAUTH_CLIENT_SECRET")
     rt = os.environ.get("GOOGLE_OAUTH_REFRESH_TOKEN")
@@ -328,11 +313,24 @@ def drive_service():
             return svc
         except Exception as e:
             errors.append(f"OAuth: {str(e)[:200]}")
+    # 2) Service Account fallback (solo útil en Shared Drives)
+    sa_json = os.environ.get("GOOGLE_SERVICE_ACCOUNT_JSON")
+    if sa_json:
+        try:
+            from google.oauth2 import service_account
+            info = json.loads(sa_json)
+            creds = service_account.Credentials.from_service_account_info(info, scopes=SCOPES)
+            svc = build("drive", "v3", credentials=creds, cache_discovery=False)
+            svc.files().get(fileId=DRIVE_FOLDER_ID, fields="id,name",
+                            supportsAllDrives=True).execute()
+            print(f"[drive] auth=SA (fallback) email={info.get('client_email')}")
+            return svc
+        except Exception as e:
+            errors.append(f"SA: {str(e)[:200]}")
     raise RuntimeError(
         "No se pudo autenticar contra Drive. Causas posibles:\n  " +
         "\n  ".join(errors) +
-        f"\nPasos: compartir la carpeta {DRIVE_FOLDER_ID} con el SA como Editor, "
-        "o renovar GOOGLE_OAUTH_REFRESH_TOKEN.")
+        f"\nRenovar GOOGLE_OAUTH_REFRESH_TOKEN.")
 
 def drive_find_or_get_stats(svc):
     """Lee stats.json del folder o devuelve dict vacío."""
