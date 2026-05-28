@@ -44,7 +44,37 @@ def main():
     mlm_to_sku = {r[0]: (r[1], r[2]) for r in cur.fetchall()}
     print(f"🔗 listings totales en sistema: {len(mlm_to_sku)}")
 
-    # 3. Iterar stock_config_*.json
+    # 3. Pre-cálculo: número de listings ACTIVE por SKU (todas las cuentas)
+    #    Esto cierra el edge case: stock=2 pero 3 listings activos → MELI mostraría 3 disponibles.
+    cur.execute("""SELECT sku, COUNT(*) FROM listings
+                   WHERE status='active' AND sku IS NOT NULL GROUP BY sku""")
+    active_listings_per_sku = {r[0]: int(r[1]) for r in cur.fetchall()}
+    # Set de "MLMs sobrantes que hay que pausar" (orden: priorizamos pausar listings recién creados / con menos ventas)
+    sku_over = {}  # sku -> cuántos hay que pausar
+    for sku, n_active in active_listings_per_sku.items():
+        stock = sku_stock_global.get(sku, 0)
+        if n_active > stock:
+            sku_over[sku] = n_active - stock
+    print(f"⚠ SKUs con MÁS listings activos que stock global: {len(sku_over)}")
+    if sku_over:
+        for s, n in list(sku_over.items())[:10]:
+            print(f"   {s}: {active_listings_per_sku[s]} activos vs stock {sku_stock_global.get(s,0)} → pausar {n}")
+
+    # Para decidir qué listings sobrantes pausar: tomamos por SKU los listings ordenados por last_sync DESC
+    # y los primeros (más recientes/peor) son los candidatos a pausar
+    cur.execute("""SELECT sku, mlm_id, account_id FROM listings
+                   WHERE status='active' AND sku IS NOT NULL
+                   ORDER BY sku, COALESCE(last_sync, '1970-01-01') DESC""")
+    over_to_pause = set()  # mlm_ids que hay que pausar por excedente
+    grouped = {}
+    for sku, mlm, aid in cur.fetchall():
+        grouped.setdefault(sku, []).append(mlm)
+    for sku, n_over in sku_over.items():
+        for mlm in grouped.get(sku, [])[:n_over]:
+            over_to_pause.add(mlm)
+    print(f"   total MLMs marcados como excedente: {len(over_to_pause)}")
+
+    # 4. Iterar stock_config_*.json
     configs_path = os.path.join(args.repo_root, "stock_config_*.json")
     config_files = sorted(glob.glob(configs_path))
     if not config_files:
@@ -89,8 +119,11 @@ def main():
             # nuevo estado: real = stock global; master = max(viejo, real)
             new_real = global_stock
             new_master = max(int(old_master or 0), new_real)
-            new_active = (new_real > 0)
-            new_agotado = (new_real == 0)
+            # Si este listing está en la lista de "excedentes" (más listings activos que stock),
+            # se marca como inactivo/agotado para que MELI no muestre más de lo que hay
+            is_overflow = mlm in over_to_pause
+            new_active = (new_real > 0) and (not is_overflow)
+            new_agotado = (new_real == 0) or is_overflow
 
             # detectar transiciones
             file_changed = False
