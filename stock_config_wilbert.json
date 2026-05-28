@@ -314,10 +314,10 @@
   },
   "MLM2910806817": {
     "closed": true,
-    "active": true,
+    "active": false,
     "auto_replenish": false,
-    "agotado": false,
-    "real_stock": 16,
+    "agotado": true,
+    "real_stock": 1,
     "master_stock": 16,
     "available_quantity": 0,
     "title": "CERRADA — clonada como MLM5354755946",
@@ -389,7 +389,7 @@
   "MLM5297087174": {
     "title": "Altavoz Bluetooth De Estantería Bose Soundlink Home Silver Color Light Silver",
     "min_visible": 1,
-    "real_stock": 75,
+    "real_stock": 71,
     "master_stock": 77,
     "auto_replenish": true,
     "active": true,
@@ -399,7 +399,7 @@
   "MLM2910806871": {
     "title": "Parlante Jbl Clip 5 Portátil Con Bluetooth Waterproof Azul",
     "min_visible": 1,
-    "real_stock": 273,
+    "real_stock": 263,
     "master_stock": 274,
     "auto_replenish": true,
     "active": true,
@@ -424,7 +424,7 @@
     "active": true,
     "auto_replenish": false,
     "agotado": false,
-    "real_stock": 278,
+    "real_stock": 263,
     "master_stock": 278,
     "available_quantity": 0,
     "title": "BAJA MELI under_review/forbidden - clonado a MLM5351937060",
@@ -434,7 +434,7 @@
   "MLM5297098664": {
     "title": "Altavoz Bose Soundlink Home, Altavoz De Estantería Bluetooth Negro",
     "min_visible": 1,
-    "real_stock": 41,
+    "real_stock": 30,
     "master_stock": 59,
     "auto_replenish": true,
     "active": true,
@@ -493,7 +493,7 @@
   "MLM2910768369": {
     "title": "Altavoz Bluetooth Jbl Go 4 Portátil Impermeable En Rojo",
     "min_visible": 1,
-    "real_stock": 16,
+    "real_stock": 1,
     "master_stock": 16,
     "auto_replenish": true,
     "active": true,
@@ -516,7 +516,7 @@
   "MLM2910457917": {
     "title": "Bocina Jbl Go 4 Jblgo4 Portátil Con Bluetooth Waterproof Celeste",
     "min_visible": 1,
-    "real_stock": 577,
+    "real_stock": 576,
     "master_stock": 578,
     "auto_replenish": true,
     "active": true,
@@ -526,7 +526,7 @@
   "MLM2910768335": {
     "title": "Jbl Go 4 - Altavoz Bluetooth Ultraportátil Rosa",
     "min_visible": 1,
-    "real_stock": 75,
+    "real_stock": 74,
     "master_stock": 75,
     "auto_replenish": true,
     "active": true,
@@ -536,7 +536,7 @@
   "MLM2910768325": {
     "title": "Parlante Bluetooth Jbl Go 4 Portátil Rosa",
     "min_visible": 1,
-    "real_stock": 75,
+    "real_stock": 74,
     "master_stock": 75,
     "auto_replenish": true,
     "active": true,
@@ -571,7 +571,7 @@
   "MLM2910457973": {
     "title": "Bocina Portátil Jbl Clip 5 Bluetooth Azul",
     "min_visible": 1,
-    "real_stock": 273,
+    "real_stock": 263,
     "master_stock": 274,
     "auto_replenish": true,
     "active": true,
@@ -842,7 +842,7 @@
   "MLM5337919270": {
     "title": "JBL Clip 5 Camuflada",
     "min_visible": 1,
-    "real_stock": 198,
+    "real_stock": 190,
     "master_stock": 198,
     "available_quantity": 1,
     "auto_replenish": true,
@@ -854,7 +854,7 @@
   "MLM5337919282": {
     "title": "JBL Clip 5 Squad",
     "min_visible": 1,
-    "real_stock": 198,
+    "real_stock": 190,
     "master_stock": 198,
     "available_quantity": 1,
     "auto_replenish": true,
@@ -866,7 +866,7 @@
   "MLM5337919290": {
     "title": "JBL Clip 5 Camo Verde Musgo",
     "min_visible": 1,
-    "real_stock": 198,
+    "real_stock": 190,
     "master_stock": 198,
     "available_quantity": 1,
     "auto_replenish": true,
@@ -981,7 +981,7 @@
   "MLM5351937060": {
     "title": "Go 4 Camuflaje (clone alterno MLM2910880749 baja)",
     "min_visible": 1,
-    "real_stock": 278,
+    "real_stock": 263,
     "master_stock": 278,
     "available_quantity": 1,
     "auto_replenish": true,
@@ -1016,14 +1016,15 @@
   "MLM2914422351": {
     "title": "JBL Go 4 Rojo (clone)",
     "min_visible": 1,
-    "real_stock": 16,
+    "real_stock": 1,
     "master_stock": 16,
     "available_quantity": 1,
     "auto_replenish": true,
-    "active": true,
+    "active": false,
     "floor_price": 449,
     "ceiling_price": 699,
-    "sku": "JBL-GO4-ROJO"
+    "sku": "JBL-GO4-ROJO",
+    "agotado": true
   },
   "MLM5347901578": {
     "title": "Charge 6 Espejo $899",
@@ -1131,15 +1132,16 @@
   },
   "MLM5354755946": {
     "title": "JBL Go 4 Rojo (clone Wilbert)",
-    "real_stock": 16,
+    "real_stock": 1,
     "master_stock": 16,
     "min_visible": 1,
     "available_quantity": 1,
     "auto_replenish": true,
-    "active": true,
+    "active": false,
     "floor_price": 449,
     "ceiling_price": 699,
-    "sku": "JBL-GO4-ROJO"
+    "sku": "JBL-GO4-ROJO",
+    "agotado": true
   },
   "MLM5351547624": {
     "paused_by_user": true,
