@@ -357,8 +357,28 @@ def drive_save_stats(svc, stats, file_id=None):
         svc.files().create(body={"name":"stats.json","parents":[DRIVE_FOLDER_ID]},
                            media_body=media, supportsAllDrives=True).execute()
 
-def drive_upload_pdf(svc, local_path, drive_name, max_retries=4):
-    """Upload con resumable + retry exponencial (SSL EOF y similares)."""
+def drive_find_or_create_day_folder(svc, parent_id, day_name):
+    """Devuelve el folder_id de la subcarpeta '<day_name>' dentro de parent_id.
+    Si no existe, la crea. Anti-empleados: cada día tiene su propia carpeta."""
+    safe = day_name.replace("'", "\\'")
+    q = (f"name='{safe}' and mimeType='application/vnd.google-apps.folder' "
+         f"and '{parent_id}' in parents and trashed=false")
+    res = svc.files().list(q=q, fields="files(id,name)",
+                           supportsAllDrives=True, includeItemsFromAllDrives=True).execute()
+    files = res.get("files", [])
+    if files:
+        print(f"[drive] subcarpeta {day_name} ya existe: {files[0]['id']}")
+        return files[0]["id"]
+    body = {"name": day_name, "mimeType": "application/vnd.google-apps.folder",
+            "parents": [parent_id]}
+    f = svc.files().create(body=body, fields="id,name,webViewLink",
+                           supportsAllDrives=True).execute()
+    print(f"[drive] subcarpeta {day_name} creada: {f['id']}")
+    return f["id"]
+
+def drive_upload_pdf(svc, local_path, drive_name, parent_id, max_retries=4):
+    """Upload con resumable + retry exponencial (SSL EOF y similares).
+    parent_id: la carpeta destino (puede ser la subcarpeta del día)."""
     from googleapiclient.http import MediaFileUpload
     last_err = None
     for attempt in range(1, max_retries + 1):
@@ -366,7 +386,7 @@ def drive_upload_pdf(svc, local_path, drive_name, max_retries=4):
             media = MediaFileUpload(local_path, mimetype="application/pdf",
                                     resumable=True, chunksize=1024*1024)
             req = svc.files().create(
-                body={"name": drive_name, "parents":[DRIVE_FOLDER_ID]},
+                body={"name": drive_name, "parents":[parent_id]},
                 media_body=media, supportsAllDrives=True,
                 fields="id,name,webViewLink",
             )
@@ -463,13 +483,18 @@ def main():
         any_error = True
     else:
         try:
-            up = drive_upload_pdf(svc, out_local, out_local)
-            link = up.get("webViewLink", "")
+            # Crea subcarpeta del día (anti-empleados: cada día su propia carpeta)
+            day_folder_id = drive_find_or_create_day_folder(svc, DRIVE_FOLDER_ID, TODAY)
+            up = drive_upload_pdf(svc, out_local, out_local, day_folder_id)
+            file_link = up.get("webViewLink", "")
+            day_folder_link = f"https://drive.google.com/drive/folders/{day_folder_id}"
             report.append(f"✅ <b>PDF combinado</b>: {pages} págs ({total} envíos · {len(fails)} fallidas)")
             for nm, n in per_account_counts.items():
                 report.append(f"   • {nm}: {n}")
-            report.append(f"\n<a href=\"{link}\">📄 Abrir PDF</a>")
+            report.append(f"\n📂 <a href=\"{day_folder_link}\">Carpeta {TODAY}</a>")
+            report.append(f"📄 <a href=\"{file_link}\">Abrir PDF directo</a>")
             summary["__combined"] = {"pages":pages, "file_id":up["id"], "date":TODAY,
+                                    "day_folder_id":day_folder_id,
                                     "breakdown":per_account_counts}
         except Exception as e:
             print(traceback.format_exc())
@@ -484,7 +509,7 @@ def main():
         report.append(f"⚠ No pude guardar stats.json: {str(e)[:120]}")
     folder_link = f"https://drive.google.com/drive/folders/{DRIVE_FOLDER_ID}"
     report.append("")
-    report.append(f"📁 <a href=\"{folder_link}\">Carpeta Drive</a>")
+    report.append(f"📁 <a href=\"{folder_link}\">Carpeta raíz</a>")
     tg_send("\n".join(report))
     print("\n=== TELEGRAM REPORT ===")
     print("\n".join(report))
