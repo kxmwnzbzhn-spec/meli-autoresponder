@@ -64,7 +64,7 @@
     "catalog_product_id": "MLM37361021",
     "auto_replenish": true,
     "min_visible": 1,
-    "real_stock": 262,
+    "real_stock": 258,
     "daily_reset_to": 10,
     "active": true,
     "condition": "new",
