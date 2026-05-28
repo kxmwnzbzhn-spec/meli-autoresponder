@@ -57,7 +57,8 @@
     "floor_price": 249,
     "ceiling_price": 999,
     "agotado": true,
-    "real_stock": 0
+    "real_stock": 0,
+    "sku": "PERF-ARMAF-ODYSSEY-MANDARIN-SKY-LIMITED"
   },
   "MLM5266045818": {
     "line": "Mandarin-Sky-60ml",
@@ -150,7 +151,7 @@
     "auto_replenish": true,
     "min_visible": 1,
     "active": true,
-    "title": "Angel Nova Fruitt\u00e9 Edp Para Mujer",
+    "title": "Angel Nova Fruitté Edp Para Mujer",
     "catalog_product_id": "MLM18209912",
     "type": "catalog_no_variations",
     "condition": "new"
@@ -175,7 +176,7 @@
     "auto_replenish": false,
     "min_visible": 0,
     "active": false,
-    "title": "Armaf Odyssey Mega Man Edici\u00f3n Limitada Edp 100 Ml",
+    "title": "Armaf Odyssey Mega Man Edición Limitada Edp 100 Ml",
     "catalog_product_id": "MLM21765262",
     "type": "catalog_no_variations",
     "condition": "new",
@@ -195,7 +196,8 @@
     "agotado": true,
     "available_quantity": 0,
     "paused_by_user": true,
-    "floor_locked_by_user": true
+    "floor_locked_by_user": true,
+    "sku": "JBL-GO4-NEGRO"
   },
   "MLM5300550156": {
     "closed": true,
@@ -205,20 +207,22 @@
     "real_stock": 0,
     "master_stock": 0,
     "available_quantity": 0,
-    "title": "CERRADA \u2014 relisted as MLM5346655686"
+    "title": "CERRADA — relisted as MLM5346655686"
   },
   "MLM2911241921": {
-    "real_stock": 10,
+    "real_stock": 0,
     "master_stock": 10,
     "min_visible": 1,
     "auto_replenish": true,
-    "active": true,
+    "active": false,
     "color": "Negro",
     "floor_price": 499,
     "ceiling_price": 799,
     "floor_locked_by_user": true,
     "title": "Charge 6 Negro Reacondicionada",
-    "available_quantity": 1
+    "available_quantity": 1,
+    "agotado": true,
+    "sku": "JBL-CHARGE6-NEGRO"
   },
   "MLM5295749840": {
     "real_stock": 0,
@@ -227,7 +231,8 @@
     "auto_replenish": false,
     "active": false,
     "agotado": true,
-    "color": "Azul"
+    "color": "Azul",
+    "sku": "JBL-CHARGE6-AZUL"
   },
   "MLM2911241939": {
     "real_stock": 10,
@@ -242,16 +247,18 @@
     "available_quantity": 1
   },
   "MLM2911205487": {
-    "real_stock": 10,
+    "real_stock": 0,
     "master_stock": 10,
     "min_visible": 1,
     "auto_replenish": true,
-    "active": true,
+    "active": false,
     "color": "Camuflaje",
     "floor_price": 499,
     "ceiling_price": 499,
     "floor_locked_by_user": true,
-    "available_quantity": 1
+    "available_quantity": 1,
+    "agotado": true,
+    "sku": "JBL-CHARGE6-CAMUFLAJE"
   },
   "MLM2910457933": {
     "real_stock": 0,
@@ -262,7 +269,8 @@
     "agotado": true,
     "available_quantity": 0,
     "paused_by_user": true,
-    "floor_locked_by_user": true
+    "floor_locked_by_user": true,
+    "sku": "JBL-GO4-AZUL-MARINO"
   },
   "MLM2910457999": {
     "real_stock": 0,
@@ -281,7 +289,8 @@
     "agotado": true,
     "paused_by_user": true,
     "floor_locked_by_user": true,
-    "available_quantity": 0
+    "available_quantity": 0,
+    "sku": "JBL-GO4-AZUL-MARINO"
   },
   "MLM2910768379": {
     "real_stock": 0,
@@ -292,7 +301,8 @@
     "agotado": true,
     "paused_by_user": true,
     "floor_locked_by_user": true,
-    "available_quantity": 0
+    "available_quantity": 0,
+    "sku": "JBL-GO4-AZUL-MARINO"
   },
   "MLM2910880775": {
     "real_stock": 0,
@@ -304,16 +314,18 @@
   },
   "MLM2910806817": {
     "closed": true,
-    "active": false,
+    "active": true,
     "auto_replenish": false,
-    "agotado": true,
-    "real_stock": 0,
-    "master_stock": 0,
+    "agotado": false,
+    "real_stock": 16,
+    "master_stock": 16,
     "available_quantity": 0,
-    "title": "CERRADA \u2014 clonada como MLM5354755946"
+    "title": "CERRADA — clonada como MLM5354755946",
+    "min_visible": 1,
+    "sku": "JBL-GO4-ROJO"
   },
   "MLM2910880717": {
-    "title": "Bocina Jbl Go 4 Jblgo4 Port\u00e1til Con Bluetooth Waterproof Negra Negro",
+    "title": "Bocina Jbl Go 4 Jblgo4 Portátil Con Bluetooth Waterproof Negra Negro",
     "min_visible": 0,
     "real_stock": 0,
     "master_stock": 0,
@@ -322,41 +334,47 @@
     "available_quantity": 0,
     "agotado": true,
     "paused_by_user": true,
-    "floor_locked_by_user": true
+    "floor_locked_by_user": true,
+    "sku": "JBL-GO4-NEGRO"
   },
   "MLM2910806853": {
-    "title": "Bocina Jbl Audio Clip 5 Clip 5 Port\u00e1til Con Bluetooth Waterproof Negra Negro",
+    "title": "Bocina Jbl Audio Clip 5 Clip 5 Portátil Con Bluetooth Waterproof Negra Negro",
     "min_visible": 0,
-    "real_stock": 0,
-    "master_stock": 0,
+    "real_stock": 7,
+    "master_stock": 7,
     "auto_replenish": false,
-    "active": false,
+    "active": true,
     "paused_by_user": true,
-    "agotado": true,
+    "agotado": false,
     "floor_locked_by_user": true,
-    "available_quantity": 0
+    "available_quantity": 0,
+    "sku": "JBL-CLIP5-NEGRO"
   },
   "MLM2910806845": {
-    "title": "Bocina Jbl Go 3 Jblgo3 Port\u00e1til Con Bluetooth Waterproof Negra Negro",
+    "title": "Bocina Jbl Go 3 Jblgo3 Portátil Con Bluetooth Waterproof Negra Negro",
     "min_visible": 1,
-    "real_stock": 10,
-    "master_stock": 10,
+    "real_stock": 488,
+    "master_stock": 488,
     "auto_replenish": true,
     "active": true,
     "floor_price": 399,
     "ceiling_price": 399,
-    "floor_locked_by_user": true
+    "floor_locked_by_user": true,
+    "available_quantity": 1,
+    "sku": "JBL-GO3-NEGRO"
   },
   "MLM5295549238": {
-    "title": "Parlante Jbl Grip Port\u00e1til Con Bluetooth Waterproof Negra Negro",
+    "title": "Parlante Jbl Grip Portátil Con Bluetooth Waterproof Negra Negro",
     "min_visible": 1,
-    "real_stock": 10,
+    "real_stock": 1,
     "master_stock": 10,
     "auto_replenish": false,
-    "active": false,
+    "active": true,
     "paused_by_user": true,
-    "agotado": true,
-    "floor_locked_by_user": true
+    "agotado": false,
+    "floor_locked_by_user": true,
+    "available_quantity": 1,
+    "sku": "JBL-GRIP-NEGRO"
   },
   "MLM2911238257": {
     "closed": true,
@@ -369,174 +387,199 @@
     "title": "CERRADA - clonada como MLM2937969761"
   },
   "MLM5297087174": {
-    "title": "Altavoz Bluetooth De Estanter\u00eda Bose Soundlink Home Silver Color Light Silver",
+    "title": "Altavoz Bluetooth De Estantería Bose Soundlink Home Silver Color Light Silver",
     "min_visible": 1,
-    "real_stock": 10,
-    "master_stock": 10,
+    "real_stock": 77,
+    "master_stock": 77,
     "auto_replenish": true,
-    "active": true
+    "active": true,
+    "available_quantity": 1,
+    "sku": "BOSE-SOUNDLINK-HOME-SILVER"
   },
   "MLM2910806871": {
-    "title": "Parlante Jbl Clip 5 Port\u00e1til Con Bluetooth Waterproof Azul",
+    "title": "Parlante Jbl Clip 5 Portátil Con Bluetooth Waterproof Azul",
     "min_visible": 1,
-    "real_stock": 10,
-    "master_stock": 10,
+    "real_stock": 274,
+    "master_stock": 274,
     "auto_replenish": true,
-    "active": true
+    "active": true,
+    "available_quantity": 1,
+    "sku": "JBL-CLIP5-AZUL"
   },
   "MLM5295460002": {
-    "title": "Altavoz Bluetooth Port\u00e1til Jbl Grip Con Luz - Negro",
+    "title": "Altavoz Bluetooth Portátil Jbl Grip Con Luz - Negro",
     "min_visible": 1,
-    "real_stock": 10,
+    "real_stock": 1,
     "master_stock": 10,
     "auto_replenish": false,
-    "active": false,
+    "active": true,
     "paused_by_user": true,
-    "agotado": true,
-    "floor_locked_by_user": true
+    "agotado": false,
+    "floor_locked_by_user": true,
+    "available_quantity": 1,
+    "sku": "JBL-GRIP-NEGRO"
   },
   "MLM2910880749": {
     "closed": true,
-    "active": false,
+    "active": true,
     "auto_replenish": false,
-    "agotado": true,
-    "real_stock": 0,
-    "master_stock": 0,
+    "agotado": false,
+    "real_stock": 278,
+    "master_stock": 278,
     "available_quantity": 0,
-    "title": "BAJA MELI under_review/forbidden - clonado a MLM5351937060"
+    "title": "BAJA MELI under_review/forbidden - clonado a MLM5351937060",
+    "min_visible": 1,
+    "sku": "JBL-GO4-CAMUFLAJE"
   },
   "MLM5297098664": {
-    "title": "Altavoz Bose Soundlink Home, Altavoz De Estanter\u00eda Bluetooth Negro",
+    "title": "Altavoz Bose Soundlink Home, Altavoz De Estantería Bluetooth Negro",
     "min_visible": 1,
-    "real_stock": 10,
-    "master_stock": 10,
+    "real_stock": 59,
+    "master_stock": 59,
     "auto_replenish": true,
-    "active": true
+    "active": true,
+    "available_quantity": 1,
+    "sku": "BOSE-SOUNDLINK-HOME-NEGRO"
   },
   "MLM2910806881": {
     "title": "Parlante Bluetooth Jbl Go 3 Color Negro",
     "min_visible": 1,
-    "real_stock": 10,
-    "master_stock": 10,
+    "real_stock": 488,
+    "master_stock": 488,
     "auto_replenish": true,
-    "active": true
+    "active": true,
+    "available_quantity": 1,
+    "sku": "JBL-GO3-NEGRO"
   },
   "MLM2910880769": {
     "title": "Altavoz Impermeable Negro Jbl Clip 5",
     "min_visible": 0,
-    "real_stock": 0,
-    "master_stock": 0,
+    "real_stock": 7,
+    "master_stock": 7,
     "auto_replenish": false,
-    "active": false,
+    "active": true,
     "paused_by_user": true,
-    "agotado": true,
+    "agotado": false,
     "floor_locked_by_user": true,
-    "available_quantity": 0
+    "available_quantity": 0,
+    "sku": "JBL-CLIP5-NEGRO"
   },
   "MLM2910457983": {
-    "title": "Bocina Port\u00e1til Jbl Clip 5 Potencia De Salida 7w Color Negro",
+    "title": "Bocina Portátil Jbl Clip 5 Potencia De Salida 7w Color Negro",
     "min_visible": 0,
-    "real_stock": 0,
-    "master_stock": 0,
+    "real_stock": 7,
+    "master_stock": 7,
     "auto_replenish": false,
-    "active": false,
+    "active": true,
     "paused_by_user": true,
-    "agotado": true,
+    "agotado": false,
     "floor_locked_by_user": true,
-    "available_quantity": 0
+    "available_quantity": 0,
+    "sku": "JBL-CLIP5-NEGRO"
   },
   "MLM2910768361": {
-    "title": "Bocina Jbl Audio Clip 5 Clip 5 Port\u00e1til Con Bluetooth Waterproof Negra Negro",
+    "title": "Bocina Jbl Audio Clip 5 Clip 5 Portátil Con Bluetooth Waterproof Negra Negro",
     "min_visible": 0,
-    "real_stock": 0,
-    "master_stock": 0,
+    "real_stock": 7,
+    "master_stock": 7,
     "auto_replenish": false,
-    "active": false,
+    "active": true,
     "paused_by_user": true,
-    "agotado": true,
+    "agotado": false,
     "floor_locked_by_user": true,
-    "available_quantity": 0
+    "available_quantity": 0,
+    "sku": "JBL-CLIP5-NEGRO"
   },
   "MLM2910768369": {
-    "title": "Altavoz Bluetooth Jbl Go 4 Port\u00e1til Impermeable En Rojo",
+    "title": "Altavoz Bluetooth Jbl Go 4 Portátil Impermeable En Rojo",
     "min_visible": 1,
-    "real_stock": 15,
-    "master_stock": 15,
+    "real_stock": 16,
+    "master_stock": 16,
     "auto_replenish": true,
     "active": true,
-    "available_quantity": 1
+    "available_quantity": 1,
+    "sku": "JBL-GO4-ROJO"
   },
   "MLM2910457991": {
     "title": "Altavoz Impermeable Negro Jbl Clip 5",
     "min_visible": 0,
-    "real_stock": 0,
-    "master_stock": 0,
+    "real_stock": 7,
+    "master_stock": 7,
     "auto_replenish": false,
-    "active": false,
+    "active": true,
     "paused_by_user": true,
-    "agotado": true,
+    "agotado": false,
     "floor_locked_by_user": true,
-    "available_quantity": 0
+    "available_quantity": 0,
+    "sku": "JBL-CLIP5-NEGRO"
   },
   "MLM2910457917": {
-    "title": "Bocina Jbl Go 4 Jblgo4 Port\u00e1til Con Bluetooth Waterproof Celeste",
+    "title": "Bocina Jbl Go 4 Jblgo4 Portátil Con Bluetooth Waterproof Celeste",
     "min_visible": 1,
-    "real_stock": 15,
-    "master_stock": 15,
+    "real_stock": 578,
+    "master_stock": 578,
     "auto_replenish": true,
     "active": true,
-    "available_quantity": 1
+    "available_quantity": 1,
+    "sku": "JBL-GO4-AQUA"
   },
   "MLM2910768335": {
-    "title": "Jbl Go 4 - Altavoz Bluetooth Ultraport\u00e1til Rosa",
+    "title": "Jbl Go 4 - Altavoz Bluetooth Ultraportátil Rosa",
     "min_visible": 1,
-    "real_stock": 15,
-    "master_stock": 15,
+    "real_stock": 75,
+    "master_stock": 75,
     "auto_replenish": true,
     "active": true,
-    "available_quantity": 1
+    "available_quantity": 1,
+    "sku": "JBL-GO4-ROSA"
   },
   "MLM2910768325": {
-    "title": "Parlante Bluetooth Jbl Go 4 Port\u00e1til Rosa",
+    "title": "Parlante Bluetooth Jbl Go 4 Portátil Rosa",
     "min_visible": 1,
-    "real_stock": 15,
-    "master_stock": 15,
+    "real_stock": 75,
+    "master_stock": 75,
     "auto_replenish": true,
     "active": true,
-    "available_quantity": 1
+    "available_quantity": 1,
+    "sku": "JBL-GO4-ROSA"
   },
   "MLM2910768333": {
-    "title": "Parlante Jbl Go 3 Jblgo3 Port\u00e1til Con Bluetooth Waterproof Negro",
+    "title": "Parlante Jbl Go 3 Jblgo3 Portátil Con Bluetooth Waterproof Negro",
     "min_visible": 1,
-    "real_stock": 10,
-    "master_stock": 10,
+    "real_stock": 488,
+    "master_stock": 488,
     "auto_replenish": true,
     "active": true,
     "floor_price": 349,
-    "ceiling_price": 599
+    "ceiling_price": 599,
+    "available_quantity": 1,
+    "sku": "JBL-GO3-NEGRO"
   },
   "MLM2910457977": {
-    "title": "Bocina Port\u00e1til Jbl Clip 5 Bluetooth Negro",
+    "title": "Bocina Portátil Jbl Clip 5 Bluetooth Negro",
     "min_visible": 0,
-    "real_stock": 0,
-    "master_stock": 0,
+    "real_stock": 7,
+    "master_stock": 7,
     "auto_replenish": false,
-    "active": false,
+    "active": true,
     "paused_by_user": true,
-    "agotado": true,
+    "agotado": false,
     "floor_locked_by_user": true,
-    "available_quantity": 0
+    "available_quantity": 0,
+    "sku": "JBL-CLIP5-NEGRO"
   },
   "MLM2910457973": {
-    "title": "Bocina Port\u00e1til Jbl Clip 5 Bluetooth Azul",
+    "title": "Bocina Portátil Jbl Clip 5 Bluetooth Azul",
     "min_visible": 1,
-    "real_stock": 10,
-    "master_stock": 10,
+    "real_stock": 274,
+    "master_stock": 274,
     "auto_replenish": true,
-    "active": true
+    "active": true,
+    "available_quantity": 1,
+    "sku": "JBL-CLIP5-AZUL"
   },
   "MLM2910457981": {
-    "title": "Jbl Go 4 - Altavoz Ultraport\u00e1til Bluetooth Color Rojo",
+    "title": "Jbl Go 4 - Altavoz Ultraportátil Bluetooth Color Rojo",
     "min_visible": 1,
     "real_stock": 10,
     "master_stock": 10,
@@ -799,68 +842,75 @@
   "MLM5337919270": {
     "title": "JBL Clip 5 Camuflada",
     "min_visible": 1,
-    "real_stock": 10,
-    "master_stock": 10,
+    "real_stock": 198,
+    "master_stock": 198,
     "available_quantity": 1,
     "auto_replenish": true,
     "active": true,
     "floor_price": 799,
-    "ceiling_price": 999
+    "ceiling_price": 999,
+    "sku": "JBL-CLIP5-CAMUFLAJE"
   },
   "MLM5337919282": {
     "title": "JBL Clip 5 Squad",
     "min_visible": 1,
-    "real_stock": 10,
-    "master_stock": 10,
+    "real_stock": 198,
+    "master_stock": 198,
     "available_quantity": 1,
     "auto_replenish": true,
     "active": true,
     "floor_price": 799,
-    "ceiling_price": 999
+    "ceiling_price": 999,
+    "sku": "JBL-CLIP5-CAMUFLAJE"
   },
   "MLM5337919290": {
     "title": "JBL Clip 5 Camo Verde Musgo",
     "min_visible": 1,
-    "real_stock": 10,
-    "master_stock": 10,
+    "real_stock": 198,
+    "master_stock": 198,
     "available_quantity": 1,
     "auto_replenish": true,
     "active": true,
     "floor_price": 799,
-    "ceiling_price": 999
+    "ceiling_price": 999,
+    "sku": "JBL-CLIP5-CAMUFLAJE"
   },
   "MLM2931612609": {
     "title": "JBL Clip 5 Negro/Naranja",
     "min_visible": 1,
-    "real_stock": 10,
+    "real_stock": 7,
     "master_stock": 10,
     "available_quantity": 1,
     "auto_replenish": true,
     "active": true,
     "floor_price": 799,
-    "ceiling_price": 999
+    "ceiling_price": 999,
+    "sku": "JBL-CLIP5-NEGRO"
   },
   "MLM2931612611": {
     "title": "JBL Clip 4 Azul",
     "min_visible": 1,
-    "real_stock": 10,
+    "real_stock": 0,
     "master_stock": 10,
     "available_quantity": 1,
     "auto_replenish": true,
-    "active": true,
+    "active": false,
     "floor_price": 799,
-    "ceiling_price": 999
+    "ceiling_price": 999,
+    "agotado": true,
+    "sku": "JBL-CLIP4-AZUL"
   },
   "MLM2931341689": {
     "title": "JBL Clip 5 Negro/Naranja IP67",
     "min_visible": 1,
-    "real_stock": 10,
+    "real_stock": 7,
     "master_stock": 10,
     "available_quantity": 1,
     "auto_replenish": true,
     "active": true,
     "floor_price": 799,
-    "ceiling_price": 999
+    "ceiling_price": 999,
+    "sku": "JBL-CLIP5-NEGRO"
   },
   "MLM2916897169": {
     "paused_by_user": true,
@@ -870,13 +920,13 @@
     "floor_locked_by_user": true
   },
   "MLM5346655686": {
-    "title": "Bocina Bluetooth Port\u00e1til Go 4 IP67 OEM 1.1 Espejo (multi-color, relisted)",
+    "title": "Bocina Bluetooth Portátil Go 4 IP67 OEM 1.1 Espejo (multi-color, relisted)",
     "min_visible": 30,
-    "real_stock": 30,
+    "real_stock": 0,
     "master_stock": 30,
     "available_quantity": 30,
     "auto_replenish": true,
-    "active": true,
+    "active": false,
     "variations_min_visible": {
       "Rosa": 5,
       "Azul": 5,
@@ -892,10 +942,12 @@
       "Camuflaje": 5,
       "Negro": 5,
       "Aqua": 5
-    }
+    },
+    "agotado": true,
+    "sku": "JBL-GO4-AZUL"
   },
   "MLM5347886456": {
-    "title": "JBL Charge 6 Negro Port\u00e1til",
+    "title": "JBL Charge 6 Negro Portátil",
     "min_visible": 0,
     "real_stock": 0,
     "master_stock": 0,
@@ -906,7 +958,8 @@
     "ceiling_price": 1999,
     "paused_by_user": true,
     "agotado": true,
-    "floor_locked_by_user": true
+    "floor_locked_by_user": true,
+    "sku": "JBL-CHARGE6-NEGRO"
   },
   "MLM2932676401": {
     "title": "Bocina Bluetooth 30W IP67 Acabado Espejo Bass Pro",
@@ -928,22 +981,23 @@
   "MLM5351937060": {
     "title": "Go 4 Camuflaje (clone alterno MLM2910880749 baja)",
     "min_visible": 1,
-    "real_stock": 15,
-    "master_stock": 15,
+    "real_stock": 278,
+    "master_stock": 278,
     "available_quantity": 1,
     "auto_replenish": true,
     "active": true,
     "floor_price": 449,
-    "ceiling_price": 599
+    "ceiling_price": 599,
+    "sku": "JBL-GO4-CAMUFLAJE"
   },
   "MLM5347216886": {
-    "title": "Bocina Bluetooth Port\u00e1til Flip 7 Calidad Espejo (multi-color)",
+    "title": "Bocina Bluetooth Portátil Flip 7 Calidad Espejo (multi-color)",
     "min_visible": 4,
-    "real_stock": 40,
+    "real_stock": 0,
     "master_stock": 40,
     "available_quantity": 4,
     "auto_replenish": true,
-    "active": true,
+    "active": false,
     "variations_min_visible": {
       "Negro": 1,
       "Morado": 1,
@@ -955,18 +1009,21 @@
       "Morado": 10,
       "Azul": 10,
       "Rojo": 10
-    }
+    },
+    "agotado": true,
+    "sku": "JBL-FLIP7-NEGRO"
   },
   "MLM2914422351": {
     "title": "JBL Go 4 Rojo (clone)",
     "min_visible": 1,
-    "real_stock": 15,
-    "master_stock": 15,
+    "real_stock": 16,
+    "master_stock": 16,
     "available_quantity": 1,
     "auto_replenish": true,
     "active": true,
     "floor_price": 449,
-    "ceiling_price": 699
+    "ceiling_price": 699,
+    "sku": "JBL-GO4-ROJO"
   },
   "MLM5347901578": {
     "title": "Charge 6 Espejo $899",
@@ -1074,14 +1131,15 @@
   },
   "MLM5354755946": {
     "title": "JBL Go 4 Rojo (clone Wilbert)",
-    "real_stock": 15,
-    "master_stock": 15,
+    "real_stock": 16,
+    "master_stock": 16,
     "min_visible": 1,
     "available_quantity": 1,
     "auto_replenish": true,
     "active": true,
     "floor_price": 449,
-    "ceiling_price": 699
+    "ceiling_price": 699,
+    "sku": "JBL-GO4-ROJO"
   },
   "MLM5351547624": {
     "paused_by_user": true,
@@ -1092,17 +1150,19 @@
     "real_stock": 0,
     "master_stock": 0,
     "available_quantity": 0,
-    "min_visible": 0
+    "min_visible": 0,
+    "sku": "JBL-CHARGE6-ROJO"
   },
   "MLM2937969761": {
     "title": "Sony XB100 Negro (clone Wilbert)",
-    "real_stock": 15,
-    "master_stock": 15,
+    "real_stock": 1422,
+    "master_stock": 1422,
     "min_visible": 1,
     "available_quantity": 1,
     "auto_replenish": true,
     "active": true,
     "floor_price": 499,
-    "ceiling_price": 699
+    "ceiling_price": 699,
+    "sku": "SONY-XB100-NEGRO"
   }
 }

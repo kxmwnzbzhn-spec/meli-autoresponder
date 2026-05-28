@@ -31,80 +31,117 @@
     "line": "Raymundo",
     "auto_replenish": true,
     "min_visible": 1,
-    "active": true,
-    "title": "Bocina Portátil Jbl Go 4 Bluetooth, Azul"
+    "active": false,
+    "title": "Bocina Portátil Jbl Go 4 Bluetooth, Azul",
+    "real_stock": 0,
+    "agotado": true,
+    "sku": "JBL-GO4-AZUL-MARINO"
   },
   "MLM5246052052": {
     "line": "Raymundo",
     "auto_replenish": true,
     "min_visible": 1,
-    "active": true,
-    "title": "Parlante Jbl Go4 Bt Azul Mm906jbl75 Azul Marino"
+    "active": false,
+    "title": "Parlante Jbl Go4 Bt Azul Mm906jbl75 Azul Marino",
+    "real_stock": 0,
+    "agotado": true,
+    "sku": "JBL-GO4-AZUL-MARINO"
   },
   "MLM2891189849": {
     "line": "Raymundo",
     "auto_replenish": true,
     "min_visible": 1,
-    "active": true,
-    "title": "Altavoz Portátil Jbl Go 4 Con Bluetooth Color Azul"
+    "active": false,
+    "title": "Altavoz Portátil Jbl Go 4 Con Bluetooth Color Azul",
+    "real_stock": 0,
+    "agotado": true,
+    "sku": "JBL-GO4-AZUL-MARINO"
   },
   "MLM5246077470": {
     "line": "Raymundo",
     "auto_replenish": true,
     "min_visible": 1,
-    "active": true,
-    "title": "Altavoz Bluetooth Ultraportátil Impermeable Jbl Go 4, Color "
+    "active": false,
+    "title": "Altavoz Bluetooth Ultraportátil Impermeable Jbl Go 4, Color ",
+    "real_stock": 0,
+    "agotado": true,
+    "sku": "JBL-GO4-AZUL-MARINO"
   },
   "MLM2891189903": {
     "line": "Raymundo",
     "auto_replenish": true,
     "min_visible": 1,
     "active": true,
-    "title": "Altavoz Bluetooth Portátil Jbl Grip Con Luz - Negro"
+    "title": "Altavoz Bluetooth Portátil Jbl Grip Con Luz - Negro",
+    "real_stock": 1,
+    "master_stock": 1,
+    "available_quantity": 1,
+    "sku": "JBL-GRIP-NEGRO"
   },
   "MLM5246077448": {
     "line": "Raymundo",
     "auto_replenish": true,
     "min_visible": 1,
     "active": true,
-    "title": "Altavoz Bluetooth Jbl Go 4 Rosa Rosa Chicle"
+    "title": "Altavoz Bluetooth Jbl Go 4 Rosa Rosa Chicle",
+    "real_stock": 75,
+    "master_stock": 75,
+    "available_quantity": 1,
+    "sku": "JBL-GO4-ROSA"
   },
   "MLM2891189883": {
     "line": "Raymundo",
     "auto_replenish": true,
     "min_visible": 1,
-    "active": true,
+    "active": false,
     "title": "Bocina Jbl Go 4 Jblgo4 Portátil Con Bluetooth Waterproof Azu",
     "floor_price": 449,
-    "floor_locked_by_user": true
+    "floor_locked_by_user": true,
+    "real_stock": 0,
+    "agotado": true,
+    "sku": "JBL-GO4-AZUL"
   },
   "MLM2891189773": {
     "line": "Raymundo",
     "auto_replenish": true,
     "min_visible": 1,
     "active": true,
-    "title": "Parlante Jbl Go 4 Jblgo4redam Portátil Con Bluetooth Negro- "
+    "title": "Parlante Jbl Go 4 Jblgo4redam Portátil Con Bluetooth Negro- ",
+    "real_stock": 578,
+    "master_stock": 578,
+    "available_quantity": 1,
+    "sku": "JBL-GO4-AQUA"
   },
   "MLM5246077488": {
     "line": "Raymundo",
     "auto_replenish": true,
     "min_visible": 1,
-    "active": true,
-    "title": "Bocina Portátil Jbl Go 4 Bluetooth, Azul"
+    "active": false,
+    "title": "Bocina Portátil Jbl Go 4 Bluetooth, Azul",
+    "real_stock": 0,
+    "agotado": true,
+    "sku": "JBL-GO4-AZUL-MARINO"
   },
   "MLM5246052128": {
     "line": "Raymundo",
     "auto_replenish": true,
     "min_visible": 1,
-    "active": true,
-    "title": "Altavoz Portátil Jbl Go4 Go 4 00000000 Con Bluetooth Azul Im"
+    "active": false,
+    "title": "Altavoz Portátil Jbl Go4 Go 4 00000000 Con Bluetooth Azul Im",
+    "real_stock": 0,
+    "agotado": true,
+    "sku": "JBL-GO4-AZUL-MARINO"
   },
   "MLM2891178563": {
     "line": "Raymundo",
     "auto_replenish": true,
     "min_visible": 1,
     "active": true,
-    "title": "Jbl Go 4 - Altavoz Ultraportátil Bluetooth Color Rojo"
+    "title": "Jbl Go 4 - Altavoz Ultraportátil Bluetooth Color Rojo",
+    "real_stock": 16,
+    "master_stock": 16,
+    "available_quantity": 1,
+    "sku": "JBL-GO4-ROJO"
   },
   "MLM5246077386": {
     "line": "Raymundo",
@@ -118,14 +155,22 @@
     "auto_replenish": true,
     "min_visible": 1,
     "active": true,
-    "title": "Parlante Jbl Grip Portátil Con Bluetooth Waterproof Negra Ne"
+    "title": "Parlante Jbl Grip Portátil Con Bluetooth Waterproof Negra Ne",
+    "real_stock": 1,
+    "master_stock": 1,
+    "available_quantity": 1,
+    "sku": "JBL-GRIP-NEGRO"
   },
   "MLM2891178553": {
     "line": "Raymundo",
     "auto_replenish": true,
     "min_visible": 1,
     "active": true,
-    "title": "Parlante Bluetooth Jbl Go 4 Portátil Rosa"
+    "title": "Parlante Bluetooth Jbl Go 4 Portátil Rosa",
+    "real_stock": 75,
+    "master_stock": 75,
+    "available_quantity": 1,
+    "sku": "JBL-GO4-ROSA"
   },
   "MLM2891189859": {
     "line": "Raymundo",
@@ -138,8 +183,11 @@
     "line": "Raymundo",
     "auto_replenish": true,
     "min_visible": 1,
-    "active": true,
-    "title": "Jbl Go4 Speaker Color Azul"
+    "active": false,
+    "title": "Jbl Go4 Speaker Color Azul",
+    "real_stock": 0,
+    "agotado": true,
+    "sku": "JBL-GO4-AZUL-MARINO"
   },
   "MLM5246052014": {
     "line": "Raymundo",
@@ -148,46 +196,68 @@
     "active": true,
     "title": "Bocina Jbl Go 4 Jblgo4 Portátil Con Bluetooth Waterproof Roj",
     "floor_price": 449,
-    "floor_locked_by_user": true
+    "floor_locked_by_user": true,
+    "real_stock": 16,
+    "master_stock": 16,
+    "available_quantity": 1,
+    "sku": "JBL-GO4-ROJO"
   },
   "MLM2891178577": {
     "line": "Raymundo",
     "auto_replenish": true,
     "min_visible": 1,
-    "active": true,
-    "title": "Altavoz Bluetooth V5.3 Jbl Go 4 Con Garantía De Color Azul J"
+    "active": false,
+    "title": "Altavoz Bluetooth V5.3 Jbl Go 4 Con Garantía De Color Azul J",
+    "real_stock": 0,
+    "agotado": true,
+    "sku": "JBL-GO4-AZUL-MARINO"
   },
   "MLM2891178603": {
     "line": "Raymundo",
     "auto_replenish": true,
     "min_visible": 1,
     "active": true,
-    "title": "Altavoz Bluetooth Jbl Go 4 Portátil Impermeable En Rojo"
+    "title": "Altavoz Bluetooth Jbl Go 4 Portátil Impermeable En Rojo",
+    "real_stock": 16,
+    "master_stock": 16,
+    "available_quantity": 1,
+    "sku": "JBL-GO4-ROJO"
   },
   "MLM2891178583": {
     "line": "Raymundo",
     "auto_replenish": true,
     "min_visible": 1,
-    "active": true,
-    "title": "Parlantes Portátil Jbl Go 4 Speaker Color Azul Jblgo4bluam"
+    "active": false,
+    "title": "Parlantes Portátil Jbl Go 4 Speaker Color Azul Jblgo4bluam",
+    "real_stock": 0,
+    "agotado": true,
+    "sku": "JBL-GO4-AZUL-MARINO"
   },
   "MLM2891178545": {
     "line": "Raymundo",
     "auto_replenish": true,
     "min_visible": 1,
     "active": true,
-    "title": "Jbl Go 4 - Altavoz Bluetooth Ultraportátil Rosa"
+    "title": "Jbl Go 4 - Altavoz Bluetooth Ultraportátil Rosa",
+    "real_stock": 75,
+    "master_stock": 75,
+    "available_quantity": 1,
+    "sku": "JBL-GO4-ROSA"
   },
   "MLM2891178511": {
     "line": "Raymundo",
     "auto_replenish": true,
     "min_visible": 1,
     "active": true,
-    "title": "Sony Srs-xb100 Altavoz De Viaje Inalámbrico Bluetooth Port C"
+    "title": "Sony Srs-xb100 Altavoz De Viaje Inalámbrico Bluetooth Port C",
+    "real_stock": 1422,
+    "master_stock": 1422,
+    "available_quantity": 1,
+    "sku": "SONY-XB100-NEGRO"
   },
   "MLM5281123238": {
     "label": "Clip 5 Morado",
-    "real_stock": 255,
+    "real_stock": 116,
     "min_visible": 1,
     "auto_replenish": true,
     "replenish_quantity": 1,
@@ -196,11 +266,13 @@
     "ceiling_price": 1499,
     "color": "Morado",
     "model": "Clip 5",
-    "catalog_product_id": "MLM44714111"
+    "catalog_product_id": "MLM44714111",
+    "available_quantity": 1,
+    "sku": "JBL-CLIP5-MORADO"
   },
   "MLM2904687737": {
     "label": "Clip 5 Rojo",
-    "real_stock": 82,
+    "real_stock": 0,
     "min_visible": 1,
     "auto_replenish": true,
     "replenish_quantity": 1,
@@ -211,11 +283,14 @@
     "model": "Clip 5",
     "catalog_product_id": "MLM37361046",
     "shares_with": "MLM2904700925",
-    "stock_note": "Rojo (comparte fisico con cover)"
+    "stock_note": "Rojo (comparte fisico con cover)",
+    "active": false,
+    "agotado": true,
+    "sku": "JBL-CLIP5-ROJO"
   },
   "MLM5281123246": {
     "label": "Clip 5 Negro",
-    "real_stock": 123,
+    "real_stock": 7,
     "min_visible": 1,
     "auto_replenish": true,
     "replenish_quantity": 1,
@@ -226,11 +301,13 @@
     "model": "Clip 5",
     "catalog_product_id": "MLM37110181",
     "shares_with": "MLM2904676579",
-    "stock_note": "Negro (comparte fisico con 7W)"
+    "stock_note": "Negro (comparte fisico con 7W)",
+    "available_quantity": 1,
+    "sku": "JBL-CLIP5-NEGRO"
   },
   "MLM2904687747": {
     "label": "Clip 5 Azul",
-    "real_stock": 479,
+    "real_stock": 274,
     "min_visible": 1,
     "auto_replenish": true,
     "replenish_quantity": 1,
@@ -239,11 +316,13 @@
     "ceiling_price": 1499,
     "color": "Azul",
     "model": "Clip 5",
-    "catalog_product_id": "MLM37110751"
+    "catalog_product_id": "MLM37110751",
+    "available_quantity": 1,
+    "sku": "JBL-CLIP5-AZUL"
   },
   "MLM2904674811": {
     "label": "Clip 5 Camuflaje",
-    "real_stock": 239,
+    "real_stock": 198,
     "min_visible": 1,
     "auto_replenish": true,
     "replenish_quantity": 1,
@@ -252,11 +331,13 @@
     "ceiling_price": 1499,
     "color": "Camuflaje",
     "model": "Clip 5",
-    "catalog_product_id": "MLM44714150"
+    "catalog_product_id": "MLM44714150",
+    "available_quantity": 1,
+    "sku": "JBL-CLIP5-CAMUFLAJE"
   },
   "MLM2904700925": {
     "label": "Clip 5 Rojo (cover)",
-    "real_stock": 82,
+    "real_stock": 0,
     "min_visible": 1,
     "auto_replenish": true,
     "replenish_quantity": 1,
@@ -267,11 +348,14 @@
     "model": "Clip 5",
     "catalog_product_id": "MLM46022592",
     "shares_with": "MLM2904687737",
-    "stock_note": "Rojo cover (comparte fisico con orig)"
+    "stock_note": "Rojo cover (comparte fisico con orig)",
+    "active": false,
+    "agotado": true,
+    "sku": "JBL-CLIP5-ROJO"
   },
   "MLM2904676579": {
     "label": "Clip 5 Negro 7W",
-    "real_stock": 123,
+    "real_stock": 7,
     "min_visible": 1,
     "auto_replenish": true,
     "replenish_quantity": 1,
@@ -282,6 +366,8 @@
     "model": "Clip 5",
     "catalog_product_id": "MLM46042650",
     "shares_with": "MLM5281123246",
-    "stock_note": "Negro 7W (comparte fisico con orig)"
+    "stock_note": "Negro 7W (comparte fisico con orig)",
+    "available_quantity": 1,
+    "sku": "JBL-CLIP5-NEGRO"
   }
 }

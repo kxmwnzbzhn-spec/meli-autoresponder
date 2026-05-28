@@ -64,11 +64,14 @@
     "catalog_product_id": "MLM37361021",
     "auto_replenish": true,
     "min_visible": 1,
-    "real_stock": 10,
+    "real_stock": 278,
     "daily_reset_to": 10,
     "active": true,
     "condition": "new",
-    "type": "catalog_no_variations"
+    "type": "catalog_no_variations",
+    "master_stock": 278,
+    "available_quantity": 1,
+    "sku": "JBL-GO4-CAMUFLAJE"
   },
   "MLM5245310494": {
     "line": "Catalog-Claribel-499",
@@ -77,11 +80,14 @@
     "catalog_product_id": "MLM61262890",
     "auto_replenish": true,
     "min_visible": 1,
-    "real_stock": 10,
+    "real_stock": 578,
     "daily_reset_to": 10,
     "active": true,
     "condition": "new",
-    "type": "catalog_no_variations"
+    "type": "catalog_no_variations",
+    "master_stock": 578,
+    "available_quantity": 1,
+    "sku": "JBL-GO4-AQUA"
   },
   "MLM5245310498": {
     "line": "Catalog-Claribel-499",
@@ -103,11 +109,13 @@
     "catalog_product_id": "MLM21765262",
     "auto_replenish": true,
     "min_visible": 1,
-    "real_stock": 10,
+    "real_stock": 0,
     "daily_reset_to": 10,
-    "active": true,
+    "active": false,
     "condition": "new",
-    "type": "catalog_no_variations"
+    "type": "catalog_no_variations",
+    "agotado": true,
+    "sku": "PERF-ARMAF-ODYSSEY-MEGA-MAN-EDICION"
   },
   "MLM2888494723": {
     "line": "Auto-added-perfume",
@@ -129,11 +137,13 @@
     "catalog_product_id": "MLM50661134",
     "auto_replenish": true,
     "min_visible": 1,
-    "real_stock": 10,
+    "real_stock": 0,
     "daily_reset_to": 10,
-    "active": true,
+    "active": false,
     "condition": "new",
-    "type": "catalog_no_variations"
+    "type": "catalog_no_variations",
+    "agotado": true,
+    "sku": "PERF-ARMAF-CLUB-DE-NUIT-MALEKA"
   },
   "MLM2888976949": {
     "line": "Auto-added-perfume",
@@ -155,11 +165,13 @@
     "catalog_product_id": "MLM41302004",
     "auto_replenish": true,
     "min_visible": 1,
-    "real_stock": 10,
+    "real_stock": 0,
     "daily_reset_to": 10,
-    "active": true,
+    "active": false,
     "condition": "new",
-    "type": "catalog_no_variations"
+    "type": "catalog_no_variations",
+    "agotado": true,
+    "sku": "PERF-LATTAFA-HIS-CONFESSION-PARA"
   },
   "MLM5244431430": {
     "line": "Auto-added-perfume",
@@ -168,11 +180,13 @@
     "catalog_product_id": "MLM45594561",
     "auto_replenish": true,
     "min_visible": 1,
-    "real_stock": 10,
+    "real_stock": 0,
     "daily_reset_to": 10,
-    "active": true,
+    "active": false,
     "condition": "new",
-    "type": "catalog_no_variations"
+    "type": "catalog_no_variations",
+    "agotado": true,
+    "sku": "PERF-ARMAF-DELIGHT-ISLAND-BLISS"
   },
   "MLM2888976979": {
     "line": "Auto-added-perfume",
@@ -337,11 +351,13 @@
     "catalog_product_id": "MLM44710397",
     "auto_replenish": true,
     "min_visible": 1,
-    "real_stock": 10,
+    "real_stock": 0,
     "daily_reset_to": 10,
-    "active": true,
+    "active": false,
     "condition": "new",
-    "type": "catalog_no_variations"
+    "type": "catalog_no_variations",
+    "agotado": true,
+    "sku": "JBL-GO4-AZUL"
   },
   "MLM2890950617": {
     "line": "Catalog-Claribel-Azul",
@@ -493,11 +509,14 @@
     "catalog_product_id": "MLM45700101",
     "auto_replenish": true,
     "min_visible": 1,
-    "real_stock": 10,
+    "real_stock": 75,
     "daily_reset_to": 10,
     "active": true,
     "condition": "new",
-    "type": "catalog_no_variations"
+    "type": "catalog_no_variations",
+    "master_stock": 75,
+    "available_quantity": 1,
+    "sku": "JBL-GO4-ROSA"
   },
   "MLM2890989209": {
     "line": "Catalog-Claribel-Rosa",
@@ -506,11 +525,14 @@
     "catalog_product_id": "MLM65831856",
     "auto_replenish": true,
     "min_visible": 1,
-    "real_stock": 10,
+    "real_stock": 75,
     "daily_reset_to": 10,
     "active": true,
     "condition": "new",
-    "type": "catalog_no_variations"
+    "type": "catalog_no_variations",
+    "master_stock": 75,
+    "available_quantity": 1,
+    "sku": "JBL-GO4-ROSA"
   },
   "MLM2890977889": {
     "line": "Catalog-Claribel-Camuflaje",
@@ -532,11 +554,14 @@
     "catalog_product_id": "MLM54696427",
     "auto_replenish": true,
     "min_visible": 1,
-    "real_stock": 10,
+    "real_stock": 578,
     "daily_reset_to": 10,
     "active": true,
     "condition": "new",
-    "type": "catalog_no_variations"
+    "type": "catalog_no_variations",
+    "master_stock": 578,
+    "available_quantity": 1,
+    "sku": "JBL-GO4-AQUA"
   },
   "MLM2890996761": {
     "line": "Catalog-Claribel-MandarinSky",
@@ -597,11 +622,13 @@
     "catalog_product_id": "MLM22299658",
     "auto_replenish": true,
     "min_visible": 1,
-    "real_stock": 10,
+    "real_stock": 0,
     "daily_reset_to": 10,
-    "active": true,
+    "active": false,
     "condition": "new",
-    "type": "catalog_no_variations"
+    "type": "catalog_no_variations",
+    "agotado": true,
+    "sku": "PERF-ARMAF-ODYSSEY-MANDARIN-SKY-LIMITED"
   },
   "MLM5245546822": {
     "line": "Catalog-Claribel-MandarinSky",
@@ -680,12 +707,14 @@
     "catalog_product_id": "MLM40336571",
     "auto_replenish": true,
     "min_visible": 1,
-    "real_stock": 150,
+    "real_stock": 0,
     "daily_reset_to": 150,
     "floor_override": 149.0,
     "ceiling_override": 149.0,
-    "active": true,
+    "active": false,
     "condition": "new",
-    "type": "catalog_no_variations"
+    "type": "catalog_no_variations",
+    "agotado": true,
+    "sku": "XIAOMI-REDMI-BUDS-4-LITE"
   }
 }

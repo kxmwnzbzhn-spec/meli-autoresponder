@@ -1,8 +1,9 @@
 {
   "_meta": {
-    "description": "Yiriam stock real almac\u00e9n - 12 perfumes",
+    "description": "Yiriam stock real almacén - 12 perfumes",
     "updated": "2026-05-16",
-    "total": 239
+    "total": 239,
+    "synced_from_supabase_at": "2026-05-28T02:47:49.292021+00:00"
   },
   "MLM2935286605": {
     "title": "Angel Nova",
@@ -106,13 +107,15 @@
   },
   "MLM5353056250": {
     "title": "Armaf Island Bliss",
-    "real_stock": 2,
+    "real_stock": 0,
     "master_stock": 12,
     "min_visible": 1,
     "available_quantity": 1,
     "auto_replenish": true,
-    "active": true,
-    "last_sold": 11
+    "active": false,
+    "last_sold": 11,
+    "agotado": true,
+    "sku": "PERF-ARMAF-DELIGHT-ISLAND-BLISS"
   },
   "MLM5353056406": {
     "title": "Lady Million Gold",

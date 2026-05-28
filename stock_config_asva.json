@@ -34,9 +34,15 @@
   },
   "MLM2886030837": {
     "color": "Rojo",
-    "stock": 35,
-    "max_stock": 35,
-    "active": true
+    "stock": 190,
+    "max_stock": 190,
+    "active": true,
+    "real_stock": 190,
+    "master_stock": 190,
+    "min_visible": 1,
+    "available_quantity": 1,
+    "auto_replenish": true,
+    "sku": "JBL-FLIP7-ROJO"
   },
   "MLM2886136351": {
     "color": "Morado",
