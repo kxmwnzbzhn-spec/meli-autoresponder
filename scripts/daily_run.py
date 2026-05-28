@@ -355,15 +355,28 @@ def drive_save_stats(svc, stats, file_id=None):
         svc.files().create(body={"name":"stats.json","parents":[DRIVE_FOLDER_ID]},
                            media_body=media, supportsAllDrives=True).execute()
 
-def drive_upload_pdf(svc, local_path, drive_name):
+def drive_upload_pdf(svc, local_path, drive_name, max_retries=4):
+    """Upload con resumable + retry exponencial (SSL EOF y similares)."""
     from googleapiclient.http import MediaFileUpload
-    media = MediaFileUpload(local_path, mimetype="application/pdf", resumable=False)
-    f = svc.files().create(
-        body={"name": drive_name, "parents":[DRIVE_FOLDER_ID]},
-        media_body=media, supportsAllDrives=True,
-        fields="id,name,webViewLink"
-    ).execute()
-    return f
+    last_err = None
+    for attempt in range(1, max_retries + 1):
+        try:
+            media = MediaFileUpload(local_path, mimetype="application/pdf",
+                                    resumable=True, chunksize=1024*1024)
+            req = svc.files().create(
+                body={"name": drive_name, "parents":[DRIVE_FOLDER_ID]},
+                media_body=media, supportsAllDrives=True,
+                fields="id,name,webViewLink",
+            )
+            resp = None
+            while resp is None:
+                _, resp = req.next_chunk(num_retries=3)
+            return resp
+        except Exception as e:
+            last_err = e
+            print(f"  upload attempt {attempt} failed: {type(e).__name__}: {str(e)[:200]}", flush=True)
+            time.sleep(2 ** attempt)
+    raise last_err
 
 
 # ============ TELEGRAM ============
