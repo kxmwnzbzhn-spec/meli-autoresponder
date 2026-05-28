@@ -1,0 +1,42 @@
+name: Sonix Auto-Audit (daily 07:00 CDMX)
+
+on:
+  schedule:
+    - cron: '0 13 * * *'   # 13:00 UTC = 07:00 CDMX (Mexico is UTC-6 year-round)
+  workflow_dispatch:        # allow manual trigger
+
+permissions:
+  contents: write           # to commit reports/
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install deps
+        run: pip install requests
+
+      - name: Run audit
+        env:
+          META_CAPI_ACCESS_TOKEN: ${{ secrets.META_CAPI_ACCESS_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python scripts/sonix_auto_audit.py
+        continue-on-error: true   # don't fail the workflow if audit exits non-zero (alerts handled in step)
+
+      - name: Commit report
+        run: |
+          git config --global user.name 'sonix-autopilot'
+          git config --global user.email 'autopilot@sonix.local'
+          git add reports/ || true
+          if ! git diff --staged --quiet; then
+            git commit -m "auto-audit: $(date -u +%Y-%m-%d) results"
+            git push
+          else
+            echo "No report changes to commit"
+          fi
