@@ -1,0 +1,40 @@
+name: Sonix Creative Engine (daily 08:00 CDMX)
+
+on:
+  schedule:
+    - cron: '0 14 * * *'   # 14:00 UTC = 08:00 CDMX (1h after auto-audit)
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  creatives:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install deps (requests + Pillow)
+        run: pip install requests Pillow
+
+      - name: Run creative engine
+        env:
+          META_CAPI_ACCESS_TOKEN: ${{ secrets.META_CAPI_ACCESS_TOKEN }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python scripts/sonix_creative_engine.py
+        continue-on-error: true
+
+      - name: Commit bench + reports
+        run: |
+          git config --global user.name 'sonix-creative'
+          git config --global user.email 'creative@sonix.local'
+          git add assets/creative-bench/ reports/ || true
+          if ! git diff --staged --quiet; then
+            git commit -m "creative-engine: $(date -u +%Y-%m-%d) refresh"
+            git push
+          fi
