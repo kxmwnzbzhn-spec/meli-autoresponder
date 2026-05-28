@@ -35,7 +35,7 @@
     },
     "real_stock_per_color": 20,
     "total_real_stock": 120,
-    "real_stock": 70,
+    "real_stock": 68,
     "available_quantity": 1,
     "sku": "JBL-GO4-ROSA"
   },
@@ -54,7 +54,7 @@
     "line": "Juan-Go4",
     "title": "Bocina Portátil Jbl Go 4 Bluetooth, Camuflaje. Color Camuflaje",
     "active": true,
-    "real_stock": 245,
+    "real_stock": 242,
     "available_quantity": 1,
     "sku": "JBL-GO4-CAMUFLAJE"
   },
@@ -65,7 +65,7 @@
     "line": "Juan-Go4",
     "title": "Bocina Jbl Go 4 Jblgo4 Portátil Con Bluetooth Waterproof Roja Rojo",
     "active": true,
-    "real_stock": 109,
+    "real_stock": 105,
     "available_quantity": 1,
     "sku": "JBL-GO4-ROJO"
   },
@@ -76,7 +76,7 @@
     "line": "Juan-Go4",
     "title": "Bocina Jbl Go 4 Jblgo4 Portátil Con Bluetooth Waterproof Celeste",
     "active": true,
-    "real_stock": 573,
+    "real_stock": 572,
     "available_quantity": 1,
     "sku": "JBL-GO4-AQUA"
   },

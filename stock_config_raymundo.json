@@ -84,7 +84,7 @@
     "min_visible": 1,
     "active": true,
     "title": "Altavoz Bluetooth Jbl Go 4 Rosa Rosa Chicle",
-    "real_stock": 70,
+    "real_stock": 68,
     "master_stock": 75,
     "available_quantity": 1,
     "sku": "JBL-GO4-ROSA"
@@ -107,7 +107,7 @@
     "min_visible": 1,
     "active": true,
     "title": "Parlante Jbl Go 4 Jblgo4redam Portátil Con Bluetooth Negro- ",
-    "real_stock": 573,
+    "real_stock": 572,
     "master_stock": 578,
     "available_quantity": 1,
     "sku": "JBL-GO4-AQUA"
@@ -138,7 +138,7 @@
     "min_visible": 1,
     "active": true,
     "title": "Jbl Go 4 - Altavoz Ultraportátil Bluetooth Color Rojo",
-    "real_stock": 109,
+    "real_stock": 105,
     "master_stock": 121,
     "available_quantity": 1,
     "sku": "JBL-GO4-ROJO"
@@ -167,7 +167,7 @@
     "min_visible": 1,
     "active": true,
     "title": "Parlante Bluetooth Jbl Go 4 Portátil Rosa",
-    "real_stock": 70,
+    "real_stock": 68,
     "master_stock": 75,
     "available_quantity": 1,
     "sku": "JBL-GO4-ROSA"
@@ -197,7 +197,7 @@
     "title": "Bocina Jbl Go 4 Jblgo4 Portátil Con Bluetooth Waterproof Roj",
     "floor_price": 449,
     "floor_locked_by_user": true,
-    "real_stock": 109,
+    "real_stock": 105,
     "master_stock": 121,
     "available_quantity": 1,
     "sku": "JBL-GO4-ROJO",
@@ -219,7 +219,7 @@
     "min_visible": 1,
     "active": true,
     "title": "Altavoz Bluetooth Jbl Go 4 Portátil Impermeable En Rojo",
-    "real_stock": 109,
+    "real_stock": 105,
     "master_stock": 121,
     "available_quantity": 1,
     "sku": "JBL-GO4-ROJO"
@@ -240,7 +240,7 @@
     "min_visible": 1,
     "active": true,
     "title": "Jbl Go 4 - Altavoz Bluetooth Ultraportátil Rosa",
-    "real_stock": 70,
+    "real_stock": 68,
     "master_stock": 75,
     "available_quantity": 1,
     "sku": "JBL-GO4-ROSA"
@@ -258,7 +258,7 @@
   },
   "MLM5281123238": {
     "label": "Clip 5 Morado",
-    "real_stock": 104,
+    "real_stock": 103,
     "min_visible": 1,
     "auto_replenish": true,
     "replenish_quantity": 1,
@@ -308,7 +308,7 @@
   },
   "MLM2904687747": {
     "label": "Clip 5 Azul",
-    "real_stock": 247,
+    "real_stock": 244,
     "min_visible": 1,
     "auto_replenish": true,
     "replenish_quantity": 1,
@@ -323,7 +323,7 @@
   },
   "MLM2904674811": {
     "label": "Clip 5 Camuflaje",
-    "real_stock": 185,
+    "real_stock": 184,
     "min_visible": 1,
     "auto_replenish": true,
     "replenish_quantity": 1,
