@@ -247,17 +247,19 @@ def collect_shipments(at, account):
             if not comp: continue
             buyer = (ord_list[0].get("buyer") or {}).get("nickname", "?")
             ships.append({"sid":sid,"account":account["name"],"buyer":buyer,
-                          "comp_lines":comp,"has_used":used,"n_prods":len(comp)})
+                          "comp_lines":comp,"has_used":used,"n_prods":len(comp),
+                          "at": at})
             time.sleep(0.04)
         except Exception as e:
             print(f"  err shipment {sid}: {str(e)[:80]}")
     ships.sort(key=lambda s: (0 if s["has_used"] else 1, "/".join(s["comp_lines"]), s["sid"]))
     return ships
 
-def build_pdf(ships, at, out_path):
-    H = {"Authorization":f"Bearer {at}"}
+def build_pdf(ships, out_path):
+    """Cada shipment trae su propio access_token en s['at'] (multi-cuenta)."""
     writer = PdfWriter(); fail=[]
     for s in ships:
+        H = {"Authorization":f"Bearer {s['at']}"}
         try:
             r = requests.get("https://api.mercadolibre.com/shipment_labels", headers=H,
                 params={"shipment_ids":s["sid"], "response_type":"pdf"}, timeout=30)
@@ -398,7 +400,10 @@ def main():
     report = [f"🤖 <b>Etiquetas diarias</b> · {TODAY}", ""]
     summary = {}
     any_error = False
+    all_ships = []
+    per_account_counts = {}
 
+    # 1) Recolectar shipments de TODAS las cuentas
     for account in ACCOUNTS:
         nm = account["name"]
         print(f"\n========== {nm} ==========")
@@ -406,11 +411,12 @@ def main():
             at, err = validate_account(account)
             if err:
                 msg = f"❌ <b>{nm}</b>: {err}"
-                report.append(msg); print(msg); any_error = True; continue
+                report.append(msg); print(msg); any_error = True
+                per_account_counts[nm] = 0; continue
             ships = collect_shipments(at, account)
             n = len(ships)
+            per_account_counts[nm] = n
             print(f"  shipments seleccionados: {n}")
-            # Sanity check vs previous
             prev = stats.get(nm, {}).get("last_count")
             anomaly = ""
             if prev is not None and prev > 5:
@@ -420,28 +426,57 @@ def main():
                     anomaly = f"⚠ Caída brusca: ayer {prev} → hoy {n}"
                 elif n > prev * 5 and n > 50:
                     anomaly = f"⚠ Subida atípica: ayer {prev} → hoy {n}"
-            if n == 0:
-                report.append(f"📭 <b>{nm}</b>: 0 pendientes. {anomaly}".strip())
-                summary[nm] = {"last_count":0,"date":TODAY,"uploaded":None}
-                continue
-            out_local = f"ETIQUETAS_{nm.upper()}_{TODAY}.pdf"
-            pages, fails = build_pdf(ships, at, out_local)
-            if pages == 0:
-                report.append(f"❌ <b>{nm}</b>: PDF salió vacío (fallidas {len(fails)}). NO subo.")
-                any_error = True; continue
-            up = drive_upload_pdf(svc, out_local, f"ETIQUETAS_{nm.upper()}_{TODAY}.pdf")
-            link = up.get("webViewLink", "")
-            line = f"✅ <b>{nm}</b>: {pages} págs ({n} envíos · {len(fails)} fallidas) · <a href=\"{link}\">PDF</a>"
-            if anomaly: line += f"\n   {anomaly}"
-            report.append(line); print(line)
-            summary[nm] = {"last_count":n,"pages":pages,"date":TODAY,"file_id":up["id"]}
+            if anomaly:
+                report.append(f"   {nm}: {anomaly}")
+            all_ships.extend(ships)
+            summary[nm] = {"last_count":n,"date":TODAY}
         except Exception as e:
-            tb = traceback.format_exc()
-            print(tb)
+            print(traceback.format_exc())
             report.append(f"❌ <b>{nm}</b>: excepción {type(e).__name__}: {str(e)[:140]}")
             any_error = True
+            per_account_counts[nm] = 0
 
-    # Persiste stats
+    if not all_ships:
+        for nm, n in per_account_counts.items():
+            report.append(f"📭 <b>{nm}</b>: {n} pendientes")
+        report.append("\nNo hay etiquetas para subir.")
+        new_stats = dict(stats); new_stats.update(summary); new_stats["__last_run"] = TODAY
+        try: drive_save_stats(svc, new_stats, stats_fid)
+        except Exception as e: report.append(f"⚠ stats fail: {str(e)[:80]}")
+        tg_send("\n".join(report))
+        print("\n".join(report))
+        if any_error: sys.exit(1)
+        return
+
+    # 2) Orden global: cuenta → USADO primero → por producto
+    all_ships.sort(key=lambda s: (s["account"], 0 if s["has_used"] else 1,
+                                  "/".join(s["comp_lines"]), s["sid"]))
+
+    # 3) Construir UN PDF combinado
+    total = len(all_ships)
+    breakdown = " + ".join(f"{nm}:{n}" for nm,n in per_account_counts.items())
+    print(f"\n========== PDF combinado: {total} envíos ({breakdown}) ==========")
+    out_local = f"ETIQUETAS_{TODAY}.pdf"
+    pages, fails = build_pdf(all_ships, out_local)
+    if pages == 0:
+        report.append(f"❌ PDF salió vacío (fallidas {len(fails)}). NO subo.")
+        any_error = True
+    else:
+        try:
+            up = drive_upload_pdf(svc, out_local, out_local)
+            link = up.get("webViewLink", "")
+            report.append(f"✅ <b>PDF combinado</b>: {pages} págs ({total} envíos · {len(fails)} fallidas)")
+            for nm, n in per_account_counts.items():
+                report.append(f"   • {nm}: {n}")
+            report.append(f"\n<a href=\"{link}\">📄 Abrir PDF</a>")
+            summary["__combined"] = {"pages":pages, "file_id":up["id"], "date":TODAY,
+                                    "breakdown":per_account_counts}
+        except Exception as e:
+            print(traceback.format_exc())
+            report.append(f"❌ Upload falló: {type(e).__name__}: {str(e)[:140]}")
+            any_error = True
+
+    # 4) Persiste stats
     new_stats = dict(stats); new_stats.update(summary); new_stats["__last_run"] = TODAY
     try:
         drive_save_stats(svc, new_stats, stats_fid)
