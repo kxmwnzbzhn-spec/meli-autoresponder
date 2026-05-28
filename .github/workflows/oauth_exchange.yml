@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
     inputs:
       code:
-        description: 'Authorization code from /?code=... URL'
+        description: 'Authorization code'
         required: true
         type: string
 jobs:
@@ -20,4 +20,5 @@ jobs:
           GOOGLE_OAUTH_CLIENT_ID:     ${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}
           GOOGLE_OAUTH_CLIENT_SECRET: ${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}
           GH_PAT:                     ${{ secrets.GH_PAT }}
+          REPO_PAT:                   ${{ secrets.REPO_PAT }}
         run: python scripts/oauth_exchange.py
