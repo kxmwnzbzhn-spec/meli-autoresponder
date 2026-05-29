@@ -1,10 +1,10 @@
 {
   "_meta": {
-    "updated": "2026-05-29T06:37:20.373367Z",
+    "updated": "2026-05-29T10:32:34.086782Z",
     "golive_ref": "stock_at_golive_20260518.json",
     "note": "Dinámico — decrementa con cada venta vía cron.",
-    "total_sold": 1376,
-    "total_available": 3640
+    "total_sold": 1377,
+    "total_available": 3639
   },
   "skus": {
     "SONY-XB100-NEGRO": {
@@ -104,9 +104,9 @@
       "color": "Rosa"
     },
     "BOSE-SOUNDLINK-BLANCO": {
-      "available": 70,
+      "available": 69,
       "initial": 77,
-      "sold_since_golive": 7,
+      "sold_since_golive": 8,
       "last_pause_triggered": false,
       "modelo": "Bose Soundlink",
       "color": "Blanco"
