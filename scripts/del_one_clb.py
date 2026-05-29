@@ -7,15 +7,12 @@ tok=requests.post(f"{API}/oauth/token",data={
 T=tok["access_token"]
 print(f"NEW_RT_CLARIBEL={tok.get('refresh_token')}")
 H={"Authorization":f"Bearer {T}"}; HJ={**H,"Content-Type":"application/json"}
-sid="MLM2967305255"
+sid="MLM5244951422"
 g=requests.get(f"{API}/items/{sid}",headers=H,timeout=20).json()
-sku=None
-for a in (g.get("attributes") or []):
-    if a.get("id")=="SELLER_SKU": sku=a.get("value_name")
-print(f"BEFORE: status={g.get('status')} sub={g.get('sub_status')} sku={sku} cpid={g.get('catalog_product_id')} price={g.get('price')} title='{(g.get('title') or '')[:60]}'")
+print(f"BEFORE: status={g.get('status')} sub={g.get('sub_status')} price={g.get('price')} title='{(g.get('title') or '')[:70]}'")
 if g.get("status")=="active":
     print("pause:",requests.put(f"{API}/items/{sid}",headers=HJ,json={"status":"paused"},timeout=20).status_code); time.sleep(0.5)
 print("close:",requests.put(f"{API}/items/{sid}",headers=HJ,json={"status":"closed"},timeout=20).status_code); time.sleep(0.5)
-print("del-flag:",requests.put(f"{API}/items/{sid}",headers=HJ,json={"deleted":"true"},timeout=20).status_code); time.sleep(0.5)
+print("del-flag:",requests.put(f"{API}/items/{sid}",headers=HJ,json={"deleted":"true"},timeout=20).status_code)
 g2=requests.get(f"{API}/items/{sid}",headers=H,timeout=20).json()
 print(f"AFTER: status={g2.get('status')}")
