@@ -85,12 +85,14 @@ while time.time()<end:
         for i in range(0,len(paused),20):
             batch=",".join(paused[i:i+20])
             try:
-                mg=requests.get(f"{API}/items",headers=H,params={"ids":batch,"attributes":"id,sub_status,catalog_product_id"},timeout=15).json()
+                mg=requests.get(f"{API}/items",headers=H,params={"ids":batch,"attributes":"id,sub_status,catalog_product_id,inventory_id"},timeout=15).json()
             except: continue
             for x in mg:
                 if x.get("code")!=200: continue
                 b=x["body"]; sid=b["id"]
                 if "out_of_stock" not in (b.get("sub_status") or []): continue
+                # Skip Full/FBM: MELI manages stock at warehouse level
+                if b.get("inventory_id"): continue
                 cpid=b.get("catalog_product_id")
                 if cpid and cpid in cpid_blacklist: continue
                 try:
@@ -119,3 +121,4 @@ if gh:
             json={"ref":"main","inputs":{}},timeout=20)
         print(f"REDISPATCH: HTTP {r.status_code}")
     except Exception as e: print(f"redispatch err: {e}")
+
