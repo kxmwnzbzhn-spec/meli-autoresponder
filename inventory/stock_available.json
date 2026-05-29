@@ -1,24 +1,24 @@
 {
   "_meta": {
-    "updated": "2026-05-28T23:56:37.453843Z",
+    "updated": "2026-05-29T02:28:32.202799Z",
     "golive_ref": "stock_at_golive_20260518.json",
     "note": "Dinámico — decrementa con cada venta vía cron.",
-    "total_sold": 1362,
-    "total_available": 3654
+    "total_sold": 1372,
+    "total_available": 3644
   },
   "skus": {
     "SONY-XB100-NEGRO": {
-      "available": 1363,
+      "available": 1365,
       "initial": 1422,
-      "sold_since_golive": 59,
+      "sold_since_golive": 57,
       "last_pause_triggered": false,
       "modelo": "Sony XB100",
       "color": "Negro"
     },
     "JBL-GO4-AQUA": {
-      "available": 546,
+      "available": 547,
       "initial": 704,
-      "sold_since_golive": 158,
+      "sold_since_golive": 157,
       "last_pause_triggered": false,
       "modelo": "JBL Go 4",
       "color": "Aqua/Celeste"
@@ -32,9 +32,9 @@
       "color": "Negro"
     },
     "JBL-CLIP5-AZUL": {
-      "available": 255,
+      "available": 253,
       "initial": 421,
-      "sold_since_golive": 166,
+      "sold_since_golive": 168,
       "last_pause_triggered": false,
       "modelo": "JBL Clip 5",
       "color": "Azul"
@@ -80,17 +80,17 @@
       "color": "Rosa"
     },
     "JBL-GO4-ROJO": {
-      "available": -45,
+      "available": -49,
       "initial": 198,
-      "sold_since_golive": 243,
+      "sold_since_golive": 247,
       "last_pause_triggered": true,
       "modelo": "JBL Go 4",
       "color": "Rojo"
     },
     "JBL-CLIP5-MORADO": {
-      "available": 93,
+      "available": 88,
       "initial": 185,
-      "sold_since_golive": 92,
+      "sold_since_golive": 97,
       "last_pause_triggered": false,
       "modelo": "JBL Clip 5",
       "color": "Morado"
@@ -112,17 +112,17 @@
       "color": "Blanco"
     },
     "BOSE-SOUNDLINK-NEGRO": {
-      "available": 24,
+      "available": 23,
       "initial": 65,
-      "sold_since_golive": 41,
+      "sold_since_golive": 42,
       "last_pause_triggered": false,
       "modelo": "Bose Soundlink",
       "color": "Negro"
     },
     "JBL-CLIP5-NEGRO": {
-      "available": -18,
+      "available": -19,
       "initial": 10,
-      "sold_since_golive": 28,
+      "sold_since_golive": 29,
       "last_pause_triggered": true,
       "modelo": "JBL Clip 5",
       "color": "Negro"
