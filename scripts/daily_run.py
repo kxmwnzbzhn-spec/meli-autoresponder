@@ -414,8 +414,36 @@ def tg_send(text):
 
 # ============ MAIN ============
 
+def already_done_today(svc):
+    """Idempotencia: si la subcarpeta del día ya tiene ETIQUETAS_<TODAY>.pdf, no rehacer."""
+    safe = TODAY.replace("'", "\\'")
+    q = (f"name='{safe}' and mimeType='application/vnd.google-apps.folder' "
+         f"and '{DRIVE_FOLDER_ID}' in parents and trashed=false")
+    res = svc.files().list(q=q, fields="files(id,name)",
+                           supportsAllDrives=True, includeItemsFromAllDrives=True).execute()
+    folders = res.get("files", [])
+    if not folders: return None
+    day_id = folders[0]["id"]
+    pdf_name = f"ETIQUETAS_{TODAY}.pdf"
+    q2 = (f"name='{pdf_name}' and '{day_id}' in parents and trashed=false")
+    res2 = svc.files().list(q=q2, fields="files(id,name,webViewLink,size,createdTime)",
+                            supportsAllDrives=True, includeItemsFromAllDrives=True).execute()
+    files = res2.get("files", [])
+    if files: return files[0]
+    return None
+
 def main():
     svc = drive_service()
+    # Guard: si el PDF de hoy ya existe, salir limpio (idempotencia para multi-cron)
+    existing = already_done_today(svc)
+    if existing:
+        msg = (f"🤖 <b>Etiquetas {TODAY}</b>\n"
+               f"⏭ Ya existían — skip\n"
+               f"<a href=\"{existing.get('webViewLink','')}\">📄 PDF existente</a> "
+               f"({int(int(existing.get('size','0'))/1024)} KB)")
+        print(msg)
+        tg_send(msg)
+        return
     stats, stats_fid = drive_find_or_get_stats(svc)
     report = [f"🤖 <b>Etiquetas diarias</b> · {TODAY}", ""]
     summary = {}
