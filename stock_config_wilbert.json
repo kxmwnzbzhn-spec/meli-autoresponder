@@ -317,7 +317,7 @@
     "active": true,
     "auto_replenish": false,
     "agotado": false,
-    "real_stock": 97,
+    "real_stock": 96,
     "master_stock": 121,
     "available_quantity": 0,
     "title": "CERRADA — clonada como MLM5354755946",
@@ -353,7 +353,7 @@
   "MLM2910806845": {
     "title": "Bocina Jbl Go 3 Jblgo3 Portátil Con Bluetooth Waterproof Negra Negro",
     "min_visible": 1,
-    "real_stock": 487,
+    "real_stock": 486,
     "master_stock": 488,
     "auto_replenish": true,
     "active": true,
@@ -389,7 +389,7 @@
   "MLM5297087174": {
     "title": "Altavoz Bluetooth De Estantería Bose Soundlink Home Silver Color Light Silver",
     "min_visible": 1,
-    "real_stock": 71,
+    "real_stock": 70,
     "master_stock": 77,
     "auto_replenish": true,
     "active": true,
@@ -424,7 +424,7 @@
     "active": true,
     "auto_replenish": false,
     "agotado": false,
-    "real_stock": 238,
+    "real_stock": 237,
     "master_stock": 278,
     "available_quantity": 0,
     "title": "BAJA MELI under_review/forbidden - clonado a MLM5351937060",
@@ -434,7 +434,7 @@
   "MLM5297098664": {
     "title": "Altavoz Bose Soundlink Home, Altavoz De Estantería Bluetooth Negro",
     "min_visible": 1,
-    "real_stock": 24,
+    "real_stock": 22,
     "master_stock": 59,
     "auto_replenish": true,
     "active": true,
@@ -444,7 +444,7 @@
   "MLM2910806881": {
     "title": "Parlante Bluetooth Jbl Go 3 Color Negro",
     "min_visible": 1,
-    "real_stock": 487,
+    "real_stock": 486,
     "master_stock": 488,
     "auto_replenish": true,
     "active": true,
@@ -493,7 +493,7 @@
   "MLM2910768369": {
     "title": "Altavoz Bluetooth Jbl Go 4 Portátil Impermeable En Rojo",
     "min_visible": 1,
-    "real_stock": 97,
+    "real_stock": 96,
     "master_stock": 121,
     "auto_replenish": true,
     "active": true,
@@ -547,7 +547,7 @@
   "MLM2910768333": {
     "title": "Parlante Jbl Go 3 Jblgo3 Portátil Con Bluetooth Waterproof Negro",
     "min_visible": 1,
-    "real_stock": 487,
+    "real_stock": 486,
     "master_stock": 488,
     "auto_replenish": true,
     "active": true,
@@ -982,7 +982,7 @@
   "MLM5351937060": {
     "title": "Go 4 Camuflaje (clone alterno MLM2910880749 baja)",
     "min_visible": 1,
-    "real_stock": 238,
+    "real_stock": 237,
     "master_stock": 278,
     "available_quantity": 1,
     "auto_replenish": true,
@@ -1017,7 +1017,7 @@
   "MLM2914422351": {
     "title": "JBL Go 4 Rojo (clone)",
     "min_visible": 1,
-    "real_stock": 97,
+    "real_stock": 96,
     "master_stock": 121,
     "available_quantity": 1,
     "auto_replenish": true,
@@ -1133,7 +1133,7 @@
   },
   "MLM5354755946": {
     "title": "JBL Go 4 Rojo (clone Wilbert)",
-    "real_stock": 97,
+    "real_stock": 96,
     "master_stock": 121,
     "min_visible": 1,
     "available_quantity": 1,
