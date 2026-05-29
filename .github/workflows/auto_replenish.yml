@@ -2,11 +2,11 @@ name: auto-replenish-30s
 on:
   workflow_dispatch: {}
   schedule:
-    - cron: '*/5 * * * *'
+    - cron: '*/30 * * * *'  # fallback en caso de que el chain se rompa
 jobs:
   go:
     runs-on: ubuntu-latest
-    timeout-minutes: 6
+    timeout-minutes: 350  # ~5h50min
     permissions:
       actions: write
       contents: read
@@ -19,6 +19,7 @@ jobs:
           MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          GH_TOKEN_FOR_SECRETS: ${{ secrets.GH_TOKEN_FOR_SECRETS }}
           MELI_REFRESH_TOKEN_ASVA: ${{ secrets.MELI_REFRESH_TOKEN_ASVA }}
           MELI_REFRESH_TOKEN_BREN: ${{ secrets.MELI_REFRESH_TOKEN_BREN }}
           MELI_REFRESH_TOKEN_CLARIBEL: ${{ secrets.MELI_REFRESH_TOKEN_CLARIBEL }}
@@ -30,11 +31,12 @@ jobs:
         run: |
           python3 scripts/auto_replenish.py | tee /tmp/replenish.log
           grep '^FINAL_ROTATED_TOKENS=' /tmp/replenish.log | sed 's/^FINAL_ROTATED_TOKENS=//' > /tmp/rotated.json || echo '{}' > /tmp/rotated.json
-      - name: update secrets
+      - name: update rotated secrets
+        if: always()
         env:
           GH_TOKEN_FOR_SECRETS: ${{ secrets.GH_TOKEN_FOR_SECRETS }}
         run: |
-          if [ -z "$GH_TOKEN_FOR_SECRETS" ]; then exit 0; fi
+          if [ -z "$GH_TOKEN_FOR_SECRETS" ] || [ ! -s /tmp/rotated.json ]; then echo "skip rotation"; exit 0; fi
           python3 - <<'PY'
           import os, json, base64, urllib.request, urllib.error
           from nacl import encoding, public
