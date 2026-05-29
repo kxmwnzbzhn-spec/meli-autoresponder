@@ -23,6 +23,7 @@ jobs:
 
       - name: Run audit
         env:
+          META_ADS_TOKEN: ${{ secrets.META_ADS_TOKEN }}
           META_CAPI_ACCESS_TOKEN: ${{ secrets.META_CAPI_ACCESS_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
