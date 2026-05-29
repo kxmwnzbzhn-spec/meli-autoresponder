@@ -2,11 +2,14 @@ name: auto-replenish-30s
 on:
   workflow_dispatch: {}
   schedule:
-    - cron: '*/30 * * * *'  # fallback en caso de que el chain se rompa
+    - cron: '*/30 * * * *'
+concurrency:
+  group: auto-replenish
+  cancel-in-progress: true
 jobs:
   go:
     runs-on: ubuntu-latest
-    timeout-minutes: 350  # ~5h50min
+    timeout-minutes: 350
     permissions:
       actions: write
       contents: read
@@ -36,14 +39,14 @@ jobs:
         env:
           GH_TOKEN_FOR_SECRETS: ${{ secrets.GH_TOKEN_FOR_SECRETS }}
         run: |
-          if [ -z "$GH_TOKEN_FOR_SECRETS" ] || [ ! -s /tmp/rotated.json ]; then echo "skip rotation"; exit 0; fi
+          if [ -z "$GH_TOKEN_FOR_SECRETS" ] || [ ! -s /tmp/rotated.json ]; then exit 0; fi
           python3 - <<'PY'
           import os, json, base64, urllib.request, urllib.error
           from nacl import encoding, public
           OWNER="kxmwnzbzhn-spec"; REPO="meli-autoresponder"
           TOKEN=os.environ["GH_TOKEN_FOR_SECRETS"]
           rotated=json.load(open("/tmp/rotated.json"))
-          if not rotated: print("no rotated"); raise SystemExit(0)
+          if not rotated: raise SystemExit(0)
           pk=json.loads(urllib.request.urlopen(urllib.request.Request(f"https://api.github.com/repos/{OWNER}/{REPO}/actions/secrets/public-key",headers={"Authorization":f"Bearer {TOKEN}","Accept":"application/vnd.github+json"})).read())
           for NAME,VAL in rotated.items():
               if not VAL: continue
