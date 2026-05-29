@@ -16,11 +16,11 @@ BOUNDS_BY_SKU={
   "ELEC-027":{"floor":449,"ceiling":699},
   "ELEC-030":{"floor":449,"ceiling":699},
   "ELEC-013":{"floor":399,"ceiling":599},
-  "ELEC-011":{"floor":599,"ceiling":999},
-  "ELEC-012":{"floor":599,"ceiling":999},
-  "ELEC-018":{"floor":599,"ceiling":999},
-  "ELEC-029":{"floor":599,"ceiling":999},
-  "ELEC-031":{"floor":599,"ceiling":999},
+  "ELEC-011":{"floor":749,"ceiling":799},
+  "ELEC-012":{"floor":749,"ceiling":799},
+  "ELEC-018":{"floor":749,"ceiling":799},
+  "ELEC-029":{"floor":749,"ceiling":799},
+  "ELEC-031":{"floor":749,"ceiling":799},
   "ELEC-021":{"floor":1499,"ceiling":2499},
   "ELEC-025":{"floor":1499,"ceiling":2499},
   "ELEC-014":{"floor":399,"ceiling":699},
@@ -155,4 +155,5 @@ if SB_KEY and telemetry:
             json=telemetry,timeout=15)
         print(f"\ntelemetry upload: {r.status_code} ({len(telemetry)} rows)")
     except Exception as e: print(f"telemetry err: {e}")
+
 
