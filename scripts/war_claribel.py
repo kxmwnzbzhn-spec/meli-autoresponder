@@ -25,7 +25,7 @@ BOUNDS_BY_SKU={
   "ELEC-025":{"floor":1499,"ceiling":2499},
   "ELEC-014":{"floor":399,"ceiling":699},
 }
-SKU_OOS_HARDCODED={"ELEC-010","ELEC-011"}
+SKU_OOS_HARDCODED=set()
 
 SB_URL=os.environ.get("SUPABASE_URL","https://wnuhslmryspnypbxbfjf.supabase.co")
 SB_KEY=os.environ.get("SUPABASE_ANON_KEY","")
@@ -155,3 +155,4 @@ if SB_KEY and telemetry:
             json=telemetry,timeout=15)
         print(f"\ntelemetry upload: {r.status_code} ({len(telemetry)} rows)")
     except Exception as e: print(f"telemetry err: {e}")
+
