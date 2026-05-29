@@ -2,10 +2,13 @@
   "MLM5223449418": {
     "auto_replenish": true,
     "min_visible": 1,
-    "master_stock": 1,
+    "master_stock": 1377,
     "line": "Juan-Sony",
     "title": "Bocina Sony Srs-xb100 Bluetooth Portatil Negra Ipx4 Nueva Negro",
-    "active": true
+    "active": true,
+    "real_stock": 1377,
+    "available_quantity": 1,
+    "sku": "SONY-XB100-NEGRO"
   },
   "MLM2883448187": {
     "auto_replenish": true,
@@ -35,17 +38,20 @@
     },
     "real_stock_per_color": 20,
     "total_real_stock": 120,
-    "real_stock": 64,
+    "real_stock": 62,
     "available_quantity": 1,
     "sku": "JBL-GO4-ROSA"
   },
   "MLM5244431296": {
     "auto_replenish": true,
     "min_visible": 1,
-    "master_stock": 1,
+    "master_stock": 1377,
     "line": "Juan-Sony",
     "title": "Sony Srs-xb100 Altavoz De Viaje Inalámbrico Bluetooth Port Color Negro",
-    "active": true
+    "active": true,
+    "real_stock": 1377,
+    "available_quantity": 1,
+    "sku": "SONY-XB100-NEGRO"
   },
   "MLM2890856611": {
     "auto_replenish": true,
@@ -54,7 +60,7 @@
     "line": "Juan-Go4",
     "title": "Bocina Portátil Jbl Go 4 Bluetooth, Camuflaje. Color Camuflaje",
     "active": true,
-    "real_stock": 237,
+    "real_stock": 236,
     "available_quantity": 1,
     "sku": "JBL-GO4-CAMUFLAJE"
   },
@@ -65,7 +71,7 @@
     "line": "Juan-Go4",
     "title": "Bocina Jbl Go 4 Jblgo4 Portátil Con Bluetooth Waterproof Roja Rojo",
     "active": true,
-    "real_stock": 96,
+    "real_stock": 94,
     "available_quantity": 1,
     "sku": "JBL-GO4-ROJO"
   },
@@ -76,7 +82,7 @@
     "line": "Juan-Go4",
     "title": "Bocina Jbl Go 4 Jblgo4 Portátil Con Bluetooth Waterproof Celeste",
     "active": true,
-    "real_stock": 570,
+    "real_stock": 569,
     "available_quantity": 1,
     "sku": "JBL-GO4-AQUA"
   },
