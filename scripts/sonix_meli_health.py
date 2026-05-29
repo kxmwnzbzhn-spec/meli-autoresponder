@@ -112,7 +112,7 @@ def create_github_issue(title, body):
 
 
 def pause_adset(adset_id):
-    token = os.environ.get("META_CAPI_ACCESS_TOKEN", "")
+    token = os.environ.get("META_ADS_TOKEN") or os.environ.get("META_CAPI_ACCESS_TOKEN", "")
     if not token:
         return False
     r = requests.post(
