@@ -1,0 +1,17 @@
+name: pub-clb-v3
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    timeout-minutes: 16
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install requests -q
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_CLARIBEL: ${{ secrets.MELI_REFRESH_TOKEN_CLARIBEL }}
+          MELI_REFRESH_TOKEN_WILBERT: ${{ secrets.MELI_REFRESH_TOKEN_WILBERT }}
+          MELI_REFRESH_TOKEN_RAYMUNDO: ${{ secrets.MELI_REFRESH_TOKEN_RAYMUNDO }}
+          MELI_REFRESH_TOKEN_JUAN: ${{ secrets.MELI_REFRESH_TOKEN_JUAN }}
+        run: python3 scripts/pub_clb_v3.py
