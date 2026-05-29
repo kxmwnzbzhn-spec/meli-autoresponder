@@ -84,7 +84,7 @@
     "min_visible": 1,
     "active": true,
     "title": "Altavoz Bluetooth Jbl Go 4 Rosa Rosa Chicle",
-    "real_stock": 52,
+    "real_stock": 50,
     "master_stock": 75,
     "available_quantity": 1,
     "sku": "JBL-GO4-ROSA"
@@ -107,7 +107,7 @@
     "min_visible": 1,
     "active": true,
     "title": "Parlante Jbl Go 4 Jblgo4redam Portátil Con Bluetooth Negro- ",
-    "real_stock": 568,
+    "real_stock": 567,
     "master_stock": 578,
     "available_quantity": 1,
     "sku": "JBL-GO4-AQUA"
@@ -167,7 +167,7 @@
     "min_visible": 1,
     "active": true,
     "title": "Parlante Bluetooth Jbl Go 4 Portátil Rosa",
-    "real_stock": 52,
+    "real_stock": 50,
     "master_stock": 75,
     "available_quantity": 1,
     "sku": "JBL-GO4-ROSA"
@@ -240,7 +240,7 @@
     "min_visible": 1,
     "active": true,
     "title": "Jbl Go 4 - Altavoz Bluetooth Ultraportátil Rosa",
-    "real_stock": 52,
+    "real_stock": 50,
     "master_stock": 75,
     "available_quantity": 1,
     "sku": "JBL-GO4-ROSA"
@@ -308,7 +308,7 @@
   },
   "MLM2904687747": {
     "label": "Clip 5 Azul",
-    "real_stock": 233,
+    "real_stock": 232,
     "min_visible": 1,
     "auto_replenish": true,
     "replenish_quantity": 1,
@@ -323,7 +323,7 @@
   },
   "MLM2904674811": {
     "label": "Clip 5 Camuflaje",
-    "real_stock": 179,
+    "real_stock": 177,
     "min_visible": 1,
     "auto_replenish": true,
     "replenish_quantity": 1,
