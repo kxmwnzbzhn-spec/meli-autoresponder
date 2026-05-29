@@ -24,7 +24,7 @@ from io import BytesIO
 # ============================ CONFIG ============================
 ACCOUNT_ID = "act_1689903372006934"
 META_GRAPH = "https://graph.facebook.com/v21.0"
-META_TOKEN = os.environ.get("META_CAPI_ACCESS_TOKEN")
+META_TOKEN = os.environ.get("META_ADS_TOKEN") or os.environ.get("META_CAPI_ACCESS_TOKEN")
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 GEMINI_IMAGE_MODEL = "imagen-4.0-generate-001"  # Nano Banana = Imagen via Gemini
 GEMINI_ENDPOINT = f"https://generativelanguage.googleapis.com/v1beta/models/{GEMINI_IMAGE_MODEL}:predict"
@@ -382,7 +382,7 @@ def deploy_creative_to_meta(image_path, prod):
 def main():
     print(f"=== Sonix Creative Engine · {datetime.now(timezone.utc).isoformat()} ===")
     if not META_TOKEN:
-        print("ERR: META_CAPI_ACCESS_TOKEN missing"); sys.exit(1)
+        print("ERR: META_ADS_TOKEN missing (or fallback META_CAPI_ACCESS_TOKEN)"); sys.exit(1)
 
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     report = []
