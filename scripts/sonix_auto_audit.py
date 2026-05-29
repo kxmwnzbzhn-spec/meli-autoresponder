@@ -23,7 +23,7 @@ from pathlib import Path
 ACCOUNT_ID = "act_1689903372006934"
 PIXEL_ID = "1520455545762550"
 META_GRAPH = "https://graph.facebook.com/v21.0"
-META_TOKEN = os.environ.get("META_CAPI_ACCESS_TOKEN")
+META_TOKEN = os.environ.get("META_ADS_TOKEN") or os.environ.get("META_CAPI_ACCESS_TOKEN")
 HARD_CAP_TOTAL_CENTS = 150000  # $1,500 MXN
 PER_CYCLE_CAP_PCT = 0.30
 
@@ -260,7 +260,7 @@ def main():
     print(f"=== Sonix Auto-Audit · {datetime.now(timezone.utc).isoformat()} ===")
 
     if not META_TOKEN:
-        print("ERR: META_CAPI_ACCESS_TOKEN env var missing")
+        print("ERR: META_ADS_TOKEN env var missing (or fallback META_CAPI_ACCESS_TOKEN)")
         sys.exit(1)
 
     today_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
