@@ -80,7 +80,7 @@ for i,cpid in enumerate(to_publish,1):
                     if tmp.get("category_id"):
                         cat=tmp.get("category_id"); break
         payload={
-            "site_id":"MLM","title":title,"category_id":cat,
+            "site_id":"MLM","category_id":cat,
             "price":PRICE,"currency_id":"MXN",
             "available_quantity":1,"buying_mode":"buy_it_now",
             "listing_type_id":"gold_pro","condition":"new",
