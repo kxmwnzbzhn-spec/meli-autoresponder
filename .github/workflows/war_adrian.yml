@@ -1,22 +1,23 @@
 name: war-adrian
 on:
   workflow_dispatch: {}
-  push: { paths: [.github/workflows/war_adrian.yml] }
   schedule:
     - cron: '*/3 * * * *'
-concurrency: { group: war-adrian, cancel-in-progress: false }
+  push:
+    paths:
+      - 'scripts/war_adrian.py'
+      - '.github/workflows/war_adrian.yml'
 jobs:
-  run:
+  go:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with: { python-version: "3.11" }
-      - run: pip install requests
+      - run: pip install requests -q
       - env:
           MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
           MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
           MELI_REFRESH_TOKEN_AH: ${{ secrets.MELI_REFRESH_TOKEN_AH }}
-          TOKEN_SHARED: ${{ secrets.TOKEN_SHARED }}
-        run: python scripts/war_adrian.py
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: python3 scripts/war_adrian.py
