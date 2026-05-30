@@ -426,7 +426,7 @@
     "active": true,
     "auto_replenish": false,
     "agotado": false,
-    "real_stock": 235,
+    "real_stock": 234,
     "master_stock": 278,
     "available_quantity": 0,
     "title": "BAJA MELI under_review/forbidden - clonado a MLM5351937060",
@@ -519,7 +519,7 @@
   "MLM2910457917": {
     "title": "Bocina Jbl Go 4 Jblgo4 Portátil Con Bluetooth Waterproof Celeste",
     "min_visible": 1,
-    "real_stock": 567,
+    "real_stock": 566,
     "master_stock": 578,
     "auto_replenish": true,
     "active": true,
@@ -529,7 +529,7 @@
   "MLM2910768335": {
     "title": "Jbl Go 4 - Altavoz Bluetooth Ultraportátil Rosa",
     "min_visible": 1,
-    "real_stock": 50,
+    "real_stock": 44,
     "master_stock": 75,
     "auto_replenish": true,
     "active": true,
@@ -539,7 +539,7 @@
   "MLM2910768325": {
     "title": "Parlante Bluetooth Jbl Go 4 Portátil Rosa",
     "min_visible": 1,
-    "real_stock": 50,
+    "real_stock": 44,
     "master_stock": 75,
     "auto_replenish": true,
     "active": true,
@@ -984,7 +984,7 @@
   "MLM5351937060": {
     "title": "Go 4 Camuflaje (clone alterno MLM2910880749 baja)",
     "min_visible": 1,
-    "real_stock": 235,
+    "real_stock": 234,
     "master_stock": 278,
     "available_quantity": 1,
     "auto_replenish": true,
