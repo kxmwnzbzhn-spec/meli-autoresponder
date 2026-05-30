@@ -38,7 +38,7 @@
     },
     "real_stock_per_color": 20,
     "total_real_stock": 120,
-    "real_stock": 40,
+    "real_stock": 31,
     "available_quantity": 1,
     "sku": "JBL-GO4-ROSA"
   },
@@ -115,7 +115,7 @@
     "line": "Juan-Flip7-Reacond",
     "title": "Bocina Jbl Flip 7 Bluetooth Ip67 Portatil Reacondicionada Rojo",
     "active": true,
-    "real_stock": 156,
+    "real_stock": 150,
     "available_quantity": 1,
     "sku": "JBL-FLIP7-ROJO"
   },
