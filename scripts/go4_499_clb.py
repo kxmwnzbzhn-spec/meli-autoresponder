@@ -46,17 +46,17 @@ for i in range(0,len(all_ids),20):
 print(f"\nJBL Go 4 detectados: {len(go4_items)}")
 ok=0; err=0; nochange=0
 for iid,title,st,cur,sku in go4_items:
-    if cur==499:
+    if cur==549:
         nochange+=1
-        print(f"  {iid} {st} sku={sku} ${cur} (already $499) | {title}")
+        print(f"  {iid} {st} sku={sku} ${cur} (already $549) | {title}")
         continue
-    r=requests.put(f"{API}/items/{iid}",headers=HJ,json={"price":499},timeout=20)
+    r=requests.put(f"{API}/items/{iid}",headers=HJ,json={"price":549},timeout=20)
     if r.status_code in (200,201):
         ok+=1
-        print(f"  {iid} {st} sku={sku} ${cur}->$499 OK | {title}")
+        print(f"  {iid} {st} sku={sku} ${cur}->$549 OK | {title}")
     else:
         err+=1
         print(f"  {iid} {st} sku={sku} ${cur} ERR {r.status_code} {r.text[:120]} | {title}")
     time.sleep(0.3)
 
-print(f"\n=== DONE === changed_to_499={ok} already_499={nochange} err={err}")
+print(f"\n=== DONE === changed_to_549={ok} already_549={nochange} err={err}")
