@@ -7,7 +7,7 @@ tok=requests.post(f"{API}/oauth/token",data={
 T=tok["access_token"]
 print(f"NEW_RT_AH={tok.get('refresh_token')}")
 H={"Authorization":f"Bearer {T}"}; HJ={**H,"Content-Type":"application/json"}
-sid="MLM2969827031"
+sid="MLM5429194488"
 g=requests.get(f"{API}/items/{sid}",headers=H,timeout=20).json()
 print(f"BEFORE: status={g.get('status')} price={g.get('price')} title='{(g.get('title') or '')[:70]}'")
 if g.get("status")=="active":
