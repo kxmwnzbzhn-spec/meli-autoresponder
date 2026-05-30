@@ -1,10 +1,10 @@
 {
   "_meta": {
-    "updated": "2026-05-30T10:09:30.937243Z",
+    "updated": "2026-05-30T11:42:36.369822Z",
     "golive_ref": "stock_at_golive_20260518.json",
     "note": "Dinámico — decrementa con cada venta vía cron.",
-    "total_sold": 1426,
-    "total_available": 3590
+    "total_sold": 1427,
+    "total_available": 3589
   },
   "skus": {
     "SONY-XB100-NEGRO": {
@@ -40,9 +40,9 @@
       "color": "Azul"
     },
     "JBL-GO4-CAMUFLAJE": {
-      "available": 233,
+      "available": 232,
       "initial": 389,
-      "sold_since_golive": 156,
+      "sold_since_golive": 157,
       "last_pause_triggered": false,
       "modelo": "JBL Go 4",
       "color": "Camuflaje"
