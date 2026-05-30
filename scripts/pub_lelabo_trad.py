@@ -1,4 +1,4 @@
-import os, requests
+import os, requests, json
 API="https://api.mercadolibre.com"
 tok=requests.post(f"{API}/oauth/token",data={
     "grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],
@@ -25,14 +25,17 @@ payload={
         {"id":"MODEL","value_name":"Genérico"},
         {"id":"UNIT_VOLUME","value_name":"100 ml"},
         {"id":"GENDER","value_name":"Sin género"},
+        {"id":"PERFUME_NAME","value_name":"Santal 33"},
+        {"id":"FRAGRANCE_TYPE","value_name":"Eau de parfum"},
     ],
-    "shipping":{"mode":"me2","free_shipping":True}
+    "shipping":{"mode":"me2","free_shipping":True},
+    "sale_terms":[{"id":"PURCHASE_MAX_QUANTITY","value_name":"8"}]
 }
 r=requests.post(f"{API}/items",headers=HJ,json=payload,timeout=40)
-print(f"\nPOST: {r.status_code}")
+print(f"POST: {r.status_code}")
 if r.status_code in (200,201):
     d=r.json()
     print(f"✓ NEW TRADICIONAL: {d['id']} {d.get('status')} ${d.get('price')}")
     print(f"  url={d.get('permalink')}")
 else:
-    print(f"ERR: {r.text[:800]}")
+    print(f"ERR full: {json.dumps(r.json(),indent=2,ensure_ascii=False)[:2000]}")
