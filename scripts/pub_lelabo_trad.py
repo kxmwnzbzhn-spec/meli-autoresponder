@@ -25,12 +25,8 @@ payload={
         {"id":"MODEL","value_name":"Genérico"},
         {"id":"UNIT_VOLUME","value_name":"100 ml"},
         {"id":"GENDER","value_name":"Sin género"},
-        {"id":"PERFUME_NAME","value_name":"Santal 33"},
-        {"id":"FRAGRANCE_TYPE","value_name":"Eau de parfum"},
-    ],
-    "shipping":{"mode":"me2","free_shipping":True},
-    "sale_terms":[{"id":"PURCHASE_MAX_QUANTITY","value_name":"8"}]
-}
+        {"id":"PERFUME_NAME","value_name":"Santal 33"}],
+    "shipping":{"mode":"me2","free_shipping":True}}
 r=requests.post(f"{API}/items",headers=HJ,json=payload,timeout=40)
 print(f"POST: {r.status_code}")
 if r.status_code in (200,201):
