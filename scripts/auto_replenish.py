@@ -30,7 +30,8 @@ def sb_get(table,q=""):
         return r.json() if r.status_code==200 else []
     except: return []
 cpid_blacklist=set(r["catalog_product_id"] for r in sb_get("meli_catalog_blacklist","select=catalog_product_id"))
-print(f"loaded cpid_blacklist={len(cpid_blacklist)}")
+no_replenish_items=set(r["item_id"] for r in sb_get("meli_no_replenish_items","select=item_id"))
+print(f"loaded cpid_blacklist={len(cpid_blacklist)} no_replenish_items={len(no_replenish_items)}")
 
 def refresh(secret_env):
     if secret_env not in os.environ: return None,None
@@ -93,6 +94,7 @@ while time.time()<end:
                 if "out_of_stock" not in (b.get("sub_status") or []): continue
                 # Skip Full/FBM: MELI manages stock at warehouse level
                 if b.get("inventory_id"): continue
+                if sid in no_replenish_items: continue
                 cpid=b.get("catalog_product_id")
                 if cpid and cpid in cpid_blacklist: continue
                 try:
@@ -121,4 +123,5 @@ if gh:
             json={"ref":"main","inputs":{}},timeout=20)
         print(f"REDISPATCH: HTTP {r.status_code}")
     except Exception as e: print(f"redispatch err: {e}")
+
 
