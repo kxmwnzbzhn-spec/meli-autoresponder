@@ -100,7 +100,7 @@ for t,pick in plan:
     if not cat:
         # fallback category for perfumes
         cat="MLM177562"
-    payload={
+    base_payload={
         "site_id":"MLM","category_id":cat,
         "price":price,"currency_id":"MXN",
         "available_quantity":1,"buying_mode":"buy_it_now",
@@ -108,7 +108,13 @@ for t,pick in plan:
         "catalog_product_id":cpid,"catalog_listing":True,
         "shipping":{"mode":"me2","free_shipping":True}
     }
-    r=requests.post(f"{API}/items",headers=HJ,json=payload,timeout=40)
+    # Try WITHOUT title first
+    r=requests.post(f"{API}/items",headers=HJ,json=base_payload,timeout=40)
+    # Fallback: WITH title if missing-required-fields error
+    if r.status_code==400 and "required_fields" in (r.text or ""):
+        payload={**base_payload,"title":name[:60]}
+        r=requests.post(f"{API}/items",headers=HJ,json=payload,timeout=40)
+        print(f"  retry with title: {r.status_code}")
     if r.status_code in (200,201):
         d=r.json()
         results["ok"].append((t["q"],cpid,d["id"],d.get("status"),d.get("price"),name))
