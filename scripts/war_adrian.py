@@ -30,10 +30,11 @@ def sb_get(table,q=""):
         return r.json() if r.status_code==200 else []
     except: return []
 sb_cpid_blacklist=set(r["catalog_product_id"] for r in sb_get("meli_catalog_blacklist","select=catalog_product_id"))
+locked_items=set(r["item_id"] for r in sb_get("meli_no_replenish_items","select=item_id"))
 sb_strat=sb_get("meli_catalog_strategy","select=catalog_product_id,floor,ceiling&active=eq.true")
 SB_FLOOR_CPID={r["catalog_product_id"]:float(r["floor"]) for r in sb_strat if r.get("floor")}
 SB_CEIL_CPID={r["catalog_product_id"]:float(r["ceiling"]) for r in sb_strat if r.get("ceiling")}
-print(f"sb_loaded cpid_bl={len(sb_cpid_blacklist)} floors={len(SB_FLOOR_CPID)} ceils={len(SB_CEIL_CPID)}")
+print(f"sb_loaded cpid_bl={len(sb_cpid_blacklist)} locked_items={len(locked_items)} floors={len(SB_FLOOR_CPID)} ceils={len(SB_CEIL_CPID)}")
 
 H={"Authorization":f"Bearer {T}"}; HJ={**H,"Content-Type":"application/json"}
 me=requests.get(f"{API}/users/me",headers=H,timeout=10).json()
@@ -53,7 +54,7 @@ stat={"win":0,"comp":0,"reindex":0,"locked":0,"nocpid":0,"err":0,"skip_bl":0,"ad
 acts=[]; telemetry=[]
 
 for iid in ids:
-    if iid in PAUSED_LOCK: stat["locked"]+=1; continue
+    if iid in PAUSED_LOCK or iid in locked_items: stat["locked"]+=1; continue
     try:
         g=requests.get(f"{API}/items/{iid}",headers=H,timeout=12).json()
         if g.get("status")!="active": continue
@@ -136,3 +137,4 @@ if SB_KEY and telemetry:
             json=telemetry,timeout=15)
         print(f"\ntelemetry: {r.status_code} ({len(telemetry)} rows)")
     except Exception as e: print(f"telemetry err: {e}")
+
