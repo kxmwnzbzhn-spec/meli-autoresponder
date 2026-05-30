@@ -317,7 +317,7 @@
     "active": true,
     "auto_replenish": false,
     "agotado": false,
-    "real_stock": 85,
+    "real_stock": 84,
     "master_stock": 121,
     "available_quantity": 0,
     "title": "CERRADA — clonada como MLM5354755946",
@@ -495,7 +495,7 @@
   "MLM2910768369": {
     "title": "Altavoz Bluetooth Jbl Go 4 Portátil Impermeable En Rojo",
     "min_visible": 1,
-    "real_stock": 85,
+    "real_stock": 84,
     "master_stock": 121,
     "auto_replenish": true,
     "active": true,
@@ -529,7 +529,7 @@
   "MLM2910768335": {
     "title": "Jbl Go 4 - Altavoz Bluetooth Ultraportátil Rosa",
     "min_visible": 1,
-    "real_stock": 28,
+    "real_stock": 27,
     "master_stock": 75,
     "auto_replenish": true,
     "active": true,
@@ -539,7 +539,7 @@
   "MLM2910768325": {
     "title": "Parlante Bluetooth Jbl Go 4 Portátil Rosa",
     "min_visible": 1,
-    "real_stock": 28,
+    "real_stock": 27,
     "master_stock": 75,
     "auto_replenish": true,
     "active": true,
@@ -1019,7 +1019,7 @@
   "MLM2914422351": {
     "title": "JBL Go 4 Rojo (clone)",
     "min_visible": 1,
-    "real_stock": 85,
+    "real_stock": 84,
     "master_stock": 121,
     "available_quantity": 1,
     "auto_replenish": true,
@@ -1135,7 +1135,7 @@
   },
   "MLM5354755946": {
     "title": "JBL Go 4 Rojo (clone Wilbert)",
-    "real_stock": 85,
+    "real_stock": 84,
     "master_stock": 121,
     "min_visible": 1,
     "available_quantity": 1,
