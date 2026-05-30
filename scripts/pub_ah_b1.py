@@ -63,7 +63,7 @@ def try_publish(cpid,name):
         tmp=requests.get(f"{API}/items/{bb['item_id']}",headers=H,params={"attributes":"category_id"},timeout=10).json()
         cat=tmp.get("category_id")
     if not cat:
-        cat="MLM177562"
+        cat="MLM1271"
     base={"site_id":"MLM","category_id":cat,"price":price,"currency_id":"MXN",
         "available_quantity":1,"buying_mode":"buy_it_now","listing_type_id":"gold_pro","condition":"new",
         "catalog_product_id":cpid,"catalog_listing":True,
