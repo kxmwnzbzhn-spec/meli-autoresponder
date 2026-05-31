@@ -82,12 +82,13 @@
     "line": "Raymundo",
     "auto_replenish": true,
     "min_visible": 1,
-    "active": true,
+    "active": false,
     "title": "Altavoz Bluetooth Jbl Go 4 Rosa Rosa Chicle",
-    "real_stock": 16,
+    "real_stock": 0,
     "master_stock": 75,
     "available_quantity": 1,
-    "sku": "JBL-GO4-ROSA"
+    "sku": "JBL-GO4-ROSA",
+    "agotado": true
   },
   "MLM2891189883": {
     "line": "Raymundo",
@@ -138,7 +139,7 @@
     "min_visible": 1,
     "active": true,
     "title": "Jbl Go 4 - Altavoz Ultraportátil Bluetooth Color Rojo",
-    "real_stock": 83,
+    "real_stock": 77,
     "master_stock": 121,
     "available_quantity": 1,
     "sku": "JBL-GO4-ROJO"
@@ -165,12 +166,13 @@
     "line": "Raymundo",
     "auto_replenish": true,
     "min_visible": 1,
-    "active": true,
+    "active": false,
     "title": "Parlante Bluetooth Jbl Go 4 Portátil Rosa",
-    "real_stock": 16,
+    "real_stock": 0,
     "master_stock": 75,
     "available_quantity": 1,
-    "sku": "JBL-GO4-ROSA"
+    "sku": "JBL-GO4-ROSA",
+    "agotado": true
   },
   "MLM2891189859": {
     "line": "Raymundo",
@@ -197,7 +199,7 @@
     "title": "Bocina Jbl Go 4 Jblgo4 Portátil Con Bluetooth Waterproof Roj",
     "floor_price": 449,
     "floor_locked_by_user": true,
-    "real_stock": 83,
+    "real_stock": 77,
     "master_stock": 121,
     "available_quantity": 1,
     "sku": "JBL-GO4-ROJO",
@@ -219,7 +221,7 @@
     "min_visible": 1,
     "active": true,
     "title": "Altavoz Bluetooth Jbl Go 4 Portátil Impermeable En Rojo",
-    "real_stock": 83,
+    "real_stock": 77,
     "master_stock": 121,
     "available_quantity": 1,
     "sku": "JBL-GO4-ROJO"
@@ -238,12 +240,13 @@
     "line": "Raymundo",
     "auto_replenish": true,
     "min_visible": 1,
-    "active": true,
+    "active": false,
     "title": "Jbl Go 4 - Altavoz Bluetooth Ultraportátil Rosa",
-    "real_stock": 16,
+    "real_stock": 0,
     "master_stock": 75,
     "available_quantity": 1,
-    "sku": "JBL-GO4-ROSA"
+    "sku": "JBL-GO4-ROSA",
+    "agotado": true
   },
   "MLM2891178511": {
     "line": "Raymundo",
@@ -258,7 +261,7 @@
   },
   "MLM5281123238": {
     "label": "Clip 5 Morado",
-    "real_stock": 88,
+    "real_stock": 84,
     "min_visible": 1,
     "auto_replenish": true,
     "replenish_quantity": 1,
@@ -308,7 +311,7 @@
   },
   "MLM2904687747": {
     "label": "Clip 5 Azul",
-    "real_stock": 206,
+    "real_stock": 196,
     "min_visible": 1,
     "auto_replenish": true,
     "replenish_quantity": 1,
@@ -323,7 +326,7 @@
   },
   "MLM2904674811": {
     "label": "Clip 5 Camuflaje",
-    "real_stock": 155,
+    "real_stock": 152,
     "min_visible": 1,
     "auto_replenish": true,
     "replenish_quantity": 1,

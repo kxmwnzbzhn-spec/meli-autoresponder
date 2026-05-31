@@ -27,7 +27,7 @@
     "master_stock": 120,
     "line": "Juan-Go4",
     "title": "Bocina Jbl Go 4 Bluetooth Ip67 Reacondicionada Excelente",
-    "active": true,
+    "active": false,
     "variations_real_stock": {
       "Rosa": 20,
       "Rojo": 20,
@@ -38,9 +38,10 @@
     },
     "real_stock_per_color": 20,
     "total_real_stock": 120,
-    "real_stock": 16,
+    "real_stock": 0,
     "available_quantity": 1,
-    "sku": "JBL-GO4-ROSA"
+    "sku": "JBL-GO4-ROSA",
+    "agotado": true
   },
   "MLM5244431296": {
     "auto_replenish": true,
@@ -60,7 +61,7 @@
     "line": "Juan-Go4",
     "title": "Bocina Portátil Jbl Go 4 Bluetooth, Camuflaje. Color Camuflaje",
     "active": true,
-    "real_stock": 215,
+    "real_stock": 196,
     "available_quantity": 1,
     "sku": "JBL-GO4-CAMUFLAJE"
   },
@@ -71,7 +72,7 @@
     "line": "Juan-Go4",
     "title": "Bocina Jbl Go 4 Jblgo4 Portátil Con Bluetooth Waterproof Roja Rojo",
     "active": true,
-    "real_stock": 83,
+    "real_stock": 77,
     "available_quantity": 1,
     "sku": "JBL-GO4-ROJO"
   },
@@ -115,7 +116,7 @@
     "line": "Juan-Flip7-Reacond",
     "title": "Bocina Jbl Flip 7 Bluetooth Ip67 Portatil Reacondicionada Rojo",
     "active": true,
-    "real_stock": 146,
+    "real_stock": 144,
     "available_quantity": 1,
     "sku": "JBL-FLIP7-ROJO"
   },
