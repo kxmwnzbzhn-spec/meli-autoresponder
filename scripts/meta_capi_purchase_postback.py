@@ -40,6 +40,30 @@ PERFUME_BLACKLIST = {
     "MLM5374718702",  # Dark Oud Cacao (TAL)
 }
 
+
+# item_id → landing URL para event_source_url (attribution Meta)
+ITEM_TO_LANDING = {
+    # Bocina espejo (varios listings rotaron)
+    "MLM2886136351": "https://sonixmx.com.mx/bocina-30w-espejo/",
+    "MLMU3924350212": "https://sonixmx.com.mx/bocina-30w-espejo/",
+    # Dashcam DVR-3
+    "MLM2943284461": "https://sonixmx.com.mx/dashcam-dvr3/",
+    "MLM5356938548": "https://sonixmx.com.mx/dashcam-dvr3/",
+    "MLMU3986495886": "https://sonixmx.com.mx/dashcam-dvr3/",
+    # Buds 2 ASVA
+    "MLM2952660425": "https://sonixmx.com.mx/audifonos-buds2/",
+    "MLM2952545353": "https://sonixmx.com.mx/audifonos-buds2/",
+    # Bocina Go4 Wilbert
+    "MLM-2958319761": "https://sonixmx.com.mx/bocina-go4/",
+    "MLM2958319761": "https://sonixmx.com.mx/bocina-go4/",
+    # Audífonos BT YC
+    "MLM2940664057": "https://sonixmx.com.mx/audifonos-bt/",
+    # Secadora ASVA
+    "MLM2940986501": "https://sonixmx.com.mx/secadora-asva/",
+}
+DEFAULT_LANDING = "https://sonixmx.com.mx/"
+
+
 def get_meli_token(token_env):
     rt = os.environ.get(token_env)
     if not rt:
@@ -115,15 +139,20 @@ def collect_events_for_seller(seller, since):
 
         total_qty = sum(int(it.get("quantity", 1)) for it in items)
 
+        # Source URL = landing del producto si la conocemos; sino sonixmx home
+        event_source_url = ITEM_TO_LANDING.get(iid, DEFAULT_LANDING)
         events.append({
             "event_name": "Purchase", "event_time": event_time,
-            "event_id": f"meli_order_{oid}", "action_source": "physical_store",
+            "event_id": f"meli_order_{oid}",
+            "action_source": "website",  # Meta atribuye web conversions a campañas
+            "event_source_url": event_source_url,
             "user_data": ud,
             "custom_data": {
                 "currency": "MXN", "value": float(o["total_amount"]),
                 "content_ids": [iid], "content_name": content_name,
                 "content_type": "product", "num_items": total_qty,
-                "content_category": content_category
+                "content_category": content_category,
+                "order_id": str(oid)  # extra metadata para audit
             }
         })
     print(f"  [{seller['name']}] events: {len(events)} (whitelist={items_in_whitelist}, other={items_other})")
