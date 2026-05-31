@@ -1,10 +1,10 @@
 {
   "_meta": {
-    "updated": "2026-05-31T20:51:17.897377Z",
+    "updated": "2026-05-31T21:43:38.850161Z",
     "golive_ref": "stock_at_golive_20260518.json",
     "note": "Dinámico — decrementa con cada venta vía cron.",
-    "total_sold": 1578,
-    "total_available": 3438
+    "total_sold": 1584,
+    "total_available": 3432
   },
   "skus": {
     "SONY-XB100-NEGRO": {
@@ -24,17 +24,17 @@
       "color": "Aqua/Celeste"
     },
     "JBL-GO3-NEGRO": {
-      "available": 207,
+      "available": 203,
       "initial": 495,
-      "sold_since_golive": 288,
+      "sold_since_golive": 292,
       "last_pause_triggered": false,
       "modelo": "JBL Go 3",
       "color": "Negro"
     },
     "JBL-CLIP5-AZUL": {
-      "available": 218,
+      "available": 217,
       "initial": 421,
-      "sold_since_golive": 203,
+      "sold_since_golive": 204,
       "last_pause_triggered": false,
       "modelo": "JBL Clip 5",
       "color": "Azul"
@@ -80,9 +80,9 @@
       "color": "Rosa"
     },
     "JBL-GO4-ROJO": {
-      "available": -60,
+      "available": -61,
       "initial": 198,
-      "sold_since_golive": 258,
+      "sold_since_golive": 259,
       "last_pause_triggered": true,
       "modelo": "JBL Go 4",
       "color": "Rojo"
