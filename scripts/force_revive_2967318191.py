@@ -7,7 +7,7 @@ tok=requests.post(f"{API}/oauth/token",data={
 T=tok["access_token"]
 print(f"NEW_RT_CLARIBEL={tok.get('refresh_token')}")
 H={"Authorization":f"Bearer {T}"}; HJ={**H,"Content-Type":"application/json"}
-sid="MLM2967318191"
+sid="MLM2967305251"
 g=requests.get(f"{API}/items/{sid}",headers=H,timeout=15).json()
 print(f"BEFORE: status={g.get('status')} sub={g.get('sub_status')} price=${g.get('price')} qty={g.get('available_quantity')} sold={g.get('sold_quantity')}")
 # Force active + qty=1 regardless of current state
