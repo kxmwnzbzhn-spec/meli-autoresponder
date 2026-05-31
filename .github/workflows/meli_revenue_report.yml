@@ -1,0 +1,121 @@
+name: Meli Revenue Report 7d
+
+on:
+  workflow_dispatch:
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - name: Install requests
+        run: pip install requests
+      - name: Pull last 7d orders per seller
+        env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          ASVA_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN_ASVA }}
+          WILBERT_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN_WILBERT }}
+          YC_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN_YC_NEW }}
+        run: |
+          python3 <<'PY'
+          import os, requests, json
+          from datetime import datetime, timedelta, timezone
+          
+          APP_ID = os.environ["MELI_APP_ID"]
+          APP_SECRET = os.environ["MELI_APP_SECRET"]
+          
+          SELLERS = [
+              ("ASVA",     "1668713481", os.environ["ASVA_TOKEN"]),
+              ("WILBERT",  "3367276814", os.environ["WILBERT_TOKEN"]),
+              ("YC",       "3364413125", os.environ["YC_TOKEN"]),
+          ]
+          
+          # Categorize items by keyword matching in title
+          def categorize(title):
+              t = title.lower()
+              if any(k in t for k in ["bocina", "speaker", "altavoz", "parlante"]):
+                  if "35w" in t or "ip67" in t or "30w" in t:
+                      return "BOCINA_ROJA"
+                  return "BOCINA_OTRA"
+              if any(k in t for k in ["dashcam", "dvr", "camara auto", "cámara auto"]):
+                  return "DASHCAM"
+              if any(k in t for k in ["audifonos", "audífonos", "earbuds", "buds", "auriculares", "tws"]):
+                  return "AUDIFONOS"
+              if any(k in t for k in ["secadora", "alaciadora", "plancha cabello"]):
+                  return "SECADORA"
+              return "OTRO"
+          
+          def refresh(token):
+              r = requests.post("https://api.mercadolibre.com/oauth/token", data={
+                  "grant_type": "refresh_token",
+                  "client_id": APP_ID,
+                  "client_secret": APP_SECRET,
+                  "refresh_token": token
+              }, timeout=15)
+              return r.json().get("access_token")
+          
+          # last 7 days
+          since = (datetime.now(timezone.utc) - timedelta(days=7)).strftime("%Y-%m-%dT00:00:00.000Z")
+          
+          totals = {}  # category -> {units, gmv}
+          for name, sid, refresh_token in SELLERS:
+              print(f"\n=== {name} (seller {sid}) ===")
+              try:
+                  at = refresh(refresh_token)
+                  if not at:
+                      print(f"  ✗ Could not refresh token for {name}")
+                      continue
+              except Exception as e:
+                  print(f"  ✗ Refresh error: {e}")
+                  continue
+              
+              offset = 0
+              limit = 50
+              while True:
+                  r = requests.get(f"https://api.mercadolibre.com/orders/search",
+                      params={"seller": sid, "order.status": "paid", "order.date_created.from": since, "offset": offset, "limit": limit, "sort": "date_desc"},
+                      headers={"Authorization": f"Bearer {at}"}, timeout=20)
+                  if r.status_code != 200:
+                      print(f"  HTTP {r.status_code}: {r.text[:200]}")
+                      break
+                  d = r.json()
+                  results = d.get("results", [])
+                  if not results:
+                      break
+                  for o in results:
+                      items = o.get("order_items", [])
+                      for it in items:
+                          title = it.get("item", {}).get("title", "")
+                          qty = it.get("quantity", 0)
+                          unit_price = float(it.get("unit_price", 0))
+                          cat = categorize(title)
+                          if cat not in totals:
+                              totals[cat] = {"units": 0, "gmv": 0, "orders": 0, "sellers": set(), "sample_titles": set()}
+                          totals[cat]["units"] += qty
+                          totals[cat]["gmv"] += qty * unit_price
+                          totals[cat]["orders"] += 1
+                          totals[cat]["sellers"].add(name)
+                          if len(totals[cat]["sample_titles"]) < 3:
+                              totals[cat]["sample_titles"].add(title[:60])
+                  if len(results) < limit:
+                      break
+                  offset += limit
+                  if offset > 1000:  # safety
+                      break
+              print(f"  Pulled offset 0..{offset}")
+          
+          print("\n\n============= MELI REVENUE 7d =============")
+          print(f"Period: {since[:10]} → today")
+          grand_units = grand_gmv = 0
+          for cat, d in sorted(totals.items(), key=lambda x: -x[1]["gmv"]):
+              print(f"\n{cat}:")
+              print(f"  Units: {d['units']}  |  GMV: ${d['gmv']:,.2f} MXN  |  Orders: {d['orders']}")
+              print(f"  Sellers: {', '.join(d['sellers'])}")
+              for t in d["sample_titles"]:
+                  print(f"    - {t}")
+              grand_units += d['units']
+              grand_gmv += d['gmv']
+          print(f"\nGRAND TOTAL: {grand_units} units / ${grand_gmv:,.2f} MXN")
+          PY
