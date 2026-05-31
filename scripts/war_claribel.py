@@ -5,8 +5,7 @@ API="https://api.mercadolibre.com"
 TICK=60
 DURATION_SEC=5*3600+30*60
 
-BOUNDS_BY_SKU={
-  "ELEC-009":{"floor":599,"ceiling":599},"ELEC-010":{"floor":599,"ceiling":599},
+BOUNDS_BY_SKU={}  # SIN bounds hardcoded — single source: meli_catalog_strategy en Supabase,"ELEC-010":{"floor":599,"ceiling":599},
   "ELEC-027":{"floor":599,"ceiling":599},"ELEC-030":{"floor":599,"ceiling":599},
   "ELEC-013":{"floor":399,"ceiling":599},"ELEC-011":{"floor":749,"ceiling":799},
   "ELEC-012":{"floor":749,"ceiling":799},"ELEC-018":{"floor":749,"ceiling":799},
@@ -46,6 +45,10 @@ def get_sku(g):
 
 def war_tick():
     sb_cpid_blacklist=set(r["catalog_product_id"] for r in sb_get("meli_catalog_blacklist","select=catalog_product_id"))
+# User directives override war calculations
+_user_directives=sb_get("meli_user_directives","select=scope,scope_value,directive_type,value_numeric")
+USER_PIN_BY_CPID={r["scope_value"]:float(r["value_numeric"]) for r in _user_directives if r.get("scope")=="cpid" and r.get("directive_type")=="pin_price"}
+USER_PIN_BY_ITEM={r["scope_value"]:float(r["value_numeric"]) for r in _user_directives if r.get("scope")=="item_id" and r.get("directive_type")=="pin_price"}
     locked_items=set(r["item_id"] for r in sb_get("meli_no_replenish_items","select=item_id"))
     sb_strat=sb_get("meli_catalog_strategy","select=catalog_product_id,floor,ceiling&active=eq.true")
     SB_FLOOR_CPID={r["catalog_product_id"]:float(r["floor"]) for r in sb_strat if r.get("floor")}
@@ -127,4 +130,5 @@ if gh:
             json={"ref":"main","inputs":{}},timeout=20)
         print(f"REDISPATCH: HTTP {r.status_code}")
     except Exception as e: print(f"redispatch err: {e}")
+
 
