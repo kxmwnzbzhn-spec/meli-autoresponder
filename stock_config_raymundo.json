@@ -261,7 +261,7 @@
   },
   "MLM5281123238": {
     "label": "Clip 5 Morado",
-    "real_stock": 83,
+    "real_stock": 82,
     "min_visible": 1,
     "auto_replenish": true,
     "replenish_quantity": 1,
@@ -311,7 +311,7 @@
   },
   "MLM2904687747": {
     "label": "Clip 5 Azul",
-    "real_stock": 191,
+    "real_stock": 189,
     "min_visible": 1,
     "auto_replenish": true,
     "replenish_quantity": 1,
@@ -326,7 +326,7 @@
   },
   "MLM2904674811": {
     "label": "Clip 5 Camuflaje",
-    "real_stock": 149,
+    "real_stock": 148,
     "min_visible": 1,
     "auto_replenish": true,
     "replenish_quantity": 1,
