@@ -172,7 +172,8 @@ def audit_landings():
     for L in LANDINGS:
         url = f"https://{DOMAIN}/{L}/?cb={int(time.time())}"
         try:
-            with urllib.request.urlopen(url, timeout=10) as r:
+            req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 GrowthDirectorBot"})
+            with urllib.request.urlopen(req, timeout=15) as r:
                 html = r.read().decode("utf-8", errors="ignore")
                 code = r.status
         except Exception as e:
@@ -182,8 +183,8 @@ def audit_landings():
         # CAPI test
         capi_url = f"https://{DOMAIN}/{L}/api/capi.php"
         try:
-            req = urllib.request.Request(capi_url, data=b'{"eventName":"ClickOut_Meli"}', headers={"Content-Type":"application/json"}, method="POST")
-            with urllib.request.urlopen(req, timeout=10) as r:
+            req = urllib.request.Request(capi_url, data=b'{"eventName":"ClickOut_Meli"}', headers={"Content-Type":"application/json","User-Agent":"Mozilla/5.0 GrowthDirectorBot"}, method="POST")
+            with urllib.request.urlopen(req, timeout=15) as r:
                 capi_resp = json.loads(r.read())
                 capi_ok = capi_resp.get("ok", False)
                 events_rcv = capi_resp.get("meta_response", {}).get("events_received", 0) if capi_resp.get("meta_response") else 0
