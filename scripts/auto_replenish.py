@@ -73,6 +73,29 @@ while time.time()<end:
     tick_num+=1
     t0=time.time()
     revived_tick=0
+    # === PRIORITY REPLENISH — check FIRST every tick, regardless of OOS status ===
+    try:
+        priority=[r for r in sb_get("meli_priority_replenish","select=item_id,account,default_qty") if r.get("item_id")]
+        for pr in priority:
+            iid=pr["item_id"]; acct=pr.get("account"); qty=int(pr.get("default_qty") or 1)
+            # find session for this account
+            sec_for=None
+            for (uid_a,sec_a,nick_a) in ACCOUNTS:
+                if nick_a.lower()==(acct or "").lower():
+                    sec_for=sec_a; break
+            if not sec_for or sec_for not in sessions: continue
+            at_p,rt_p,uid_p,nick_p=sessions[sec_for]
+            Hp={"Authorization":f"Bearer {at_p}"}
+            HJp={**Hp,"Content-Type":"application/json"}
+            try:
+                g=requests.get(f"{API}/items/{iid}",headers=Hp,timeout=10).json()
+                if g.get("status")!="active" or (g.get("available_quantity") or 0)<qty:
+                    rr=requests.put(f"{API}/items/{iid}",headers=HJp,json={"status":"active","available_quantity":qty},timeout=10)
+                    if rr.status_code in (200,201):
+                        print(f"[t{tick_num} PRIORITY {nick_p}] {iid} FORCED active qty={qty}")
+            except: pass
+    except: pass
+    
     for sec,(at,rt,uid,nick) in sessions.items():
         H={"Authorization":f"Bearer {at}"}; HJ={**H,"Content-Type":"application/json"}
         paused,sc=all_paused(uid,H)
@@ -123,5 +146,6 @@ if gh:
             json={"ref":"main","inputs":{}},timeout=20)
         print(f"REDISPATCH: HTTP {r.status_code}")
     except Exception as e: print(f"redispatch err: {e}")
+
 
 
