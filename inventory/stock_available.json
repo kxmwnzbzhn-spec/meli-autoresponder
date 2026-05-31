@@ -1,6 +1,6 @@
 {
   "_meta": {
-    "updated": "2026-05-31T10:48:14.753168Z",
+    "updated": "2026-05-31T12:04:39.002670Z",
     "golive_ref": "stock_at_golive_20260518.json",
     "note": "Dinámico — decrementa con cada venta vía cron.",
     "total_sold": 1535,
