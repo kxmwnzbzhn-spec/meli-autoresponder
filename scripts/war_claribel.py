@@ -5,7 +5,7 @@ API="https://api.mercadolibre.com"
 TICK=60
 DURATION_SEC=5*3600+30*60
 
-BOUNDS_BY_SKU={}  # SIN bounds hardcoded — single source: meli_catalog_strategy en Supabase,"ELEC-010":{"floor":599,"ceiling":599},
+BOUNDS_BY_SKU={}  BOUNDS_BY_SKU={}  # SIN hardcoded"ceiling":599},
   "ELEC-027":{"floor":599,"ceiling":599},"ELEC-030":{"floor":599,"ceiling":599},
   "ELEC-013":{"floor":399,"ceiling":599},"ELEC-011":{"floor":749,"ceiling":799},
   "ELEC-012":{"floor":749,"ceiling":799},"ELEC-018":{"floor":749,"ceiling":799},
