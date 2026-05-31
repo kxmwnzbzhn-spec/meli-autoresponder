@@ -39,6 +39,9 @@ def war_tick(tick_n):
     # Reload Supabase config every tick
     sb_cpid_blacklist=set(r["catalog_product_id"] for r in sb_get("meli_catalog_blacklist","select=catalog_product_id"))
     locked_items=set(r["item_id"] for r in sb_get("meli_no_replenish_items","select=item_id"))
+    _ud=sb_get("meli_user_directives","select=scope,scope_value,directive_type,value_numeric")
+    USER_PIN_CPID={r["scope_value"]:float(r["value_numeric"]) for r in _ud if r.get("scope")=="cpid" and r.get("directive_type")=="pin_price" and r.get("value_numeric")}
+    USER_PIN_ITEM={r["scope_value"]:float(r["value_numeric"]) for r in _ud if r.get("scope")=="item_id" and r.get("directive_type")=="pin_price" and r.get("value_numeric")}
     sb_strat=sb_get("meli_catalog_strategy","select=catalog_product_id,floor,ceiling&active=eq.true")
     SB_FLOOR_CPID={r["catalog_product_id"]:float(r["floor"]) for r in sb_strat if r.get("floor")}
     SB_CEIL_CPID={r["catalog_product_id"]:float(r["ceiling"]) for r in sb_strat if r.get("ceiling")}
@@ -125,3 +128,4 @@ if gh:
             json={"ref":"main","inputs":{}},timeout=20)
         print(f"REDISPATCH: HTTP {r.status_code}")
     except Exception as e: print(f"redispatch err: {e}")
+
