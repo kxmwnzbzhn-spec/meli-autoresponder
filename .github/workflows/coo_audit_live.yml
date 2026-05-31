@@ -1,0 +1,25 @@
+name: coo-audit-live
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install requests -q
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_ASVA: ${{ secrets.MELI_REFRESH_TOKEN_ASVA }}
+          MELI_REFRESH_TOKEN_BREN: ${{ secrets.MELI_REFRESH_TOKEN_BREN }}
+          MELI_REFRESH_TOKEN_CLARIBEL: ${{ secrets.MELI_REFRESH_TOKEN_CLARIBEL }}
+          MELI_REFRESH_TOKEN_DILCIE: ${{ secrets.MELI_REFRESH_TOKEN_DILCIE }}
+          MELI_REFRESH_TOKEN_JUAN: ${{ secrets.MELI_REFRESH_TOKEN_JUAN }}
+          MELI_REFRESH_TOKEN_RAYMUNDO: ${{ secrets.MELI_REFRESH_TOKEN_RAYMUNDO }}
+          MELI_REFRESH_TOKEN_RMAYCHI: ${{ secrets.MELI_REFRESH_TOKEN_RMAYCHI }}
+          MELI_REFRESH_TOKEN_WILBERT: ${{ secrets.MELI_REFRESH_TOKEN_WILBERT }}
+          MELI_REFRESH_TOKEN_AH: ${{ secrets.MELI_REFRESH_TOKEN_AH }}
+          MELI_REFRESH_TOKEN_YC_NEW: ${{ secrets.MELI_REFRESH_TOKEN_YC_NEW }}
+          MELI_REFRESH_TOKEN_ANGEL: ${{ secrets.MELI_REFRESH_TOKEN_ANGEL }}
+          MELI_REFRESH_TOKEN_MAYRELY: ${{ secrets.MELI_REFRESH_TOKEN_MAYRELY }}
+        run: python3 scripts/coo_audit_live.py
