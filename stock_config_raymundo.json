@@ -139,7 +139,7 @@
     "min_visible": 1,
     "active": true,
     "title": "Jbl Go 4 - Altavoz Ultraportátil Bluetooth Color Rojo",
-    "real_stock": 71,
+    "real_stock": 70,
     "master_stock": 121,
     "available_quantity": 1,
     "sku": "JBL-GO4-ROJO"
@@ -199,7 +199,7 @@
     "title": "Bocina Jbl Go 4 Jblgo4 Portátil Con Bluetooth Waterproof Roj",
     "floor_price": 449,
     "floor_locked_by_user": true,
-    "real_stock": 71,
+    "real_stock": 70,
     "master_stock": 121,
     "available_quantity": 1,
     "sku": "JBL-GO4-ROJO",
@@ -221,7 +221,7 @@
     "min_visible": 1,
     "active": true,
     "title": "Altavoz Bluetooth Jbl Go 4 Portátil Impermeable En Rojo",
-    "real_stock": 71,
+    "real_stock": 70,
     "master_stock": 121,
     "available_quantity": 1,
     "sku": "JBL-GO4-ROJO"
@@ -311,7 +311,7 @@
   },
   "MLM2904687747": {
     "label": "Clip 5 Azul",
-    "real_stock": 189,
+    "real_stock": 188,
     "min_visible": 1,
     "auto_replenish": true,
     "replenish_quantity": 1,
