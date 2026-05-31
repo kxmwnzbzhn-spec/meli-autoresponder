@@ -6,8 +6,8 @@ TICK=60
 DURATION_SEC=5*3600+30*60
 
 BOUNDS_BY_SKU={
-  "ELEC-009":{"floor":449,"ceiling":699},"ELEC-010":{"floor":449,"ceiling":699},
-  "ELEC-027":{"floor":449,"ceiling":699},"ELEC-030":{"floor":449,"ceiling":699},
+  "ELEC-009":{"floor":599,"ceiling":599},"ELEC-010":{"floor":599,"ceiling":599},
+  "ELEC-027":{"floor":599,"ceiling":599},"ELEC-030":{"floor":599,"ceiling":599},
   "ELEC-013":{"floor":399,"ceiling":599},"ELEC-011":{"floor":749,"ceiling":799},
   "ELEC-012":{"floor":749,"ceiling":799},"ELEC-018":{"floor":749,"ceiling":799},
   "ELEC-029":{"floor":749,"ceiling":799},"ELEC-031":{"floor":749,"ceiling":799},
@@ -127,3 +127,4 @@ if gh:
             json={"ref":"main","inputs":{}},timeout=20)
         print(f"REDISPATCH: HTTP {r.status_code}")
     except Exception as e: print(f"redispatch err: {e}")
+
