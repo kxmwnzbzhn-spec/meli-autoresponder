@@ -1,10 +1,8 @@
 name: daily-etiquetas
 on:
-  schedule:
-    # 7 AM CDMX = 13:00 UTC (CDMX = UTC-6, sin DST permanente)
-    - cron: '30 12 * * *'   # 6:30 AM CDMX (primary)
-    - cron: '0 14 * * *'    # 8:00 AM CDMX (backup si cron de 6:30 se salta)
   workflow_dispatch: {}
+  # Cron se dispara desde Supabase pg_cron a las 12:30 UTC (6:30 AM CDMX).
+  # NO usamos schedule de GitHub porque es flakey (best-effort).
 jobs:
   run:
     runs-on: ubuntu-latest
