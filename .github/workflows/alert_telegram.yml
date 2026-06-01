@@ -1,0 +1,27 @@
+name: alert-telegram
+on:
+  workflow_dispatch:
+    inputs:
+      text:
+        description: 'Mensaje a Telegram (HTML)'
+        required: false
+        type: string
+        default: '🚨 <b>ALERTA Supabase pg_cron</b>: el workflow daily_etiquetas NO terminó success hoy. Revisa: https://github.com/kxmwnzbzhn-spec/meli-autoresponder/actions/workflows/daily_etiquetas.yml'
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Send Telegram
+        env:
+          TG_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TG_CHAT:  ${{ secrets.TELEGRAM_CHAT_ID }}
+          TEXT:     ${{ inputs.text }}
+        run: |
+          curl -s -X POST "https://api.telegram.org/bot${TG_TOKEN}/sendMessage" \
+            -d "chat_id=${TG_CHAT}" \
+            -d "parse_mode=HTML" \
+            -d "disable_web_page_preview=true" \
+            --data-urlencode "text=${TEXT}"
+          echo ""
+          echo "OK"
