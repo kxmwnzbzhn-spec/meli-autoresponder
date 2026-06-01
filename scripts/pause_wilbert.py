@@ -1,35 +1,46 @@
 import os, requests, time
-r = requests.post("https://api.mercadolibre.com/oauth/token", data={"grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],"client_secret":os.environ["MELI_APP_SECRET"],"refresh_token":os.environ["MELI_REFRESH_TOKEN_WILBERT"]}).json()
-H = {"Authorization":f"Bearer {r['access_token']}","Content-Type":"application/json"}
-me = requests.get("https://api.mercadolibre.com/users/me", headers=H).json()
-sid = me["id"]
-print(f"WILBERT id={sid} nick={me.get('nickname')}")
+API="https://api.mercadolibre.com"
+r=requests.post(f"{API}/oauth/token",data={
+  "grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],
+  "client_secret":os.environ["MELI_APP_SECRET"],
+  "refresh_token":os.environ["MELI_REFRESH_TOKEN_WILBERT"]},timeout=20).json()
+AT=r["access_token"]; NEW_RT=r.get("refresh_token")
+print(f"NEW_RT_WILBERT={NEW_RT}")
+H={"Authorization":f"Bearer {AT}"}
+HJ={**H,"Content-Type":"application/json"}
 
-ids = []
-s = 0
+me=requests.get(f"{API}/users/me",headers=H,timeout=10).json()
+uid=me["id"]; nick=me.get("nickname")
+print(f"seller={uid} nick={nick}")
+
+ids=[]; off=0
 while True:
-    d = requests.get(f"https://api.mercadolibre.com/users/{sid}/items/search?status=active&limit=100&offset={s}", headers=H, timeout=20).json()
-    got = d.get("results", [])
-    if not got:
-        break
-    ids.extend(got)
-    s += 100
-    if s >= d.get("paging", {}).get("total", 0):
-        break
-print(f"Items activos a pausar: {len(ids)}")
+    r=requests.get(f"{API}/users/{uid}/items/search?status=active&limit=50&offset={off}",headers=H,timeout=20).json()
+    res=r.get("results") or []
+    if not res: break
+    ids.extend(res)
+    if len(res)<50: break
+    off+=50
+    if off>5000: break
+print(f"ACTIVOS={len(ids)}")
 
-paused = err = 0
+ok=0; fail=0; err_samples=[]
 for iid in ids:
-    rr = requests.put(f"https://api.mercadolibre.com/items/{iid}", headers=H, json={"status":"paused"}, timeout=15)
-    if rr.status_code in (200, 201):
-        paused += 1
-    else:
-        err += 1
-        print(f"  ERR {iid}: {rr.status_code} {rr.text[:80]}")
-    time.sleep(0.25)
-print(f"=== {paused} pausados / {err} errores ===")
+    try:
+        r2=requests.put(f"{API}/items/{iid}",headers=HJ,json={"status":"paused"},timeout=12)
+        if r2.status_code in (200,201): ok+=1
+        else:
+            fail+=1
+            if len(err_samples)<5: err_samples.append(f"{iid}:{r2.status_code}:{r2.text[:120]}")
+    except Exception as e:
+        fail+=1
+        if len(err_samples)<5: err_samples.append(f"{iid}:EXC:{e}")
 
-tg_t = os.environ.get("TELEGRAM_BOT_TOKEN")
-tg_c = os.environ.get("TELEGRAM_CHAT_ID")
-if tg_t and tg_c:
-    requests.post(f"https://api.telegram.org/bot{tg_t}/sendMessage", data={"chat_id":tg_c,"text":f"WILBERT pausado: {paused} items / {err} errores"}, timeout=10)
+print(f"PAUSED ok={ok} fail={fail}")
+for s in err_samples: print("  ERR:",s)
+
+# Telegram report
+TG=os.environ.get("TELEGRAM_BOT_TOKEN",""); CID=os.environ.get("TELEGRAM_CHAT_ID","")
+if TG and CID:
+    requests.post(f"https://api.telegram.org/bot{TG}/sendMessage",
+        json={"chat_id":CID,"text":f"WILBERT pausa total: ok={ok} fail={fail} de {len(ids)} activos"},timeout=10)
