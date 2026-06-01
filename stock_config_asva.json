@@ -28,16 +28,19 @@
   },
   "MLM5233454100": {
     "color": "Azul",
-    "stock": 82,
+    "stock": 0,
     "max_stock": 82,
-    "active": true
+    "active": false,
+    "real_stock": 0,
+    "agotado": true,
+    "sku": "JBL-FLIP7-AZUL"
   },
   "MLM2886030837": {
     "color": "Rojo",
-    "stock": 133,
+    "stock": 132,
     "max_stock": 190,
     "active": true,
-    "real_stock": 133,
+    "real_stock": 132,
     "master_stock": 190,
     "min_visible": 1,
     "available_quantity": 1,

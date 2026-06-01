@@ -149,7 +149,11 @@
     "auto_replenish": true,
     "min_visible": 1,
     "active": true,
-    "title": "Bocina Portátil Jbl Go 4 Bluetooth, Camuflaje. Color Camufla"
+    "title": "Bocina Portátil Jbl Go 4 Bluetooth, Camuflaje. Color Camufla",
+    "real_stock": 196,
+    "master_stock": 196,
+    "available_quantity": 1,
+    "sku": "JBL-GO4-CAMUFLAJE"
   },
   "MLM2891178657": {
     "line": "Raymundo",
@@ -311,7 +315,7 @@
   },
   "MLM2904687747": {
     "label": "Clip 5 Azul",
-    "real_stock": 183,
+    "real_stock": 181,
     "min_visible": 1,
     "auto_replenish": true,
     "replenish_quantity": 1,

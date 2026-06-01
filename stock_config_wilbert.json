@@ -126,15 +126,17 @@
     "line": "Armaf-Aqua",
     "auto_replenish": true,
     "min_visible": 1,
-    "active": true,
+    "active": false,
     "title": "Armaf Odyssey Aqua Men 100ml Edp",
     "catalog_product_id": "MLM23633415",
     "type": "catalog_no_variations",
     "condition": "new",
-    "real_stock": 6,
+    "real_stock": 1,
     "master_stock": 6,
     "floor_price": 299,
-    "ceiling_price": 999
+    "ceiling_price": 999,
+    "agotado": true,
+    "sku": "PERF-ARMAF-ODYSSEY-AQUA-MEN"
   },
   "MLM5266032976": {
     "line": "Armaf-Maleka",
@@ -353,7 +355,7 @@
   "MLM2910806845": {
     "title": "Bocina Jbl Go 3 Jblgo3 Portátil Con Bluetooth Waterproof Negra Negro",
     "min_visible": 1,
-    "real_stock": 415,
+    "real_stock": 408,
     "master_stock": 488,
     "auto_replenish": true,
     "active": true,
@@ -401,7 +403,7 @@
   "MLM2910806871": {
     "title": "Parlante Jbl Clip 5 Portátil Con Bluetooth Waterproof Azul",
     "min_visible": 1,
-    "real_stock": 183,
+    "real_stock": 181,
     "master_stock": 274,
     "auto_replenish": true,
     "active": true,
@@ -446,7 +448,7 @@
   "MLM2910806881": {
     "title": "Parlante Bluetooth Jbl Go 3 Color Negro",
     "min_visible": 1,
-    "real_stock": 415,
+    "real_stock": 408,
     "master_stock": 488,
     "auto_replenish": true,
     "active": true,
@@ -551,7 +553,7 @@
   "MLM2910768333": {
     "title": "Parlante Jbl Go 3 Jblgo3 Portátil Con Bluetooth Waterproof Negro",
     "min_visible": 1,
-    "real_stock": 415,
+    "real_stock": 408,
     "master_stock": 488,
     "auto_replenish": true,
     "active": true,
@@ -576,7 +578,7 @@
   "MLM2910457973": {
     "title": "Bocina Portátil Jbl Clip 5 Bluetooth Azul",
     "min_visible": 1,
-    "real_stock": 183,
+    "real_stock": 181,
     "master_stock": 274,
     "auto_replenish": true,
     "active": true,
@@ -1077,9 +1079,14 @@
     "ceiling_price": 999,
     "floor_locked_by_user": true,
     "paused_by_user": true,
-    "active": false,
+    "active": true,
     "auto_replenish": false,
-    "agotado": true
+    "agotado": false,
+    "real_stock": 8,
+    "master_stock": 8,
+    "min_visible": 1,
+    "available_quantity": 1,
+    "sku": "PERF-ORIENTICA-DORADO"
   },
   "MLM2916676513": {
     "floor_price": 999,
@@ -1110,10 +1117,15 @@
   },
   "MLM2916921591": {
     "paused_by_user": true,
-    "active": false,
+    "active": true,
     "auto_replenish": false,
-    "agotado": true,
-    "floor_locked_by_user": true
+    "agotado": false,
+    "floor_locked_by_user": true,
+    "real_stock": 4,
+    "master_stock": 4,
+    "min_visible": 1,
+    "available_quantity": 1,
+    "sku": "PERF-DOLCE-GABBANA-DEVOTION-MEN"
   },
   "MLM2916932945": {
     "paused_by_user": true,

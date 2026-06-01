@@ -661,13 +661,15 @@
     "catalog_product_id": "MLM47809248",
     "auto_replenish": true,
     "min_visible": 1,
-    "real_stock": 15,
+    "real_stock": 0,
     "daily_reset_to": 15,
-    "active": true,
+    "active": false,
     "condition": "new",
     "type": "catalog_no_variations",
     "base_price": 1299,
-    "ceiling_override": 1299
+    "ceiling_override": 1299,
+    "agotado": true,
+    "sku": "JBL-FLIP7-NEGRO"
   },
   "MLM5245746244": {
     "line": "Catalog-Claribel-Custom2",

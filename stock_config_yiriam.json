@@ -3,7 +3,7 @@
     "description": "Yiriam stock real almacén - 12 perfumes",
     "updated": "2026-05-16",
     "total": 239,
-    "synced_from_supabase_at": "2026-05-30T15:37:55.148554+00:00"
+    "synced_from_supabase_at": "2026-06-01T18:50:56.061823+00:00"
   },
   "MLM2935286605": {
     "title": "Angel Nova",
@@ -77,13 +77,14 @@
   },
   "MLM5353104620": {
     "title": "Orientica Royal Amber",
-    "real_stock": 10,
+    "real_stock": 8,
     "master_stock": 11,
     "min_visible": 1,
     "available_quantity": 1,
     "auto_replenish": true,
     "active": true,
-    "last_sold": 1
+    "last_sold": 1,
+    "sku": "PERF-ORIENTICA-DORADO"
   },
   "MLM2935286557": {
     "title": "Lattafa Confession",
@@ -173,14 +174,15 @@
   },
   "MLM2935587247": {
     "title": "Marshmallow Blush",
-    "real_stock": 10,
+    "real_stock": 6,
     "master_stock": 10,
     "min_visible": 1,
     "available_quantity": 1,
     "auto_replenish": true,
     "active": true,
     "last_sold": 0,
-    "_note": "pending user stock count"
+    "_note": "pending user stock count",
+    "sku": "PERF-MARSHMALLOW-BLUSH"
   },
   "MLM2935587257": {
     "title": "Le Labo Santal 33",
