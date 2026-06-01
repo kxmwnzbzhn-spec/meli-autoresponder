@@ -96,7 +96,7 @@
     "catalog_product_id": "MLM25912333",
     "auto_replenish": true,
     "min_visible": 1,
-    "real_stock": 1377,
+    "real_stock": 1376,
     "daily_reset_to": 10,
     "active": true,
     "condition": "new",
