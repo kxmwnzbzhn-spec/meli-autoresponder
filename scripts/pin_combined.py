@@ -17,6 +17,11 @@ for x in ["2967318191","2967317601","2967305251","2967317613","2967292003"]:
     JOBS.append({"item":f"MLM{x}","floor":499,"ceiling":549,
                  "raw":"estas en 549: 2967318191,2967317601,2967305251,2967317613,2967292003, ese es el precio mas alto y el minimo es el $499",
                  "dt":"pin_band"})
+# C) ceiling=799 (floor flexible)
+for x in ["2967292013","2967279337","2967292049","2967292015"]:
+    JOBS.append({"item":f"MLM{x}","floor":None,"ceiling":799,
+                 "raw":"estas ponlas precio maximo 799: 2967292013,2967279337,2967292049,2967292015",
+                 "dt":"set_ceiling"})
 
 r=requests.post(f"{API}/oauth/token",data={
   "grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],
