@@ -889,11 +889,11 @@
     "master_stock": 10,
     "available_quantity": 1,
     "auto_replenish": true,
-    "active": false,
+    "active": true,
     "floor_price": 799,
     "ceiling_price": 999,
     "sku": "JBL-CLIP5-NEGRO",
-    "agotado": true
+    "agotado": false
   },
   "MLM2931612611": {
     "title": "JBL Clip 4 Azul",
