@@ -1,8 +1,7 @@
 name: manifest-pull
 on:
   workflow_dispatch: {}
-  schedule:
-    - cron: '*/30 12-23 * * *'   # cada 30 min entre 6am-5pm CDMX (horario laboral)
+  # Cron desde Supabase cada 30 min en horario laboral CDMX.
 permissions:
   contents: write
 jobs:
