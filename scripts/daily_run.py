@@ -30,9 +30,9 @@ PAGE_W = 4*72; PAGE_H = 6*72
 
 # Cuentas con metadata anti-error (uid y nickname esperados — si no coinciden, abortar esa cuenta)
 ACCOUNTS = [
-    {"name":"Yiriam", "rt_env":"MELI_REFRESH_TOKEN_YC_NEW", "expected_uid":3364413125, "expected_nick":"YC20260428092057",
+    {"name":"Claribel","rt_env":"MELI_REFRESH_TOKEN_CLARIBEL","expected_uid":3348766821,"expected_nick":"CX20260420180750",
      "exclude_models":set(), "exclude_titles":set()},
-    {"name":"Asva",   "rt_env":"MELI_REFRESH_TOKEN_ASVA",   "expected_uid":1668713481, "expected_nick":"ASVAELECTRONICS",
+    {"name":"Asva",    "rt_env":"MELI_REFRESH_TOKEN_ASVA",    "expected_uid":1668713481,"expected_nick":"ASVAELECTRONICS",
      "exclude_models":set(), "exclude_titles":set()},
 ]
 ALLOWED_SUBS = {"printed", "ready_to_print"}
