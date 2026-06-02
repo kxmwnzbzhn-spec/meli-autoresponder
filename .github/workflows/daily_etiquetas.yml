@@ -1,7 +1,13 @@
 name: daily-etiquetas
 on:
-  workflow_dispatch: {}
-  # Cron se dispara desde Supabase pg_cron a las 13:05 UTC (7:05 AM CDMX).
+  workflow_dispatch:
+    inputs:
+      force_regen:
+        description: 'Borrar PDF de hoy y regenerar (anti-cache)'
+        required: false
+        type: string
+        default: ''
+  # Cron Supabase pg_cron 13:05 UTC (7:05 AM CDMX)
 jobs:
   run:
     runs-on: ubuntu-latest
@@ -16,6 +22,7 @@ jobs:
         run: pip install requests pypdf reportlab pdf2image Pillow google-api-python-client google-auth google-auth-oauthlib -q
       - name: Run daily etiquetas
         env:
+          FORCE_REGEN:                ${{ inputs.force_regen }}
           MELI_APP_ID:                ${{ secrets.MELI_APP_ID }}
           MELI_APP_SECRET:            ${{ secrets.MELI_APP_SECRET }}
           MELI_REFRESH_TOKEN_CLARIBEL: ${{ secrets.MELI_REFRESH_TOKEN_CLARIBEL }}
@@ -34,5 +41,4 @@ jobs:
           name: daily-etiquetas-${{ github.run_id }}
           path: |
             ETIQUETAS_*.pdf
-            run_log.txt
           if-no-files-found: ignore
