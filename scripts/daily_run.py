@@ -435,7 +435,18 @@ def already_done_today(svc):
 def main():
     svc = drive_service()
     # Guard: si el PDF de hoy ya existe, salir limpio (idempotencia para multi-cron)
-    existing = already_done_today(svc)
+    # Override con FORCE_REGEN=1: borra el viejo y regenera
+    if os.environ.get("FORCE_REGEN") == "1":
+        existing = already_done_today(svc)
+        if existing:
+            try:
+                svc.files().delete(fileId=existing["id"], supportsAllDrives=True).execute()
+                print(f"[force] Borré PDF previo de hoy: {existing.get('name')}")
+            except Exception as e:
+                print(f"[force] No pude borrar viejo: {e}")
+        existing = None
+    else:
+        existing = already_done_today(svc)
     if existing:
         msg = (f"🤖 <b>Etiquetas {TODAY}</b>\n"
                f"⏭ Ya existían — skip\n"
