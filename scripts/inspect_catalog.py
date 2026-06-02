@@ -6,7 +6,7 @@ API="https://api.mercadolibre.com"
 r=requests.post(f"{API}/oauth/token",data={
   "grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],
   "client_secret":os.environ["MELI_APP_SECRET"],
-  "refresh_token":os.environ["MELI_REFRESH_TOKEN_ADRIAN"]},timeout=20).json()
+  "refresh_token":os.environ["MELI_REFRESH_TOKEN_AH"]},timeout=20).json()
 AT=r["access_token"]
 print(f"NEW_RT_ADRIAN={r.get('refresh_token')}")
 H={"Authorization":f"Bearer {AT}"}
