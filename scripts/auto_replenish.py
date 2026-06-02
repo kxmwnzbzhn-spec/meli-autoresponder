@@ -1,4 +1,4 @@
-"""Auto-replenish bot v4 — paginación completa por cuenta + concurrency-safe.
+"""Auto-replenish bot v7 (SERVICE_KEY fix) — paginación completa por cuenta + concurrency-safe.
 Cambios vs v3:
 - Pagina TODOS los paused (no solo 50) en cada tick
 - Manejo gracioso de tokens
@@ -21,7 +21,9 @@ ACCOUNTS=[
 ]
 
 SB_URL=os.environ.get("SUPABASE_URL","https://wnuhslmryspnypbxbfjf.supabase.co")
-SB_KEY=os.environ.get("SUPABASE_ANON_KEY","")
+SB_KEY=os.environ.get("SUPABASE_SERVICE_KEY") or os.environ.get("SUPABASE_ANON_KEY") or os.environ.get("SUPABASE_SECRET_KEY") or ""
+if not SB_KEY:
+    print("[WARN] no SUPABASE key — priority/blacklists no funcionarán")
 def sb_get(table,q=""):
     if not SB_KEY: return []
     try:
@@ -146,6 +148,7 @@ if gh:
             json={"ref":"main","inputs":{}},timeout=20)
         print(f"REDISPATCH: HTTP {r.status_code}")
     except Exception as e: print(f"redispatch err: {e}")
+
 
 
 
