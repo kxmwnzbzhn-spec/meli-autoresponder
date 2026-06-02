@@ -45,7 +45,7 @@ for s in DESIRED_SIZES:
         continue
     variations.append({
         "attribute_combinations":[
-            {"id":"SIZE_GRID_ROW_ID","value_id":rid},
+            {"id":"SIZE_GRID_ROW_ID","value_name":rid},
             {"id":"SIZE","value_name":s},
         ],
         "available_quantity":1,
