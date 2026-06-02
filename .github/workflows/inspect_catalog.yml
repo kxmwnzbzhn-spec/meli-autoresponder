@@ -14,5 +14,5 @@ jobs:
           CPID: ${{ github.event.inputs.cpid }}
           MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
           MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
-          MELI_REFRESH_TOKEN_ADRIAN: ${{ secrets.MELI_REFRESH_TOKEN_ADRIAN }}
+          MELI_REFRESH_TOKEN_AH: ${{ secrets.MELI_REFRESH_TOKEN_AH }}
         run: python3 scripts/inspect_catalog.py
