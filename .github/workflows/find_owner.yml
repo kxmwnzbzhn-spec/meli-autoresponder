@@ -1,0 +1,30 @@
+name: find-owner
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install requests -q
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
+          MELI_REFRESH_TOKEN_CLARIBEL: ${{ secrets.MELI_REFRESH_TOKEN_CLARIBEL }}
+          MELI_REFRESH_TOKEN_ASVA: ${{ secrets.MELI_REFRESH_TOKEN_ASVA }}
+          MELI_REFRESH_TOKEN_MAYRELY: ${{ secrets.MELI_REFRESH_TOKEN_MAYRELY }}
+          MELI_REFRESH_TOKEN_BREN: ${{ secrets.MELI_REFRESH_TOKEN_BREN }}
+          MELI_REFRESH_TOKEN_DILCIE: ${{ secrets.MELI_REFRESH_TOKEN_DILCIE }}
+          MELI_REFRESH_TOKEN_MILDRED: ${{ secrets.MELI_REFRESH_TOKEN_MILDRED }}
+          MELI_REFRESH_TOKEN_JUAN: ${{ secrets.MELI_REFRESH_TOKEN_JUAN }}
+          MELI_REFRESH_TOKEN_RAYMUNDO: ${{ secrets.MELI_REFRESH_TOKEN_RAYMUNDO }}
+          MELI_REFRESH_TOKEN_WILBERT: ${{ secrets.MELI_REFRESH_TOKEN_WILBERT }}
+          MELI_REFRESH_TOKEN_ANGEL: ${{ secrets.MELI_REFRESH_TOKEN_ANGEL }}
+          MELI_REFRESH_TOKEN_AH: ${{ secrets.MELI_REFRESH_TOKEN_AH }}
+          MELI_REFRESH_TOKEN_MC: ${{ secrets.MELI_REFRESH_TOKEN_MC }}
+          MELI_REFRESH_TOKEN_OFICIAL: ${{ secrets.MELI_REFRESH_TOKEN_OFICIAL }}
+          MELI_REFRESH_TOKEN_ANGEL_DAMIAN: ${{ secrets.MELI_REFRESH_TOKEN_ANGEL_DAMIAN }}
+          MELI_REFRESH_TOKEN_ASGARI: ${{ secrets.MELI_REFRESH_TOKEN_ASGARI }}
+          MELI_REFRESH_TOKEN_RAYMUNDO_MAY: ${{ secrets.MELI_REFRESH_TOKEN_RAYMUNDO_MAY }}
+        run: python3 scripts/find_owner_3849137034.py
