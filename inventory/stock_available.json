@@ -1,10 +1,10 @@
 {
   "_meta": {
-    "updated": "2026-06-02T23:14:30.901647Z",
+    "updated": "2026-06-03T01:47:14.105587Z",
     "golive_ref": "stock_at_golive_20260518.json",
     "note": "Dinámico — decrementa con cada venta vía cron.",
-    "total_sold": 1926,
-    "total_available": 3090
+    "total_sold": 1964,
+    "total_available": 3052
   },
   "skus": {
     "SONY-XB100-NEGRO": {
@@ -24,17 +24,17 @@
       "color": "Aqua/Celeste"
     },
     "JBL-GO3-NEGRO": {
-      "available": 52,
+      "available": 39,
       "initial": 495,
-      "sold_since_golive": 443,
+      "sold_since_golive": 456,
       "last_pause_triggered": false,
       "modelo": "JBL Go 3",
       "color": "Negro"
     },
     "JBL-CLIP5-AZUL": {
-      "available": 176,
+      "available": 172,
       "initial": 421,
-      "sold_since_golive": 245,
+      "sold_since_golive": 249,
       "last_pause_triggered": false,
       "modelo": "JBL Clip 5",
       "color": "Azul"
@@ -80,25 +80,25 @@
       "color": "Rosa"
     },
     "JBL-GO4-ROJO": {
-      "available": -99,
+      "available": -104,
       "initial": 198,
-      "sold_since_golive": 297,
+      "sold_since_golive": 302,
       "last_pause_triggered": true,
       "modelo": "JBL Go 4",
       "color": "Rojo"
     },
     "JBL-CLIP5-MORADO": {
-      "available": 56,
+      "available": 55,
       "initial": 185,
-      "sold_since_golive": 129,
+      "sold_since_golive": 130,
       "last_pause_triggered": false,
       "modelo": "JBL Clip 5",
       "color": "Morado"
     },
     "JBL-GO4-ROSA": {
-      "available": -99,
+      "available": -110,
       "initial": 170,
-      "sold_since_golive": 269,
+      "sold_since_golive": 280,
       "last_pause_triggered": true,
       "modelo": "JBL Go 4",
       "color": "Rosa"
@@ -112,9 +112,9 @@
       "color": "Blanco"
     },
     "BOSE-SOUNDLINK-NEGRO": {
-      "available": -15,
+      "available": -19,
       "initial": 65,
-      "sold_since_golive": 80,
+      "sold_since_golive": 84,
       "last_pause_triggered": true,
       "modelo": "Bose Soundlink",
       "color": "Negro"
