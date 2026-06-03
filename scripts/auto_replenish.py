@@ -1,4 +1,4 @@
-"""Auto-replenish bot v7 (SERVICE_KEY fix) — paginación completa por cuenta + concurrency-safe.
+"""Auto-replenish bot v8 (+Adrián) (SERVICE_KEY fix) — paginación completa por cuenta + concurrency-safe.
 Cambios vs v3:
 - Pagina TODOS los paused (no solo 50) en cada tick
 - Manejo gracioso de tokens
@@ -18,6 +18,7 @@ ACCOUNTS=[
   (3338633403,"MELI_REFRESH_TOKEN_RAYMUNDO","Raymundo"),
   (3294280577,"MELI_REFRESH_TOKEN_RMAYCHI","RMAYCHI"),
   (3367276814,"MELI_REFRESH_TOKEN_WILBERT","Wilbert"),
+  (3417664339,"MELI_REFRESH_TOKEN_AH","Adrian"),
 ]
 
 SB_URL=os.environ.get("SUPABASE_URL","https://wnuhslmryspnypbxbfjf.supabase.co")
@@ -148,6 +149,7 @@ if gh:
             json={"ref":"main","inputs":{}},timeout=20)
         print(f"REDISPATCH: HTTP {r.status_code}")
     except Exception as e: print(f"redispatch err: {e}")
+
 
 
 
