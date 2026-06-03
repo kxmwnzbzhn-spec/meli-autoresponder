@@ -7,7 +7,7 @@ on:
         required: true
         type: string
       labels:
-        description: 'Etiquetas de cuenta separadas por coma (mismo orden que run_ids)'
+        description: 'Etiquetas de cuenta separadas por coma'
         required: true
         type: string
 jobs:
@@ -15,6 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
+      - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: { python-version: '3.11' }
       - run: pip install requests pypdf google-api-python-client google-auth -q
