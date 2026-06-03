@@ -27,16 +27,14 @@ attrs=[]
 for a in (g.get("attributes") or []):
     aid=a.get("id"); vn=a.get("value_name"); vi=a.get("value_id")
     if not aid: continue
-    # Skip system-set attrs that shouldn't be re-posted
-    if aid in ("GTIN",): continue
+    if aid in ("GTIN","SELLER_SKU"): continue
     obj={"id":aid}
     if vi: obj["value_id"]=vi
     elif vn: obj["value_name"]=vn
     if vn or vi: attrs.append(obj)
 
 payload={
-    "title":g.get("title"),
-    "family_name":g.get("family_name") or g.get("title")[:50],
+    "title":(g.get("title") or "")+" -",
     "category_id":g.get("category_id"),
     "price":g.get("price") or 199,
     "currency_id":g.get("currency_id") or "MXN",
