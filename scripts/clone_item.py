@@ -34,7 +34,7 @@ for a in (g.get("attributes") or []):
     if vn or vi: attrs.append(obj)
 
 payload={
-    "title":(g.get("title") or "")+" -",
+    "family_name":g.get("family_name") or "Bocina BT Portatil 35W",
     "category_id":g.get("category_id"),
     "price":g.get("price") or 199,
     "currency_id":g.get("currency_id") or "MXN",
