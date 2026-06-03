@@ -1,7 +1,6 @@
 name: manifest-pull
 on:
   workflow_dispatch: {}
-  # Cron desde Supabase cada 30 min en horario laboral CDMX.
 permissions:
   contents: write
 jobs:
@@ -21,14 +20,23 @@ jobs:
           MELI_REFRESH_TOKEN_AH:       ${{ secrets.MELI_REFRESH_TOKEN_AH }}
           MELI_REFRESH_TOKEN_YC_NEW:   ${{ secrets.MELI_REFRESH_TOKEN_YC_NEW }}
         run: python scripts/manifest_pull.py
-      - name: Commit manifest
+      - name: Commit manifest (with retry on conflict)
         run: |
           git config user.name "manifest-bot"
           git config user.email "manifest-bot@users.noreply.github.com"
           git add data/manifest.json
           if git diff --cached --quiet; then
-            echo "no changes"
-          else
-            git commit -m "auto: refresh manifest $(date -u +%FT%TZ)"
-            git push
+            echo "no changes"; exit 0
           fi
+          for i in 1 2 3 4 5; do
+            git commit -m "auto: refresh manifest $(date -u +%FT%TZ)" 2>/dev/null || true
+            if git push origin main; then
+              echo "pushed on attempt $i"
+              exit 0
+            fi
+            echo "push rejected, rebasing... (attempt $i)"
+            git pull --rebase -X ours origin main
+            sleep 2
+          done
+          echo "FAILED after 5 retries"
+          exit 1
