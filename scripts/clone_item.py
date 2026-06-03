@@ -27,7 +27,7 @@ attrs=[]
 for a in (g.get("attributes") or []):
     aid=a.get("id"); vn=a.get("value_name"); vi=a.get("value_id")
     if not aid: continue
-    if aid in ("GTIN","SELLER_SKU"): continue
+    if aid in ("GTIN","SELLER_SKU","SPEAKER_FORMAT","PACKAGE_LENGTH","PACKAGE_WEIGHT","PACKAGE_WIDTH","SHIPMENT_PACKING","PRODUCT_FEATURES","HEIGHT","LENGTH","WEIGHT","WIDTH"): continue
     obj={"id":aid}
     if vi: obj["value_id"]=vi
     elif vn: obj["value_name"]=vn
