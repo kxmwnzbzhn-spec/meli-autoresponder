@@ -1,0 +1,15 @@
+name: revive-one
+on: { workflow_dispatch: { inputs: { item: { description: 'Item ID', required: true } } } }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install requests -q
+      - env:
+          ITEM: ${{ github.event.inputs.item }}
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_ASVA: ${{ secrets.MELI_REFRESH_TOKEN_ASVA }}
+        run: python3 scripts/revive_one.py
