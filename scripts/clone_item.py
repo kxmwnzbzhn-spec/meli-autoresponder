@@ -36,6 +36,7 @@ for a in (g.get("attributes") or []):
 
 payload={
     "title":g.get("title"),
+    "family_name":g.get("family_name") or g.get("title")[:50],
     "category_id":g.get("category_id"),
     "price":g.get("price") or 199,
     "currency_id":g.get("currency_id") or "MXN",
