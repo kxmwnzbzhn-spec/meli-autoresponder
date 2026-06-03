@@ -1,16 +1,16 @@
 {
   "_meta": {
-    "updated": "2026-06-03T11:29:18.184558Z",
+    "updated": "2026-06-03T15:59:12.854167Z",
     "golive_ref": "stock_at_golive_20260518.json",
     "note": "Dinámico — decrementa con cada venta vía cron.",
-    "total_sold": 2050,
-    "total_available": 2966
+    "total_sold": 2090,
+    "total_available": 2926
   },
   "skus": {
     "SONY-XB100-NEGRO": {
-      "available": 1364,
+      "available": 1365,
       "initial": 1422,
-      "sold_since_golive": 58,
+      "sold_since_golive": 57,
       "last_pause_triggered": false,
       "modelo": "Sony XB100",
       "color": "Negro"
@@ -24,17 +24,17 @@
       "color": "Aqua/Celeste"
     },
     "JBL-GO3-NEGRO": {
-      "available": 14,
+      "available": -18,
       "initial": 495,
-      "sold_since_golive": 481,
-      "last_pause_triggered": false,
+      "sold_since_golive": 513,
+      "last_pause_triggered": true,
       "modelo": "JBL Go 3",
       "color": "Negro"
     },
     "JBL-CLIP5-AZUL": {
-      "available": 162,
+      "available": 163,
       "initial": 421,
-      "sold_since_golive": 259,
+      "sold_since_golive": 258,
       "last_pause_triggered": false,
       "modelo": "JBL Clip 5",
       "color": "Azul"
@@ -48,9 +48,9 @@
       "color": "Camuflaje"
     },
     "JBL-CLIP5-CAMUFLAJE": {
-      "available": 198,
+      "available": 197,
       "initial": 240,
-      "sold_since_golive": 42,
+      "sold_since_golive": 43,
       "last_pause_triggered": false,
       "modelo": "JBL Clip 5",
       "color": "Camuflaje"
@@ -72,9 +72,9 @@
       "color": "Rojo"
     },
     "JBL-CLIP5-ROSA": {
-      "available": 186,
+      "available": 185,
       "initial": 200,
-      "sold_since_golive": 14,
+      "sold_since_golive": 15,
       "last_pause_triggered": false,
       "modelo": "JBL Clip 5",
       "color": "Rosa"
@@ -88,17 +88,17 @@
       "color": "Rojo"
     },
     "JBL-CLIP5-MORADO": {
-      "available": 50,
+      "available": 49,
       "initial": 185,
-      "sold_since_golive": 135,
+      "sold_since_golive": 136,
       "last_pause_triggered": false,
       "modelo": "JBL Clip 5",
       "color": "Morado"
     },
     "JBL-GO4-ROSA": {
-      "available": -130,
+      "available": -137,
       "initial": 170,
-      "sold_since_golive": 300,
+      "sold_since_golive": 307,
       "last_pause_triggered": true,
       "modelo": "JBL Go 4",
       "color": "Rosa"
