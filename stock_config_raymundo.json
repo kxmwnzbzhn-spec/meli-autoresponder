@@ -317,7 +317,7 @@
   },
   "MLM2904687747": {
     "label": "Clip 5 Azul",
-    "real_stock": 116,
+    "real_stock": 115,
     "min_visible": 1,
     "auto_replenish": true,
     "replenish_quantity": 1,
