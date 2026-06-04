@@ -260,14 +260,14 @@
     "min_visible": 1,
     "active": true,
     "title": "Sony Srs-xb100 Altavoz De Viaje Inalámbrico Bluetooth Port C",
-    "real_stock": 1367,
+    "real_stock": 1365,
     "master_stock": 1422,
     "available_quantity": 1,
     "sku": "SONY-XB100-NEGRO"
   },
   "MLM5281123238": {
     "label": "Clip 5 Morado",
-    "real_stock": 44,
+    "real_stock": 43,
     "min_visible": 1,
     "auto_replenish": true,
     "replenish_quantity": 1,
@@ -317,7 +317,7 @@
   },
   "MLM2904687747": {
     "label": "Clip 5 Azul",
-    "real_stock": 115,
+    "real_stock": 113,
     "min_visible": 1,
     "auto_replenish": true,
     "replenish_quantity": 1,
@@ -332,7 +332,7 @@
   },
   "MLM2904674811": {
     "label": "Clip 5 Camuflaje",
-    "real_stock": 102,
+    "real_stock": 100,
     "min_visible": 1,
     "auto_replenish": true,
     "replenish_quantity": 1,
