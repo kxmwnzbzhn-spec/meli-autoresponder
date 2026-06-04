@@ -1,0 +1,26 @@
+name: answer-asva-pro
+on:
+  workflow_dispatch: {}
+  schedule:
+    - cron: "*/5 * * * *"
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    concurrency:
+      group: answer-asva-pro
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.11"}
+      - run: pip install requests -q
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_ASVA: ${{ secrets.MELI_REFRESH_TOKEN_ASVA }}
+          TOKEN_SHARED: ${{ secrets.TOKEN_SHARED }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python scripts/answer_asva_pro.py
