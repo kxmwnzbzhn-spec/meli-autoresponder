@@ -1,6 +1,6 @@
 {
   "_meta": {
-    "updated": "2026-06-04T11:39:41.774209Z",
+    "updated": "2026-06-04T14:19:36.729080Z",
     "golive_ref": "stock_at_golive_20260518.json",
     "note": "Dinámico — decrementa con cada venta vía cron.",
     "total_sold": 2165,
@@ -24,9 +24,9 @@
       "color": "Aqua/Celeste"
     },
     "JBL-GO3-NEGRO": {
-      "available": -43,
+      "available": -44,
       "initial": 495,
-      "sold_since_golive": 538,
+      "sold_since_golive": 539,
       "last_pause_triggered": true,
       "modelo": "JBL Go 3",
       "color": "Negro"
@@ -96,9 +96,9 @@
       "color": "Morado"
     },
     "JBL-GO4-ROSA": {
-      "available": -167,
+      "available": -166,
       "initial": 170,
-      "sold_since_golive": 337,
+      "sold_since_golive": 336,
       "last_pause_triggered": true,
       "modelo": "JBL Go 4",
       "color": "Rosa"
