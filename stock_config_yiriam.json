@@ -3,7 +3,7 @@
     "description": "Yiriam stock real almacén - 12 perfumes",
     "updated": "2026-05-16",
     "total": 239,
-    "synced_from_supabase_at": "2026-06-01T18:50:56.061823+00:00"
+    "synced_from_supabase_at": "2026-06-04T04:40:39.843913+00:00"
   },
   "MLM2935286605": {
     "title": "Angel Nova",
@@ -17,13 +17,14 @@
   },
   "MLM2935286537": {
     "title": "Billie Eilish",
-    "real_stock": 40,
+    "real_stock": 36,
     "master_stock": 40,
     "min_visible": 1,
     "available_quantity": 1,
     "auto_replenish": true,
     "active": true,
-    "last_sold": 0
+    "last_sold": 0,
+    "sku": "PERF-BILLIE-ELISH"
   },
   "MLM2935286615": {
     "title": "Jo Milano Spades",
@@ -174,7 +175,7 @@
   },
   "MLM2935587247": {
     "title": "Marshmallow Blush",
-    "real_stock": 6,
+    "real_stock": 5,
     "master_stock": 10,
     "min_visible": 1,
     "available_quantity": 1,

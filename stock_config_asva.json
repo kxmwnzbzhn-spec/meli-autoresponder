@@ -37,10 +37,10 @@
   },
   "MLM2886030837": {
     "color": "Rojo",
-    "stock": 122,
+    "stock": 103,
     "max_stock": 190,
     "active": true,
-    "real_stock": 122,
+    "real_stock": 103,
     "master_stock": 190,
     "min_visible": 1,
     "available_quantity": 1,
@@ -55,9 +55,12 @@
   },
   "MLM5233480022": {
     "color": "Negro",
-    "stock": 179,
+    "stock": 0,
     "max_stock": 179,
-    "active": true
+    "active": false,
+    "real_stock": 0,
+    "agotado": true,
+    "sku": "TRONSMART-IP67-35W-NEGRO"
   },
   "MLM2886523677": {
     "color": "Rosa",

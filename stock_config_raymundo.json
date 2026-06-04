@@ -108,7 +108,7 @@
     "min_visible": 1,
     "active": true,
     "title": "Parlante Jbl Go 4 Jblgo4redam Portátil Con Bluetooth Negro- ",
-    "real_stock": 564,
+    "real_stock": 562,
     "master_stock": 578,
     "available_quantity": 1,
     "sku": "JBL-GO4-AQUA"
@@ -137,12 +137,13 @@
     "line": "Raymundo",
     "auto_replenish": true,
     "min_visible": 1,
-    "active": true,
+    "active": false,
     "title": "Jbl Go 4 - Altavoz Ultraportátil Bluetooth Color Rojo",
-    "real_stock": 35,
+    "real_stock": 0,
     "master_stock": 121,
     "available_quantity": 1,
-    "sku": "JBL-GO4-ROJO"
+    "sku": "JBL-GO4-ROJO",
+    "agotado": true
   },
   "MLM5246077386": {
     "line": "Raymundo",
@@ -150,7 +151,7 @@
     "min_visible": 1,
     "active": true,
     "title": "Bocina Portátil Jbl Go 4 Bluetooth, Camuflaje. Color Camufla",
-    "real_stock": 196,
+    "real_stock": 194,
     "master_stock": 196,
     "available_quantity": 1,
     "sku": "JBL-GO4-CAMUFLAJE"
@@ -199,15 +200,15 @@
     "line": "Raymundo",
     "auto_replenish": true,
     "min_visible": 1,
-    "active": true,
+    "active": false,
     "title": "Bocina Jbl Go 4 Jblgo4 Portátil Con Bluetooth Waterproof Roj",
     "floor_price": 449,
     "floor_locked_by_user": true,
-    "real_stock": 35,
+    "real_stock": 0,
     "master_stock": 121,
     "available_quantity": 1,
     "sku": "JBL-GO4-ROJO",
-    "agotado": false
+    "agotado": true
   },
   "MLM2891178577": {
     "line": "Raymundo",
@@ -223,12 +224,13 @@
     "line": "Raymundo",
     "auto_replenish": true,
     "min_visible": 1,
-    "active": true,
+    "active": false,
     "title": "Altavoz Bluetooth Jbl Go 4 Portátil Impermeable En Rojo",
-    "real_stock": 35,
+    "real_stock": 0,
     "master_stock": 121,
     "available_quantity": 1,
-    "sku": "JBL-GO4-ROJO"
+    "sku": "JBL-GO4-ROJO",
+    "agotado": true
   },
   "MLM2891178583": {
     "line": "Raymundo",
@@ -258,14 +260,14 @@
     "min_visible": 1,
     "active": true,
     "title": "Sony Srs-xb100 Altavoz De Viaje Inalámbrico Bluetooth Port C",
-    "real_stock": 1376,
+    "real_stock": 1367,
     "master_stock": 1422,
     "available_quantity": 1,
     "sku": "SONY-XB100-NEGRO"
   },
   "MLM5281123238": {
     "label": "Clip 5 Morado",
-    "real_stock": 65,
+    "real_stock": 44,
     "min_visible": 1,
     "auto_replenish": true,
     "replenish_quantity": 1,
@@ -315,7 +317,7 @@
   },
   "MLM2904687747": {
     "label": "Clip 5 Azul",
-    "real_stock": 155,
+    "real_stock": 116,
     "min_visible": 1,
     "auto_replenish": true,
     "replenish_quantity": 1,
@@ -330,7 +332,7 @@
   },
   "MLM2904674811": {
     "label": "Clip 5 Camuflaje",
-    "real_stock": 126,
+    "real_stock": 102,
     "min_visible": 1,
     "auto_replenish": true,
     "replenish_quantity": 1,
