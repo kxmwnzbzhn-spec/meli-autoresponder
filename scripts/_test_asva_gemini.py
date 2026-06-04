@@ -1,11 +1,14 @@
-"""DRY: curl directo Gemini + comparar."""
-import os, json, requests
-GK = os.environ["GEMINI_API_KEY"]
-url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent"
-body = {
-    "contents": [{"role":"user","parts":[{"text":"Responde una frase: el cielo es azul?"}]}],
-    "generationConfig": {"temperature":0.3,"maxOutputTokens":200,"thinkingConfig":{"thinkingBudget":0}}
-}
-r = requests.post(f"{url}?key={GK}", json=body, timeout=30)
-print("HTTP", r.status_code)
-print("BODY:", r.text[:2000])
+import os, importlib.util, requests
+spec = importlib.util.spec_from_file_location("aap","scripts/answer_asva_pro.py")
+aap  = importlib.util.module_from_spec(spec); spec.loader.exec_module(aap)
+import meli_token
+r = meli_token.refresh(os.environ["MELI_REFRESH_TOKEN_ASVA"])
+at = r["access_token"] if isinstance(r,dict) else r.json()["access_token"]
+H = {"Authorization": f"Bearer {at}"}
+item = aap.fetch_item("MLM3849137034", H)
+print("TITULO:", item["title"])
+for q in ["El perfume es fresco?", "Es para hombre o mujer?", "Cuanto dura el aroma?",
+          "Cuantos ml viene?", "Es original?", "Se puede usar en oficina?"]:
+    print(f"\nQ: {q}")
+    a = aap.gemini_answer(q, item)
+    print(f"A: {a}")
