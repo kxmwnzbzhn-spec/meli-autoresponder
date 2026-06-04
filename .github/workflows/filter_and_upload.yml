@@ -1,0 +1,28 @@
+name: filter-and-upload
+on:
+  workflow_dispatch:
+    inputs:
+      run_ids:    { required: true,  type: string }
+      labels:     { required: true,  type: string }
+      exclude_sids: { required: true,  type: string, description: 'SIDs to exclude, comma separated' }
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests pypdf google-api-python-client google-auth -q
+      - env:
+          RUN_IDS:            ${{ inputs.run_ids }}
+          LABELS:             ${{ inputs.labels }}
+          EXCLUDE_SIDS:       ${{ inputs.exclude_sids }}
+          GH_TOKEN_FOR_API:   ${{ secrets.GH_PAT }}
+          GOOGLE_OAUTH_CLIENT_ID:     ${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}
+          GOOGLE_OAUTH_CLIENT_SECRET: ${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}
+          GOOGLE_OAUTH_REFRESH_TOKEN: ${{ secrets.GOOGLE_OAUTH_REFRESH_TOKEN }}
+          TG_TOKEN:           ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TG_CHAT:            ${{ secrets.TELEGRAM_CHAT_ID }}
+          DRIVE_FOLDER_ID:    '1aIDN3iq6zwCacL57iamptvQCPoSDyRbL'
+        run: python scripts/filter_and_upload.py
