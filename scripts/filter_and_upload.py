@@ -1,0 +1,98 @@
+"""Filtra páginas de PDFs combinados quitando shipments por SID, luego sube a Drive."""
+import os, sys, requests, zipfile, io, re, json
+from datetime import datetime, timezone, timedelta
+from pypdf import PdfReader, PdfWriter
+
+TZ = timezone(timedelta(hours=-6))
+TODAY = datetime.now(TZ).strftime("%Y-%m-%d")
+REPO = "kxmwnzbzhn-spec/meli-autoresponder"
+RUN_IDS = os.environ["RUN_IDS"].split(",")
+LABELS = os.environ.get("LABELS","").split(",")
+EXCLUDE_SIDS = set(s.strip() for s in os.environ.get("EXCLUDE_SIDS","").split(",") if s.strip())
+DRIVE_FOLDER = os.environ.get("DRIVE_FOLDER_ID","1aIDN3iq6zwCacL57iamptvQCPoSDyRbL")
+GH_TOKEN = os.environ["GH_TOKEN_FOR_API"]
+
+print(f"Filtros: {len(EXCLUDE_SIDS)} SIDs a excluir")
+
+H = {"Authorization": f"Bearer {GH_TOKEN}", "Accept": "application/vnd.github+json"}
+writer = PdfWriter()
+summary = []; total_in = 0; total_kept = 0; total_excl = 0; per_account_excl = {}
+
+for rid, label in zip(RUN_IDS, LABELS):
+    arts = requests.get(f"https://api.github.com/repos/{REPO}/actions/runs/{rid}/artifacts", headers=H).json()
+    url = arts["artifacts"][0]["archive_download_url"]
+    r = requests.get(url, headers=H, allow_redirects=True)
+    zf = zipfile.ZipFile(io.BytesIO(r.content))
+    pdf_name = [n for n in zf.namelist() if n.endswith(".pdf")][0]
+    pdf_bytes = zf.read(pdf_name)
+    reader = PdfReader(io.BytesIO(pdf_bytes))
+    kept = 0; excl = 0
+    for page in reader.pages:
+        text = page.extract_text() or ""
+        # Find SID via "Ship:<digits>" pattern (header from labels_one overlay)
+        m = re.search(r'Ship[:\s]+(\d{10,})', text)
+        sid = m.group(1) if m else None
+        if sid and sid in EXCLUDE_SIDS:
+            excl += 1
+            continue
+        writer.add_page(page)
+        kept += 1
+    total_in += kept + excl; total_kept += kept; total_excl += excl
+    per_account_excl[label] = excl
+    summary.append(f"{label}: {kept} ok ({excl} excl)")
+    print(f"  {label}: kept {kept}, excluded {excl}")
+
+out_name = f"ETIQUETAS_{TODAY}_combo_clean.pdf"
+with open(out_name, "wb") as f: writer.write(f)
+print(f"\nTotal entrada: {total_in} | kept: {total_kept} | excluded: {total_excl}")
+
+# Drive upload
+from google.oauth2.credentials import Credentials
+from google.auth.transport.requests import Request as GRequest
+from googleapiclient.discovery import build
+from googleapiclient.http import MediaFileUpload
+
+creds = Credentials(token=None, refresh_token=os.environ["GOOGLE_OAUTH_REFRESH_TOKEN"],
+                    token_uri="https://oauth2.googleapis.com/token",
+                    client_id=os.environ["GOOGLE_OAUTH_CLIENT_ID"],
+                    client_secret=os.environ["GOOGLE_OAUTH_CLIENT_SECRET"],
+                    scopes=["https://www.googleapis.com/auth/drive"])
+creds.refresh(GRequest())
+svc = build("drive","v3",credentials=creds,cache_discovery=False)
+
+q = f"name='{TODAY}' and mimeType='application/vnd.google-apps.folder' and '{DRIVE_FOLDER}' in parents and trashed=false"
+res = svc.files().list(q=q, fields="files(id,name)").execute()
+files = res.get("files", [])
+if files: day_id = files[0]["id"]
+else:
+    f = svc.files().create(body={"name":TODAY,"mimeType":"application/vnd.google-apps.folder","parents":[DRIVE_FOLDER]},
+                           fields="id").execute()
+    day_id = f["id"]
+
+# Delete prior combo files
+q = f"name contains 'combo' and '{day_id}' in parents and trashed=false"
+prev = svc.files().list(q=q, fields="files(id,name)").execute().get("files", [])
+for p in prev:
+    try:
+        svc.files().delete(fileId=p["id"]).execute()
+        print(f"  borré viejo: {p['name']}")
+    except Exception as e:
+        print(f"  no pude borrar {p['name']}: {e}")
+
+media = MediaFileUpload(out_name, mimetype="application/pdf", resumable=True, chunksize=1024*1024)
+req = svc.files().create(body={"name":out_name,"parents":[day_id]}, media_body=media,
+                         fields="id,name,webViewLink")
+resp = None
+while resp is None: _, resp = req.next_chunk(num_retries=4)
+print(f"\n✅ Subido: {resp.get('name')} → {resp.get('webViewLink')}")
+print(f"📂 Carpeta: https://drive.google.com/drive/folders/{day_id}")
+
+TG = os.environ.get("TG_TOKEN",""); TGC = os.environ.get("TG_CHAT","")
+if TG and TGC:
+    text = (f"🧹 <b>Etiquetas filtradas {TODAY}</b>\n"
+            f"📊 {total_kept} págs (excluí {total_excl} Bose Negro)\n"
+            f"   • " + " · ".join(summary) + "\n"
+            f"📂 <a href=\"https://drive.google.com/drive/folders/{day_id}\">Carpeta</a>\n"
+            f"📄 <a href=\"{resp.get('webViewLink')}\">PDF</a>")
+    requests.post(f"https://api.telegram.org/bot{TG}/sendMessage",
+                  data={"chat_id":TGC,"text":text,"parse_mode":"HTML","disable_web_page_preview":"true"}, timeout=10)
