@@ -157,17 +157,32 @@ def gemini_answer(q_text, item):
         "contents": [{"role": "user", "parts": [{"text": user_prompt}]}],
         "generationConfig": {
             "temperature": 0.3,
-            "maxOutputTokens": 220,
+            "maxOutputTokens": 600,
             "candidateCount": 1,
+            "thinkingConfig": {"thinkingBudget": 0},
         }
     }
+    j = None
+    for attempt in range(4):
+        try:
+            r = requests.post(f"{GEMINI_URL}?key={GEMINI_KEY}", json=body, timeout=40)
+        except Exception as e:
+            print(f"    gemini exc try{attempt+1}: {e}")
+            time.sleep(2*(attempt+1)); continue
+        if r.status_code == 200:
+            j = r.json(); break
+        if r.status_code in (429, 500, 502, 503, 504):
+            print(f"    gemini http {r.status_code} try{attempt+1}, backoff")
+            time.sleep(2*(attempt+1)); continue
+        print(f"    gemini http {r.status_code}: {r.text[:200]}")
+        return None
+    if not j:
+        return None
     try:
-        r = requests.post(f"{GEMINI_URL}?key={GEMINI_KEY}", json=body, timeout=30)
-        if r.status_code != 200:
-            print(f"    gemini http {r.status_code}: {r.text[:200]}")
-            return None
-        j = r.json()
         ans = j["candidates"][0]["content"]["parts"][0]["text"].strip()
+    except Exception:
+        print(f"    gemini parse fail: {json.dumps(j)[:300]}")
+        return None
         # Sanity cap a 480 chars (limite MELI 2000 — pero queremos brevedad)
         ans = re.sub(r"\s+", " ", ans).strip()
         if len(ans) > 480:
