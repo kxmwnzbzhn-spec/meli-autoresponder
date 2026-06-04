@@ -1,4 +1,4 @@
-"""Auto-replenish bot v8 (+Adrián) (SERVICE_KEY fix) — paginación completa por cuenta + concurrency-safe.
+"""Auto-replenish bot v9 (+capped stock) (+Adrián) (SERVICE_KEY fix) — paginación completa por cuenta + concurrency-safe.
 Cambios vs v3:
 - Pagina TODOS los paused (no solo 50) en cada tick
 - Manejo gracioso de tokens
@@ -77,11 +77,24 @@ while time.time()<end:
     t0=time.time()
     revived_tick=0
     # === PRIORITY REPLENISH — check FIRST every tick, regardless of OOS status ===
+    # capped: dict item_id -> {visible_qty, remaining, account, auto_pause_when_zero}
+    capped_map={}
+    if SB_KEY:
+        try:
+            for r in sb_get("meli_stock_capped","select=item_id,account,visible_qty,remaining,auto_pause_when_zero"):
+                capped_map[r["item_id"]]={"visible_qty":int(r.get("visible_qty") or 1),
+                                          "remaining":int(r.get("remaining") or 0),
+                                          "account":r.get("account"),
+                                          "auto_pause":bool(r.get("auto_pause_when_zero",True))}
+        except: pass
     try:
         priority=[r for r in sb_get("meli_priority_replenish","select=item_id,account,default_qty") if r.get("item_id")]
         for pr in priority:
             iid=pr["item_id"]; acct=pr.get("account"); qty=int(pr.get("default_qty") or 1)
-            # find session for this account
+            cap=capped_map.get(iid)
+            if cap:
+                qty=cap["visible_qty"]
+                acct=acct or cap["account"]
             sec_for=None
             for (uid_a,sec_a,nick_a) in ACCOUNTS:
                 if nick_a.lower()==(acct or "").lower():
@@ -92,7 +105,40 @@ while time.time()<end:
             HJp={**Hp,"Content-Type":"application/json"}
             try:
                 g=requests.get(f"{API}/items/{iid}",headers=Hp,timeout=10).json()
-                if g.get("status")!="active" or (g.get("available_quantity") or 0)<qty:
+                cur_qty=g.get("available_quantity") or 0
+                cur_status=g.get("status")
+                needs_replenish = (cur_status!="active") or (cur_qty<qty)
+                if not needs_replenish: continue
+                if cap:
+                    # Detect sale: any drop = at least 1 sold. We assume visible=qty, so sold=qty-cur_qty (min 1).
+                    sold=max(qty-cur_qty,1)
+                    new_remaining=cap["remaining"]-sold
+                    if new_remaining<=0 and cap["auto_pause"]:
+                        # Pause + sticky no_replenish + delete from priority + zero capped
+                        try:
+                            requests.put(f"{API}/items/{iid}",headers=HJp,json={"status":"paused"},timeout=10)
+                        except: pass
+                        sb_post("meli_no_replenish_items",[{"item_id":iid,"account":acct,"reason":"capped stock exhausted"}])
+                        try:
+                            requests.delete(f"{SB_URL}/rest/v1/meli_priority_replenish?item_id=eq.{iid}",
+                                headers={"apikey":SB_KEY,"Authorization":f"Bearer "+SB_KEY},timeout=10)
+                            requests.patch(f"{SB_URL}/rest/v1/meli_stock_capped?item_id=eq.{iid}",
+                                headers={"apikey":SB_KEY,"Authorization":f"Bearer "+SB_KEY,"Content-Type":"application/json","Prefer":"return=minimal"},
+                                json={"remaining":0,"updated_at":"now()"},timeout=10)
+                        except: pass
+                        print(f"[t{tick_num} CAPPED-DONE {nick_p}] {iid} stock_real=0 → PAUSED + locked")
+                        continue
+                    # Replenish + decrement
+                    rr=requests.put(f"{API}/items/{iid}",headers=HJp,json={"status":"active","available_quantity":qty},timeout=10)
+                    if rr.status_code in (200,201):
+                        cap["remaining"]=new_remaining
+                        try:
+                            requests.patch(f"{SB_URL}/rest/v1/meli_stock_capped?item_id=eq.{iid}",
+                                headers={"apikey":SB_KEY,"Authorization":f"Bearer "+SB_KEY,"Content-Type":"application/json","Prefer":"return=minimal"},
+                                json={"remaining":new_remaining,"updated_at":"now()"},timeout=10)
+                        except: pass
+                        print(f"[t{tick_num} CAPPED {nick_p}] {iid} sold={sold} remaining={new_remaining} qty→{qty}")
+                else:
                     rr=requests.put(f"{API}/items/{iid}",headers=HJp,json={"status":"active","available_quantity":qty},timeout=10)
                     if rr.status_code in (200,201):
                         print(f"[t{tick_num} PRIORITY {nick_p}] {iid} FORCED active qty={qty}")
@@ -149,6 +195,7 @@ if gh:
             json={"ref":"main","inputs":{}},timeout=20)
         print(f"REDISPATCH: HTTP {r.status_code}")
     except Exception as e: print(f"redispatch err: {e}")
+
 
 
 
