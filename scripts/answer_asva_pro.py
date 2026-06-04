@@ -183,25 +183,22 @@ def gemini_answer(q_text, item):
     except Exception:
         print(f"    gemini parse fail: {json.dumps(j)[:300]}")
         return None
-        # Sanity cap a 480 chars (limite MELI 2000 — pero queremos brevedad)
-        ans = re.sub(r"\s+", " ", ans).strip()
-        if len(ans) > 480:
-            ans = ans[:477] + "..."
-        # Guardas duras: NUNCA dejar pasar canales externos
-        forbidden_patterns = [
-            r"whats\s*app", r"wa\.me", r"@gmail", r"@hotmail", r"@outlook",
-            r"@yahoo", r"\+52\s*\d", r"\binstagram\b", r"\btiktok\b",
-            r"facebook\.com", r"mi[\s-]?correo", r"mi[\s-]?tel[ée]fono",
-            r"https?://(?!www\.mercadolibre)",
-        ]
-        for pat in forbidden_patterns:
-            if re.search(pat, ans, re.IGNORECASE):
-                print(f"    gemini blocked by pattern: {pat}")
-                return None
-        return ans
-    except Exception as e:
-        print(f"    gemini exc: {e}")
-        return None
+    # Sanity cap a 480 chars (limite MELI 2000 - queremos brevedad)
+    ans = re.sub(r"\s+", " ", ans).strip()
+    if len(ans) > 480:
+        ans = ans[:477] + "..."
+    # Guardas duras: NUNCA dejar pasar canales externos
+    forbidden_patterns = [
+        r"whats\s*app", r"wa\.me", r"@gmail", r"@hotmail", r"@outlook",
+        r"@yahoo", r"\+52\s*\d", r"\binstagram\b", r"\btiktok\b",
+        r"facebook\.com", r"mi[\s-]?correo", r"mi[\s-]?tel[\u00e9]fono",
+        r"https?://(?!www\.mercadolibre)",
+    ]
+    for pat in forbidden_patterns:
+        if re.search(pat, ans, re.IGNORECASE):
+            print(f"    gemini blocked by pattern: {pat}")
+            return None
+    return ans
 
 def craft(q_text, item):
     a = template_answer(q_text, item)
