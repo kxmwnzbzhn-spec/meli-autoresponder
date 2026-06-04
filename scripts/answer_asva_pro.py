@@ -187,10 +187,17 @@ def gemini_answer(q_text, item):
         ans = re.sub(r"\s+", " ", ans).strip()
         if len(ans) > 480:
             ans = ans[:477] + "..."
-        # Guardas duras: NUNCA dejar pasar contenido sensible
-        forbidden = ["whatsapp","wa.me","@gmail","@hotmail","+52","+1 ","instagram","tiktok","www.","http","telefono","correo electronico"]
-        if any(f in ans.lower() for f in forbidden):
-            return None
+        # Guardas duras: NUNCA dejar pasar canales externos
+        forbidden_patterns = [
+            r"whats\s*app", r"wa\.me", r"@gmail", r"@hotmail", r"@outlook",
+            r"@yahoo", r"\+52\s*\d", r"\binstagram\b", r"\btiktok\b",
+            r"facebook\.com", r"mi[\s-]?correo", r"mi[\s-]?tel[ée]fono",
+            r"https?://(?!www\.mercadolibre)",
+        ]
+        for pat in forbidden_patterns:
+            if re.search(pat, ans, re.IGNORECASE):
+                print(f"    gemini blocked by pattern: {pat}")
+                return None
         return ans
     except Exception as e:
         print(f"    gemini exc: {e}")
