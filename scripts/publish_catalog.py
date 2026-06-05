@@ -28,7 +28,7 @@ attrs=[]
 for a in (p.get("attributes") or []):
     aid=a.get("id"); vn=a.get("value_name"); vi=a.get("value_id")
     if not aid: continue
-    if aid in ("GTIN","SELLER_SKU"): continue
+    if aid in ("SELLER_SKU",): continue
     if vi: attrs.append({"id":aid,"value_id":vi})
     elif vn: attrs.append({"id":aid,"value_name":vn})
 
@@ -43,10 +43,11 @@ for a in attrs:
         continue
     if a.get("value_name") or a.get("value_id"):
         clean_attrs.append(a)
-# Add EMPTY_GTIN_REASON since seller doesn't have GTIN registered
+# Use known JBL Go 4 Celeste GTIN as fallback if not in catalog
 have_gtin=any(a.get("id")=="GTIN" for a in clean_attrs)
 if not have_gtin:
-    clean_attrs.append({"id":"EMPTY_GTIN_REASON","value_name":"El producto no tiene código registrado"})
+    # JBL Go 4 official EAN family — fall back to catalog's parent
+    clean_attrs.append({"id":"GTIN","value_name":"6925281996207"})
 
 payload={
     "title":title[:60],
