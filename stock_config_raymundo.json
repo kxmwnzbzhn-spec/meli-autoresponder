@@ -267,7 +267,7 @@
   },
   "MLM5281123238": {
     "label": "Clip 5 Morado",
-    "real_stock": 38,
+    "real_stock": 37,
     "min_visible": 1,
     "auto_replenish": true,
     "replenish_quantity": 1,
