@@ -32,10 +32,25 @@ for a in (p.get("attributes") or []):
     if vi: attrs.append({"id":aid,"value_id":vi})
     elif vn: attrs.append({"id":aid,"value_name":vn})
 
+# Filter null/struct-conflicting attrs + ensure GTIN
+clean_attrs=[]
+for a in attrs:
+    aid=a.get("id")
+    if aid in ("ALPHANUMERIC_MODEL","CHARGE_TIME","MAX_BATTERY_AUTONOMY","POWER_OUTPUT_RMS",
+               "DISTORTION","WIDTH","HEIGHT","LENGTH","WEIGHT","MAX_FREQUENCY_RESPONSE",
+               "MIN_FREQUENCY_RESPONSE","PACKAGE_HEIGHT","PACKAGE_LENGTH","PACKAGE_WEIGHT",
+               "PACKAGE_WIDTH","ITEM_CONDITION"):
+        continue
+    if a.get("value_name") or a.get("value_id"):
+        clean_attrs.append(a)
+# Add EMPTY_GTIN_REASON since seller doesn't have GTIN registered
+have_gtin=any(a.get("id")=="GTIN" for a in clean_attrs)
+if not have_gtin:
+    clean_attrs.append({"id":"EMPTY_GTIN_REASON","value_name":"El producto no tiene código de barras"})
+
 payload={
     "title":title[:60],
     "category_id":category_id,
-    "catalog_product_id":CPID,
     "price":PRICE,
     "currency_id":"MXN",
     "available_quantity":1,
@@ -43,7 +58,7 @@ payload={
     "condition":"new",
     "listing_type_id":"gold_special",
     "pictures":pictures,
-    "attributes":attrs,
+    "attributes":clean_attrs,
     "shipping":{"mode":"me2","local_pick_up":False,"free_shipping":False},
     "sale_terms":[
         {"id":"WARRANTY_TYPE","value_name":"Garantía del vendedor"},
