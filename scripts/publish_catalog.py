@@ -46,7 +46,7 @@ for a in attrs:
 # Add EMPTY_GTIN_REASON since seller doesn't have GTIN registered
 have_gtin=any(a.get("id")=="GTIN" for a in clean_attrs)
 if not have_gtin:
-    clean_attrs.append({"id":"EMPTY_GTIN_REASON","value_name":"El producto no tiene código de barras"})
+    clean_attrs.append({"id":"EMPTY_GTIN_REASON","value_name":"El producto no tiene código registrado"})
 
 payload={
     "title":title[:60],
