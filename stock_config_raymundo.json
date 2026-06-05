@@ -317,7 +317,7 @@
   },
   "MLM2904687747": {
     "label": "Clip 5 Azul",
-    "real_stock": 109,
+    "real_stock": 108,
     "min_visible": 1,
     "auto_replenish": true,
     "replenish_quantity": 1,
@@ -332,7 +332,7 @@
   },
   "MLM2904674811": {
     "label": "Clip 5 Camuflaje",
-    "real_stock": 96,
+    "real_stock": 95,
     "min_visible": 1,
     "auto_replenish": true,
     "replenish_quantity": 1,
