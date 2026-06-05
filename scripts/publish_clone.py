@@ -46,7 +46,6 @@ if not have_gtin and not have_egr:
 TITLE="Bocina JBL Go 4 Celeste Bluetooth Waterproof Portátil"[:60]
 payload={
     "title":TITLE,
-    "family_name":g.get("family_name") or "JBL Go 4 Celeste",
     "category_id":g.get("category_id"),
     "price":PRICE,
     "currency_id":"MXN",
