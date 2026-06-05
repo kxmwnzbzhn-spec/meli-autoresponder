@@ -19,15 +19,31 @@ FLOOR=499; CEIL=549; PRICE=549
 p=requests.get(f"{API}/products/{CPID}",headers=H,timeout=10).json()
 print(f"\n[CATALOG] {CPID} name={p.get('name')} status={p.get('status')} pdp_types={p.get('pdp_types')}")
 
+# pdp_types=traditional means we can't use catalog_listing=true; publish as tradicional with CPID reference
+title = p.get("name") or "Bocina JBL Go 4 Celeste Bluetooth Waterproof"
+category_id = p.get("category_id") or "MLM59800"
+pictures = [{"source":pic.get("url")} for pic in (p.get("pictures") or []) if pic.get("url")]
+# Extract attributes from catalog (BRAND, MODEL, COLOR etc.)
+attrs=[]
+for a in (p.get("attributes") or []):
+    aid=a.get("id"); vn=a.get("value_name"); vi=a.get("value_id")
+    if not aid: continue
+    if aid in ("GTIN","SELLER_SKU"): continue
+    if vi: attrs.append({"id":aid,"value_id":vi})
+    elif vn: attrs.append({"id":aid,"value_name":vn})
+
 payload={
+    "title":title[:60],
+    "category_id":category_id,
     "catalog_product_id":CPID,
-    "catalog_listing":True,
     "price":PRICE,
     "currency_id":"MXN",
     "available_quantity":1,
     "buying_mode":"buy_it_now",
     "condition":"new",
-    "listing_type_id":"gold_pro",
+    "listing_type_id":"gold_special",
+    "pictures":pictures,
+    "attributes":attrs,
     "shipping":{"mode":"me2","local_pick_up":False,"free_shipping":False},
     "sale_terms":[
         {"id":"WARRANTY_TYPE","value_name":"Garantía del vendedor"},
