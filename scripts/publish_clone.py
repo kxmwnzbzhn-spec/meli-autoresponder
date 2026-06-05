@@ -41,7 +41,7 @@ for a in (g.get("attributes") or []):
 have_gtin=any(a.get("id")=="GTIN" for a in attrs)
 have_egr=any(a.get("id")=="EMPTY_GTIN_REASON" for a in attrs)
 if not have_gtin and not have_egr:
-    attrs.append({"id":"EMPTY_GTIN_REASON","value_name":"El producto no tiene código registrado"})
+    attrs.append({"id":"GTIN","value_name":"6925281996528"})
 
 TITLE="Bocina JBL Go 4 Celeste Bluetooth Waterproof Portátil"[:60]
 payload={
