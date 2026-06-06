@@ -1,16 +1,16 @@
 {
   "_meta": {
-    "updated": "2026-06-06T01:47:44.141307Z",
+    "updated": "2026-06-06T05:41:46.765995Z",
     "golive_ref": "stock_at_golive_20260518.json",
     "note": "Dinámico — decrementa con cada venta vía cron.",
-    "total_sold": 2215,
-    "total_available": 2801
+    "total_sold": 2223,
+    "total_available": 2793
   },
   "skus": {
     "SONY-XB100-NEGRO": {
-      "available": 1355,
+      "available": 1354,
       "initial": 1422,
-      "sold_since_golive": 67,
+      "sold_since_golive": 68,
       "last_pause_triggered": false,
       "modelo": "Sony XB100",
       "color": "Negro"
@@ -24,17 +24,17 @@
       "color": "Aqua/Celeste"
     },
     "JBL-GO3-NEGRO": {
-      "available": -86,
+      "available": -91,
       "initial": 495,
-      "sold_since_golive": 581,
+      "sold_since_golive": 586,
       "last_pause_triggered": true,
       "modelo": "JBL Go 3",
       "color": "Negro"
     },
     "JBL-CLIP5-AZUL": {
-      "available": 161,
+      "available": 160,
       "initial": 421,
-      "sold_since_golive": 260,
+      "sold_since_golive": 261,
       "last_pause_triggered": false,
       "modelo": "JBL Clip 5",
       "color": "Azul"
@@ -48,9 +48,9 @@
       "color": "Camuflaje"
     },
     "JBL-CLIP5-CAMUFLAJE": {
-      "available": 192,
+      "available": 191,
       "initial": 240,
-      "sold_since_golive": 48,
+      "sold_since_golive": 49,
       "last_pause_triggered": false,
       "modelo": "JBL Clip 5",
       "color": "Camuflaje"
@@ -72,9 +72,9 @@
       "color": "Rojo"
     },
     "JBL-CLIP5-ROSA": {
-      "available": 180,
+      "available": 179,
       "initial": 200,
-      "sold_since_golive": 20,
+      "sold_since_golive": 21,
       "last_pause_triggered": false,
       "modelo": "JBL Clip 5",
       "color": "Rosa"
@@ -120,9 +120,9 @@
       "color": "Negro"
     },
     "JBL-CLIP5-NEGRO": {
-      "available": -10,
+      "available": -9,
       "initial": 10,
-      "sold_since_golive": 20,
+      "sold_since_golive": 19,
       "last_pause_triggered": true,
       "modelo": "JBL Clip 5",
       "color": "Negro"
