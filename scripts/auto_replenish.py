@@ -1,4 +1,4 @@
-"""Auto-replenish bot v9 (+capped stock) (+Adrián) (SERVICE_KEY fix) — paginación completa por cuenta + concurrency-safe.
+"""Auto-replenish bot v10 (variation-aware) (+capped stock) (+Adrián) (SERVICE_KEY fix) — paginación completa por cuenta + concurrency-safe.
 Cambios vs v3:
 - Pagina TODOS los paused (no solo 50) en cada tick
 - Manejo gracioso de tokens
@@ -128,8 +128,23 @@ while time.time()<end:
                         except: pass
                         print(f"[t{tick_num} CAPPED-DONE {nick_p}] {iid} stock_real=0 → PAUSED + locked")
                         continue
-                    # Replenish + decrement
-                    rr=requests.put(f"{API}/items/{iid}",headers=HJp,json={"status":"active","available_quantity":qty},timeout=10)
+                    # Replenish + decrement — variation-aware
+                    vars_list=g.get("variations") or []
+                    if vars_list:
+                        # qty represents per-variation target (1 each)
+                        per_var=1 if qty<=len(vars_list) else max(qty//len(vars_list),1)
+                        vupdates=[]
+                        for v in vars_list:
+                            if (v.get("available_quantity") or 0)<per_var:
+                                vupdates.append({"id":v.get("id"),"available_quantity":per_var})
+                        if vupdates:
+                            rr=requests.put(f"{API}/items/{iid}",headers=HJp,
+                                json={"status":"active","variations":vupdates},timeout=10)
+                        else:
+                            class _R: status_code=200
+                            rr=_R()
+                    else:
+                        rr=requests.put(f"{API}/items/{iid}",headers=HJp,json={"status":"active","available_quantity":qty},timeout=10)
                     if rr.status_code in (200,201):
                         cap["remaining"]=new_remaining
                         try:
@@ -139,9 +154,22 @@ while time.time()<end:
                         except: pass
                         print(f"[t{tick_num} CAPPED {nick_p}] {iid} sold={sold} remaining={new_remaining} qty→{qty}")
                 else:
-                    rr=requests.put(f"{API}/items/{iid}",headers=HJp,json={"status":"active","available_quantity":qty},timeout=10)
-                    if rr.status_code in (200,201):
-                        print(f"[t{tick_num} PRIORITY {nick_p}] {iid} FORCED active qty={qty}")
+                    vars_list=g.get("variations") or []
+                    if vars_list:
+                        per_var=1 if qty<=len(vars_list) else max(qty//len(vars_list),1)
+                        vupdates=[]
+                        for v in vars_list:
+                            if (v.get("available_quantity") or 0)<per_var:
+                                vupdates.append({"id":v.get("id"),"available_quantity":per_var})
+                        if vupdates:
+                            rr=requests.put(f"{API}/items/{iid}",headers=HJp,
+                                json={"status":"active","variations":vupdates},timeout=10)
+                            if rr.status_code in (200,201):
+                                print(f"[t{tick_num} PRIORITY-VAR {nick_p}] {iid} restocked {len(vupdates)} variants per_var={per_var}")
+                    else:
+                        rr=requests.put(f"{API}/items/{iid}",headers=HJp,json={"status":"active","available_quantity":qty},timeout=10)
+                        if rr.status_code in (200,201):
+                            print(f"[t{tick_num} PRIORITY {nick_p}] {iid} FORCED active qty={qty}")
             except: pass
     except: pass
     
@@ -195,6 +223,7 @@ if gh:
             json={"ref":"main","inputs":{}},timeout=20)
         print(f"REDISPATCH: HTTP {r.status_code}")
     except Exception as e: print(f"redispatch err: {e}")
+
 
 
 
