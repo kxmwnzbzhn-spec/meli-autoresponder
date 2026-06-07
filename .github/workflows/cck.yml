@@ -1,9 +1,9 @@
-name: consolidate-ck
+name: clone-ck-boxer
 on: { workflow_dispatch: {} }
 jobs:
   go:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 4
     steps:
       - uses: actions/checkout@v4
       - run: pip install requests -q
@@ -13,4 +13,4 @@ jobs:
           MELI_REFRESH_TOKEN_AH: ${{ secrets.MELI_REFRESH_TOKEN_AH }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
-        run: python3 scripts/consolidate_ck.py
+        run: python3 scripts/clone_ck.py
