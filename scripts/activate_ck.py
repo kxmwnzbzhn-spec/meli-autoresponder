@@ -12,9 +12,8 @@ g=requests.get(f"{API}/items/{ITEM}",headers=H,timeout=10).json()
 print(f"[BEFORE] {ITEM} status={g.get('status')} qty={g.get('available_quantity')} price={g.get('price')}")
 print(f"  title={g.get('title')}")
 
+# Item has has_bids=true and available_quantity locked. Try status only first.
 payload={"status":"active"}
-if (g.get("available_quantity") or 0)<1:
-    payload["available_quantity"]=1
 rr=requests.put(f"{API}/items/{ITEM}",headers=HJ,json=payload,timeout=15)
 print(f"[ACTIVATE] HTTP {rr.status_code}: {rr.text[:400]}")
 
