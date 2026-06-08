@@ -158,12 +158,13 @@ def main():
     accounts = ["Claribel", "Asva", "Adrian"]
     # accounts → en la pipeline guardé como ETIQUETAS_Claribel.pdf, ETIQUETAS_Asva.pdf, ETIQUETAS_Ah.pdf
     # Mapeo display name → file name
-    file_map = {"Claribel": "CLARIBEL", "Asva": "ASVA", "Adrian": "AH"}
+    # ARTIFACT dir uses mixed case (workflow input.account), FILE inside is upper (labels_one.py output)
+    artifact_map = {"Claribel": "Claribel", "Asva": "Asva", "Adrian": "Ah"}
+    file_map     = {"Claribel": "CLARIBEL", "Asva": "ASVA", "Adrian": "AH"}
     for acc in accounts:
-        fname = file_map[acc]
-        # GitHub Actions download-artifact pone cada artifact en subdir con nombre del artifact
+        adir = artifact_map[acc]; fname = file_map[acc]
         candidates = [
-            f"./pdfs/labels-{fname}/ETIQUETAS_{fname}.pdf",
+            f"./pdfs/labels-{adir}/ETIQUETAS_{fname}.pdf",
             f"./pdfs/ETIQUETAS_{fname}.pdf",
         ]
         path = next((c for c in candidates if os.path.exists(c)), None)
