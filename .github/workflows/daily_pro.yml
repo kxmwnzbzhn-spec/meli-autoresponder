@@ -29,7 +29,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: labels-Claribel
-          path: ETIQUETAS_Claribel.pdf
+          path: ETIQUETAS_CLARIBEL.pdf
           if-no-files-found: error
           retention-days: 7
 
@@ -51,7 +51,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: labels-Asva
-          path: ETIQUETAS_Asva.pdf
+          path: ETIQUETAS_ASVA.pdf
           if-no-files-found: error
           retention-days: 7
 
@@ -73,7 +73,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: labels-Ah
-          path: ETIQUETAS_Ah.pdf
+          path: ETIQUETAS_AH.pdf
           if-no-files-found: error
           retention-days: 7
 
