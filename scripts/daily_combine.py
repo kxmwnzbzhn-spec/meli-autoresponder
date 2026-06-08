@@ -158,7 +158,7 @@ def main():
     accounts = ["Claribel", "Asva", "Adrian"]
     # accounts → en la pipeline guardé como ETIQUETAS_Claribel.pdf, ETIQUETAS_Asva.pdf, ETIQUETAS_Ah.pdf
     # Mapeo display name → file name
-    file_map = {"Claribel": "Claribel", "Asva": "Asva", "Adrian": "Ah"}
+    file_map = {"Claribel": "CLARIBEL", "Asva": "ASVA", "Adrian": "AH"}
     for acc in accounts:
         fname = file_map[acc]
         # GitHub Actions download-artifact pone cada artifact en subdir con nombre del artifact
