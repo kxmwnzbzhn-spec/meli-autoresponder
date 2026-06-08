@@ -272,7 +272,7 @@ writer=PdfWriter(); fail=[]
 for s in ships:
     try:
         r=requests.get("https://api.mercadolibre.com/shipment_labels",headers=H,
-            params={"shipment_ids":s["sid"],"response_type":"pdf"},timeout=30)
+            params={"shipment_ids":s["sid"],"response_type":"pdf","savePdf":"Y"},timeout=30)
         if r.status_code!=200 or not r.headers.get("content-type","").lower().startswith("application/pdf"):
             fail.append(s["sid"]); continue
         raw=r.content; lp=PdfReader(io.BytesIO(raw))
