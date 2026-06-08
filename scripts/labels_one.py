@@ -18,6 +18,43 @@ RT_SECRET_NAME = os.environ.get("RT_SECRET_NAME") or f"MELI_REFRESH_TOKEN_{ACCOU
 RT = os.environ.get(RT_SECRET_NAME)
 if not RT:
     raise SystemExit(f"No hay token: {RT_SECRET_NAME}")
+
+# === SUPABASE TOKEN PERSISTENCE ===
+SB_URL = os.environ.get("SUPABASE_URL","").rstrip('/')
+SB_KEY = os.environ.get("SUPABASE_SERVICE_KEY","")
+
+def sb_get_rt(account_name):
+    """Lee refresh_token actual de meli_tokens. Devuelve None si no se puede."""
+    if not (SB_URL and SB_KEY): return None
+    try:
+        r = requests.get(f"{SB_URL}/rest/v1/meli_tokens",
+            params={"account":f"eq.{account_name}","select":"refresh_token","limit":1},
+            headers={"apikey":SB_KEY,"Authorization":f"Bearer {SB_KEY}"}, timeout=10)
+        if r.status_code == 200 and r.json():
+            return r.json()[0].get("refresh_token")
+    except Exception as e:
+        print(f"[sb_get_rt] {e}")
+    return None
+
+def sb_save_rt(account_name, new_rt, access_token=None, expires_in=None):
+    """Actualiza refresh_token en meli_tokens después de un refresh exitoso."""
+    if not (SB_URL and SB_KEY) or not new_rt: return False
+    try:
+        from datetime import datetime as _dt, timezone as _tz, timedelta as _td
+        body = {"refresh_token": new_rt, "last_refreshed_at": _dt.now(_tz.utc).isoformat(), "refresh_error": None}
+        if access_token: body["access_token"] = access_token
+        if expires_in:
+            body["expires_at"] = (_dt.now(_tz.utc) + _td(seconds=int(expires_in))).isoformat()
+        r = requests.patch(f"{SB_URL}/rest/v1/meli_tokens",
+            params={"account":f"eq.{account_name}"},
+            json=body,
+            headers={"apikey":SB_KEY,"Authorization":f"Bearer {SB_KEY}",
+                     "Content-Type":"application/json","Prefer":"return=minimal"}, timeout=10)
+        return r.status_code in (200, 204)
+    except Exception as e:
+        print(f"[sb_save_rt] {e}")
+    return False
+
 TZ = timezone(timedelta(hours=-6))
 PAGE_W=4*72; PAGE_H=6*72
 ALLOWED_SUBS = {"printed", "ready_to_print"}
@@ -26,9 +63,24 @@ EX_TITLE = set(s.strip().lower() for s in (os.environ.get("EXCLUDE_TITLE_CONTAIN
 EX_MODELS = set(s.strip() for s in (os.environ.get("EXCLUDE_MODELS","") or "").split(",") if s.strip())
 
 def tok(rt):
-    r=requests.post("https://api.mercadolibre.com/oauth/token",data={
-        "grant_type":"refresh_token","client_id":APP_ID,"client_secret":APP_SECRET,"refresh_token":rt}).json()
-    return r.get("access_token")
+    """Refresca access_token. Prioriza refresh_token de Supabase; persiste el nuevo en Supabase."""
+    # Si SB disponible, usar el de allá (más fresco que el de GH secret)
+    sb_rt = sb_get_rt(ACCOUNT.upper())
+    use_rt = sb_rt or rt
+    r = requests.post("https://api.mercadolibre.com/oauth/token", data={
+        "grant_type":"refresh_token","client_id":APP_ID,"client_secret":APP_SECRET,"refresh_token":use_rt}).json()
+    new_rt = r.get("refresh_token")
+    at = r.get("access_token")
+    if new_rt and at:
+        sb_save_rt(ACCOUNT.upper(), new_rt, at, r.get("expires_in"))
+    elif not at:
+        # Fallback: si SB falló, prueba el GH secret directo
+        if sb_rt and sb_rt != rt:
+            r2 = requests.post("https://api.mercadolibre.com/oauth/token", data={
+                "grant_type":"refresh_token","client_id":APP_ID,"client_secret":APP_SECRET,"refresh_token":rt}).json()
+            new_rt2 = r2.get("refresh_token"); at = r2.get("access_token")
+            if new_rt2 and at: sb_save_rt(ACCOUNT.upper(), new_rt2, at, r2.get("expires_in"))
+    return at
 
 def _parse_color_map(text):
     if not text: return None
