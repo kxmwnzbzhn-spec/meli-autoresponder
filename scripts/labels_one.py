@@ -57,7 +57,7 @@ def sb_save_rt(account_name, new_rt, access_token=None, expires_in=None):
 
 TZ = timezone(timedelta(hours=-6))
 PAGE_W=4*72; PAGE_H=6*72
-ALLOWED_SUBS = {"printed", "ready_to_print"}
+ALLOWED_SUBS = {"ready_to_print"}  # solo NUEVAS — evita duplicados de etiquetas ya impresas
 # Filtros opcionales: lista separada por coma en EXCLUDE_TITLE_CONTAINS
 EX_TITLE = set(s.strip().lower() for s in (os.environ.get("EXCLUDE_TITLE_CONTAINS","") or "").split(",") if s.strip())
 EX_MODELS = set(s.strip() for s in (os.environ.get("EXCLUDE_MODELS","") or "").split(",") if s.strip())
