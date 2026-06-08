@@ -1,16 +1,16 @@
 {
   "_meta": {
-    "updated": "2026-06-08T11:50:16.234708Z",
+    "updated": "2026-06-08T15:03:41.411412Z",
     "golive_ref": "stock_at_golive_20260518.json",
     "note": "Dinámico — decrementa con cada venta vía cron.",
-    "total_sold": 2276,
-    "total_available": 2740
+    "total_sold": 2278,
+    "total_available": 2738
   },
   "skus": {
     "SONY-XB100-NEGRO": {
-      "available": 1347,
+      "available": 1345,
       "initial": 1422,
-      "sold_since_golive": 75,
+      "sold_since_golive": 77,
       "last_pause_triggered": false,
       "modelo": "Sony XB100",
       "color": "Negro"
