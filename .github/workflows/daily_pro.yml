@@ -104,4 +104,7 @@ jobs:
           TELEGRAM_BOT_TOKEN:         ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID:           ${{ secrets.TELEGRAM_CHAT_ID }}
           DRIVE_FOLDER_ID:            '1aIDN3iq6zwCacL57iamptvQCPoSDyRbL'
+          SUPABASE_URL:               ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY:       ${{ secrets.SUPABASE_SERVICE_KEY }}
+          GITHUB_RUN_ID:              ${{ github.run_id }}
         run: python scripts/daily_combine.py
