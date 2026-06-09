@@ -21,6 +21,11 @@ on:
         required: false
         type: string
         default: ''
+      allowed_substatuses:
+        description: 'Substatuses a incluir, separados por coma (default: ready_to_print)'
+        required: false
+        type: string
+        default: 'ready_to_print'
 jobs:
   run:
     runs-on: ubuntu-latest
@@ -36,6 +41,7 @@ jobs:
           RT_SECRET_NAME:           ${{ inputs.rt_secret_name }}
           EXCLUDE_MODELS:           ${{ inputs.exclude_models }}
           EXCLUDE_TITLE_CONTAINS:   ${{ inputs.exclude_title_contains }}
+          ALLOWED_SUBSTATUSES:      ${{ inputs.allowed_substatuses }}
           MELI_APP_ID:              ${{ secrets.MELI_APP_ID }}
           MELI_APP_SECRET:          ${{ secrets.MELI_APP_SECRET }}
           MELI_REFRESH_TOKEN_WILBERT:  ${{ secrets.MELI_REFRESH_TOKEN_WILBERT }}
