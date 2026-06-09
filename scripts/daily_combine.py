@@ -19,6 +19,10 @@ TG_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "")
 TG_CHAT  = os.environ.get("TELEGRAM_CHAT_ID", "")
 FORCE = os.environ.get("FORCE_REGEN") == "1"
 MANIFEST_URL = "https://raw.githubusercontent.com/kxmwnzbzhn-spec/meli-autoresponder/main/data/manifest.json"
+SB_URL = os.environ.get("SUPABASE_URL","").rstrip("/")
+SB_KEY = os.environ.get("SUPABASE_SERVICE_KEY","")
+RUN_ID = os.environ.get("GITHUB_RUN_ID","")
+LOOKBACK_DAYS = 7  # SIDs entregados en últimos N días → SKIP (anti-duplicado)
 
 # Exclusión hardcoded
 EXCL_KEYWORDS = [
@@ -33,6 +37,66 @@ def is_bad_text(text):
     tl = strip_accents(text.lower())
     if 'bose' in tl and ('negr' in tl or 'black' in tl): return True
     return any(k in tl for k in EXCL_KEYWORDS)
+
+
+
+# === SUPABASE TRACKING ===
+def sb_already_delivered_sids(lookback_days=LOOKBACK_DAYS):
+    """Devuelve set de SIDs ya entregados en los últimos N días."""
+    if not (SB_URL and SB_KEY): return set()
+    try:
+        from datetime import datetime as _dt, timezone as _tz, timedelta as _td
+        cutoff = (_dt.now(_tz.utc) - _td(days=lookback_days)).date().isoformat()
+        sids = set(); offset = 0
+        while True:
+            r = requests.get(f"{SB_URL}/rest/v1/etiquetas_entregadas",
+                params={"select":"sid","batch_date":f"gte.{cutoff}","limit":1000,"offset":offset},
+                headers={"apikey":SB_KEY,"Authorization":f"Bearer {SB_KEY}"}, timeout=15)
+            if r.status_code != 200: break
+            rows = r.json()
+            if not rows: break
+            for row in rows: sids.add(row["sid"])
+            if len(rows) < 1000: break
+            offset += 1000
+        print(f"[supabase] {len(sids)} SIDs ya entregados en últimos {lookback_days} días")
+        return sids
+    except Exception as e:
+        print(f"[sb_already_delivered_sids] {e}")
+    return set()
+
+def sb_record_delivered(records):
+    """Inserta (con upsert) los SIDs entregados en esta corrida."""
+    if not (SB_URL and SB_KEY) or not records: return
+    try:
+        # Chunk de 500 para evitar payload demasiado grande
+        for i in range(0, len(records), 500):
+            chunk = records[i:i+500]
+            r = requests.post(f"{SB_URL}/rest/v1/etiquetas_entregadas",
+                json=chunk,
+                headers={"apikey":SB_KEY,"Authorization":f"Bearer {SB_KEY}",
+                         "Content-Type":"application/json",
+                         "Prefer":"resolution=merge-duplicates,return=minimal"}, timeout=30)
+            if r.status_code not in (200, 201, 204):
+                print(f"[sb_record] HTTP {r.status_code}: {r.text[:200]}")
+        print(f"[supabase] registrados {len(records)} SIDs entregados")
+    except Exception as e:
+        print(f"[sb_record_delivered] {e}")
+
+def sb_count_carryover(min_days=3):
+    """Cuenta SIDs que llevan >N días en el sistema y siguen pendientes."""
+    if not (SB_URL and SB_KEY): return 0
+    try:
+        from datetime import datetime as _dt, timezone as _tz, timedelta as _td
+        cutoff = (_dt.now(_tz.utc) - _td(days=min_days)).date().isoformat()
+        r = requests.get(f"{SB_URL}/rest/v1/etiquetas_entregadas",
+            params={"select":"sid","batch_date":f"lt.{cutoff}","limit":1},
+            headers={"apikey":SB_KEY,"Authorization":f"Bearer {SB_KEY}",
+                     "Prefer":"count=exact"}, timeout=10)
+        cnt = int(r.headers.get("content-range","0/0").split("/")[-1])
+        return cnt
+    except Exception as e:
+        print(f"[sb_count_carryover] {e}")
+    return 0
 
 def tg_send(text):
     if not TG_TOKEN or not TG_CHAT: return
@@ -152,13 +216,15 @@ def main():
     # 3) Filtros: SID-based + text-based
     sid_excl = get_excluded_sids()
 
-    # 4) Combinar los 3 PDFs
+    # 4) Cargar SIDs ya entregados en últimos N días (anti-duplicado)
+    already_delivered = sb_already_delivered_sids()
+
+    # 5) Combinar los 3 PDFs
     writer = PdfWriter()
     per_account = {}
+    delivered_records = []  # para INSERT batch al final
+    today_cdmx = (datetime.now(TZ)).strftime("%Y-%m-%d")
     accounts = ["Claribel", "Asva", "Adrian"]
-    # accounts → en la pipeline guardé como ETIQUETAS_Claribel.pdf, ETIQUETAS_Asva.pdf, ETIQUETAS_Ah.pdf
-    # Mapeo display name → file name
-    # ARTIFACT dir uses mixed case (workflow input.account), FILE inside is upper (labels_one.py output)
     artifact_map = {"Claribel": "Claribel", "Asva": "Asva", "Adrian": "Ah"}
     file_map     = {"Claribel": "CLARIBEL", "Asva": "ASVA", "Adrian": "AH"}
     for acc in accounts:
@@ -170,23 +236,33 @@ def main():
         path = next((c for c in candidates if os.path.exists(c)), None)
         if not path:
             print(f"  [{acc}] PDF no encontrado en candidates {candidates}")
-            per_account[acc] = {"in":0, "kept":0, "sid_excl":0, "text_excl":0}
+            per_account[acc] = {"in":0, "kept":0, "sid_excl":0, "text_excl":0, "dup_excl":0}
             continue
         try:
             r = PdfReader(path)
-            in_n = len(r.pages); kept = 0; se = 0; te = 0
+            in_n = len(r.pages); kept = 0; se = 0; te = 0; du = 0
             for page in r.pages:
                 text = page.extract_text() or ""
                 m = re.search(r'Ship[:\s]+(\d{10,})', text)
                 sid = m.group(1) if m else None
                 if sid and sid in sid_excl: se += 1; continue
                 if is_bad_text(text): te += 1; continue
+                if sid and sid in already_delivered: du += 1; continue  # ANTI-DUPLICADO
                 writer.add_page(page); kept += 1
-            per_account[acc] = {"in": in_n, "kept": kept, "sid_excl": se, "text_excl": te}
-            print(f"  [{acc}] in={in_n} kept={kept} sid_excl={se} text_excl={te}")
+                if sid:
+                    # Extraer primera línea del producto del header del label como title
+                    lines = [l.strip() for l in text.split("\n") if l.strip()]
+                    product_title = next((l for l in lines if any(c.isalpha() for c in l)), "")[:200]
+                    delivered_records.append({
+                        "sid": sid, "account": acc, "product_title": product_title,
+                        "batch_date": today_cdmx,
+                        "run_id": int(RUN_ID) if RUN_ID.isdigit() else None,
+                    })
+            per_account[acc] = {"in": in_n, "kept": kept, "sid_excl": se, "text_excl": te, "dup_excl": du}
+            print(f"  [{acc}] in={in_n} kept={kept} sid_excl={se} text_excl={te} dup_excl={du}")
         except Exception as e:
             print(f"  [{acc}] ERROR leyendo PDF: {e}")
-            per_account[acc] = {"in":0, "kept":0, "sid_excl":0, "text_excl":0}
+            per_account[acc] = {"in":0, "kept":0, "sid_excl":0, "text_excl":0, "dup_excl":0}
 
     total = len(writer.pages)
     if total == 0:
@@ -212,11 +288,17 @@ def main():
                f"pero upload Drive falló.\n<code>{type(e).__name__}: {str(e)[:200]}</code>")
         print(msg); tg_send(msg); sys.exit(3)
 
-    # 6) Telegram report
+    # 6) Registrar SIDs entregados (anti-duplicado para próximas corridas)
+    sb_record_delivered(delivered_records)
+
+    # 7) Telegram report con carryover
+    carryover = sb_count_carryover(3)
     lines = [f"🤖 <b>daily_pro · {TODAY}</b>",
-             f"📊 <b>{total}</b> págs entregadas"]
+             f"📊 <b>{total}</b> págs entregadas (sin duplicados)"]
     for acc, st in per_account.items():
-        lines.append(f"   • {acc}: {st['kept']} (in {st['in']}, excl SID {st['sid_excl']}, excl texto {st['text_excl']})")
+        lines.append(f"   • {acc}: {st['kept']} (excl: {st['sid_excl']} SID, {st['text_excl']} texto, {st['dup_excl']} ya entregados)")
+    if carryover > 0:
+        lines.append(f"\n🚨 <b>{carryover} envíos en carryover</b> (>3 días en sistema, sin enviar físicamente)")
     lines.append("")
     lines.append(f"📂 <a href=\"https://drive.google.com/drive/folders/{day_id}\">Carpeta {TODAY}</a>")
     lines.append(f"📄 <a href=\"{up.get('webViewLink','')}\">PDF</a>")
