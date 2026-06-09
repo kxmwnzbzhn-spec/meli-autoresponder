@@ -1,0 +1,23 @@
+name: read-link
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install requests -q
+      - env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: python3 scripts/read_link.py
+      - run: |
+          if [ -f AUTH_URL.txt ]; then
+            git config user.email "claude@cowork.local"
+            git config user.name "claude-cowork"
+            git add AUTH_URL.txt
+            git commit -m "auth url"
+            git push
+          fi
