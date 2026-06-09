@@ -328,10 +328,18 @@ for sid, ord_list in obs.items():
                 if any(kw in rt or kw in rcln for kw in EX_TITLE): skip=True
                 qty=it.get("quantity",1); iid=io_obj.get("id") or ""
                 cond=get_condition(io_obj,H)
+                # ANTI-ROBO: usar código en lugar de nombre legible
+                col = get_variant_color(io_obj, H)
+                sz = None
+                for a in (io_obj.get("variation_attributes") or []):
+                    if a.get("id")=="SIZE" or "talla" in (a.get("name","") or "").lower():
+                        sz = (a.get("value_name") or "").strip()
+                        if sz: break
+                code = to_code(model, col, sz, io_obj.get("title",""))
                 if cond=="used":
-                    used=True; comp.append(f"USADO {qty} {tcln}")
+                    used=True; comp.append(f"USADO {qty} {code}")
                 else:
-                    comp.append(f"{qty} {tcln}")
+                    comp.append(f"{qty} {code}")
         if skip: continue
         buyer=(ord_list[0].get("buyer") or {}).get("nickname","?")
         ships.append({"sid":sid,"account":ACCOUNT,"buyer":buyer,"comp_lines":comp,
