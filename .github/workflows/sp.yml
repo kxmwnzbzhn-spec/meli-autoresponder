@@ -1,10 +1,14 @@
-name: search-public
+name: swap-pics-perfume
 on: { workflow_dispatch: {} }
 jobs:
   go:
     runs-on: ubuntu-latest
-    timeout-minutes: 3
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
       - run: pip install requests -q
-      - run: python3 scripts/search_public.py
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_AH: ${{ secrets.MELI_REFRESH_TOKEN_AH }}
+        run: python3 scripts/swap_pics.py
