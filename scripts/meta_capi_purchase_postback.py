@@ -1,11 +1,12 @@
 """
-Meli Orders → Meta CAPI Purchase post-back · MODO ALL-SALES.
-Manda Purchase event al pixel POR CADA orden paid de cualquier seller en SELLERS,
-sin filtrar por whitelist. WHITELIST_ITEMS solo se usa para mapear category amigable;
-items fuera de la whitelist se mandan con category="OTHER" pero igual alimentan el pixel.
+Meli Orders -> Meta CAPI Purchase post-back - MODO ALL-SALES con dual-pixel routing.
 
-Razón: más volumen de Purchase events = mejor pixel profile = cold start más rápido
-para futuras campañas + atribución modelada más precisa para las activas.
+Routing por producto:
+- ELITE_PRODUCTS (boxers + perfumes) -> pixel Elite Market 2952595904932530 con ELITE_TOKEN
+- Resto -> pixel Sonix 1520455545762550 con CAPI_TOKEN default
+
+Razon: Boxers + perfumes corren bajo Business Manager Elite Market, otros productos bajo Sonix.
+Mantener atribucion separada permite training audiences distintos por marca.
 """
 import os, requests, json, hashlib, sys
 from datetime import datetime, timedelta, timezone
@@ -13,7 +14,15 @@ import meli_token
 
 API_MELI = "https://api.mercadolibre.com"
 META_GRAPH = "https://graph.facebook.com/v21.0"
-PIXEL_ID = "1520455545762550"
+
+# === DUAL PIXEL CONFIG ===
+SONIX_PIXEL_ID = "1520455545762550"
+ELITE_PIXEL_ID = "2952595904932530"
+ELITE_PRODUCTS = {
+    "MLM2976325463", "MLM-2976325463",   # Boxers 3-pack Adrian
+    "MLM2996229227", "MLM-2996229227",   # Perfume 1M Gold
+}
+
 LOOKBACK_HOURS = 168
 
 SELLERS = [
@@ -23,8 +32,6 @@ SELLERS = [
     {"id": 3417664339, "name": "ADRIAN",  "token_env": "MELI_REFRESH_TOKEN_ADRIAN"},
 ]
 
-# Solo metadata amigable para items que conocemos.
-# Items fuera de esta tabla igual se mandan al pixel, pero con category="OTHER".
 WHITELIST_ITEMS = {
     "MLM2886030837": {"name": "Bocina Bluetooth 35w Rojo",        "category": "SPK35W_ROJO_V1"},
     "MLM2886136351": {"name": "Bocina Bluetooth 35w Morado",      "category": "SPK35W_MORADO_V1"},
@@ -33,38 +40,30 @@ WHITELIST_ITEMS = {
     "MLM2940664057": {"name": "Audifonos Bluetooth In-Ear Negro", "category": "AUDIFONOS_BT_V1"},
     "MLM5346655686": {"name": "Bocina Bluetooth Portatil Go4 IP67","category": "SPK_GO4_V1"},
     "MLM2976325463": {"name": "Pack 3 Boxers Premium Hombre",      "category": "APPAREL_BOXERS_V1"},
+    "MLM2996229227": {"name": "Perfume Gold Premium 100ml",        "category": "PERFUME_GOLD_V1"},
 }
 
-# PERFUME_BLACKLIST — SKUs TAL que NO van al pixel Sonix.
-# Los maneja tal-meli-pipeline al pixel TAL 2062725974505434 (atribución separada).
 PERFUME_BLACKLIST = {
     "MLM4436177528",  # Oud Cherry (TAL)
     "MLM5374718702",  # Dark Oud Cacao (TAL)
 }
 
-
-# item_id → landing URL para event_source_url (attribution Meta)
 ITEM_TO_LANDING = {
-    # Bocina espejo (varios listings rotaron)
     "MLM2886136351": "https://sonixmx.com.mx/bocina-30w-espejo/",
     "MLMU3924350212": "https://sonixmx.com.mx/bocina-30w-espejo/",
-    # Dashcam DVR-3
     "MLM2943284461": "https://sonixmx.com.mx/dashcam-dvr3/",
     "MLM5356938548": "https://sonixmx.com.mx/dashcam-dvr3/",
     "MLMU3986495886": "https://sonixmx.com.mx/dashcam-dvr3/",
-    # Buds 2 ASVA
     "MLM2952660425": "https://sonixmx.com.mx/audifonos-buds2/",
     "MLM2952545353": "https://sonixmx.com.mx/audifonos-buds2/",
-    # Bocina Go4 Wilbert
     "MLM-2958319761": "https://sonixmx.com.mx/bocina-go4/",
     "MLM2958319761": "https://sonixmx.com.mx/bocina-go4/",
-    # Audífonos BT YC
     "MLM2940664057": "https://sonixmx.com.mx/audifonos-bt/",
-    # Secadora ASVA
     "MLM2940986501": "https://sonixmx.com.mx/secadora-asva/",
-    # Boxers 3-Pack Adrian (apparel)
     "MLM2976325463": "https://sonixmx.com.mx/boxers-3pack/",
     "MLM-2976325463": "https://sonixmx.com.mx/boxers-3pack/",
+    "MLM2996229227": "https://sonixmx.com.mx/perfume-1m-gold/",
+    "MLM-2996229227": "https://sonixmx.com.mx/perfume-1m-gold/",
 }
 DEFAULT_LANDING = "https://sonixmx.com.mx/"
 
@@ -87,7 +86,6 @@ def collect_events_for_seller(seller, since):
     if not tok: return []
     h = {"Authorization": f"Bearer {tok}"}
     seller_id = seller["id"]
-
     all_orders = []
     offset = 0
     while True:
@@ -104,9 +102,11 @@ def collect_events_for_seller(seller, since):
         offset += 50
     print(f"  [{seller['name']}] orders pulled: {len(all_orders)}")
 
-    events = []
+    events_sonix = []
+    events_elite = []
     items_in_whitelist = 0
     items_other = 0
+    items_elite = 0
     for o in all_orders:
         oid = o["id"]; ot = o["date_created"]
         dt = datetime.fromisoformat(ot.replace("Z", "+00:00")) if "Z" in ot else datetime.fromisoformat(ot)
@@ -120,7 +120,7 @@ def collect_events_for_seller(seller, since):
         title = ((first.get("item") or {}).get("title") or "")[:80]
 
         if iid in PERFUME_BLACKLIST:
-            continue  # perfume TAL → pixel TAL via tal-meli-pipeline, NO al pixel Sonix
+            continue
 
         if iid in WHITELIST_ITEMS:
             meta = WHITELIST_ITEMS[iid]
@@ -143,13 +143,11 @@ def collect_events_for_seller(seller, since):
         if state: ud["st"] = [sha256_hash(state)]
 
         total_qty = sum(int(it.get("quantity", 1)) for it in items)
-
-        # Source URL = landing del producto si la conocemos; sino sonixmx home
         event_source_url = ITEM_TO_LANDING.get(iid, DEFAULT_LANDING)
-        events.append({
+        event = {
             "event_name": "Purchase", "event_time": event_time,
             "event_id": f"meli_order_{oid}",
-            "action_source": "website",  # Meta atribuye web conversions a campañas
+            "action_source": "website",
             "event_source_url": event_source_url,
             "user_data": ud,
             "custom_data": {
@@ -157,48 +155,71 @@ def collect_events_for_seller(seller, since):
                 "content_ids": [iid], "content_name": content_name,
                 "content_type": "product", "num_items": total_qty,
                 "content_category": content_category,
-                "order_id": str(oid)  # extra metadata para audit
+                "order_id": str(oid)
             }
-        })
-    print(f"  [{seller['name']}] events: {len(events)} (whitelist={items_in_whitelist}, other={items_other})")
-    return events
+        }
+
+        # Route to ELITE if product is in ELITE_PRODUCTS, else SONIX (default)
+        if iid in ELITE_PRODUCTS:
+            events_elite.append(event)
+            items_elite += 1
+        else:
+            events_sonix.append(event)
+
+    print(f"  [{seller['name']}] events: sonix={len(events_sonix)} elite={len(events_elite)} (whitelist={items_in_whitelist}, other={items_other}, elite_routed={items_elite})")
+    return events_sonix, events_elite
 
 def chunk(lst, n):
     for i in range(0, len(lst), n): yield lst[i:i+n]
 
+def send_to_pixel(events, pixel_id, token, label, test_code=""):
+    if not events:
+        print(f"  [{label}] no events to send")
+        return 0
+    print(f"  [{label}] Total events: {len(events)}")
+    success = 0
+    for batch in chunk(events, 500):
+        payload = {"data": batch}
+        if test_code: payload["test_event_code"] = test_code
+        r = requests.post(f"{META_GRAPH}/{pixel_id}/events",
+                          params={"access_token": token}, json=payload, timeout=30)
+        print(f"    batch {len(batch)} -> HTTP {r.status_code}")
+        if r.status_code == 200:
+            success += 1
+            try: print(f"      events_received: {r.json().get('events_received','?')}")
+            except: pass
+        else:
+            print(f"      err: {r.text[:300]}")
+    return success
+
 def main():
-    capi_token = os.environ.get("META_CAPI_ACCESS_TOKEN")
-    if not capi_token: print("ERR: META_CAPI_ACCESS_TOKEN missing"); sys.exit(0)
+    sonix_token = os.environ.get("META_CAPI_ACCESS_TOKEN")
+    elite_token = os.environ.get("META_CAPI_ACCESS_TOKEN_ELITE")
+    if not sonix_token: print("ERR: META_CAPI_ACCESS_TOKEN missing"); sys.exit(0)
+    if not elite_token: print("WARN: META_CAPI_ACCESS_TOKEN_ELITE missing - elite events will be skipped")
     test_code = os.environ.get("META_TEST_EVENT_CODE", "")
 
     since = (datetime.now(timezone.utc) - timedelta(hours=LOOKBACK_HOURS)).strftime("%Y-%m-%dT%H:%M:%S.000-00:00")
-    print(f"=== ALL-SALES CAPI post-back | since={since} | pixel={PIXEL_ID} ===")
+    print(f"=== DUAL-PIXEL CAPI post-back | since={since} ===")
+    print(f"  SONIX pixel: {SONIX_PIXEL_ID}")
+    print(f"  ELITE pixel: {ELITE_PIXEL_ID}")
+    print(f"  ELITE_PRODUCTS: {sorted(ELITE_PRODUCTS)}")
     print(f"Sellers in scope: {[s['name'] for s in SELLERS]}\n")
 
-    all_events = []
+    all_sonix = []
+    all_elite = []
     for seller in SELLERS:
         print(f"--- Seller: {seller['name']} ({seller['id']}) ---")
-        all_events.extend(collect_events_for_seller(seller, since))
+        sonix_evs, elite_evs = collect_events_for_seller(seller, since)
+        all_sonix.extend(sonix_evs)
+        all_elite.extend(elite_evs)
 
-    if not all_events:
-        print("\nNo events to send. Done."); return
-
-    # Meta CAPI accepts up to 1000 events per request — batch para evitar payload too big
-    print(f"\nTotal events to send: {len(all_events)}")
-    success_chunks = 0
-    for batch in chunk(all_events, 500):
-        payload = {"data": batch}
-        if test_code: payload["test_event_code"] = test_code
-        r = requests.post(f"{META_GRAPH}/{PIXEL_ID}/events",
-                          params={"access_token": capi_token}, json=payload, timeout=30)
-        print(f"  batch {len(batch)} events → HTTP {r.status_code}")
-        if r.status_code == 200:
-            success_chunks += 1
-            try: print(f"    events_received: {r.json().get('events_received','?')}")
-            except: pass
-        else:
-            print(f"    err: {r.text[:300]}")
-    print(f"\nDone. Batches success: {success_chunks}")
+    print(f"\nTotals: sonix={len(all_sonix)} elite={len(all_elite)}")
+    s_batches = send_to_pixel(all_sonix, SONIX_PIXEL_ID, sonix_token, "SONIX", test_code)
+    e_batches = 0
+    if elite_token:
+        e_batches = send_to_pixel(all_elite, ELITE_PIXEL_ID, elite_token, "ELITE", test_code)
+    print(f"\nDone. Sonix batches success: {s_batches} | Elite batches success: {e_batches}")
 
 if __name__ == "__main__":
     main()
