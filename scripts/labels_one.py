@@ -149,6 +149,85 @@ def clean_title(item_obj, H):
     return base, model
 
 _CC={}
+
+# === CÓDIGOS INTERNOS (anti-robo) — esconde nombre del producto en el label térmico ===
+MODEL_CODES = {
+    "Charge6":"CH6","Charge5":"CH5","Charge4":"CH4","Go4":"GO4","Go3":"GO3","Go2":"GO2",
+    "Clip5":"CL5","Clip4":"CL4","Clip3":"CL3","Flip7":"FL7","Flip6":"FL6","Flip5":"FL5",
+    "Xtreme4":"XT4","Xtreme3":"XT3","Boombox3":"BB3","Boombox4":"BB4","Pulse5":"PL5",
+    "SoundLink":"SLK","Soundlink":"SLK","SoundlinkHome":"SLH","SoundlinkMini":"SLM",
+    "SoundlinkFlex":"SLF","SoundLinkHome":"SLH","SoundLinkMini":"SLM","SoundLinkFlex":"SLF",
+    "XB100":"XB1","XB13":"X13","XB23":"X23","Grip":"GRP","Pulse4":"PL4",
+}
+COLOR_CODES = {
+    "Negro":"NG","Negra":"NG","Black":"NG","Blanco":"BL","Blanca":"BL","White":"BL",
+    "Rojo":"RJ","Roja":"RJ","Red":"RJ","Rosa":"RS","Pink":"RS","Morado":"MR",
+    "Violeta":"MR","Purple":"MR","Azul":"AZ","Blue":"AZ","Azul Marino":"MAR",
+    "Aqua":"AQ","Celeste":"CL","Verde":"VD","Green":"VD","Amarillo":"AMA",
+    "Yellow":"AMA","Naranja":"NA","Orange":"NA","Gris":"GR","Gray":"GR","Grey":"GR",
+    "Plata":"PT","Silver":"PT","Dorado":"DR","Gold":"DR","Camuflaje":"CMF","Camo":"CMF",
+}
+# Productos genéricos (no JBL/Sony/Bose)
+GENERIC_CODES = [
+    ("alma de tenochtitlan","ALMA"),("flor de nopal","NOPAL"),("guerrero sol","GSOL"),
+    ("xibalba","XIB"),("xochicopal","XOCH"),("tlaloc","TLA"),("dominio del fuego","DFG"),
+    ("cenote azul","CEN"),("templo oscuro","TMP"),("corazon de copal","COP"),
+    ("kukulcan","KUK"),("calvin klein","CK"),("le male","LMP"),("dashcam","DSC"),
+    ("mandarin sky","MSKY"),
+]
+def to_code(model, color, size=None, title_full=""):
+    """Convierte (modelo, color, talla) en código corto opaco para el label térmico.
+       Si no reconoce el modelo, genera código a partir del título."""
+    import unicodedata
+    def _na(s): return "".join(c for c in unicodedata.normalize("NFD", s or "") if unicodedata.category(c) != "Mn")
+    # 1) Genéricos por título completo (perfumes, etc.)
+    if title_full:
+        tl = _na(title_full).lower()
+        for kw, c in GENERIC_CODES:
+            if kw in tl:
+                base = c
+                if size: return f"{base}-{size}"
+                return base
+    # 2) Modelo conocido (JBL/Bose/Sony)
+    code_m = None
+    if model:
+        m = model.replace(" ", "")
+        # exact match
+        code_m = MODEL_CODES.get(m)
+        if not code_m:
+            # try case-insensitive
+            for k, v in MODEL_CODES.items():
+                if k.lower() == m.lower(): code_m = v; break
+    if not code_m and model:
+        # fallback: primeras letras del modelo
+        cleaned = "".join(c for c in model if c.isalnum())
+        code_m = cleaned[:3].upper() if cleaned else "???"
+    if not code_m: code_m = "???"
+    # 3) Color
+    code_c = None
+    if color:
+        # normalizar y match
+        cn = _na(color).strip().title()
+        code_c = COLOR_CODES.get(cn) or COLOR_CODES.get(color.strip().title())
+        if not code_c:
+            # primeras 2 letras del color
+            code_c = "".join(c for c in cn if c.isalpha())[:2].upper() or "??"
+    # 4) Componer
+    parts = [code_m]
+    if code_c: parts.append(code_c)
+    if size:   parts.append(str(size))
+    return "-".join(parts)
+
+
+def export_legend_csv():
+    """Devuelve mapping completo de códigos → nombres legibles."""
+    out = []
+    for m, c in MODEL_CODES.items():
+        out.append((c, m))
+    for kw, c in GENERIC_CODES:
+        out.append((c, kw.title()))
+    return sorted(set(out))
+
 def get_condition(item_obj, H):
     c=item_obj.get("condition")
     if c: return c
