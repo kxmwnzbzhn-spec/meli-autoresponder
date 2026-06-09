@@ -20,6 +20,7 @@ SELLERS = [
     {"id": 1668713481, "name": "ASVA",    "token_env": "MELI_REFRESH_TOKEN_USER1668"},
     {"id": 3364413125, "name": "YC",      "token_env": "MELI_REFRESH_TOKEN_YC_NEW"},
     {"id": 3367276814, "name": "WILBERT", "token_env": "MELI_REFRESH_TOKEN_WILBERT"},
+    {"id": 3417664339, "name": "ADRIAN",  "token_env": "MELI_REFRESH_TOKEN_ADRIAN"},
 ]
 
 # Solo metadata amigable para items que conocemos.
@@ -31,6 +32,7 @@ WHITELIST_ITEMS = {
     "MLM5356938548": {"name": "Dashcam ASVA DVR-3",                "category": "DASHCAM_DVR3_V1"},
     "MLM2940664057": {"name": "Audifonos Bluetooth In-Ear Negro", "category": "AUDIFONOS_BT_V1"},
     "MLM5346655686": {"name": "Bocina Bluetooth Portatil Go4 IP67","category": "SPK_GO4_V1"},
+    "MLM2976325463": {"name": "Pack 3 Boxers Premium Hombre",      "category": "APPAREL_BOXERS_V1"},
 }
 
 # PERFUME_BLACKLIST — SKUs TAL que NO van al pixel Sonix.
@@ -60,6 +62,9 @@ ITEM_TO_LANDING = {
     "MLM2940664057": "https://sonixmx.com.mx/audifonos-bt/",
     # Secadora ASVA
     "MLM2940986501": "https://sonixmx.com.mx/secadora-asva/",
+    # Boxers 3-Pack Adrian (apparel)
+    "MLM2976325463": "https://sonixmx.com.mx/boxers-3pack/",
+    "MLM-2976325463": "https://sonixmx.com.mx/boxers-3pack/",
 }
 DEFAULT_LANDING = "https://sonixmx.com.mx/"
 
