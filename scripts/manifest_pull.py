@@ -75,6 +75,25 @@ def get_color(item_obj, item_full):
                         if val: return val.title().replace("Color ","")
     return None
 
+def get_size(item_obj, item_full):
+    """Devuelve la talla del producto. Similar a get_color pero busca SIZE.
+       1) variation_attributes from order item; 2) variation in full item; 3) None."""
+    for a in (item_obj.get("variation_attributes") or []):
+        aid = a.get("id","")
+        anm = (a.get("name","") or "").lower()
+        if aid == "SIZE" or "talla" in anm or "size" in anm:
+            v = a.get("value_name", "").strip()
+            if v: return v
+    vid = item_obj.get("variation_id")
+    if vid:
+        for v in item_full.get("variations", []):
+            if str(v.get("id")) == str(vid):
+                for a in v.get("attribute_combinations", []):
+                    if a.get("id") == "SIZE":
+                        val = a.get("value_name","").strip()
+                        if val: return val
+    return None
+
 def clean_title_short(title, color):
     """Shorten title for display: model name + color."""
     if not title: return color or "?"
@@ -141,6 +160,7 @@ def collect_account(account):
                     if not iid: continue
                     full = get_item_full(iid, H)
                     color = get_color(io, full)
+                    size  = get_size(io, full)
                     photo = get_variation_photo(full, io.get("variation_id"))
                     title_full = io.get("title") or full.get("title","")
                     name_short = clean_title_short(title_full, color)
@@ -150,6 +170,7 @@ def collect_account(account):
                         "name_short": name_short,
                         "title_full": title_full,
                         "color": color,
+                        "size": size,
                         "qty": it.get("quantity", 1),
                         "condition": cond,
                         "photo_url": photo,
