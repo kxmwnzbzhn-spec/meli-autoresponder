@@ -94,6 +94,63 @@ def get_size(item_obj, item_full):
                         if val: return val
     return None
 
+
+# === CÓDIGOS INTERNOS (mismo mapeo que labels_one.py) ===
+MODEL_CODES = {
+    "Charge6":"CH6","Charge5":"CH5","Charge4":"CH4","Go4":"GO4","Go3":"GO3","Go2":"GO2",
+    "Clip5":"CL5","Clip4":"CL4","Clip3":"CL3","Flip7":"FL7","Flip6":"FL6","Flip5":"FL5",
+    "Xtreme4":"XT4","Xtreme3":"XT3","Boombox3":"BB3","Boombox4":"BB4","Pulse5":"PL5",
+    "SoundLink":"SLK","Soundlink":"SLK","SoundlinkHome":"SLH","SoundlinkMini":"SLM",
+    "SoundlinkFlex":"SLF","SoundLinkHome":"SLH","SoundLinkMini":"SLM","SoundLinkFlex":"SLF",
+    "XB100":"XB1","XB13":"X13","XB23":"X23","Grip":"GRP","Pulse4":"PL4",
+}
+COLOR_CODES = {
+    "Negro":"NG","Negra":"NG","Black":"NG","Blanco":"BL","Blanca":"BL","White":"BL",
+    "Rojo":"RJ","Roja":"RJ","Red":"RJ","Rosa":"RS","Pink":"RS","Morado":"MR",
+    "Violeta":"MR","Purple":"MR","Azul":"AZ","Blue":"AZ","Azul Marino":"MAR",
+    "Aqua":"AQ","Celeste":"CL","Verde":"VD","Green":"VD","Amarillo":"AMA",
+    "Yellow":"AMA","Naranja":"NA","Orange":"NA","Gris":"GR","Gray":"GR","Grey":"GR",
+    "Plata":"PT","Silver":"PT","Dorado":"DR","Gold":"DR","Camuflaje":"CMF","Camo":"CMF",
+}
+GENERIC_CODES = [
+    ("alma de tenochtitlan","ALMA"),("flor de nopal","NOPAL"),("guerrero sol","GSOL"),
+    ("xibalba","XIB"),("xochicopal","XOCH"),("tlaloc","TLA"),("dominio del fuego","DFG"),
+    ("cenote azul","CEN"),("templo oscuro","TMP"),("corazon de copal","COP"),
+    ("kukulcan","KUK"),("calvin klein","CK"),("le male","LMP"),("dashcam","DSC"),
+    ("mandarin sky","MSKY"),
+]
+def to_code(model, color, size=None, title_full=""):
+    import unicodedata
+    def _na(s): return "".join(c for c in unicodedata.normalize("NFD", s or "") if unicodedata.category(c) != "Mn")
+    if title_full:
+        tl = _na(title_full).lower()
+        for kw, c_ in GENERIC_CODES:
+            if kw in tl:
+                base = c_
+                return f"{base}-{size}" if size else base
+    code_m = None
+    if model:
+        m = model.replace(" ", "")
+        code_m = MODEL_CODES.get(m)
+        if not code_m:
+            for k, v in MODEL_CODES.items():
+                if k.lower() == m.lower(): code_m = v; break
+    if not code_m and model:
+        cleaned = "".join(c for c in model if c.isalnum())
+        code_m = cleaned[:3].upper() if cleaned else "???"
+    if not code_m: code_m = "???"
+    code_c = None
+    if color:
+        cn = _na(color).strip().title()
+        code_c = COLOR_CODES.get(cn) or COLOR_CODES.get(color.strip().title())
+        if not code_c:
+            code_c = "".join(ch for ch in cn if ch.isalpha())[:2].upper() or "??"
+    parts = [code_m]
+    if code_c: parts.append(code_c)
+    if size:   parts.append(str(size))
+    return "-".join(parts)
+
+
 def clean_title_short(title, color):
     """Shorten title for display: model name + color."""
     if not title: return color or "?"
@@ -166,7 +223,16 @@ def collect_account(account):
                     name_short = clean_title_short(title_full, color)
                     cond = full.get("condition","new")
                     if cond == "used": has_used = True
+                    # Detectar modelo simple del title para to_code
+                    _tl = (title_full or "").lower()
+                    _model = None
+                    for _kw in ["charge6","charge5","charge4","go4","go3","go2","clip5","clip4","clip3","flip7","flip6","flip5","xtreme4","xtreme3","boombox3","boombox4","pulse5","soundlink","xb100","xb13","xb23","grip"]:
+                        if _kw in _tl.replace(" ",""):
+                            _model = _kw.capitalize().replace("Soundlink","Soundlink")
+                            break
+                    code = to_code(_model, color, size, title_full)
                     products.append({
+                        "code": code,
                         "name_short": name_short,
                         "title_full": title_full,
                         "color": color,
