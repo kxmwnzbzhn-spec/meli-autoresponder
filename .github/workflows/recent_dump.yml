@@ -1,0 +1,19 @@
+name: recent-dump
+on:
+  workflow_dispatch: {}
+  # Cron desde Supabase (ya hay infrastructure)
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests -q
+      - env:
+          MELI_APP_ID:         ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET:     ${{ secrets.MELI_APP_SECRET }}
+          SUPABASE_URL:        ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: python scripts/recent_dump.py
