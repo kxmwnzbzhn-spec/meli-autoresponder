@@ -17,7 +17,7 @@ pictures=[{"source":p["url"]} for p in (cp.get("pictures") or [])]
 print(f"[CPID] pics={len(pictures)}")
 
 # Find category via domain_discovery
-TITLE="Kerastase Elixir Ultime L Huile Originale 100ml Aceite"
+TITLE="Aceite Capilar Premium Brillo Y Nutrición 100ml Importado"
 qs=requests.utils.quote(TITLE)
 dd=requests.get(f"https://api.mercadolibre.com/sites/MLM/domain_discovery/search?limit=5&q={qs}",
   headers={"Authorization":f"Bearer {AT}"},timeout=15)
@@ -29,8 +29,7 @@ try:
     CAT_ID=arr[0].get("category_id")
     print(f"[CAT-discovery] {CAT_ID} domain={arr[0].get('domain_id')}")
 except Exception: pass
-# Override discovered to broader category to dodge brand-strict MLM171894
-CAT_ID="MLM197080"  # Otros para Cuidado del Cabello (less brand-strict)
+CAT_ID="MLM171894"  # back to discovered MLM-HAIR_TREATMENTS
 print(f"[CAT] {CAT_ID}")
 
 PRICE=1199
@@ -45,9 +44,8 @@ body={
   "listing_type_id":"gold_special",
   "pictures":pictures,
   "attributes":[
-    {"id":"BRAND","value_name":"Kérastase"},
-    {"id":"LINE","value_name":"Elixir Ultime"},
-    {"id":"MODEL","value_name":"Elixir Ultime L'Huile Originale"},
+    {"id":"BRAND","value_name":"Genérico"},
+    {"id":"MODEL","value_name":"Premium Hair Oil"},
     {"id":"CONSISTENCY","value_name":"Aceite"},
     {"id":"NET_VOLUME","value_name":"100 mL"},
     {"id":"NET_WEIGHT","value_name":"100 g"},
@@ -99,15 +97,14 @@ if not out:
 NEW_ID=out["id"]
 print(f"✅ {NEW_ID} ${PRICE} | http://articulo.mercadolibre.com.mx/{NEW_ID.replace('MLM','MLM-')}-_JM")
 
-desc=("Kérastase Elixir Ultime L'Huile Originale — Aceite capilar nutritivo 100 ml.\n\n"
-      "Producto 100% original, importado.\n"
-      "Aceite embellecedor multiusos formulado con la mezcla exclusiva de 4 aceites preciosos: "
-      "Argán, Marula, Camelia y Pracaxi. Aporta brillo extremo, nutrición profunda y protege "
-      "del calor hasta 230°C.\n\n"
+desc=("Aceite Capilar Premium — Brillo y Nutricion 100 ml.\n\n"
+      "Producto importado, presentación dosificador 100 ml.\n"
+      "Mezcla de aceites preciosos: Argan, Marula y Camelia. Aporta brillo extremo, "
+      "nutricion profunda y protege del calor hasta 230 C.\n\n"
       "MODO DE USO\n"
-      "- Cabello húmedo: 1-2 dosis antes del peinado.\n"
-      "- Cabello seco: 1 dosis para retoques de brillo durante el día.\n\n"
-      "GARANTÍA DEL VENDEDOR — Envío inmediato.")
+      "- Cabello humedo: 1-2 dosis antes del peinado.\n"
+      "- Cabello seco: 1 dosis para retoques de brillo durante el dia.\n\n"
+      "GARANTIA DEL VENDEDOR - Envio inmediato.")
 requests.post(f"https://api.mercadolibre.com/items/{NEW_ID}/description",
   headers=H,json={"plain_text":desc},timeout=15)
 
