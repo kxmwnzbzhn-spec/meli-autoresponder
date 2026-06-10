@@ -6,7 +6,7 @@ r=requests.post("https://api.mercadolibre.com/oauth/token",
 r.raise_for_status(); tok=r.json(); AT=tok["access_token"]; NEW_RT=tok["refresh_token"]
 print(f"[ROTATED RT] {NEW_RT}")
 H={"Authorization":f"Bearer {AT}"}
-IID="MLM2969827197"
+IID="MLM2969851475"
 g=requests.get(f"https://api.mercadolibre.com/items/{IID}",headers=H,timeout=15).json()
 print(f"title: {g.get('title')}")
 print(f"price: {g.get('price')}  status: {g.get('status')}  catalog_product_id: {g.get('catalog_product_id')}")
