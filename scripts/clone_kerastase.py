@@ -16,19 +16,16 @@ print(f"[CPID] name={cp.get('name')}")
 pictures=[{"source":p["url"]} for p in (cp.get("pictures") or [])]
 print(f"[CPID] pics={len(pictures)}")
 
-# Predict category from title
-TITLE="Kerastase Elixir Ultime L'Huile Originale Aceite Capilar 100ml"
-pr=requests.get(f"https://api.mercadolibre.com/sites/MLM/category_predictor/predict?title={requests.utils.quote(TITLE)}",
-  headers={"Authorization":f"Bearer {AT}"},timeout=15)
-print(f"[predict] HTTP {pr.status_code} body={pr.text[:300]}")
+# Learn category from an existing public Kérastase Elixir Ultime listing
+TITLE="Kérastase Elixir Ultime L'Huile Originale Aceite Capilar 100ml Importado"
 CAT_ID=None
-try:
-  pj=pr.json()
-  CAT_ID=pj.get("id") if isinstance(pj,dict) else None
-except Exception:
-  pass
+for ref_id in ["MLM853186439","MLM864994002"]:
+  rg=requests.get(f"https://api.mercadolibre.com/items/{ref_id}",headers={"Authorization":f"Bearer {AT}"},timeout=15)
+  if rg.status_code==200:
+    CAT_ID=rg.json().get("category_id")
+    if CAT_ID: print(f"[CAT-from-ref] {ref_id} -> {CAT_ID}"); break
 if not CAT_ID:
-  CAT_ID="MLM194069"  # Tratamientos para el cabello (fallback)
+  CAT_ID="MLM166700"
 print(f"[CAT] {CAT_ID}")
 
 PRICE=1199
