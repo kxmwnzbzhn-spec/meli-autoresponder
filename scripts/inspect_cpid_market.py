@@ -11,7 +11,7 @@ r.raise_for_status(); tok=r.json(); AT=tok["access_token"]; NEW_RT=tok["refresh_
 print(f"[ROTATED RT] {NEW_RT}")
 H={"Authorization":f"Bearer {AT}"}
 
-CPID="MLM34280293"
+CPID="MLM2023522170"
 cp=requests.get(f"https://api.mercadolibre.com/products/{CPID}",headers=H,timeout=15).json()
 print(f"=== {CPID} ===")
 print("name:",cp.get("name"))
