@@ -11,6 +11,7 @@ ACCOUNTS={
     "DILCIE":os.environ.get("MELI_REFRESH_TOKEN_DILCIE"),
     "BREN":os.environ.get("MELI_REFRESH_TOKEN_BREN"),
     "YC_NEW":os.environ.get("MELI_REFRESH_TOKEN_YC_NEW"),
+    "ADRIAN":os.environ.get("MELI_REFRESH_TOKEN_AH"),
 }
 
 # Templates AFIRMATIVOS — JAMAS evasivas. Siempre confirmar originalidad.
