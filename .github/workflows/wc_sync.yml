@@ -1,0 +1,19 @@
+name: wc-sync
+on:
+  workflow_dispatch: {}
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests -q
+      - env:
+          WC_BASE_URL:         ${{ secrets.WC_BASE_URL }}
+          WC_CONSUMER_KEY:     ${{ secrets.WC_CONSUMER_KEY }}
+          WC_CONSUMER_SECRET:  ${{ secrets.WC_CONSUMER_SECRET }}
+          SUPABASE_URL:        ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: python scripts/wc_sync.py
