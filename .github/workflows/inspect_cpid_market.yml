@@ -9,3 +9,7 @@ jobs:
         with: { python-version: '3.11' }
       - run: pip install requests
       - run: python scripts/inspect_cpid_market.py
+        env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_AH: ${{ secrets.MELI_REFRESH_TOKEN_AH }}
