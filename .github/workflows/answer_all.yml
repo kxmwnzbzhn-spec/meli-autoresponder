@@ -25,4 +25,6 @@ jobs:
           MELI_REFRESH_TOKEN_DILCIE: ${{ secrets.MELI_REFRESH_TOKEN_DILCIE }}
           MELI_REFRESH_TOKEN_BREN: ${{ secrets.MELI_REFRESH_TOKEN_BREN }}
           MELI_REFRESH_TOKEN_YC_NEW: ${{ secrets.MELI_REFRESH_TOKEN_YC_NEW }}
+          MELI_REFRESH_TOKEN_AH: ${{ secrets.MELI_REFRESH_TOKEN_AH }}
         run: python scripts/answer_all_accounts.py
+
