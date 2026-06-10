@@ -16,7 +16,7 @@ print(f"[CPID] name={cp.get('name')} pics={len(cp.get('pictures') or [])}")
 pictures=[{"source":p["url"]} for p in (cp.get("pictures") or [])][:12]
 
 # Discover category
-TITLE="Sony SRS-XB100 Bocina Bluetooth Portátil Negro IP67 16hrs Original"
+TITLE="Sony SRS-XB100 Bocina Bluetooth Portátil Negro Ip67 Nueva"
 qs=requests.utils.quote(TITLE)
 dd=requests.get(f"https://api.mercadolibre.com/sites/MLM/domain_discovery/search?limit=5&q={qs}",
   headers={"Authorization":f"Bearer {AT}"},timeout=15)
@@ -29,7 +29,7 @@ except: pass
 if not CAT_ID: CAT_ID="MLM1004"  # Bocinas y subwoofers fallback
 print(f"[CAT] {CAT_ID}")
 
-PRICE=699
+PRICE=599
 body={
   "title":TITLE,
   "category_id":CAT_ID,
@@ -44,7 +44,7 @@ body={
     {"id":"BRAND","value_name":"Sony"},
     {"id":"MODEL","value_name":"SRS-XB100"},
     {"id":"COLOR","value_name":"Negro"},
-    {"id":"GTIN","value_name":"027242926097"},
+    {"id":"GTIN","value_name":"0027242926097"},
     {"id":"ITEM_CONDITION","value_id":"2230284","value_name":"Nuevo"},
     {"id":"LINE","value_name":"SRS"},
   ],
