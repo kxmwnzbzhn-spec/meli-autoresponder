@@ -16,16 +16,22 @@ print(f"[CPID] name={cp.get('name')}")
 pictures=[{"source":p["url"]} for p in (cp.get("pictures") or [])]
 print(f"[CPID] pics={len(pictures)}")
 
-# Learn category from an existing public Kérastase Elixir Ultime listing
-TITLE="Kérastase Elixir Ultime L'Huile Originale Aceite Capilar 100ml Importado"
+# Find category via domain_discovery
+TITLE="Kerastase Aceite Capilar Elixir Ultime L Huile Originale 100ml"
+qs=requests.utils.quote(TITLE)
+dd=requests.get(f"https://api.mercadolibre.com/sites/MLM/domain_discovery/search?limit=5&q={qs}",
+  headers={"Authorization":f"Bearer {AT}"},timeout=15)
+print(f"[domain_discovery] HTTP {dd.status_code} body={dd.text[:400]}")
 CAT_ID=None
-for ref_id in ["MLM853186439","MLM864994002"]:
-  rg=requests.get(f"https://api.mercadolibre.com/items/{ref_id}",headers={"Authorization":f"Bearer {AT}"},timeout=15)
-  if rg.status_code==200:
-    CAT_ID=rg.json().get("category_id")
-    if CAT_ID: print(f"[CAT-from-ref] {ref_id} -> {CAT_ID}"); break
+try:
+  arr=dd.json()
+  if isinstance(arr,list) and arr:
+    CAT_ID=arr[0].get("category_id")
+    print(f"[CAT-discovery] {CAT_ID} domain={arr[0].get('domain_id')}")
+except Exception: pass
 if not CAT_ID:
-  CAT_ID="MLM166700"
+  # Fallback to HAIR_OILS direct category
+  CAT_ID="MLM174181"  # Aceites para el cabello
 print(f"[CAT] {CAT_ID}")
 
 PRICE=1199
