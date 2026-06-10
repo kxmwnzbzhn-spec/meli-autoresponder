@@ -29,6 +29,7 @@ print(f"\n[TITLE] '{TITLE}' ({len(TITLE)} chars)")
 # Clean attribute build: ONLY required + key informational. NO read-only/calculated.
 ATTRS=[
     {"id":"BRAND","value_name":"Lattafa"},
+    {"id":"GTIN","value_name":"6291108737521"},
     {"id":"PERFUME_NAME","value_name":"Khamrah Dukhan"},
     {"id":"UNIT_VOLUME","value_name":"100 mL"},
     {"id":"GENDER","value_name":"Hombre"},
