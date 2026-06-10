@@ -36,12 +36,20 @@ body={
   ],
   }
 
-# Validate
+# Validate (warnings OK)
 v=requests.post("https://api.mercadolibre.com/items/validate",
   headers=H,json=body,timeout=20)
 print(f"[VALIDATE] HTTP {v.status_code}")
 if v.status_code>=300:
-  print(v.text[:1500]); sys.exit(1)
+  try:
+    j=v.json(); causes=j.get("cause",[])
+    err=[c for c in causes if c.get("type")=="error"]
+    if err:
+      print("ERR:",json.dumps(err)[:1000]); sys.exit(1)
+    else:
+      print("warnings only, proceeding")
+  except Exception:
+    print(v.text[:1500]); sys.exit(1)
 
 # POST
 p=requests.post("https://api.mercadolibre.com/items",headers=H,json=body,timeout=25)
