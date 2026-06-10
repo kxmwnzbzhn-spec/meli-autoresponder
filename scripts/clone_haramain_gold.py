@@ -32,11 +32,9 @@ body={
     {"id":"GENDER","value_name":"Sin género"},
     {"id":"ITEM_CONDITION","value_name":"Nuevo"},
     {"id":"MODEL","value_name":"Amber Oud Gold Edition"},
-    {"id":"EMPTY_GTIN_REASON","value_name":"El producto no tiene código registrado"},
+    {"id":"GTIN","value_name":"6291100130405"},
   ],
-  "sale_terms":[{"id":"WARRANTY_TYPE","value_name":"Garantía del vendedor"},
-                {"id":"WARRANTY_TIME","value_name":"30 días"}],
-}
+  }
 
 # Validate
 v=requests.post("https://api.mercadolibre.com/items/validate",
