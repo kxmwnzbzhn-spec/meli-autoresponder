@@ -1,8 +1,13 @@
 import os, requests, json, sys, base64
 CID=os.environ["MELI_APP_ID"]; CSEC=os.environ["MELI_APP_SECRET"]
 RT=os.environ["MELI_REFRESH_TOKEN_AH"]
-r=requests.post("https://api.mercadolibre.com/oauth/token",
-  data={"grant_type":"refresh_token","client_id":CID,"client_secret":CSEC,"refresh_token":RT},timeout=20)
+import time
+for attempt in range(6):
+  r=requests.post("https://api.mercadolibre.com/oauth/token",
+    data={"grant_type":"refresh_token","client_id":CID,"client_secret":CSEC,"refresh_token":RT},timeout=20)
+  if r.status_code<500: break
+  print(f"[oauth retry {attempt+1}] HTTP {r.status_code}, sleeping...")
+  time.sleep(8)
 r.raise_for_status(); tok=r.json(); AT=tok["access_token"]; NEW_RT=tok["refresh_token"]
 print(f"[ROTATED RT] {NEW_RT}")
 H={"Authorization":f"Bearer {AT}","Content-Type":"application/json"}
