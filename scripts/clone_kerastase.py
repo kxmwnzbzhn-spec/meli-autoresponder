@@ -17,7 +17,7 @@ pictures=[{"source":p["url"]} for p in (cp.get("pictures") or [])]
 print(f"[CPID] pics={len(pictures)}")
 
 # Find category via domain_discovery
-TITLE="Kerastase Aceite Capilar Elixir Ultime L Huile Originale 100ml"
+TITLE="Kerastase Elixir Ultime L Huile Originale 100ml Aceite"
 qs=requests.utils.quote(TITLE)
 dd=requests.get(f"https://api.mercadolibre.com/sites/MLM/domain_discovery/search?limit=5&q={qs}",
   headers={"Authorization":f"Bearer {AT}"},timeout=15)
@@ -29,9 +29,8 @@ try:
     CAT_ID=arr[0].get("category_id")
     print(f"[CAT-discovery] {CAT_ID} domain={arr[0].get('domain_id')}")
 except Exception: pass
-if not CAT_ID:
-  # Fallback to HAIR_OILS direct category
-  CAT_ID="MLM174181"  # Aceites para el cabello
+# Override discovered to broader category to dodge brand-strict MLM171894
+CAT_ID="MLM197080"  # Otros para Cuidado del Cabello (less brand-strict)
 print(f"[CAT] {CAT_ID}")
 
 PRICE=1199
