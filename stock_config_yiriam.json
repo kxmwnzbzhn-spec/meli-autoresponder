@@ -3,7 +3,7 @@
     "description": "Yiriam stock real almacén - 12 perfumes",
     "updated": "2026-05-16",
     "total": 239,
-    "synced_from_supabase_at": "2026-06-10T00:05:25.799994+00:00"
+    "synced_from_supabase_at": "2026-06-10T16:04:58.112323+00:00"
   },
   "MLM2935286605": {
     "title": "Angel Nova",
@@ -175,7 +175,7 @@
   },
   "MLM2935587247": {
     "title": "Marshmallow Blush",
-    "real_stock": 5,
+    "real_stock": 4,
     "master_stock": 10,
     "min_visible": 1,
     "available_quantity": 1,
