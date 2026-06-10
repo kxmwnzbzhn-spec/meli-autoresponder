@@ -22,7 +22,7 @@ TITLE="Billie Eilish Eilish Eau De Parfum 100ml"  # 40 chars
 
 ATTRS=[
     {"id":"BRAND","value_name":"Billie Eilish"},
-    {"id":"GTIN","value_name":"658925510412"},
+    {"id":"GTIN","value_name":"0658925510412"},
     {"id":"PERFUME_NAME","value_name":"Eilish"},
     {"id":"PERFUME_TYPE","value_name":"Eau de parfum"},
     {"id":"UNIT_VOLUME","value_name":"100 mL"},
