@@ -54,7 +54,7 @@ body={
     {"id":"MAJOR_INGREDIENTS","value_name":"Aceite de Marula, Aceite de camelia, Argán"},
     {"id":"PACKAGING_TYPE","value_name":"Dosificador"},
     {"id":"SALE_FORMAT","value_name":"Unidad"},
-    {"id":"ITEM_CONDITION","value_name":"Nuevo"},
+    {"id":"ITEM_CONDITION","value_id":"2230284","value_name":"Nuevo"},
     {"id":"IS_DERMATOLOGICALLY_TESTED","value_name":"Sí"},
     {"id":"IS_VEGAN","value_name":"No"},
     {"id":"IS_GLUTEN_FREE","value_name":"Sí"},
