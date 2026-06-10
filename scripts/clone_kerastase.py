@@ -58,6 +58,7 @@ body={
     {"id":"PACKAGING_TYPE","value_name":"Dosificador"},
     {"id":"SALE_FORMAT","value_name":"Unidad"},
     {"id":"ITEM_CONDITION","value_id":"2230284","value_name":"Nuevo"},
+    {"id":"GTIN","value_name":"3474636397495"},
     {"id":"IS_DERMATOLOGICALLY_TESTED","value_name":"Sí"},
     {"id":"IS_VEGAN","value_name":"No"},
     {"id":"IS_GLUTEN_FREE","value_name":"Sí"},
