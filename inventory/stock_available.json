@@ -1,10 +1,10 @@
 {
   "_meta": {
-    "updated": "2026-06-11T11:01:00.536561Z",
+    "updated": "2026-06-11T14:40:29.717572Z",
     "golive_ref": "stock_at_golive_20260518.json",
     "note": "Dinámico — decrementa con cada venta vía cron.",
-    "total_sold": 2232,
-    "total_available": 2784
+    "total_sold": 2231,
+    "total_available": 2785
   },
   "skus": {
     "SONY-XB100-NEGRO": {
@@ -32,9 +32,9 @@
       "color": "Negro"
     },
     "JBL-CLIP5-AZUL": {
-      "available": 161,
+      "available": 162,
       "initial": 421,
-      "sold_since_golive": 260,
+      "sold_since_golive": 259,
       "last_pause_triggered": false,
       "modelo": "JBL Clip 5",
       "color": "Azul"
