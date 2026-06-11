@@ -244,7 +244,8 @@ def process_row(row):
 
 def main():
   cutoff=(datetime.now(timezone.utc)-timedelta(minutes=5)).isoformat()
-  url=f"{SB}/rest/v1/v_returns_admin?status=eq.pending&escalated_to_meli_at=is.null&created_at=lte.{cutoff}&select=*&order=created_at.asc&limit=50"
+  cutoff_enc=requests.utils.quote(cutoff,safe='')
+  url=f"{SB}/rest/v1/v_returns_admin?status=eq.pending&escalated_to_meli_at=is.null&created_at=lte.{cutoff_enc}&select=*&order=created_at.asc&limit=50"
   r=requests.get(url,headers=SBH,timeout=15)
   if r.status_code>=300:
     print(f"[supabase ERR] {r.status_code} {r.text[:300]}"); sys.exit(1)
