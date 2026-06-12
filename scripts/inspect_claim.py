@@ -2,7 +2,8 @@ import os, requests, json, base64, time
 API="https://api.mercadolibre.com"
 CID=os.environ["MELI_APP_ID"]; CSEC=os.environ["MELI_APP_SECRET"]
 RT=os.environ["MELI_REFRESH_TOKEN_ASVA"]
-ORDER="2000013323144453"
+ORDER="2000016755298724"
+PACK_ID="2000013323144453"
 
 for a in range(4):
   r=requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token",
@@ -38,9 +39,23 @@ if o.status_code==200:
 else:
   print(f"  body: {o.text[:400]}")
 
-print(f"\n========== CLAIMS ON ORDER ==========")
+print(f"\n========== CLAIMS ON ORDER / PACK ==========")
 c=requests.get(f"{API}/post-purchase/v1/claims/search",headers=H,
-  params={"resource":"order","resource_id":ORDER,"limit":20},timeout=15)
+  params={"order_id":ORDER,"limit":20},timeout=15)
+print(f"by order_id HTTP {c.status_code} total={c.json().get('paging',{}).get('total') if c.status_code==200 else 'err'}")
+cp=requests.get(f"{API}/post-purchase/v1/claims/search",headers=H,
+  params={"pack_id":PACK_ID,"limit":20},timeout=15)
+print(f"by pack_id  HTTP {cp.status_code} total={cp.json().get('paging',{}).get('total') if cp.status_code==200 else 'err'}")
+# Merge claims
+if c.status_code==200 and cp.status_code==200:
+  d1=c.json().get("data",[]); d2=cp.json().get("data",[])
+  seen=set(); merged=[]
+  for x in d1+d2:
+    if x.get("id") in seen: continue
+    seen.add(x.get("id")); merged.append(x)
+  class FakeR: pass
+  c=FakeR(); c.status_code=200; c._j={"paging":{"total":len(merged)},"data":merged}
+  c.json=lambda: c._j
 print(f"HTTP {c.status_code}")
 if c.status_code==200:
   cd=c.json()
