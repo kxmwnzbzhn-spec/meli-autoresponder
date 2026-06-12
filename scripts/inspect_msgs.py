@@ -68,7 +68,13 @@ if m.status_code==200:
   for x in msgs:
     f=x.get("from") or {}
     t=x.get("to") or {}
-    txt=(x.get("text") or {}).get("plain") or x.get("message") or ""
+    txt_field=x.get("text")
+    if isinstance(txt_field,dict):
+      txt=txt_field.get("plain","") or txt_field.get("html","")
+    elif isinstance(txt_field,str):
+      txt=txt_field
+    else:
+      txt=x.get("message","") or ""
     msg_id=x.get("id")
     dt=x.get("message_date",{}).get("created") or x.get("date_created","")
     print(f"  {dt[:19]} | {msg_id} | from {f.get('user_id')} -> to {t.get('user_id')}")
