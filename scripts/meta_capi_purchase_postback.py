@@ -27,8 +27,8 @@ LOOKBACK_HOURS = 168
 
 # === SUPABASE ATTRIBUTION ===
 # Lookup fbp/fbc captured at clickout time → attach to Purchase event for deterministic ad matching
-SUPABASE_URL = os.environ.get("SUPABASE_URL", "")
-SUPABASE_KEY = os.environ.get("SUPABASE_KEY", "")
+SUPABASE_URL = os.environ.get("SUPABASE_URL", "https://wnuhslmryspnypbxbfjf.supabase.co")
+SUPABASE_KEY = os.environ.get("SUPABASE_KEY", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndudWhzbG1yeXNwbnlwYnhiZmpmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwNDMzOTMsImV4cCI6MjA5NDYxOTM5M30.Rj3RIWyGvqRk91bYVRQpFF4al3oMWfjNs-IPIdHQP3E")
 
 def lookup_clickout_session(item_id):
     """Get the most recent unclaimed clickout for this item_id from Supabase (within 7d).
