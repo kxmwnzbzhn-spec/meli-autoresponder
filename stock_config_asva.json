@@ -37,15 +37,16 @@
   },
   "MLM2886030837": {
     "color": "Rojo",
-    "stock": 2,
+    "stock": 0,
     "max_stock": 190,
-    "active": true,
-    "real_stock": 2,
+    "active": false,
+    "real_stock": 0,
     "master_stock": 190,
     "min_visible": 1,
     "available_quantity": 1,
     "auto_replenish": true,
-    "sku": "TRONSMART-IP67-35W-ROJO"
+    "sku": "TRONSMART-IP67-35W-ROJO",
+    "agotado": true
   },
   "MLM2886136351": {
     "color": "Morado",

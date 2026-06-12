@@ -383,7 +383,7 @@
     "active": true,
     "auto_replenish": false,
     "agotado": false,
-    "real_stock": 1332,
+    "real_stock": 1330,
     "master_stock": 1377,
     "available_quantity": 0,
     "title": "CERRADA - clonada como MLM2937969761",
@@ -1176,7 +1176,7 @@
   },
   "MLM2937969761": {
     "title": "Sony XB100 Negro (clone Wilbert)",
-    "real_stock": 1332,
+    "real_stock": 1330,
     "master_stock": 1422,
     "min_visible": 1,
     "available_quantity": 1,
