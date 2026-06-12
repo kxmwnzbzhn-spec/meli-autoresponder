@@ -316,10 +316,10 @@
   },
   "MLM2910806817": {
     "closed": true,
-    "active": true,
+    "active": false,
     "auto_replenish": false,
-    "agotado": false,
-    "real_stock": 1,
+    "agotado": true,
+    "real_stock": 0,
     "master_stock": 121,
     "available_quantity": 0,
     "title": "CERRADA — clonada como MLM5354755946",
@@ -383,7 +383,7 @@
     "active": true,
     "auto_replenish": false,
     "agotado": false,
-    "real_stock": 1333,
+    "real_stock": 1332,
     "master_stock": 1377,
     "available_quantity": 0,
     "title": "CERRADA - clonada como MLM2937969761",
@@ -498,13 +498,13 @@
   "MLM2910768369": {
     "title": "Altavoz Bluetooth Jbl Go 4 Portátil Impermeable En Rojo",
     "min_visible": 1,
-    "real_stock": 1,
+    "real_stock": 0,
     "master_stock": 121,
     "auto_replenish": true,
-    "active": true,
+    "active": false,
     "available_quantity": 1,
     "sku": "JBL-GO4-ROJO",
-    "agotado": false
+    "agotado": true
   },
   "MLM2910457991": {
     "title": "Altavoz Impermeable Negro Jbl Clip 5",
@@ -1025,15 +1025,15 @@
   "MLM2914422351": {
     "title": "JBL Go 4 Rojo (clone)",
     "min_visible": 1,
-    "real_stock": 1,
+    "real_stock": 0,
     "master_stock": 121,
     "available_quantity": 1,
     "auto_replenish": true,
-    "active": true,
+    "active": false,
     "floor_price": 449,
     "ceiling_price": 699,
     "sku": "JBL-GO4-ROJO",
-    "agotado": false
+    "agotado": true
   },
   "MLM5347901578": {
     "title": "Charge 6 Espejo $899",
@@ -1151,16 +1151,16 @@
   },
   "MLM5354755946": {
     "title": "JBL Go 4 Rojo (clone Wilbert)",
-    "real_stock": 1,
+    "real_stock": 0,
     "master_stock": 121,
     "min_visible": 1,
     "available_quantity": 1,
     "auto_replenish": true,
-    "active": true,
+    "active": false,
     "floor_price": 449,
     "ceiling_price": 699,
     "sku": "JBL-GO4-ROJO",
-    "agotado": false
+    "agotado": true
   },
   "MLM5351547624": {
     "paused_by_user": true,
@@ -1176,7 +1176,7 @@
   },
   "MLM2937969761": {
     "title": "Sony XB100 Negro (clone Wilbert)",
-    "real_stock": 1333,
+    "real_stock": 1332,
     "master_stock": 1422,
     "min_visible": 1,
     "available_quantity": 1,
