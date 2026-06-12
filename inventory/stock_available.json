@@ -1,10 +1,10 @@
 {
   "_meta": {
-    "updated": "2026-06-12T20:33:16.291041Z",
+    "updated": "2026-06-12T22:09:09.368849Z",
     "golive_ref": "stock_at_golive_20260518.json",
     "note": "Dinámico — decrementa con cada venta vía cron.",
-    "total_sold": 2202,
-    "total_available": 2814
+    "total_sold": 2198,
+    "total_available": 2818
   },
   "skus": {
     "SONY-XB100-NEGRO": {
@@ -24,9 +24,9 @@
       "color": "Aqua/Celeste"
     },
     "JBL-GO3-NEGRO": {
-      "available": -98,
+      "available": -97,
       "initial": 495,
-      "sold_since_golive": 593,
+      "sold_since_golive": 592,
       "last_pause_triggered": true,
       "modelo": "JBL Go 3",
       "color": "Negro"
@@ -48,9 +48,9 @@
       "color": "Camuflaje"
     },
     "JBL-CLIP5-CAMUFLAJE": {
-      "available": 192,
+      "available": 193,
       "initial": 240,
-      "sold_since_golive": 48,
+      "sold_since_golive": 47,
       "last_pause_triggered": false,
       "modelo": "JBL Clip 5",
       "color": "Camuflaje"
@@ -72,9 +72,9 @@
       "color": "Rojo"
     },
     "JBL-CLIP5-ROSA": {
-      "available": 177,
+      "available": 178,
       "initial": 200,
-      "sold_since_golive": 23,
+      "sold_since_golive": 22,
       "last_pause_triggered": false,
       "modelo": "JBL Clip 5",
       "color": "Rosa"
@@ -112,9 +112,9 @@
       "color": "Blanco"
     },
     "BOSE-SOUNDLINK-NEGRO": {
-      "available": -23,
+      "available": -22,
       "initial": 65,
-      "sold_since_golive": 88,
+      "sold_since_golive": 87,
       "last_pause_triggered": true,
       "modelo": "Bose Soundlink",
       "color": "Negro"
