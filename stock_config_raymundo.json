@@ -267,7 +267,7 @@
   },
   "MLM5281123238": {
     "label": "Clip 5 Morado",
-    "real_stock": 24,
+    "real_stock": 0,
     "min_visible": 1,
     "auto_replenish": true,
     "replenish_quantity": 1,
@@ -278,7 +278,9 @@
     "model": "Clip 5",
     "catalog_product_id": "MLM44714111",
     "available_quantity": 1,
-    "sku": "JBL-CLIP5-MORADO"
+    "sku": "JBL-CLIP5-MORADO",
+    "active": false,
+    "agotado": true
   },
   "MLM2904687737": {
     "label": "Clip 5 Rojo",
