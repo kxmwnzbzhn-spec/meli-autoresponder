@@ -137,13 +137,13 @@
     "line": "Raymundo",
     "auto_replenish": true,
     "min_visible": 1,
-    "active": false,
+    "active": true,
     "title": "Jbl Go 4 - Altavoz Ultraportátil Bluetooth Color Rojo",
-    "real_stock": 0,
+    "real_stock": 1,
     "master_stock": 121,
     "available_quantity": 1,
     "sku": "JBL-GO4-ROJO",
-    "agotado": true
+    "agotado": false
   },
   "MLM5246077386": {
     "line": "Raymundo",
@@ -204,7 +204,7 @@
     "title": "Bocina Jbl Go 4 Jblgo4 Portátil Con Bluetooth Waterproof Roj",
     "floor_price": 449,
     "floor_locked_by_user": true,
-    "real_stock": 0,
+    "real_stock": 1,
     "master_stock": 121,
     "available_quantity": 1,
     "sku": "JBL-GO4-ROJO",
@@ -224,13 +224,13 @@
     "line": "Raymundo",
     "auto_replenish": true,
     "min_visible": 1,
-    "active": false,
+    "active": true,
     "title": "Altavoz Bluetooth Jbl Go 4 Portátil Impermeable En Rojo",
-    "real_stock": 0,
+    "real_stock": 1,
     "master_stock": 121,
     "available_quantity": 1,
     "sku": "JBL-GO4-ROJO",
-    "agotado": true
+    "agotado": false
   },
   "MLM2891178583": {
     "line": "Raymundo",
@@ -260,14 +260,14 @@
     "min_visible": 1,
     "active": true,
     "title": "Sony Srs-xb100 Altavoz De Viaje Inalámbrico Bluetooth Port C",
-    "real_stock": 1343,
+    "real_stock": 1333,
     "master_stock": 1422,
     "available_quantity": 1,
     "sku": "SONY-XB100-NEGRO"
   },
   "MLM5281123238": {
     "label": "Clip 5 Morado",
-    "real_stock": 0,
+    "real_stock": 6,
     "min_visible": 1,
     "auto_replenish": true,
     "replenish_quantity": 1,
@@ -279,8 +279,9 @@
     "catalog_product_id": "MLM44714111",
     "available_quantity": 1,
     "sku": "JBL-CLIP5-MORADO",
-    "active": false,
-    "agotado": true
+    "active": true,
+    "agotado": false,
+    "master_stock": 6
   },
   "MLM2904687737": {
     "label": "Clip 5 Rojo",
@@ -319,7 +320,7 @@
   },
   "MLM2904687747": {
     "label": "Clip 5 Azul",
-    "real_stock": 83,
+    "real_stock": 87,
     "min_visible": 1,
     "auto_replenish": true,
     "replenish_quantity": 1,
@@ -330,11 +331,12 @@
     "model": "Clip 5",
     "catalog_product_id": "MLM37110751",
     "available_quantity": 1,
-    "sku": "JBL-CLIP5-AZUL"
+    "sku": "JBL-CLIP5-AZUL",
+    "master_stock": 87
   },
   "MLM2904674811": {
     "label": "Clip 5 Camuflaje",
-    "real_stock": 84,
+    "real_stock": 87,
     "min_visible": 1,
     "auto_replenish": true,
     "replenish_quantity": 1,
@@ -345,7 +347,8 @@
     "model": "Clip 5",
     "catalog_product_id": "MLM44714150",
     "available_quantity": 1,
-    "sku": "JBL-CLIP5-CAMUFLAJE"
+    "sku": "JBL-CLIP5-CAMUFLAJE",
+    "master_stock": 87
   },
   "MLM2904700925": {
     "label": "Clip 5 Rojo (cover)",

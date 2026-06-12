@@ -49,9 +49,12 @@
   },
   "MLM2886136351": {
     "color": "Morado",
-    "stock": 202,
+    "stock": 0,
     "max_stock": 202,
-    "active": true
+    "active": false,
+    "real_stock": 0,
+    "agotado": true,
+    "sku": "TRONSMART-IP67-35W-MORADO"
   },
   "MLM5233480022": {
     "color": "Negro",
