@@ -25,6 +25,53 @@ ELITE_PRODUCTS = {
 
 LOOKBACK_HOURS = 168
 
+# === SUPABASE ATTRIBUTION ===
+# Lookup fbp/fbc captured at clickout time → attach to Purchase event for deterministic ad matching
+SUPABASE_URL = os.environ.get("SUPABASE_URL", "")
+SUPABASE_KEY = os.environ.get("SUPABASE_KEY", "")
+
+def lookup_clickout_session(item_id):
+    """Get the most recent unclaimed clickout for this item_id from Supabase (within 7d).
+    Returns (fbp, fbc, row_id) or (None, None, None) if not found."""
+    if not SUPABASE_URL or not SUPABASE_KEY: return (None, None, None)
+    try:
+        # Normalize item_id: try both with and without hyphen
+        ids = [item_id]
+        if "-" in item_id: ids.append(item_id.replace("-", ""))
+        else:
+            for prefix in ("MLM", "MLMU"):
+                if item_id.startswith(prefix):
+                    ids.append(prefix + "-" + item_id[len(prefix):])
+        cutoff = (datetime.now(timezone.utc) - timedelta(days=7)).isoformat()
+        params = {
+            "item_id": f"in.({','.join(ids)})",
+            "claimed_at": "is.null",
+            "created_at": f"gt.{cutoff}",
+            "order": "created_at.desc",
+            "limit": "1"
+        }
+        r = requests.get(f"{SUPABASE_URL}/rest/v1/clickout_sessions",
+            params=params,
+            headers={"apikey": SUPABASE_KEY, "Authorization": f"Bearer {SUPABASE_KEY}"},
+            timeout=4)
+        if r.status_code != 200 or not r.json(): return (None, None, None)
+        row = r.json()[0]
+        return (row.get("fbp"), row.get("fbc"), row.get("id"))
+    except Exception as e:
+        print(f"  WARN: Supabase lookup failed for {item_id}: {e}")
+        return (None, None, None)
+
+def mark_clickout_claimed(row_id, order_id):
+    if not SUPABASE_URL or not SUPABASE_KEY or not row_id: return
+    try:
+        requests.patch(f"{SUPABASE_URL}/rest/v1/clickout_sessions",
+            params={"id": f"eq.{row_id}"},
+            json={"claimed_at": datetime.now(timezone.utc).isoformat(), "claimed_by_order_id": str(order_id)},
+            headers={"apikey": SUPABASE_KEY, "Authorization": f"Bearer {SUPABASE_KEY}", "Content-Type": "application/json", "Prefer": "return=minimal"},
+            timeout=4)
+    except Exception: pass
+
+
 SELLERS = [
     {"id": 1668713481, "name": "ASVA",    "token_env": "MELI_REFRESH_TOKEN_USER1668"},
     {"id": 3364413125, "name": "YC",      "token_env": "MELI_REFRESH_TOKEN_YC_NEW"},
@@ -107,6 +154,7 @@ def collect_events_for_seller(seller, since):
     items_in_whitelist = 0
     items_other = 0
     items_elite = 0
+    total_fbp_matched = 0
     for o in all_orders:
         oid = o["id"]; ot = o["date_created"]
         dt = datetime.fromisoformat(ot.replace("Z", "+00:00")) if "Z" in ot else datetime.fromisoformat(ot)
@@ -142,6 +190,13 @@ def collect_events_for_seller(seller, since):
         if city: ud["ct"] = [sha256_hash(city)]
         if state: ud["st"] = [sha256_hash(state)]
 
+        # ATTRIBUTION: pull fbp/fbc captured at landing click for this item_id
+        _fbp, _fbc, _row_id = lookup_clickout_session(iid)
+        if _fbp: ud["fbp"] = _fbp
+        if _fbc: ud["fbc"] = _fbc
+        if _row_id: mark_clickout_claimed(_row_id, oid)
+        total_fbp_matched += (1 if _fbp or _fbc else 0)
+
         total_qty = sum(int(it.get("quantity", 1)) for it in items)
         event_source_url = ITEM_TO_LANDING.get(iid, DEFAULT_LANDING)
         event = {
@@ -166,7 +221,7 @@ def collect_events_for_seller(seller, since):
         else:
             events_sonix.append(event)
 
-    print(f"  [{seller['name']}] events: sonix={len(events_sonix)} elite={len(events_elite)} (whitelist={items_in_whitelist}, other={items_other}, elite_routed={items_elite})")
+    print(f"  [{seller['name']}] events: sonix={len(events_sonix)} elite={len(events_elite)} (whitelist={items_in_whitelist}, other={items_other}, elite_routed={items_elite}, fbp_matched={total_fbp_matched})")
     return events_sonix, events_elite
 
 def chunk(lst, n):
