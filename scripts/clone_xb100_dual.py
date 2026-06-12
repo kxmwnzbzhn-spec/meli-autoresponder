@@ -17,7 +17,7 @@ for a in cp.get("attributes",[])[:15]:
   print(f"  {a.get('id')}: {a.get('value_name')}")
 pictures=[{"source":p["url"]} for p in (cp.get("pictures") or [])][:12]
 
-PRICE=599
+PRICE=699
 
 # === 1) TRADICIONAL ===
 TITLE="Sony SRS-XB100 Bocina Bluetooth Inalámbrica Portátil Negro"
