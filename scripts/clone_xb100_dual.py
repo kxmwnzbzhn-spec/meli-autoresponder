@@ -38,7 +38,7 @@ trad_body={
     {"id":"BRAND","value_name":"Sony"},
     {"id":"MODEL","value_name":"SRS-XB100"},
     {"id":"COLOR","value_name":"Negro"},
-    {"id":"EMPTY_GTIN_REASON","value_name":"El producto no tiene código registrado"},
+    {"id":"GTIN","value_name":"4548736149878"},
     {"id":"ITEM_CONDITION","value_id":"2230284","value_name":"Nuevo"},
     {"id":"LINE","value_name":"SRS"},
   ],
