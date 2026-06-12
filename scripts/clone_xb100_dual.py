@@ -11,15 +11,18 @@ print(f"[ROTATED RT] {NEW_RT}")
 H={"Authorization":f"Bearer {AT}","Content-Type":"application/json"}
 
 CPID="MLM41991186"
-cp=requests.get(f"https://api.mercadolibre.com/products/{CPID}",headers={"Authorization":f"Bearer {AT}"},timeout=15).json()
-print(f"[CPID] name={cp.get('name')} pics={len(cp.get('pictures') or [])}")
-for a in cp.get("attributes",[])[:15]:
-  print(f"  {a.get('id')}: {a.get('value_name')}")
-pictures=[{"source":p["url"]} for p in (cp.get("pictures") or [])][:12]
-
 PRICE=699
 
-# === 1) TRADICIONAL ===
+# 1) PUT $699 on existing catalog item
+EXISTING_CAT="MLM3005722365"
+pu=requests.put(f"https://api.mercadolibre.com/items/{EXISTING_CAT}",headers=H,json={"price":PRICE},timeout=20)
+print(f"[CATALOG PUT price] HTTP {pu.status_code}")
+if pu.status_code>=300: print("  ",pu.text[:300])
+
+# 2) Retry TRADICIONAL with EMPTY_GTIN_REASON
+cp=requests.get(f"https://api.mercadolibre.com/products/{CPID}",headers={"Authorization":f"Bearer {AT}"},timeout=15).json()
+pictures=[{"source":p["url"]} for p in (cp.get("pictures") or [])][:12]
+
 TITLE="Sony SRS-XB100 Bocina Bluetooth Inalámbrica Portátil Negro"
 trad_body={
   "title":TITLE,
@@ -35,52 +38,28 @@ trad_body={
     {"id":"BRAND","value_name":"Sony"},
     {"id":"MODEL","value_name":"SRS-XB100"},
     {"id":"COLOR","value_name":"Negro"},
-    {"id":"GTIN","value_name":"0027242926097"},
+    {"id":"EMPTY_GTIN_REASON","value_name":"El producto no tiene código registrado"},
     {"id":"ITEM_CONDITION","value_id":"2230284","value_name":"Nuevo"},
     {"id":"LINE","value_name":"SRS"},
   ],
 }
 
-# === 2) CATALOG ===
-cat_body={
-  "title":TITLE,
-  "catalog_product_id":CPID,
-  "category_id":"MLM59800",
-  "price":PRICE,
-  "currency_id":"MXN",
-  "available_quantity":1,
-  "buying_mode":"buy_it_now",
-  "condition":"new",
-  "listing_type_id":"gold_pro",
-  "catalog_listing":True,
-  "channels":["marketplace"],
-}
-
-def try_publish(label,body):
-  v=requests.post("https://api.mercadolibre.com/items/validate",headers=H,json=body,timeout=20)
-  print(f"[{label} VALIDATE] HTTP {v.status_code}")
-  if v.status_code>=300:
-    try:
-      j=v.json(); causes=j.get("cause",[])
-      err=[c for c in causes if c.get("type")=="error"]
-      if err:
-        print(f"  ERR:",json.dumps(err)[:1000])
-        return None
-      print("  warnings only")
-    except: print("  raw:",v.text[:600]); return None
-  p=requests.post("https://api.mercadolibre.com/items",headers=H,json=body,timeout=25)
-  print(f"[{label} POST] HTTP {p.status_code}")
-  if p.status_code>=300:
-    print("  ",p.text[:800]); return None
+v=requests.post("https://api.mercadolibre.com/items/validate",headers=H,json=trad_body,timeout=20)
+print(f"[TRAD VALIDATE] HTTP {v.status_code}")
+if v.status_code>=300:
+  try:
+    j=v.json(); causes=j.get("cause",[])
+    err=[c for c in causes if c.get("type")=="error"]
+    if err: print("  ERR:",json.dumps(err)[:1200])
+  except: print("  ",v.text[:600])
+p=requests.post("https://api.mercadolibre.com/items",headers=H,json=trad_body,timeout=25)
+print(f"[TRAD POST] HTTP {p.status_code}")
+if p.status_code>=300:
+  print("  ",p.text[:800])
+else:
   out=p.json()
-  print(f"  ✅ {out['id']} ${out.get('price')} | https://articulo.mercadolibre.com.mx/{out['id'].replace('MLM','MLM-')}-_JM")
-  return out
-
-trad=try_publish("TRADICIONAL", trad_body)
-cat=try_publish("CATALOG", cat_body)
-
-# Description for tradicional
-if trad:
+  NEW_ID=out["id"]
+  print(f"  ✅ {NEW_ID} ${PRICE} | https://articulo.mercadolibre.com.mx/{NEW_ID.replace('MLM','MLM-')}-_JM")
   desc=("Sony SRS-XB100 — Bocina Bluetooth portátil color negro. 100% original.\n\n"
         "CARACTERÍSTICAS\n"
         "- Diseño compacto y ligero, perfecto para llevar.\n"
@@ -90,10 +69,10 @@ if trad:
         "- Bluetooth 5.3 con función manos libres.\n"
         "- Correa multifunción y tecnología Sound Diffusion.\n\n"
         "GARANTÍA DEL VENDEDOR · Envío inmediato.")
-  requests.post(f"https://api.mercadolibre.com/items/{trad['id']}/description",
+  requests.post(f"https://api.mercadolibre.com/items/{NEW_ID}/description",
     headers=H,json={"plain_text":desc},timeout=15)
 
-# Sync rotated RT
+# Sync RT
 try:
   import nacl.encoding, nacl.public
 except Exception:
@@ -109,4 +88,3 @@ enc=base64.b64encode(sealed).decode()
 ru=requests.put(f"https://api.github.com/repos/{REPO}/actions/secrets/MELI_REFRESH_TOKEN_AH",
   headers=GHH,json={"encrypted_value":enc,"key_id":pk["key_id"]},timeout=15)
 print(f"[GH SECRET UPDATE] HTTP {ru.status_code}")
-print(f"SUMMARY trad={trad and trad.get('id')} cat={cat and cat.get('id')}")
