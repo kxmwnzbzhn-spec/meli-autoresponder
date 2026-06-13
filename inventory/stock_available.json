@@ -1,10 +1,10 @@
 {
   "_meta": {
-    "updated": "2026-06-13T17:49:45.386412Z",
+    "updated": "2026-06-13T18:59:48.613322Z",
     "golive_ref": "stock_at_golive_20260518.json",
     "note": "Dinámico — decrementa con cada venta vía cron.",
-    "total_sold": 2183,
-    "total_available": 2833
+    "total_sold": 2182,
+    "total_available": 2834
   },
   "skus": {
     "SONY-XB100-NEGRO": {
@@ -16,9 +16,9 @@
       "color": "Negro"
     },
     "JBL-GO4-AQUA": {
-      "available": 540,
+      "available": 541,
       "initial": 704,
-      "sold_since_golive": 164,
+      "sold_since_golive": 163,
       "last_pause_triggered": false,
       "modelo": "JBL Go 4",
       "color": "Aqua/Celeste"
