@@ -1,10 +1,10 @@
 {
   "_meta": {
-    "updated": "2026-06-13T16:23:24.589782Z",
+    "updated": "2026-06-13T17:49:45.386412Z",
     "golive_ref": "stock_at_golive_20260518.json",
     "note": "Dinámico — decrementa con cada venta vía cron.",
-    "total_sold": 2184,
-    "total_available": 2832
+    "total_sold": 2183,
+    "total_available": 2833
   },
   "skus": {
     "SONY-XB100-NEGRO": {
@@ -24,9 +24,9 @@
       "color": "Aqua/Celeste"
     },
     "JBL-GO3-NEGRO": {
-      "available": -96,
+      "available": -95,
       "initial": 495,
-      "sold_since_golive": 591,
+      "sold_since_golive": 590,
       "last_pause_triggered": true,
       "modelo": "JBL Go 3",
       "color": "Negro"
