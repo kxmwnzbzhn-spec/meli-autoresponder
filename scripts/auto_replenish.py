@@ -87,8 +87,15 @@ while time.time()<end:
                                           "account":r.get("account"),
                                           "auto_pause":bool(r.get("auto_pause_when_zero",True))}
         except: pass
+    # Reload priority list every 10 ticks (~5 min) so new entries are picked up mid-loop
+    if tick_num % 10 == 0:
+        try:
+            priority=[r for r in sb_get("meli_priority_replenish","select=item_id,account,default_qty") if r.get("item_id")]
+            print(f"[t{tick_num} RELOAD] priority list reloaded: {len(priority)} items")
+        except: pass
     try:
-        priority=[r for r in sb_get("meli_priority_replenish","select=item_id,account,default_qty") if r.get("item_id")]
+        if 'priority' not in dir():
+            priority=[r for r in sb_get("meli_priority_replenish","select=item_id,account,default_qty") if r.get("item_id")]
         for pr in priority:
             iid=pr["item_id"]; acct=pr.get("account"); qty=int(pr.get("default_qty") or 1)
             cap=capped_map.get(iid)
@@ -107,7 +114,15 @@ while time.time()<end:
                 g=requests.get(f"{API}/items/{iid}",headers=Hp,timeout=10).json()
                 cur_qty=g.get("available_quantity") or 0
                 cur_status=g.get("status")
-                needs_replenish = (cur_status!="active") or (cur_qty<qty)
+                vars_list_check=g.get("variations") or []
+                if vars_list_check:
+                    # For items with variations, check per-variant individually
+                    per_var_check=1 if qty<=len(vars_list_check) else max(qty//len(vars_list_check),1)
+                    needs_replenish=(cur_status!="active") or any(
+                        (v.get("available_quantity") or 0)<per_var_check for v in vars_list_check
+                    )
+                else:
+                    needs_replenish=(cur_status!="active") or (cur_qty<qty)
                 if not needs_replenish: continue
                 if cap:
                     # Detect sale: any drop = at least 1 sold. We assume visible=qty, so sold=qty-cur_qty (min 1).
@@ -166,6 +181,8 @@ while time.time()<end:
                                 json={"status":"active","variations":vupdates},timeout=10)
                             if rr.status_code in (200,201):
                                 print(f"[t{tick_num} PRIORITY-VAR {nick_p}] {iid} restocked {len(vupdates)} variants per_var={per_var}")
+                            else:
+                                print(f"[t{tick_num} PRIORITY-VAR-ERR {nick_p}] {iid} HTTP {rr.status_code}: {rr.text[:200]}")
                     else:
                         rr=requests.put(f"{API}/items/{iid}",headers=HJp,json={"status":"active","available_quantity":qty},timeout=10)
                         if rr.status_code in (200,201):
