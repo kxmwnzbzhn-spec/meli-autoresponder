@@ -3,7 +3,7 @@
     "description": "Yiriam stock real almacén - 12 perfumes",
     "updated": "2026-05-16",
     "total": 239,
-    "synced_from_supabase_at": "2026-06-13T07:57:11.314270+00:00"
+    "synced_from_supabase_at": "2026-06-14T21:24:08.666250+00:00"
   },
   "MLM2935286605": {
     "title": "Angel Nova",
@@ -114,9 +114,9 @@
     "min_visible": 1,
     "available_quantity": 1,
     "auto_replenish": true,
-    "active": true,
+    "active": false,
     "last_sold": 11,
-    "agotado": false,
+    "agotado": true,
     "sku": "PERF-ARMAF-DELIGHT-ISLAND-BLISS"
   },
   "MLM5353056406": {
