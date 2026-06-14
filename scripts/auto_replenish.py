@@ -103,8 +103,10 @@ while time.time()<end:
                 qty=cap["visible_qty"]
                 acct=acct or cap["account"]
             sec_for=None
+            acct_lower=(acct or "").lower()
             for (uid_a,sec_a,nick_a) in ACCOUNTS:
-                if nick_a.lower()==(acct or "").lower():
+                env_suffix=sec_a.replace("MELI_REFRESH_TOKEN_","").replace("MELI_REFRESH_TOKEN","").lower()
+                if nick_a.lower()==acct_lower or env_suffix==acct_lower:
                     sec_for=sec_a; break
             if not sec_for or sec_for not in sessions: continue
             at_p,rt_p,uid_p,nick_p=sessions[sec_for]
