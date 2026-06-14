@@ -150,13 +150,17 @@ while time.time()<end:
                     if vars_list:
                         # qty represents per-variation target (1 each)
                         per_var=1 if qty<=len(vars_list) else max(qty//len(vars_list),1)
-                        vupdates=[]
+                        # CRITICAL: include ALL variations (PUT with partial array deletes others)
+                        v_all=[]
+                        any_below=False
                         for v in vars_list:
-                            if (v.get("available_quantity") or 0)<per_var:
-                                vupdates.append({"id":v.get("id"),"available_quantity":per_var})
-                        if vupdates:
+                            cq=v.get("available_quantity") or 0
+                            new_q=per_var if cq<per_var else cq
+                            if cq<per_var: any_below=True
+                            v_all.append({"id":v.get("id"),"available_quantity":new_q})
+                        if any_below:
                             rr=requests.put(f"{API}/items/{iid}",headers=HJp,
-                                json={"status":"active","variations":vupdates},timeout=10)
+                                json={"status":"active","variations":v_all},timeout=10)
                         else:
                             class _R: status_code=200
                             rr=_R()
@@ -174,15 +178,19 @@ while time.time()<end:
                     vars_list=g.get("variations") or []
                     if vars_list:
                         per_var=1 if qty<=len(vars_list) else max(qty//len(vars_list),1)
-                        vupdates=[]
+                        # CRITICAL: include ALL variations (PUT with partial array deletes others)
+                        v_all=[]
+                        below_count=0
                         for v in vars_list:
-                            if (v.get("available_quantity") or 0)<per_var:
-                                vupdates.append({"id":v.get("id"),"available_quantity":per_var})
-                        if vupdates:
+                            cq=v.get("available_quantity") or 0
+                            new_q=per_var if cq<per_var else cq
+                            if cq<per_var: below_count+=1
+                            v_all.append({"id":v.get("id"),"available_quantity":new_q})
+                        if below_count>0:
                             rr=requests.put(f"{API}/items/{iid}",headers=HJp,
-                                json={"status":"active","variations":vupdates},timeout=10)
+                                json={"status":"active","variations":v_all},timeout=10)
                             if rr.status_code in (200,201):
-                                print(f"[t{tick_num} PRIORITY-VAR {nick_p}] {iid} restocked {len(vupdates)} variants per_var={per_var}")
+                                print(f"[t{tick_num} PRIORITY-VAR {nick_p}] {iid} restocked {below_count} variants per_var={per_var}")
                             else:
                                 print(f"[t{tick_num} PRIORITY-VAR-ERR {nick_p}] {iid} HTTP {rr.status_code}: {rr.text[:200]}")
                     else:
