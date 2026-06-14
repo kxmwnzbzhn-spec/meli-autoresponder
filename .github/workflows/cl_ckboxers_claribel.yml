@@ -1,0 +1,46 @@
+name: cl_ckboxers_claribel
+on: { workflow_dispatch: {} }
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests pynacl -q
+      - name: run
+        env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_AH: ${{ secrets.MELI_REFRESH_TOKEN_AH }}
+          MELI_REFRESH_TOKEN_CLARIBEL: ${{ secrets.MELI_REFRESH_TOKEN_CLARIBEL }}
+        run: |
+          python3 scripts/clone_ckboxers_to_claribel.py | tee /tmp/clk.log
+          grep '^FINAL_ROTATED_TOKENS=' /tmp/clk.log | sed 's/^FINAL_ROTATED_TOKENS=//' > /tmp/rot.json || echo '{}' > /tmp/rot.json
+      - name: sync rotated tokens
+        if: always()
+        env:
+          GH_TOKEN_FOR_SECRETS: ${{ secrets.GH_TOKEN_FOR_SECRETS }}
+        run: |
+          if [ -z "$GH_TOKEN_FOR_SECRETS" ] || [ ! -s /tmp/rot.json ]; then exit 0; fi
+          python3 - <<'PY'
+          import os,json,base64,urllib.request
+          from nacl import encoding, public
+          R="kxmwnzbzhn-spec/meli-autoresponder"
+          T=os.environ["GH_TOKEN_FOR_SECRETS"]
+          rot=json.load(open("/tmp/rot.json"))
+          pk=json.loads(urllib.request.urlopen(urllib.request.Request(
+              f"https://api.github.com/repos/{R}/actions/secrets/public-key",
+              headers={"Authorization":f"Bearer {T}","Accept":"application/vnd.github+json"})).read())
+          for N,V in rot.items():
+              if not V: continue
+              sealed=public.SealedBox(public.PublicKey(pk["key"].encode(),encoding.Base64Encoder())).encrypt(V.encode())
+              req=urllib.request.Request(
+                  f"https://api.github.com/repos/{R}/actions/secrets/{N}",
+                  headers={"Authorization":f"Bearer {T}","Accept":"application/vnd.github+json","Content-Type":"application/json"},
+                  method="PUT",
+                  data=json.dumps({"encrypted_value":base64.b64encode(sealed).decode(),"key_id":pk["key_id"]}).encode())
+              try:
+                  with urllib.request.urlopen(req) as r: print(f"{N}: {r.status}")
+              except Exception as e: print(f"{N}: err {e}")
+          PY
