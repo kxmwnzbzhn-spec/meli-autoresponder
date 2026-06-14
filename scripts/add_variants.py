@@ -10,88 +10,83 @@ print(f"[ROTATED] {NEW_RT}")
 H={"Authorization":f"Bearer {AT}","Content-Type":"application/json"}
 
 ITEM="MLM2976325463"
-g=requests.get(f"{API}/items/{ITEM}",headers={"Authorization":f"Bearer {AT}"},timeout=15).json()
+CHART_ID="5915675"
+
+g=requests.get(f"{API}/items/{ITEM}?include_attributes=all",headers={"Authorization":f"Bearer {AT}"},timeout=15).json()
 existing_vars=g.get("variations") or []
 print(f"[before] {len(existing_vars)} variations")
-existing_sizes=set()
-for v in existing_vars:
-  for ac in v.get("attribute_combinations",[]):
-    if ac.get("id") in ("SIZE","SIZE_GRID_ROW_ID"):
-      existing_sizes.add(ac.get("value_name"))
-  print(f"  id={v.get('id')} | combos={[(ac.get('id'),ac.get('value_name'),ac.get('value_id')) for ac in v.get('attribute_combinations',[])]} | qty={v.get('available_quantity')}")
-print(f"existing sizes: {existing_sizes}")
+template=existing_vars[0]
 
-# EAN per size (from project SKU_Y_EAN.txt)
+# Clean existing variation: strip catalog_product_id + read-only fields
+def clean_var(v):
+  return {
+    "id": v["id"],
+    "price": v.get("price"),
+    "available_quantity": v.get("available_quantity"),
+    "picture_ids": v.get("picture_ids",[]),
+    "attribute_combinations": [
+      {"id":ac["id"],"value_id":ac.get("value_id"),"value_name":ac.get("value_name")}
+      for ac in v.get("attribute_combinations",[])
+    ],
+    "attributes": [
+      {"id":a["id"],"value_name":a.get("value_name")}
+      for a in v.get("attributes",[]) if a["id"] in ("GTIN","SELLER_SKU","SIZE_GRID_ROW_ID")
+    ],
+  }
+
+new_variations=[clean_var(v) for v in existing_vars]
+
+# Standard CK chart row mapping (M=2 confirmed)
+ROW_BY_SIZE={"S":"1","M":"2","L":"3"}
+SIZE_VALUE_IDS={"S":None,"M":"2282666","L":None}  # leave value_id null for S/L, MELI resolves via chart
 EAN_BY_SIZE={"S":"2050788300012","M":"2050788300029","L":"2050788300036"}
 SKU_PREFIX="CK-PACK3-BRIEF"
 
-# Decide which to add: S, M, L minus existing
-all_sizes=["S","M","L"]
-missing=[s for s in all_sizes if s not in existing_sizes]
-print(f"missing sizes to add: {missing}")
-if not missing:
-  print("Nothing to add"); raise SystemExit(0)
+# Find existing sizes
+existing_sizes=set()
+for v in existing_vars:
+  for ac in v.get("attribute_combinations",[]):
+    if ac.get("id")=="SIZE":
+      existing_sizes.add(ac.get("value_name"))
+missing=[s for s in ["S","L"] if s not in existing_sizes]
+print(f"existing={existing_sizes} missing={missing}")
 
-# Get first variation's structure as template (same picture_ids + ITEM_CONDITION combo + attributes)
-template=existing_vars[0]
-# Get its attribute_combinations to learn the attribute structure (SIZE_GRID_ROW_ID + value_id mapping)
-print(f"\ntemplate variation full combos: {json.dumps(template.get('attribute_combinations',[]),ensure_ascii=False)}")
-
-# Map size -> value_id from SIZE_GRID
-# Get the SIZE attribute possible values
-cat_attrs=requests.get(f"{API}/categories/MLM194115/attributes",headers=H,timeout=15).json()
-SIZE_VALUE_IDS={}
-for a in cat_attrs:
-  if a.get("id")=="SIZE":
-    for v in (a.get("values") or []):
-      SIZE_VALUE_IDS[v.get("name")]=v.get("id")
-print(f"SIZE value_ids: {SIZE_VALUE_IDS}")
-
-# Build new variations
-new_variations=list(existing_vars)
 for sz in missing:
-  base={
-    "price":g.get("price"),
-    "available_quantity":1,
-    "picture_ids":template.get("picture_ids",[])[:6],
-    "attributes":[
-      {"id":"SELLER_SKU","value_name":f"{SKU_PREFIX}-{sz}"},
-      {"id":"GTIN","value_name":EAN_BY_SIZE[sz]},
-    ],
-    "attribute_combinations":[],
-  }
-  # Replicate template's combo structure but swap size
+  # Build attribute_combinations replicating template's COLOR + FABRIC_DESIGN + SIZE
+  combos=[]
   for ac in template.get("attribute_combinations",[]):
     if ac.get("id")=="SIZE":
       combo={"id":"SIZE","value_name":sz}
-      if sz in SIZE_VALUE_IDS:
-        combo["value_id"]=SIZE_VALUE_IDS[sz]
-      base["attribute_combinations"].append(combo)
-    elif ac.get("id")=="SIZE_GRID_ROW_ID":
-      # Keep value_id null for new size — let MELI resolve from chart
-      base["attribute_combinations"].append({"id":ac.get("id"),"value_name":sz})
+      if SIZE_VALUE_IDS.get(sz): combo["value_id"]=SIZE_VALUE_IDS[sz]
+      combos.append(combo)
     else:
-      # Copy as-is
-      base["attribute_combinations"].append(ac)
-  new_variations.append(base)
+      combos.append({"id":ac["id"],"value_id":ac.get("value_id"),"value_name":ac.get("value_name")})
+  new_var={
+    "price": g.get("price"),
+    "available_quantity": 1,
+    "picture_ids": template.get("picture_ids",[])[:10],
+    "attribute_combinations": combos,
+    "attributes": [
+      {"id":"GTIN","value_name":EAN_BY_SIZE[sz]},
+      {"id":"SELLER_SKU","value_name":f"{SKU_PREFIX}-{sz}"},
+      {"id":"SIZE_GRID_ROW_ID","value_name":f"{CHART_ID}:{ROW_BY_SIZE[sz]}"},
+    ],
+  }
+  new_variations.append(new_var)
 
-print(f"\n[after build] total variations: {len(new_variations)}")
-
-# PUT update
+print(f"[total] {len(new_variations)} variations to send")
 payload={"variations":new_variations}
-print(f"\n[PUT payload (truncated)] variations={len(new_variations)} | sizes: {existing_sizes | set(missing)}")
-pu=requests.put(f"{API}/items/{ITEM}",headers=H,json=payload,timeout=25)
+pu=requests.put(f"{API}/items/{ITEM}",headers=H,json=payload,timeout=30)
 print(f"[PUT] HTTP {pu.status_code}")
 if pu.status_code>=300:
-  print(f"  body: {pu.text[:1500]}")
+  print(f"  body: {pu.text[:1800]}")
 else:
-  print(f"  ✅ updated")
+  print("  ✅ updated")
 
-# Verify
-g2=requests.get(f"{API}/items/{ITEM}",headers={"Authorization":f"Bearer {AT}"},timeout=12).json()
-print(f"\n[after PUT] variations: {len(g2.get('variations') or [])}")
+g2=requests.get(f"{API}/items/{ITEM}",headers={"Authorization":f"Bearer {AT}"},timeout=15).json()
+print(f"\n[after] {len(g2.get('variations') or [])} variations:")
 for v in g2.get('variations',[]):
-  sz=None
+  sz="?"
   for ac in v.get("attribute_combinations",[]):
     if ac.get("id")=="SIZE": sz=ac.get("value_name")
   print(f"  id={v.get('id')} size={sz} qty={v.get('available_quantity')}")
