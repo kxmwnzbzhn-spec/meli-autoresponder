@@ -107,9 +107,9 @@ R: Sí, el Gold Elixir es la versión Parfum Intense - más concentrado, más du
 P: ¿Llega con factura?
 R: Sí, generamos factura automática cuando compras."""
 
-rd=requests.post(f"{API}/items/{ITEM}/description",headers=H,
+rd=requests.put(f"{API}/items/{ITEM}/description",headers=H,
   json={"plain_text":DESC},timeout=15)
-print(f"[PUT description] HTTP {rd.status_code} - {len(DESC)} chars")
+print(f"[PUT description] HTTP {rd.status_code} - {len(DESC)} chars\n  body: {rd.text[:400]}")
 
 # Verify
 g=requests.get(f"{API}/items/{ITEM}",headers={"Authorization":f"Bearer {AT}"},timeout=15).json()
