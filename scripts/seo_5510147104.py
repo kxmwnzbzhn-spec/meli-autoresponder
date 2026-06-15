@@ -107,11 +107,25 @@ R: Sí, el Gold Elixir es la versión Parfum Intense - más concentrado, más du
 P: ¿Llega con factura?
 R: Sí, generamos factura automática cuando compras."""
 
-# Convert DESC to HTML (newlines to <br>, preserve structure)
+# Try multiple combos to find what this listing accepts
 import html as _h
 DESC_HTML="<p>"+_h.escape(DESC).replace("\n\n","</p><p>").replace("\n","<br>")+"</p>"
+print("--- try 1: ONLY text(html) ---")
 rd=requests.put(f"{API}/items/{ITEM}/description",headers=H,
-  json={"text":DESC_HTML,"plain_text":DESC},timeout=15)
+  json={"text":DESC_HTML},timeout=15)
+print(f"  HTTP {rd.status_code}: {rd.text[:300]}")
+if rd.status_code>=300:
+  print("--- try 2: DELETE + POST plain_text ---")
+  d=requests.delete(f"{API}/items/{ITEM}/description",headers=H,timeout=15)
+  print(f"  DELETE HTTP {d.status_code}")
+  rd=requests.post(f"{API}/items/{ITEM}/description",headers=H,
+    json={"plain_text":DESC},timeout=15)
+  print(f"  POST plain HTTP {rd.status_code}: {rd.text[:300]}")
+  if rd.status_code>=300:
+    print("--- try 3: POST text(html) ---")
+    rd=requests.post(f"{API}/items/{ITEM}/description",headers=H,
+      json={"text":DESC_HTML},timeout=15)
+    print(f"  POST html HTTP {rd.status_code}: {rd.text[:300]}")
 print(f"[PUT description] HTTP {rd.status_code} - {len(DESC)} chars\n  body: {rd.text[:400]}")
 
 # Verify
