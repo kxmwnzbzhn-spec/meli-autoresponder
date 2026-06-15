@@ -12,40 +12,52 @@ r.raise_for_status(); tk=r.json(); AT=tk["access_token"]; NEW_RT=tk["refresh_tok
 print(f"[ROTATED] {NEW_RT}")
 H={"Authorization":f"Bearer {AT}","Content-Type":"application/json"}
 SB=os.environ["SUPABASE_URL"].rstrip("/"); SBK=os.environ["SUPABASE_SERVICE_KEY"]
-SBH={"apikey":SBK,"Authorization":f"Bearer {SBK}","Content-Type":"application/json",
-     "Prefer":"return=representation,resolution=merge-duplicates"}
+SBH={"apikey":SBK,"Authorization":f"Bearer {SBK}","Content-Type":"application/json","Prefer":"return=representation,resolution=merge-duplicates"}
 
-# 3 groups
+# CPID groups — SKIP already-published: MLM63875183 (TRAD)
+ALREADY_DONE = {"MLM63875183"}
 GROUP_CAT_499_599 = ["MLM61262890","MLM54696427","MLM37361021","MLM70607552","MLM37918100"]
-GROUP_TRAD_599_999 = ["MLM48244979","MLM63875183","MLM64288232","MLM44714337","MLM35713227","MLM37110751","MLM52667244","MLM44714150","MLM47219000","MLM44712057","MLM58616124"]
+GROUP_TRAD_599_999 = ["MLM48244979","MLM64288232","MLM44714337","MLM35713227","MLM37110751","MLM52667244","MLM44714150","MLM47219000","MLM44712057","MLM58616124"]
 GROUP_TRAD_399_499 = ["MLM44709174","MLM35886513","MLM58788792","MLM58918178"]
 
-def safe_get_cpid(cpid):
-  for _ in range(3):
-    try:
-      r=requests.get(f"{API}/products/{cpid}",headers=H,timeout=15)
-      if r.status_code==200: return r.json()
-      if r.status_code>=400 and r.status_code<500: return None
-    except: pass
-    time.sleep(2)
-  return None
-
-def predict_category(title, brand):
-  qs=requests.utils.quote(f"{brand} {title}")
+def get_cpid(cpid):
   try:
-    dd=requests.get(f"{API}/sites/MLM/domain_discovery/search?limit=3&q={qs}",headers=H,timeout=10)
-    if dd.status_code==200:
-      arr=dd.json()
-      if isinstance(arr,list) and arr: return arr[0].get("category_id")
+    r=requests.get(f"{API}/products/{cpid}",headers=H,timeout=15)
+    if r.status_code==200: return r.json()
   except: pass
   return None
 
-def setup_replenish(item_id, name):
+def get_competitors(cpid, limit=10):
+  """Get list of items competing on CPID — they tell us category + GTIN."""
   try:
-    r=requests.post(f"{SB}/rest/v1/meli_priority_replenish",headers=SBH,
-      json={"item_id":item_id,"account":"AH","default_qty":1,"product_name":name},timeout=10)
-    return r.status_code<300
-  except: return False
+    r=requests.get(f"{API}/products/{cpid}/items?limit={limit}",headers=H,timeout=15)
+    if r.status_code==200: return r.json().get("results",[])
+  except: pass
+  return []
+
+def get_item_meta(iid):
+  try:
+    r=requests.get(f"{API}/items/{iid}",headers=H,timeout=12)
+    if r.status_code==200: return r.json()
+  except: pass
+  return None
+
+def derive_category_gtin(cpid):
+  """Fetch category_id and GTIN from real competing items."""
+  cat=None; gtin=None
+  comps=get_competitors(cpid, limit=20)
+  for c in comps:
+    iid=c.get("item_id") or c.get("id")
+    if not iid: continue
+    m=get_item_meta(iid)
+    if not m: continue
+    if not cat: cat=m.get("category_id")
+    if not gtin:
+      for a in m.get("attributes",[]):
+        if a.get("id")=="GTIN" and a.get("value_name"):
+          gtin=a.get("value_name"); break
+    if cat and gtin: break
+  return cat, gtin
 
 def set_bounds(cpid, item_id, floor, ceiling):
   raw=f"item bounds floor={floor} ceiling={ceiling}"
@@ -57,14 +69,23 @@ def set_bounds(cpid, item_id, floor, ceiling):
               "directive_type":dt,"value_numeric":val,"raw_user_message":raw},timeout=10)
     except: pass
 
+def setup_replenish(item_id, name):
+  try:
+    requests.post(f"{SB}/rest/v1/meli_priority_replenish",headers=SBH,
+      json={"item_id":item_id,"account":"AH","default_qty":1,"product_name":(name or "")[:200]},timeout=10)
+  except: pass
+
 def publish_catalog(cpid, low, high):
-  cp=safe_get_cpid(cpid)
-  if not cp:
-    print(f"  ❌ CPID {cpid} not found"); return None
+  cp=get_cpid(cpid)
+  cat=cp.get("category_id") if cp else None
+  if not cat:
+    cat,_=derive_category_gtin(cpid)
+  if not cat:
+    print(f"  ❌ no category for {cpid}"); return None
   body={
-    "title":(cp.get("name") or "")[:60],
+    "title":(cp.get("name") or "")[:60] if cp else "Product",
     "catalog_product_id":cpid,
-    "category_id":cp.get("category_id"),
+    "category_id":cat,
     "price":high,
     "currency_id":"MXN",
     "available_quantity":1,
@@ -78,49 +99,46 @@ def publish_catalog(cpid, low, high):
   if v.status_code>=300:
     try:
       j=v.json(); err=[c for c in j.get("cause",[]) if c.get("type")=="error"]
-      if err: print(f"  ❌ VALIDATE: {json.dumps(err)[:300]}"); return None
+      if err: print(f"  ❌ VALIDATE {cpid}: {json.dumps(err)[:400]}"); return None
     except: pass
   p=requests.post(f"{API}/items",headers=H,json=body,timeout=25)
   if p.status_code>=300:
-    print(f"  ❌ POST {p.status_code}: {p.text[:300]}"); return None
+    print(f"  ❌ POST {cpid}: {p.text[:400]}"); return None
   out=p.json(); iid=out["id"]
   print(f"  ✅ CATALOG {iid} ${high} bounds[{low},{high}] | https://articulo.mercadolibre.com.mx/{iid.replace('MLM','MLM-')}-_JM")
-  set_bounds(cpid, iid, low, high)
-  setup_replenish(iid, cp.get("name"))
+  set_bounds(cpid, iid, low, high); setup_replenish(iid, cp.get("name") if cp else "")
   return iid
 
 def publish_tradicional(cpid, low, high):
-  cp=safe_get_cpid(cpid)
-  if not cp:
-    print(f"  ❌ CPID {cpid} not found"); return None
+  cp=get_cpid(cpid)
+  if not cp: print(f"  ❌ no CPID {cpid}"); return None
   name=cp.get("name") or ""
   pics=[{"source":p["url"]} for p in (cp.get("pictures") or [])][:10]
   attrs=cp.get("attributes") or []
-  brand_attr=next((a for a in attrs if a.get("id")=="BRAND"),{})
-  brand=brand_attr.get("value_name","Genérico")
-  
-  # Find category
-  cat_id=cp.get("category_id")
-  if not cat_id:
-    cat_id=predict_category(name, brand)
-  if not cat_id:
+  cat=cp.get("category_id")
+  # Get competitor for category + GTIN
+  comp_cat, comp_gtin = derive_category_gtin(cpid)
+  cat=cat or comp_cat
+  if not cat:
     print(f"  ❌ no category for {cpid}"); return None
-  
-  # Build attributes (copy from CPID, sanitize)
+
   ATTRS=[]
   for a in attrs:
     if a.get("id") in ("BRAND","MODEL","COLOR","GTIN","LINE","PERFUME_NAME","PERFUME_TYPE",
-                       "UNIT_VOLUME","GENDER","MAIN_MATERIAL","COMPOSITION","UNITS_PER_PACK",
-                       "AGE_GROUP","SIZE_GRID_ID"):
+                       "UNIT_VOLUME","GENDER","MAIN_MATERIAL","COMPOSITION","UNITS_PER_PACK","AGE_GROUP"):
       ATTRS.append({"id":a["id"],"value_name":a.get("value_name")})
-  has_brand=any(a["id"]=="BRAND" for a in ATTRS)
-  if not has_brand: ATTRS.append({"id":"BRAND","value_name":brand})
+  has_gtin=any(a["id"]=="GTIN" for a in ATTRS)
+  if not has_gtin and comp_gtin:
+    ATTRS.append({"id":"GTIN","value_name":comp_gtin})
+    has_gtin=True
+  if not any(a["id"]=="BRAND" for a in ATTRS):
+    ATTRS.append({"id":"BRAND","value_name":"Genérico"})
   if not any(a["id"]=="ITEM_CONDITION" for a in ATTRS):
     ATTRS.append({"id":"ITEM_CONDITION","value_id":"2230284","value_name":"Nuevo"})
-  
+
   body={
     "title":name[:60],
-    "category_id":cat_id,
+    "category_id":cat,
     "price":high,
     "currency_id":"MXN",
     "available_quantity":1,
@@ -130,60 +148,46 @@ def publish_tradicional(cpid, low, high):
     "pictures":pics,
     "attributes":ATTRS,
   }
-  
-  # try
-  for attempt in range(2):
+
+  for attempt in range(3):
     v=requests.post(f"{API}/items/validate",headers=H,json=body,timeout=20)
-    if v.status_code>=300:
-      try:
-        j=v.json(); err=[c for c in j.get("cause",[]) if c.get("type")=="error"]
-        if err:
-          # If GTIN required and missing, add EMPTY_GTIN_REASON
-          codes=[c.get("code") for c in err]
-          if "item.attribute.missing_conditional_required" in codes and not any(a["id"]=="EMPTY_GTIN_REASON" for a in ATTRS) and not any(a["id"]=="GTIN" for a in ATTRS):
-            ATTRS.append({"id":"EMPTY_GTIN_REASON","value_name":"El producto no tiene código registrado"})
-            body["attributes"]=ATTRS
-            continue
-          # If title too long
-          if "item.title.length.invalid" in codes:
-            body["title"]=body["title"][:58]
-            continue
-          print(f"  ❌ VALIDATE {cpid}: {json.dumps(err)[:300]}"); return None
-      except: pass
-    break
-  
+    if v.status_code<300: break
+    try:
+      j=v.json(); err=[c for c in j.get("cause",[]) if c.get("type")=="error"]
+      codes=[c.get("code") for c in err]
+      if "item.attribute.missing_conditional_required" in codes and not has_gtin:
+        ATTRS.append({"id":"EMPTY_GTIN_REASON","value_name":"El producto no tiene código registrado"})
+        body["attributes"]=ATTRS; continue
+      if "item.title.length.invalid" in codes:
+        body["title"]=body["title"][:58]; continue
+      print(f"  ❌ VALIDATE {cpid}: {json.dumps(err)[:500]}"); return None
+    except: print(f"  ❌ {v.text[:300]}"); return None
+
   p=requests.post(f"{API}/items",headers=H,json=body,timeout=25)
   if p.status_code>=300:
-    print(f"  ❌ POST {cpid}: {p.text[:300]}"); return None
+    print(f"  ❌ POST {cpid}: {p.text[:400]}"); return None
   out=p.json(); iid=out["id"]
   print(f"  ✅ TRAD {iid} ${high} bounds[{low},{high}] | https://articulo.mercadolibre.com.mx/{iid.replace('MLM','MLM-')}-_JM")
-  set_bounds(cpid, iid, low, high)
-  setup_replenish(iid, name)
+  set_bounds(cpid, iid, low, high); setup_replenish(iid, name)
   return iid
 
-results=[]
 print("\n=== GROUP 1: CATALOGO [$499 - $599] ===")
 for cpid in GROUP_CAT_499_599:
+  if cpid in ALREADY_DONE: continue
   print(f"\n--- {cpid} ---")
-  r=publish_catalog(cpid, 499, 599)
-  results.append({"cpid":cpid,"group":"CATALOG","item":r})
+  publish_catalog(cpid, 499, 599)
 
 print("\n=== GROUP 2: TRADICIONAL [$599 - $999] ===")
 for cpid in GROUP_TRAD_599_999:
+  if cpid in ALREADY_DONE: continue
   print(f"\n--- {cpid} ---")
-  r=publish_tradicional(cpid, 599, 999)
-  results.append({"cpid":cpid,"group":"TRAD","item":r})
+  publish_tradicional(cpid, 599, 999)
 
 print("\n=== GROUP 3: TRADICIONAL [$399 - $499] ===")
 for cpid in GROUP_TRAD_399_499:
+  if cpid in ALREADY_DONE: continue
   print(f"\n--- {cpid} ---")
-  r=publish_tradicional(cpid, 399, 499)
-  results.append({"cpid":cpid,"group":"TRAD","item":r})
-
-ok=[r for r in results if r["item"]]
-fail=[r for r in results if not r["item"]]
-print(f"\n=== SUMMARY ===\nOK: {len(ok)}/{len(results)}")
-for r in fail: print(f"  FAIL: {r['cpid']} ({r['group']})")
+  publish_tradicional(cpid, 399, 499)
 
 # Sync RT
 try: import nacl.encoding, nacl.public
