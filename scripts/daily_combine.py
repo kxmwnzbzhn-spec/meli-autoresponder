@@ -25,18 +25,14 @@ RUN_ID = os.environ.get("GITHUB_RUN_ID","")
 LOOKBACK_DAYS = 7  # SIDs entregados en últimos N días → SKIP (anti-duplicado)
 
 # Exclusión hardcoded
-EXCL_KEYWORDS = [
-    'club de nuit','armaf','malek','maleka','malaka',
-    'angel nova','alma de tenochtitlan',
-]
+EXCL_KEYWORDS = []  # Sin exclusiones automáticas — todo lo pendiente se imprime
 
 def strip_accents(s):
     return ''.join(c for c in unicodedata.normalize('NFD', s) if unicodedata.category(c) != 'Mn')
 
 def is_bad_text(text):
-    tl = strip_accents(text.lower())
-    if 'bose' in tl and ('negr' in tl or 'black' in tl): return True
-    return any(k in tl for k in EXCL_KEYWORDS)
+    # Sin exclusiones automáticas. Si necesitas excluir algo puntualmente, hazlo manual.
+    return False
 
 
 
