@@ -14,7 +14,7 @@ SB=os.environ["SUPABASE_URL"].rstrip("/"); SBK=os.environ["SUPABASE_SERVICE_KEY"
 SBH={"apikey":SBK,"Authorization":f"Bearer {SBK}","Content-Type":"application/json","Prefer":"return=representation,resolution=merge-duplicates"}
 
 ALREADY_DONE = {"MLM63875183"}
-GROUP_CAT_499_599 = ["MLM61262890","MLM54696427","MLM37361021","MLM70607552","MLM37918100"]
+GROUP_CAT_499_599 = []  # already done
 GROUP_TRAD_599_999 = ["MLM48244979","MLM64288232","MLM44714337","MLM35713227","MLM37110751","MLM52667244","MLM44714150","MLM47219000","MLM44712057","MLM58616124"]
 GROUP_TRAD_399_499 = ["MLM44709174","MLM35886513","MLM58788792","MLM58918178"]
 
@@ -87,6 +87,7 @@ def publish_tradicional(cpid, low, high):
   if not cp: print(f"  ❌ no CPID {cpid}"); return None
   cat=resolve_category(cp)
   if not cat: print(f"  ❌ no category for {cpid}"); return None
+  pics=[{"source":p["url"]} for p in (cp.get("pictures") or [])][:10]
   body={
     "title":(cp.get("name") or "")[:60],
     "catalog_product_id":cpid,
@@ -94,6 +95,7 @@ def publish_tradicional(cpid, low, high):
     "price":high,"currency_id":"MXN","available_quantity":1,
     "buying_mode":"buy_it_now","condition":"new",
     "listing_type_id":"gold_special",
+    "pictures":pics,
   }
   v=requests.post(f"{API}/items/validate",headers=H,json=body,timeout=20)
   if v.status_code>=300:
