@@ -1,0 +1,20 @@
+name: lookup-order
+on:
+  workflow_dispatch:
+    inputs:
+      target_id: { required: true, type: string }
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests -q
+      - env:
+          TARGET_ID:          ${{ inputs.target_id }}
+          MELI_APP_ID:        ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET:    ${{ secrets.MELI_APP_SECRET }}
+          SUPABASE_URL:       ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: python scripts/lookup_order.py
