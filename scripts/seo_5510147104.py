@@ -107,8 +107,11 @@ R: Sí, el Gold Elixir es la versión Parfum Intense - más concentrado, más du
 P: ¿Llega con factura?
 R: Sí, generamos factura automática cuando compras."""
 
+# Convert DESC to HTML (newlines to <br>, preserve structure)
+import html as _h
+DESC_HTML="<p>"+_h.escape(DESC).replace("\n\n","</p><p>").replace("\n","<br>")+"</p>"
 rd=requests.put(f"{API}/items/{ITEM}/description",headers=H,
-  json={"plain_text":DESC},timeout=15)
+  json={"text":DESC_HTML,"plain_text":DESC},timeout=15)
 print(f"[PUT description] HTTP {rd.status_code} - {len(DESC)} chars\n  body: {rd.text[:400]}")
 
 # Verify
