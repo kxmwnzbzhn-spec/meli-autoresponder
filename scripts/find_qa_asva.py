@@ -17,12 +17,12 @@ print(f"ASVA seller={SELLER}")
 all_q=[]
 offset=0
 while True:
-  r=requests.get(f"{API}/questions/search",headers=H,
-    params={"seller_id":SELLER,"limit":50,"offset":offset,"sort":"date_created","sort.direction":"desc"},timeout=20)
+  r=requests.get(f"{API}/my/received_questions/search",headers=H,
+    params={"limit":50,"offset":offset,"sort":"date_created","sort.direction":"desc"},timeout=20)
   if r.status_code!=200:
     print(f"HTTP {r.status_code}: {r.text[:200]}"); break
   j=r.json()
-  qs=j.get("questions",[])
+  qs=j.get("questions") or j.get("results") or []
   if not qs: break
   all_q.extend(qs)
   total=j.get("total") or j.get("paging",{}).get("total",0)
