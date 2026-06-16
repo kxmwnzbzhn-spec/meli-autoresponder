@@ -31,7 +31,6 @@ if not cat:
   print("❌ no category"); raise SystemExit(1)
 
 body={
-  "title":(cp.get("name") or "")[:60],
   "catalog_product_id":CPID,
   "category_id":cat,
   "price":PRICE,
