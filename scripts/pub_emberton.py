@@ -9,8 +9,10 @@ H={"Authorization":f"Bearer {AT}","Content-Type":"application/json"}
 
 CPID="MLM42230166"
 PRICE=3000
+TITLE="Bocina Marshall Emberton Bluetooth Portátil Negro"  # 50 chars
 
 payload={
+  "title": TITLE,
   "catalog_product_id":CPID,
   "catalog_listing":True,
   "category_id":"MLM59800",
@@ -23,11 +25,10 @@ payload={
   "sale_terms":[{"id":"WARRANTY_TYPE","value_name":"Garantía del vendedor"},
                 {"id":"WARRANTY_TIME","value_name":"30 días"}]
 }
-print("payload:",json.dumps(payload))
 p=requests.post(f"{API}/items",headers=H,json=payload,timeout=30)
 print("POST /items:",p.status_code)
 print(p.text[:1500])
 if p.status_code==201:
   d=p.json()
   iid=d.get("id")
-  print(f"\nCREATED {iid} @ ${PRICE}  status={d.get('status')}  permalink={d.get('permalink')}")
+  print(f"\nCREATED {iid} @ ${PRICE} status={d.get('status')} permalink={d.get('permalink')}")
