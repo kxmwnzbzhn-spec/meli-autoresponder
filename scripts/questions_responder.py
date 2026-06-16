@@ -96,20 +96,27 @@ def post_answer(AT, qid, text, item_id=None):
     if r.status_code==400 and "not_active_item" in r.text and item_id:
         try:
             g=requests.get(f"{API}/items/{item_id}",headers={"Authorization":f"Bearer {AT}"},timeout=10).json()
-            orig_status=g.get("status"); orig_qty=g.get("available_quantity") or 0
-            # Temporary activate
+            orig_status=g.get("status")
+            # Try temporary activate
             ract=requests.put(f"{API}/items/{item_id}",headers=H,
               json={"status":"active"},timeout=15)
             if ract.status_code<300:
                 time.sleep(1)
                 r=requests.post(f"{API}/answers",headers=H,
                   json={"question_id":qid,"text":text},timeout=20)
-                # Restore original status if it was paused/closed
                 if orig_status in ("paused","closed"):
                     requests.put(f"{API}/items/{item_id}",headers=H,
                       json={"status":orig_status},timeout=15)
         except Exception as e:
             print(f"  [reactivate err] {e}")
+    # If STILL not_active_item (couldn't reactivate), DELETE the question to clear backlog
+    if r.status_code==400 and "not_active_item" in r.text:
+        try:
+            dr=requests.delete(f"{API}/questions/{qid}",headers={"Authorization":f"Bearer {AT}"},timeout=10)
+            print(f"  [auto-delete unanswerable Q{qid}] HTTP {dr.status_code}")
+            return dr.status_code, f"DELETED_UNANSWERABLE | original: {r.text[:200]}"
+        except Exception as e:
+            print(f"  [delete err] {e}")
     return r.status_code, r.text[:400]
 
 def process_account(nick, env_var):
