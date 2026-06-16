@@ -126,7 +126,7 @@
     "line": "Armaf-Aqua",
     "auto_replenish": true,
     "min_visible": 1,
-    "active": false,
+    "active": true,
     "title": "Armaf Odyssey Aqua Men 100ml Edp",
     "catalog_product_id": "MLM23633415",
     "type": "catalog_no_variations",
@@ -135,8 +135,9 @@
     "master_stock": 6,
     "floor_price": 299,
     "ceiling_price": 999,
-    "agotado": true,
-    "sku": "PERF-ARMAF-ODYSSEY-AQUA-MEN"
+    "agotado": false,
+    "sku": "PERF-ARMAF-ODYSSEY-AQUA-MEN",
+    "available_quantity": 1
   },
   "MLM5266032976": {
     "line": "Armaf-Maleka",
@@ -383,7 +384,7 @@
     "active": true,
     "auto_replenish": false,
     "agotado": false,
-    "real_stock": 1310,
+    "real_stock": 1308,
     "master_stock": 1377,
     "available_quantity": 0,
     "title": "CERRADA - clonada como MLM2937969761",
@@ -403,7 +404,7 @@
   "MLM2910806871": {
     "title": "Parlante Jbl Clip 5 Portátil Con Bluetooth Waterproof Azul",
     "min_visible": 1,
-    "real_stock": 86,
+    "real_stock": 85,
     "master_stock": 274,
     "auto_replenish": true,
     "active": true,
@@ -428,7 +429,7 @@
     "active": true,
     "auto_replenish": false,
     "agotado": false,
-    "real_stock": 192,
+    "real_stock": 188,
     "master_stock": 278,
     "available_quantity": 0,
     "title": "BAJA MELI under_review/forbidden - clonado a MLM5351937060",
@@ -579,7 +580,7 @@
   "MLM2910457973": {
     "title": "Bocina Portátil Jbl Clip 5 Bluetooth Azul",
     "min_visible": 1,
-    "real_stock": 86,
+    "real_stock": 85,
     "master_stock": 274,
     "auto_replenish": true,
     "active": true,
@@ -990,7 +991,7 @@
   "MLM5351937060": {
     "title": "Go 4 Camuflaje (clone alterno MLM2910880749 baja)",
     "min_visible": 1,
-    "real_stock": 192,
+    "real_stock": 188,
     "master_stock": 278,
     "available_quantity": 1,
     "auto_replenish": true,
@@ -1176,7 +1177,7 @@
   },
   "MLM2937969761": {
     "title": "Sony XB100 Negro (clone Wilbert)",
-    "real_stock": 1310,
+    "real_stock": 1308,
     "master_stock": 1422,
     "min_visible": 1,
     "available_quantity": 1,
