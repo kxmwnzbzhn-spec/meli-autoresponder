@@ -69,7 +69,7 @@ if not out:
   # Retry with GTIN if EMPTY_GTIN_REASON rejected
   print("\nRETRY: con GTIN fallback")
   body["attributes"]=[a for a in body["attributes"] if a["id"]!="EMPTY_GTIN_REASON"]
-  body["attributes"].append({"id":"GTIN","value_name":"0860001234567"})
+  body["attributes"].append({"id":"GTIN","value_name":"0860005113040"})
   out=try_publish(body)
 
 if not out: sys.exit(1)
