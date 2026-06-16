@@ -88,10 +88,28 @@ def claude_answer(context):
         return json.loads(text.strip())
     except Exception as e: print(f"[claude exc] {e}"); return None
 
-def post_answer(AT, qid, text):
+def post_answer(AT, qid, text, item_id=None):
     H={"Authorization":f"Bearer {AT}","Content-Type":"application/json"}
     r=requests.post(f"{API}/answers",headers=H,
       json={"question_id":qid,"text":text},timeout=20)
+    # If item not active, briefly reactivate and retry
+    if r.status_code==400 and "not_active_item" in r.text and item_id:
+        try:
+            g=requests.get(f"{API}/items/{item_id}",headers={"Authorization":f"Bearer {AT}"},timeout=10).json()
+            orig_status=g.get("status"); orig_qty=g.get("available_quantity") or 0
+            # Temporary activate
+            ract=requests.put(f"{API}/items/{item_id}",headers=H,
+              json={"status":"active"},timeout=15)
+            if ract.status_code<300:
+                time.sleep(1)
+                r=requests.post(f"{API}/answers",headers=H,
+                  json={"question_id":qid,"text":text},timeout=20)
+                # Restore original status if it was paused/closed
+                if orig_status in ("paused","closed"):
+                    requests.put(f"{API}/items/{item_id}",headers=H,
+                      json={"status":orig_status},timeout=15)
+        except Exception as e:
+            print(f"  [reactivate err] {e}")
     return r.status_code, r.text[:400]
 
 def process_account(nick, env_var):
@@ -155,7 +173,7 @@ def process_account(nick, env_var):
                f"Draft AI: {ans[:200]}")
             continue
         if len(ans)>500: ans=ans[:495]+"..."
-        code,body=post_answer(AT,qid,ans)
+        code,body=post_answer(AT,qid,ans,item_id)
         ok=code<300
         # Compute delay
         delay=None
