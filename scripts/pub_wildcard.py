@@ -15,7 +15,7 @@ print(f"title len={len(TITLE)}")
 
 # Placeholder image (transparent/white). MELI requires at least 1 picture for gold_special.
 # Use a free MELI-CDN-served placeholder. Will be replaced by user.
-PLACEHOLDER="https://http2.mlstatic.com/D_NQ_NP_2X_834906-MLA53234168395_012023-F.webp"
+PLACEHOLDER="https://dummyimage.com/1200x1200/f5f5f5/333333.png&text=Foto+Pendiente"
 
 body={
   "title":TITLE,
