@@ -7,19 +7,14 @@ AT=r.json()["access_token"]
 H={"Authorization":f"Bearer {AT}"}
 HJ={"Authorization":f"Bearer {AT}","Content-Type":"application/json"}
 
-IID="MLM5511901014"
-g=requests.get(f"{API}/items/{IID}?attributes=id,title,price,status,catalog_listing,catalog_product_id,seller_custom_field",headers=H,timeout=15).json()
+IID="MLM5517826416"
+g=requests.get(f"{API}/items/{IID}?attributes=id,title,price,status,catalog_product_id,catalog_listing",headers=H,timeout=15).json()
 print(f"PRE: {g}")
 
-# pause first
-p1=requests.put(f"{API}/items/{IID}",headers=HJ,json={"status":"paused"},timeout=20)
-print(f"PAUSE: {p1.status_code} {p1.text[:200]}")
-# close
-p2=requests.put(f"{API}/items/{IID}",headers=HJ,json={"status":"closed"},timeout=20)
-print(f"CLOSE: {p2.status_code} {p2.text[:200]}")
-# delete flag
-p3=requests.put(f"{API}/items/{IID}",headers=HJ,json={"deleted":"true"},timeout=20)
-print(f"DELETE: {p3.status_code} {p3.text[:200]}")
+# Bump to 999 if currently below
+if (g.get("price") or 0) < 999:
+  p=requests.put(f"{API}/items/{IID}",headers=HJ,json={"price":999},timeout=20)
+  print(f"PUT price 999: {p.status_code} {p.text[:300]}")
 
-g2=requests.get(f"{API}/items/{IID}?attributes=id,title,status,sub_status",headers=H,timeout=15).json()
+g2=requests.get(f"{API}/items/{IID}?attributes=id,title,price,status,catalog_product_id",headers=H,timeout=15).json()
 print(f"POST: {g2}")
