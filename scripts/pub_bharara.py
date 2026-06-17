@@ -7,36 +7,20 @@ AT=r.json()["access_token"]
 H={"Authorization":f"Bearer {AT}"}
 HJ={"Authorization":f"Bearer {AT}","Content-Type":"application/json"}
 
+# Titles inherited from CPID name (truncated to ≤60 if needed)
+SPECS=[
+  ("MLM42426004","Bocina Marshall Willen II Bluetooth IP67 Negro"),       # 47 chars
+  ("MLM45472872","Bocina Marshall Willen Bluetooth Black And Grass Negro"),# 54 chars
+]
+
 results=[]
-for CPID in ["MLM42426004","MLM45472872"]:
-  print(f"\n=== {CPID} ===")
-  cp=requests.get(f"{API}/products/{CPID}",headers=H,timeout=15).json()
-  print(f"  name: {cp.get('name','?')[:80]}")
-  print(f"  domain: {cp.get('domain_id')} pdp: {cp.get('pdp_types')}")
-  # find category from existing items
-  i=requests.get(f"{API}/products/{CPID}/items?limit=5",headers=H,timeout=15).json()
-  cat=None
-  for r2 in i.get("results",[]):
-    iid=r2.get("item_id")
-    if iid:
-      g=requests.get(f"{API}/items/{iid}?attributes=category_id",headers=H,timeout=10).json()
-      cat=g.get("category_id")
-      if cat: break
-  print(f"  category: {cat}")
-  
-  # Existing competition
-  ps=[]
-  for r2 in (i.get("results") or [])[:10]:
-    p=r2.get("price")
-    if p: ps.append(p)
-  ps.sort()
-  if ps:
-    print(f"  competidores: {len(ps)} | min={ps[0]} median={ps[len(ps)//2]} max={ps[-1]}")
-  
+for CPID,TITLE in SPECS:
+  print(f"\n=== {CPID} | title={TITLE} ({len(TITLE)} chars) ===")
   payload={
+    "title": TITLE,
     "catalog_product_id":CPID,
     "catalog_listing":True,
-    "category_id":cat or "MLM59800",
+    "category_id":"MLM59800",
     "price":1999,
     "currency_id":"MXN",
     "available_quantity":1,
@@ -53,12 +37,13 @@ for CPID in ["MLM42426004","MLM45472872"]:
   if p.status_code==201:
     d=p.json()
     iid=d.get("id")
-    results.append((CPID,iid,d.get("title")))
+    results.append((CPID,iid,d.get("title"),d.get("permalink")))
     print(f"  ✅ CREATED {iid} @ ${d.get('price')} status={d.get('status')}")
     print(f"  permalink: {d.get('permalink')}")
   else:
     print(f"  ERROR: {p.text[:600]}")
 
 print("\n=== SUMMARY ===")
-for c,i,t in results:
-  print(f"  {c} → {i} | {t[:60]}")
+for c,i,t,u in results:
+  print(f"  {c} → {i} @ $1999")
+  print(f"    {u}")
