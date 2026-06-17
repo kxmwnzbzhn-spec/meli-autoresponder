@@ -6,13 +6,24 @@ r=requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token","client_
 AT=r.json()["access_token"]
 H={"Authorization":f"Bearer {AT}"}
 
-for q in ["calcetines tommy hilfiger hombre","calcetines hombre pack","tobilleras hombre"]:
-  s=requests.get(f"{API}/sites/MLM/search?q={requests.utils.quote(q)}&limit=10",headers=H,timeout=15).json()
-  cats={}
-  for r2 in s.get("results",[])[:10]:
-    c=r2.get("category_id")
-    if c: cats[c]=cats.get(c,0)+1
-  print(f"\nQ: {q}")
-  for c,n in sorted(cats.items(),key=lambda x:-x[1])[:5]:
-    cn=requests.get(f"{API}/categories/{c}",headers=H,timeout=10).json().get("name","?")
-    print(f"  {c}: n={n} '{cn}'")
+# Try multiple variations and dump full response
+for q in ["calcetines","tobilleras","medias hombre","socks tommy"]:
+  s=requests.get(f"{API}/sites/MLM/search?q={requests.utils.quote(q)}&limit=20",headers=H,timeout=15)
+  print(f"\nQ:'{q}' status={s.status_code}")
+  if s.status_code==200:
+    j=s.json()
+    print(f"  total={j.get('paging',{}).get('total')}")
+    results=j.get("results",[])
+    print(f"  result count={len(results)}")
+    cats={}
+    for r2 in results:
+      c=r2.get("category_id")
+      if c: cats[c]=cats.get(c,0)+1
+    for c,n in sorted(cats.items(),key=lambda x:-x[1])[:5]:
+      cn=requests.get(f"{API}/categories/{c}",headers=H,timeout=10).json().get("name","?")
+      print(f"  {c}: n={n} '{cn}'")
+
+# Try /sites/MLM/categories tree
+tree=requests.get(f"{API}/sites/MLM/categories",headers=H,timeout=15).json()
+print(f"\n=== top MLM cats ===")
+for t in tree[:15]: print(f"  {t['id']} - {t['name']}")
