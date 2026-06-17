@@ -6,24 +6,26 @@ r=requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token","client_
 AT=r.json()["access_token"]
 H={"Authorization":f"Bearer {AT}"}
 
-# Check current competition on CPID
 CPID="MLM37110181"
 i=requests.get(f"{API}/products/{CPID}/items?limit=30",headers=H,timeout=15).json()
-print(f"competidores CPID {CPID}:")
-ps=[]
-for r2 in (i.get("results") or [])[:25]:
-  p=r2.get("price"); s=r2.get("status"); iid=r2.get("item_id") or r2.get("id"); sold=r2.get("sold_quantity")
-  if p and s=="active":
-    ps.append((p,iid))
-    print(f"  ${p} {iid} sold={sold}")
-ps.sort()
-print(f"\nmin/median/max activos: ${ps[0][0]} / ${ps[len(ps)//2][0]} / ${ps[-1][0]}")
+print(f"raw response keys: {list(i.keys())}")
+print(f"paging total: {i.get('paging',{}).get('total')}")
+results=i.get("results",[])
+print(f"results count: {len(results)}")
+for r2 in results[:10]:
+  print(f"  raw: {json.dumps({k:r2.get(k) for k in ['item_id','id','price','status','listing_type_id','sold_quantity','seller_id']})}")
 
-# Buy box winner
-bb=requests.get(f"{API}/products/{CPID}",headers=H,timeout=15).json().get("buy_box_winner")
-print(f"\nbuy_box_winner: {bb}")
+# Buy box
+cp=requests.get(f"{API}/products/{CPID}",headers=H,timeout=15).json()
+bb=cp.get("buy_box_winner")
+print(f"\nbuy_box_winner full: {bb}")
 
-# Estado de nuestro item
+# Our item
 our="MLM3018313225"
-g=requests.get(f"{API}/items/{our}?attributes=id,price,status,catalog_listing,buying_mode",headers=H,timeout=15).json()
-print(f"\nNuestro item: {g}")
+g=requests.get(f"{API}/items/{our}",headers=H,timeout=15).json()
+print(f"\nNuestro item:")
+print(f"  status: {g.get('status')} sub: {g.get('sub_status')}")
+print(f"  price: ${g.get('price')}")
+print(f"  catalog_listing: {g.get('catalog_listing')}")
+print(f"  catalog_product_id: {g.get('catalog_product_id')}")
+print(f"  listing_type_id: {g.get('listing_type_id')}")
