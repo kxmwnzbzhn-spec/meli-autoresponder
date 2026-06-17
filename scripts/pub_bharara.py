@@ -9,31 +9,15 @@ HJ={"Authorization":f"Bearer {AT}","Content-Type":"application/json"}
 
 SRC="MLM5516466768"
 src=requests.get(f"{API}/items/{SRC}",headers=H,timeout=15).json()
-print(f"src title: {src.get('title')}")
-print(f"src price: {src.get('price')}")
-print(f"src category: {src.get('category_id')}")
-print(f"src catalog_product_id: {src.get('catalog_product_id')}")
-print(f"src condition: {src.get('condition')}")
 src_pics=src.get("pictures",[])
 src_attrs=src.get("attributes",[])
-print(f"src pics: {len(src_pics)}  attrs: {len(src_attrs)}")
-
-# Reuse pic IDs directly from source (same seller, same account, MELI accepts)
 pic_ids=[p.get("id") for p in src_pics if p.get("id")]
-print(f"reusing pic_ids: {pic_ids}")
-
-# Pull description from source
-sd=requests.get(f"{API}/items/{SRC}/description",headers=H,timeout=15).json()
-src_desc=sd.get("plain_text","")
-print(f"src desc len: {len(src_desc)}")
-
-# Build CLONE
 CAT=src.get("category_id") or "MLM59800"
 CPID=src.get("catalog_product_id")
-TITLE="Bocina Marshall Emberton Reacondicionada Calidad Excelente"  # 58 chars
-PRICE=1499
-print(f"\nnew title len: {len(TITLE)}")
+print(f"src CPID: {CPID}  pics: {len(pic_ids)}")
 
+TITLE="Bocina Marshall Emberton Reacondicionada Calidad Excelente"
+PRICE=1499
 desc=(
 "AVISO IMPORTANTE - LEE ANTES DE COMPRAR\n"
 "==========================================\n"
@@ -49,7 +33,7 @@ desc=(
 "Esta unidad pertenece a nuestro grado PREMIUM dentro de los reacondicionados:\n"
 "- Estado cosmetico EXCELENTE: minimas o nulas marcas de uso previo, "
 "acabados limpios y completos.\n"
-"- Funcionamiento al 100%, batalla certificada en banco de pruebas.\n"
+"- Funcionamiento al 100%, probada y certificada en banco de pruebas.\n"
 "- Bateria recargable en optimas condiciones.\n"
 "- Sonido potente y limpio, sin distorsion.\n"
 "- Incluye cable de carga.\n"
@@ -73,16 +57,12 @@ desc=(
 "Al comprar este articulo, el cliente acepta expresamente lo anterior."
 )
 
-# Copy compatible attributes
-keep=["BRAND","MODEL","LINE","ITEM_CONDITION","COLOR","MAIN_COLOR","WITH_BLUETOOTH","IS_WATER_RESISTANT","CONNECTION_TYPE"]
+# Copy attributes EXCEPT ITEM_CONDITION (let condition field drive it)
+keep=["BRAND","MODEL","LINE","COLOR","MAIN_COLOR","WITH_BLUETOOTH","IS_WATER_RESISTANT","CONNECTION_TYPE","GTIN"]
 attrs=[]
 for a in src_attrs:
   if a.get("id") in keep and a.get("value_name"):
     attrs.append({"id":a["id"],"value_name":a["value_name"]})
-# Force condition
-have_cond=any(a["id"]=="ITEM_CONDITION" for a in attrs)
-if not have_cond:
-  attrs.append({"id":"ITEM_CONDITION","value_name":"Reacondicionado"})
 
 payload={
   "title": TITLE,
@@ -105,7 +85,7 @@ payload={
 if CPID:
   payload["catalog_product_id"]=CPID
 
-print(f"sending {len(attrs)} attrs, CPID={CPID}, pics={len(pic_ids)}")
+print(f"sending {len(attrs)} attrs, pics={len(pic_ids)}, condition=used")
 p=requests.post(f"{API}/items",headers=HJ,json=payload,timeout=30)
 print("\nPOST /items:",p.status_code)
 print(p.text[:2500])
