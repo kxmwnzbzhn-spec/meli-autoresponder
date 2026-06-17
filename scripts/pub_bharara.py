@@ -74,7 +74,7 @@ payload={
   "condition":"used",
   "buying_mode":"buy_it_now",
   "pictures":[{"id":p} for p in pic_ids],
-  "attributes": attrs,
+  "attributes": attrs + ([{"id":"GTIN","value_name":"7340055384230"}] if not any(a["id"]=="GTIN" for a in attrs) else []),
   "shipping":{"mode":"me2","free_shipping":False,"local_pick_up":False},
   "sale_terms":[
     {"id":"WARRANTY_TYPE","value_name":"Garantía del vendedor"},
