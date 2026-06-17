@@ -7,20 +7,21 @@ AT=r.json()["access_token"]
 H={"Authorization":f"Bearer {AT}"}
 HJ={"Authorization":f"Bearer {AT}","Content-Type":"application/json"}
 
-CPID="MLM50444272"
+CPID="MLM69907677"
 cp=requests.get(f"{API}/products/{CPID}",headers=H,timeout=15).json()
 name=cp.get("name","")
 print(f"CPID name: {name}")
-print(f"domain: {cp.get('domain_id')} pdp: {cp.get('pdp_types')}")
 i=requests.get(f"{API}/products/{CPID}/items?limit=15",headers=H,timeout=15).json()
 ps=[r2.get("price") for r2 in (i.get("results") or []) if r2.get("price")]
 ps.sort()
 if ps:
   print(f"competidores: {len(ps)} min={ps[0]} median={ps[len(ps)//2]} max={ps[-1]}")
+for r2 in (i.get("results") or [])[:8]:
+  print(f"  {r2.get('item_id')} ${r2.get('price')} {r2.get('listing_type_id')}")
 
 TITLE=name[:60] if len(name)<=60 else "Bocina " + " ".join(name.split()[:8])
 TITLE=TITLE[:60]
-print(f"title: '{TITLE}' ({len(TITLE)} chars)")
+print(f"\ntitle: '{TITLE}' ({len(TITLE)})")
 
 payload={
   "title": TITLE,
@@ -39,7 +40,7 @@ payload={
   ]
 }
 p=requests.post(f"{API}/items",headers=HJ,json=payload,timeout=30)
-print(f"POST: {p.status_code}")
+print(f"\nPOST: {p.status_code}")
 print(p.text[:1500])
 if p.status_code==201:
   d=p.json()
