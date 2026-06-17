@@ -8,6 +8,23 @@ from datetime import datetime, timezone, timedelta
 from collections import OrderedDict
 
 APP_ID = os.environ.get("MELI_APP_ID","2008666770714005")
+
+# === DEVOLUCIONES (anti-confusion) ===
+SB_URL = os.environ.get("SUPABASE_URL","").rstrip("/")
+SB_KEY = os.environ.get("SUPABASE_SERVICE_KEY","")
+def load_devolucion_map():
+    if not (SB_URL and SB_KEY): return {}
+    try:
+        r = requests.get(f"{SB_URL}/rest/v1/meli_devolucion_items",
+            params={"select":"item_id,display_name,modelo"},
+            headers={"apikey":SB_KEY,"Authorization":f"Bearer {SB_KEY}"}, timeout=10)
+        if r.status_code == 200:
+            return {row["item_id"]: row for row in r.json()}
+    except Exception as e:
+        print(f"[devolucion] load fail: {e}")
+    return {}
+DEV_MAP = load_devolucion_map()
+print(f"[devolucion] {len(DEV_MAP)} item_ids marcados como devolución")
 APP_SECRET = os.environ["MELI_APP_SECRET"]
 TZ = timezone(timedelta(hours=-6))
 NOW_ISO = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -231,7 +248,15 @@ def collect_account(account):
                             _model = _kw.capitalize().replace("Soundlink","Soundlink")
                             break
                     code = to_code(_model, color, size, title_full)
+                    # Override si es devolución
+                    is_devolucion = False
+                    devolucion_name = None
+                    if iid in DEV_MAP:
+                        is_devolucion = True
+                        devolucion_name = DEV_MAP[iid].get("display_name")
                     products.append({
+                        "is_devolucion": is_devolucion,
+                        "devolucion_name": devolucion_name,
                         "code": code,
                         "name_short": name_short,
                         "title_full": title_full,
