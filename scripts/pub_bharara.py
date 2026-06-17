@@ -7,85 +7,133 @@ AT=r.json()["access_token"]
 H={"Authorization":f"Bearer {AT}"}
 HJ={"Authorization":f"Bearer {AT}","Content-Type":"application/json"}
 
-CAT="MLM194118"  # Calcetas y Calcetines (leaf)
-PICS=["834576-MLM113409938965_062026","765596-MLM113410408307_062026","630176-MLM112259910322_062026","642469-MLM112259910344_062026","911512-MLM113409969181_062026"]
+CAT="MLM194118"
+IID="MLM3025719815"
 
-TITLE="Calcetines Tommy Hilfiger Hombre Pack 3 Pares Negro Algodón"
-desc=(
-"CALCETINES TOMMY HILFIGER PARA HOMBRE - PACK DE 3 PARES NEGRO\n\n"
-"Set de 3 pares de calcetines Tommy Hilfiger color negro, tejido en mezcla "
-"premium de algodón con elastano para máxima comodidad y durabilidad. "
-"Diseño clásico atemporal ideal para uso diario, oficina, deporte casual "
-"y ocasiones formales.\n\n"
-"CARACTERÍSTICAS\n"
-"- Marca: Tommy Hilfiger (100% original)\n"
-"- Pack: 3 pares por set\n"
-"- Color: Negro sólido\n"
-"- Material: Mezcla de algodón premium con elastano\n"
-"- Talla: Estándar adulto, ajuste universal (talla 7-12 MX)\n"
-"- Tipo: Calcetín pantorrillero (3/4)\n"
-"- Logo: Bordado clásico Tommy Hilfiger\n"
-"- Tejido transpirable y suave al tacto\n"
-"- Costuras planas anti-rozaduras\n"
-"- Banda elástica reforzada que no aprieta\n"
-"- Refuerzo en talón y puntera para mayor durabilidad\n\n"
-"USOS RECOMENDADOS\n"
-"- Trabajo y oficina\n"
-"- Uso diario casual\n"
-"- Deporte ligero\n"
-"- Ocasiones semi-formales\n"
-"- Ideal para regalo\n\n"
-"CUIDADOS\n"
-"- Lavar a máquina con agua fría\n"
-"- No usar blanqueador\n"
-"- Secar al aire para máxima durabilidad\n"
-"- Plancha a baja temperatura si es necesario\n\n"
-"PRODUCTO ORIGINAL TOMMY HILFIGER\n"
-"100% originales con etiquetas de marca. Empaque sellado de fábrica. "
-"Envío inmediato desde México. Garantía del vendedor 30 días por defectos "
-"de fabricación."
-)
+# 1) Dump all attrs for category with values (to pick valid IDs)
+ats=requests.get(f"{API}/categories/{CAT}/attributes",headers=H,timeout=15).json()
+print(f"cat attrs available: {len(ats)}")
 
-attrs=[
-  {"id":"BRAND","value_name":"Tommy Hilfiger"},
-  {"id":"MODEL","value_name":"Pack 3 Pares"},
-  {"id":"COLOR","value_name":"Negro"},
-  {"id":"SIZE","value_name":"Único"},
-  {"id":"GENDER","value_id":"339666","value_name":"Hombre"},
-  {"id":"SOCKS_TYPE","value_id":"44992001","value_name":"Pantorrillero"},
-  {"id":"LENGTH_TYPE","value_id":"2150772","value_name":"3/4"},
-  {"id":"MAIN_COLOR","value_id":"2450295","value_name":"Negro"},
-  {"id":"ITEM_CONDITION","value_name":"Nuevo"},
-  {"id":"MAIN_MATERIAL","value_name":"Algodón"},
-  {"id":"UNITS_PER_PACK","value_name":"3"},
-]
+attr_map={}
+for a in ats:
+  aid=a["id"]
+  attr_map[aid]=a
 
-payload={
-  "title": TITLE,
-  "category_id": CAT,
-  "price": 199,
-  "currency_id":"MXN",
-  "available_quantity":100,
-  "listing_type_id":"gold_special",
-  "condition":"new",
-  "buying_mode":"buy_it_now",
-  "pictures":[{"id":p} for p in PICS],
-  "attributes": attrs,
-  "shipping":{"mode":"me2","free_shipping":False,"local_pick_up":False},
-  "sale_terms":[
-    {"id":"WARRANTY_TYPE","value_name":"Garantía del vendedor"},
-    {"id":"WARRANTY_TIME","value_name":"30 días"}
-  ],
-  "description":{"plain_text":desc}
+# Get current item state
+g=requests.get(f"{API}/items/{IID}",headers=H,timeout=15).json()
+current_ids=set(a["id"] for a in g.get("attributes",[]) if a.get("value_name") or a.get("value_id"))
+print(f"current filled: {len(current_ids)}")
+
+# Build value mapping per attribute id
+# For list types use value_id when needed
+def get_value_id(aid, name):
+  a=attr_map.get(aid,{})
+  vs=a.get("values") or []
+  for v in vs:
+    if (v.get("name") or "").lower()==name.lower():
+      return v.get("id")
+  return None
+
+# Mapping per attribute id with desired value
+desired = {
+  "BRAND": ("Tommy Hilfiger", None),
+  "MODEL": ("Pack 3 Pares", None),
+  "LINE": ("Classic", None),
+  "ALPHANUMERIC_MODEL": ("TH-3PK", None),
+  "MAIN_COLOR": ("Negro", get_value_id("MAIN_COLOR","Negro")),
+  "COLOR": ("Negro", None),
+  "GENDER": ("Hombre", get_value_id("GENDER","Hombre")),
+  "AGE_GROUP": ("Adultos", get_value_id("AGE_GROUP","Adultos")),
+  "ITEM_CONDITION": ("Nuevo", get_value_id("ITEM_CONDITION","Nuevo")),
+  "SIZE": ("Único", None),
+  "SOCKS_TYPE": ("Pantorrillero", get_value_id("SOCKS_TYPE","Pantorrillero")),
+  "LENGTH_TYPE": ("3/4", get_value_id("LENGTH_TYPE","3/4")),
+  "MAIN_MATERIAL": ("Algodón", None),
+  "FABRIC_DESIGN": ("Liso", None),
+  "DESIGN": ("Liso", None),
+  "PRINT": ("Liso", None),
+  "PATTERN": ("Liso", None),
+  "UNITS_PER_PACK": ("3", None),
+  "PACK_SIZE": ("3", None),
+  "FOOT_LENGTH": ("Estándar", None),
+  "SOCKS_USE": ("Casual", None),
+  "RECOMMENDED_USE": ("Diario", None),
+  "RECOMMENDED_FOR": ("Casual", None),
+  "SPORTS_AND_FITNESS_ACTIVITY": ("Casual", None),
+  "WAIST_TYPE": ("Media", None),
+  "WITH_ELASTIC_BAND": ("Sí", None),
+  "WITH_REINFORCEMENT": ("Sí", None),
+  "WITH_PLAIN_SEAM": ("Sí", None),
+  "WITH_LOGO": ("Sí", None),
+  "WITH_BRAND_LOGO": ("Sí", None),
+  "WASHING_TYPE": ("Lavado a máquina", None),
+  "CARE_INSTRUCTIONS": ("Lavar a máquina con agua fría", None),
+  "MATERIAL_COMPOSITION": ("80% Algodón, 17% Poliéster, 3% Elastano", None),
+  "COMPOSITION": ("80% Algodón, 17% Poliéster, 3% Elastano", None),
+  "SOCK_HEIGHT": ("Media pantorrilla", None),
+  "PACKAGING_TYPE": ("Caja", None),
+  "INCLUDES_PACKAGING": ("Sí", None),
+  "STYLE": ("Casual", None),
+  "SEASON": ("Todo el año", None),
+  "WEIGHT": ("90 g", None),
+  "SELLER_PACKAGE_LENGTH": ("16 cm", None),
+  "SELLER_PACKAGE_WIDTH": ("12 cm", None),
+  "SELLER_PACKAGE_HEIGHT": ("4 cm", None),
+  "SELLER_PACKAGE_WEIGHT": ("120 g", None),
+  "HAZMAT_TRANSPORTABILITY": ("No es peligroso", None),
+  "GTIN": ("0088541002493", None),  # placeholder Tommy socks UPC
+  "SHAFT_TYPE": ("Pantorrillera", None),
+  "WITH_NON_SLIP_SOLE": ("No", None),
+  "IS_TRANSPARENT": ("No", None),
+  "IS_THERMAL": ("No", None),
+  "IS_COMPRESSION": ("No", None),
+  "TOE_SHAPE": ("Reforzada", None),
+  "MATERIAL_DETAIL": ("Algodón premium con elastano", None),
 }
 
-p=requests.post(f"{API}/items",headers=HJ,json=payload,timeout=30)
-print(f"POST: {p.status_code}")
-print(p.text[:2500])
-if p.status_code==201:
-  d=p.json()
-  iid=d.get("id")
-  pd=requests.post(f"{API}/items/{iid}/description",headers=HJ,json={"plain_text":desc},timeout=20)
-  print(f"\ndesc: {pd.status_code}")
-  print(f"\n✅ CREATED {iid} @ ${d.get('price')} qty={d.get('available_quantity')} status={d.get('status')}")
-  print(f"permalink: {d.get('permalink')}")
+# Build payload only with attrs that exist in category
+to_set=[]
+for aid,(name,vid) in desired.items():
+  if aid not in attr_map: continue
+  a={"id":aid,"value_name":name}
+  if vid: a["value_id"]=vid
+  to_set.append(a)
+
+print(f"sending {len(to_set)} attrs")
+
+# Try in batches in case some are invalid (errors stop whole PUT)
+# First try all at once
+p=requests.put(f"{API}/items/{IID}",headers=HJ,json={"attributes":to_set},timeout=30)
+print(f"PUT all: {p.status_code}")
+if p.status_code>=400:
+  try:
+    err=p.json()
+    bad=set()
+    for c in err.get("cause",[]):
+      msg=c.get("message","")
+      print(f"  {c.get('code','')}: {msg[:200]}")
+      # Try to extract attribute id from message
+      import re
+      m=re.search(r"Attribute \[([A-Z_]+)\]", msg)
+      if m: bad.add(m.group(1))
+    # Retry without bad ones
+    if bad:
+      retry=[a for a in to_set if a["id"] not in bad]
+      print(f"\nretry without {len(bad)} bad: {bad}")
+      p2=requests.put(f"{API}/items/{IID}",headers=HJ,json={"attributes":retry},timeout=30)
+      print(f"PUT retry: {p2.status_code}")
+      if p2.status_code>=400:
+        print(p2.text[:800])
+        # individual fallback
+        print("\nindividual mode...")
+        for a in retry:
+          pp=requests.put(f"{API}/items/{IID}",headers=HJ,json={"attributes":[a]},timeout=20)
+          if pp.status_code<400: print(f"  ✓ {a['id']}")
+          else: print(f"  ✗ {a['id']}: {pp.text[:200]}")
+  except Exception as e: print("parse err:",e)
+
+# Verify
+g2=requests.get(f"{API}/items/{IID}",headers=H,timeout=15).json()
+filled=sum(1 for a in g2.get("attributes",[]) if a.get("value_name") or a.get("value_id"))
+total=len(g2.get("attributes",[]))
+print(f"\n✅ AFTER: {filled}/{total} attrs filled")
