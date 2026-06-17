@@ -7,118 +7,87 @@ AT=r.json()["access_token"]
 H={"Authorization":f"Bearer {AT}"}
 HJ={"Authorization":f"Bearer {AT}","Content-Type":"application/json"}
 
-# Find JBL Go 4 CPID
-s=requests.get(f"{API}/sites/MLM/search?q=JBL+Go+4&limit=5",headers=H,timeout=15).json()
-go4_cpid=None
-for r2 in s.get("results",[]):
-  if r2.get("catalog_product_id"):
-    title=(r2.get("title") or "").lower()
-    if "go 4" in title or "go4" in title:
-      go4_cpid=r2.get("catalog_product_id")
-      print(f"found Go4 CPID via search: {go4_cpid} from item {r2.get('id')}")
-      break
+SRC="MLM5516466768"
+src=requests.get(f"{API}/items/{SRC}",headers=H,timeout=15).json()
+print(f"src title: {src.get('title')}")
+print(f"src price: {src.get('price')}")
+print(f"src category: {src.get('category_id')}")
+print(f"src catalog_product_id: {src.get('catalog_product_id')}")
+print(f"src condition: {src.get('condition')}")
+src_pics=src.get("pictures",[])
+src_attrs=src.get("attributes",[])
+print(f"src pics: {len(src_pics)}  attrs: {len(src_attrs)}")
 
-# Also try product search
-if not go4_cpid:
-  pr=requests.get(f"{API}/products/search?status=active&site_id=MLM&q=JBL+Go+4",headers=H,timeout=15)
-  print(f"product search: {pr.status_code}")
-  if pr.status_code==200:
-    for r2 in pr.json().get("results",[])[:3]:
-      print(f"  {r2.get('id')} {r2.get('name','')[:60]}")
-      if "go 4" in (r2.get("name","") or "").lower() and not go4_cpid:
-        go4_cpid=r2.get("id")
+# Reuse pic IDs directly from source (same seller, same account, MELI accepts)
+pic_ids=[p.get("id") for p in src_pics if p.get("id")]
+print(f"reusing pic_ids: {pic_ids}")
 
-if not go4_cpid:
-  go4_cpid="MLM44031244"  # known CPID for JBL Go 4 negro
-print(f"using CPID: {go4_cpid}")
+# Pull description from source
+sd=requests.get(f"{API}/items/{SRC}/description",headers=H,timeout=15).json()
+src_desc=sd.get("plain_text","")
+print(f"src desc len: {len(src_desc)}")
 
-cp=requests.get(f"{API}/products/{go4_cpid}",headers=H,timeout=15).json()
-print(f"CPID name: {cp.get('name')}")
-pics=cp.get("pictures",[])[:8]
-print(f"CPID pics: {len(pics)}")
-
-pic_ids=[]
-for p in pics:
-  url=p.get("url")
-  if not url: continue
-  try:
-    rr=requests.get(url,timeout=30)
-    if rr.status_code==200 and len(rr.content)>5000:
-      up=requests.post(f"{API}/pictures/items/upload",
-        headers={"Authorization":f"Bearer {AT}"},
-        files={"file":(f"go4_{len(pic_ids)}.jpg",rr.content,"image/jpeg")},timeout=60)
-      if up.status_code in (200,201):
-        pid=up.json().get("id")
-        if pid:
-          pic_ids.append(pid); print(f"  ✓ {pid}")
-  except Exception as e:
-    print(f"err: {e}")
-print(f"\nuploaded: {len(pic_ids)}")
-
-# Inspect COLOR attribute values for MLM59800
-ats=requests.get(f"{API}/categories/MLM59800/attributes",headers=H,timeout=15).json()
-color_a=next((a for a in ats if a.get("id")=="COLOR"),None)
-if color_a:
-  vs=color_a.get("values") or []
-  print(f"\nCOLOR allowed: {len(vs)}")
-  for v in vs[:20]:
-    print(f"  {v.get('id')}: {v.get('name')}")
-
-CAT="MLM59800"
-TITLE="Bocina JBL Go 4 Bluetooth Usada Caja Abierta Color Aleatorio"
-print(f"title len: {len(TITLE)}")
+# Build CLONE
+CAT=src.get("category_id") or "MLM59800"
+CPID=src.get("catalog_product_id")
+TITLE="Bocina Marshall Emberton Reacondicionada Calidad Excelente"  # 58 chars
+PRICE=1499
+print(f"\nnew title len: {len(TITLE)}")
 
 desc=(
-"==============================================\n"
-"COLOR ALEATORIO - NO SE PUEDE ELEGIR EL COLOR\n"
-"==============================================\n\n"
-"IMPORTANTE: El color de la bocina es totalmente aleatorio y NO se puede "
-"escoger. El cliente recibira el color disponible al momento de empaquetar. "
-"Al confirmar la compra acepta esta condicion y NO podra presentarla como "
-"motivo de devolucion, reclamo o cancelacion.\n\n"
-"==============================================\n"
-"PRODUCTO USADO - CAJA ABIERTA - LIQUIDACION\n"
-"==============================================\n\n"
-"Bocina JBL Go 4 Bluetooth en condicion USADA / CAJA ABIERTA. Producto "
-"proveniente de devoluciones liquidadas a super precio.\n\n"
-"ESTADO DEL PRODUCTO\n"
-"- La bocina puede estar en perfecto estado o presentar minimos detalles "
-"esteticos por uso previo.\n"
-"- La caja puede estar en perfecto estado, ligeramente danada, abierta o "
-"con marcas de manipulacion.\n"
-"- Puede o no incluir etiquetas de envios anteriores en la caja externa.\n"
-"- Funcionamiento al 100% garantizado: Bluetooth, sonido, bateria y "
-"resistencia al agua IP67.\n"
-"- NO COMPATIBLE con la aplicacion oficial de JBL Portable. Al comprar el "
-"cliente acepta esta limitante y no podra reclamar por la app.\n\n"
+"AVISO IMPORTANTE - LEE ANTES DE COMPRAR\n"
+"==========================================\n"
+"Esta bocina Marshall Emberton REACONDICIONADA NO ES COMPATIBLE con la "
+"aplicacion oficial de Marshall (Marshall Bluetooth App). Al confirmar la "
+"compra, el cliente declara haber leido y estar conforme con esta limitante "
+"y NO podra presentarla como motivo de devolucion, reclamo o cancelacion.\n\n"
+"El funcionamiento Bluetooth es 100% normal y se empareja directamente con "
+"cualquier dispositivo (celular, tablet, laptop). Solo se pierde el acceso "
+"a la app oficial de Marshall (ecualizador y firmware).\n"
+"==========================================\n\n"
+"PRODUCTO REACONDICIONADO - CALIDAD EXCELENTE\n\n"
+"Esta unidad pertenece a nuestro grado PREMIUM dentro de los reacondicionados:\n"
+"- Estado cosmetico EXCELENTE: minimas o nulas marcas de uso previo, "
+"acabados limpios y completos.\n"
+"- Funcionamiento al 100%, batalla certificada en banco de pruebas.\n"
+"- Bateria recargable en optimas condiciones.\n"
+"- Sonido potente y limpio, sin distorsion.\n"
+"- Incluye cable de carga.\n"
+"- Presentacion en caja generica de seguridad (no incluye caja Marshall "
+"original).\n\n"
+"DIFERENCIA CON OTRAS REACONDICIONADAS\n"
+"Las bocinas REACONDICIONADAS CALIDAD EXCELENTE pasan una segunda revision "
+"y solo se separan unidades que cumplen el estandar Premium. Por ello su "
+"precio es ligeramente superior a las reacondicionadas estandar.\n\n"
 "CARACTERISTICAS\n"
 "- Conectividad: Bluetooth\n"
-"- Resistencia: IP67 polvo y agua\n"
-"- Bateria recargable\n"
-"- Tamano compacto, portatil\n"
-"- Color: ALEATORIO (no se elige)\n"
-"- Condicion: usada / caja abierta\n"
-"- App oficial JBL: NO COMPATIBLE\n\n"
+"- App oficial Marshall: NO COMPATIBLE\n"
+"- Bateria recargable, larga duracion\n"
+"- Sonido potente, 360 grados\n"
+"- Color: negro\n"
+"- Estado: reacondicionado calidad excelente\n\n"
 "GARANTIA\n"
-"30 dias del vendedor contra defectos de funcionamiento. NO aplica para: "
-"color especifico, estado cosmetico, condicion de caja, etiquetas de envios "
-"previos, incompatibilidad con app JBL. Estas condiciones quedan declaradas "
-"en este aviso y son aceptadas con la compra.\n\n"
-"100% funcional. Excelente producto a un excelente super precio."
+"30 dias del vendedor contra defectos de funcionamiento. NO aplica a: "
+"incompatibilidad con app Marshall (declarada en este aviso), preferencias "
+"esteticas subjetivas.\n\n"
+"Al comprar este articulo, el cliente acepta expresamente lo anterior."
 )
 
-attrs=[
-  {"id":"BRAND","value_name":"JBL"},
-  {"id":"MODEL","value_name":"Go 4"},
-  {"id":"ITEM_CONDITION","value_name":"Usado"},
-  {"id":"WITH_BLUETOOTH","value_name":"Sí"},
-  {"id":"IS_WATER_RESISTANT","value_name":"Sí"},
-]
+# Copy compatible attributes
+keep=["BRAND","MODEL","LINE","ITEM_CONDITION","COLOR","MAIN_COLOR","WITH_BLUETOOTH","IS_WATER_RESISTANT","CONNECTION_TYPE"]
+attrs=[]
+for a in src_attrs:
+  if a.get("id") in keep and a.get("value_name"):
+    attrs.append({"id":a["id"],"value_name":a["value_name"]})
+# Force condition
+have_cond=any(a["id"]=="ITEM_CONDITION" for a in attrs)
+if not have_cond:
+  attrs.append({"id":"ITEM_CONDITION","value_name":"Reacondicionado"})
 
 payload={
   "title": TITLE,
   "category_id": CAT,
-  "price": 299,
+  "price": PRICE,
   "currency_id":"MXN",
   "available_quantity":1,
   "listing_type_id":"gold_special",
@@ -126,14 +95,17 @@ payload={
   "buying_mode":"buy_it_now",
   "pictures":[{"id":p} for p in pic_ids],
   "attributes": attrs,
-  "shipping":{"mode":"me2","free_shipping":True,"local_pick_up":False},
+  "shipping":{"mode":"me2","free_shipping":False,"local_pick_up":False},
   "sale_terms":[
     {"id":"WARRANTY_TYPE","value_name":"Garantía del vendedor"},
     {"id":"WARRANTY_TIME","value_name":"30 días"}
   ],
   "description":{"plain_text":desc}
 }
+if CPID:
+  payload["catalog_product_id"]=CPID
 
+print(f"sending {len(attrs)} attrs, CPID={CPID}, pics={len(pic_ids)}")
 p=requests.post(f"{API}/items",headers=HJ,json=payload,timeout=30)
 print("\nPOST /items:",p.status_code)
 print(p.text[:2500])
@@ -142,6 +114,5 @@ if p.status_code==201:
   iid=d.get("id")
   pd=requests.post(f"{API}/items/{iid}/description",headers=HJ,json={"plain_text":desc},timeout=20)
   print(f"\ndesc set: {pd.status_code}")
-  print(f"\n✅ CREATED {iid} @ ${d.get('price')} status={d.get('status')}")
-  print(f"shipping: {d.get('shipping')}")
+  print(f"\n✅ CLONED {iid} @ ${PRICE} cond={d.get('condition')} status={d.get('status')}")
   print(f"permalink: {d.get('permalink')}")
