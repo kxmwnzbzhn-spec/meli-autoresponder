@@ -7,24 +7,28 @@ AT=r.json()["access_token"]
 H={"Authorization":f"Bearer {AT}"}
 HJ={"Authorization":f"Bearer {AT}","Content-Type":"application/json"}
 
+# Re-snap competitor and undercut to one peso below the cheapest
 IID="MLM5511720082"
-g=requests.get(f"{API}/items/{IID}",headers=H,timeout=15).json()
-print(f"title: {g.get('title')}")
-print(f"price: ${g.get('price')}")
-print(f"status: {g.get('status')} sub: {g.get('sub_status')}")
-print(f"catalog_listing: {g.get('catalog_listing')}")
-print(f"catalog_product_id: {g.get('catalog_product_id')}")
-print(f"listing_type_id: {g.get('listing_type_id')}")
-print(f"available: {g.get('available_quantity')} sold: {g.get('sold_quantity')}")
+CPID="MLM44709174"
+FLOOR=299
 
-CPID=g.get("catalog_product_id")
-if CPID:
-  i=requests.get(f"{API}/products/{CPID}/items?limit=30",headers=H,timeout=15).json()
-  print(f"\n=== competidores CPID {CPID}: {i.get('paging',{}).get('total')} ===")
-  for r2 in (i.get("results") or [])[:15]:
-    iid=r2.get("item_id"); p=r2.get("price"); lt=r2.get("listing_type_id"); sid=r2.get("seller_id")
-    me=" ◄ NUESTRO" if iid==IID else ""
-    print(f"  ${p:>8} | {iid} | {lt} | seller={sid}{me}")
-  cp=requests.get(f"{API}/products/{CPID}",headers=H,timeout=15).json()
-  print(f"\nbuy_box_winner: {cp.get('buy_box_winner')}")
-  print(f"CPID name: {cp.get('name','')[:80]}")
+i=requests.get(f"{API}/products/{CPID}/items?limit=30",headers=H,timeout=15).json()
+ours_price=None; others=[]
+for r2 in (i.get("results") or []):
+  iid=r2.get("item_id"); p=r2.get("price")
+  if not p: continue
+  if iid==IID: ours_price=p
+  else: others.append((p,iid))
+others.sort()
+print(f"ours: ${ours_price}")
+print(f"cheapest competitor: ${others[0][0] if others else 'none'} ({others[0][1] if others else ''})")
+
+target=max(FLOOR, int(others[0][0])-1) if others else ours_price
+print(f"target: ${target}")
+if target != ours_price:
+  p=requests.put(f"{API}/items/{IID}",headers=HJ,json={"price":target},timeout=20)
+  print(f"PUT price {target}: {p.status_code}")
+  print(p.text[:400])
+
+g=requests.get(f"{API}/items/{IID}?attributes=id,price,status",headers=H,timeout=15).json()
+print(f"\nnow: {g}")
