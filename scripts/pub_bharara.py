@@ -7,7 +7,7 @@ AT=r.json()["access_token"]
 H={"Authorization":f"Bearer {AT}"}
 HJ={"Authorization":f"Bearer {AT}","Content-Type":"application/json"}
 
-CPID="MLM43919535"
+CPID="MLM50444272"
 cp=requests.get(f"{API}/products/{CPID}",headers=H,timeout=15).json()
 name=cp.get("name","")
 print(f"CPID name: {name}")
@@ -27,7 +27,7 @@ payload={
   "catalog_product_id":CPID,
   "catalog_listing":True,
   "category_id":"MLM59800",
-  "price":2499,
+  "price":1999,
   "currency_id":"MXN",
   "available_quantity":1,
   "listing_type_id":"gold_pro",
