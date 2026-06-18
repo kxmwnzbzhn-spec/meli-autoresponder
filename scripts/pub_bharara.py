@@ -7,10 +7,10 @@ AT=r.json()["access_token"]
 H={"Authorization":f"Bearer {AT}"}
 HJ={"Authorization":f"Bearer {AT}","Content-Type":"application/json"}
 
-IID="MLM5516269150"
+IID="MLM5517826416"
 g=requests.get(f"{API}/items/{IID}?attributes=id,title,price,status,catalog_product_id",headers=H,timeout=15).json()
 print(f"PRE: {g}")
 p=requests.put(f"{API}/items/{IID}",headers=HJ,json={"status":"paused"},timeout=20)
-print(f"PAUSE: {p.status_code} {p.text[:200]}")
+print(f"PAUSE: {p.status_code} {p.text[:300]}")
 g2=requests.get(f"{API}/items/{IID}?attributes=id,status,sub_status",headers=H,timeout=15).json()
 print(f"POST: {g2}")
