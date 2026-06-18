@@ -356,7 +356,7 @@
   "MLM2910806845": {
     "title": "Bocina Jbl Go 3 Jblgo3 Portátil Con Bluetooth Waterproof Negra Negro",
     "min_visible": 1,
-    "real_stock": 116,
+    "real_stock": 115,
     "master_stock": 488,
     "auto_replenish": true,
     "active": true,
@@ -384,7 +384,7 @@
     "active": true,
     "auto_replenish": false,
     "agotado": false,
-    "real_stock": 1294,
+    "real_stock": 1292,
     "master_stock": 1377,
     "available_quantity": 0,
     "title": "CERRADA - clonada como MLM2937969761",
@@ -429,7 +429,7 @@
     "active": true,
     "auto_replenish": false,
     "agotado": false,
-    "real_stock": 140,
+    "real_stock": 138,
     "master_stock": 278,
     "available_quantity": 0,
     "title": "BAJA MELI under_review/forbidden - clonado a MLM5351937060",
@@ -450,7 +450,7 @@
   "MLM2910806881": {
     "title": "Parlante Bluetooth Jbl Go 3 Color Negro",
     "min_visible": 1,
-    "real_stock": 116,
+    "real_stock": 115,
     "master_stock": 488,
     "auto_replenish": true,
     "active": true,
@@ -555,7 +555,7 @@
   "MLM2910768333": {
     "title": "Parlante Jbl Go 3 Jblgo3 Portátil Con Bluetooth Waterproof Negro",
     "min_visible": 1,
-    "real_stock": 116,
+    "real_stock": 115,
     "master_stock": 488,
     "auto_replenish": true,
     "active": true,
@@ -991,7 +991,7 @@
   "MLM5351937060": {
     "title": "Go 4 Camuflaje (clone alterno MLM2910880749 baja)",
     "min_visible": 1,
-    "real_stock": 140,
+    "real_stock": 138,
     "master_stock": 278,
     "available_quantity": 1,
     "auto_replenish": true,
@@ -1177,7 +1177,7 @@
   },
   "MLM2937969761": {
     "title": "Sony XB100 Negro (clone Wilbert)",
-    "real_stock": 1294,
+    "real_stock": 1292,
     "master_stock": 1422,
     "min_visible": 1,
     "available_quantity": 1,
