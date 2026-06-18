@@ -7,11 +7,10 @@ AT=r.json()["access_token"]
 H={"Authorization":f"Bearer {AT}"}
 HJ={"Authorization":f"Bearer {AT}","Content-Type":"application/json"}
 
-for IID in ["MLM5511027118","MLM3014079893"]:
-  print(f"\n=== {IID} ===")
-  g=requests.get(f"{API}/items/{IID}?attributes=id,title,price,status,catalog_product_id",headers=H,timeout=15).json()
-  print(f"PRE: {g}")
-  p=requests.put(f"{API}/items/{IID}",headers=HJ,json={"status":"paused"},timeout=20)
-  print(f"PAUSE: {p.status_code} {p.text[:200]}")
-  g2=requests.get(f"{API}/items/{IID}?attributes=id,status,sub_status",headers=H,timeout=15).json()
-  print(f"POST: {g2}")
+IID="MLM5516269150"
+g=requests.get(f"{API}/items/{IID}?attributes=id,title,price,status,catalog_product_id",headers=H,timeout=15).json()
+print(f"PRE: {g}")
+p=requests.put(f"{API}/items/{IID}",headers=HJ,json={"status":"paused"},timeout=20)
+print(f"PAUSE: {p.status_code} {p.text[:200]}")
+g2=requests.get(f"{API}/items/{IID}?attributes=id,status,sub_status",headers=H,timeout=15).json()
+print(f"POST: {g2}")
