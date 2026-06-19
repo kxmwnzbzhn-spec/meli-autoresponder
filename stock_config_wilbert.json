@@ -126,7 +126,7 @@
     "line": "Armaf-Aqua",
     "auto_replenish": true,
     "min_visible": 1,
-    "active": true,
+    "active": false,
     "title": "Armaf Odyssey Aqua Men 100ml Edp",
     "catalog_product_id": "MLM23633415",
     "type": "catalog_no_variations",
@@ -135,7 +135,7 @@
     "master_stock": 6,
     "floor_price": 299,
     "ceiling_price": 999,
-    "agotado": false,
+    "agotado": true,
     "sku": "PERF-ARMAF-ODYSSEY-AQUA-MEN",
     "available_quantity": 1
   },
@@ -191,12 +191,12 @@
     "real_stock": 0
   },
   "MLM2910457937": {
-    "real_stock": 0,
-    "master_stock": 0,
+    "real_stock": 1450,
+    "master_stock": 1450,
     "min_visible": 0,
     "auto_replenish": false,
-    "active": false,
-    "agotado": true,
+    "active": true,
+    "agotado": false,
     "available_quantity": 0,
     "paused_by_user": true,
     "floor_locked_by_user": true,
@@ -213,18 +213,18 @@
     "title": "CERRADA — relisted as MLM5346655686"
   },
   "MLM2911241921": {
-    "real_stock": 0,
-    "master_stock": 10,
+    "real_stock": 1778,
+    "master_stock": 1778,
     "min_visible": 1,
     "auto_replenish": true,
-    "active": false,
+    "active": true,
     "color": "Negro",
     "floor_price": 499,
     "ceiling_price": 799,
     "floor_locked_by_user": true,
     "title": "Charge 6 Negro Reacondicionada",
     "available_quantity": 1,
-    "agotado": true,
+    "agotado": false,
     "sku": "JBL-CHARGE6-NEGRO"
   },
   "MLM5295749840": {
@@ -330,12 +330,12 @@
   "MLM2910880717": {
     "title": "Bocina Jbl Go 4 Jblgo4 Portátil Con Bluetooth Waterproof Negra Negro",
     "min_visible": 0,
-    "real_stock": 0,
-    "master_stock": 0,
+    "real_stock": 1450,
+    "master_stock": 1450,
     "auto_replenish": false,
-    "active": false,
+    "active": true,
     "available_quantity": 0,
-    "agotado": true,
+    "agotado": false,
     "paused_by_user": true,
     "floor_locked_by_user": true,
     "sku": "JBL-GO4-NEGRO"
@@ -356,7 +356,7 @@
   "MLM2910806845": {
     "title": "Bocina Jbl Go 3 Jblgo3 Portátil Con Bluetooth Waterproof Negra Negro",
     "min_visible": 1,
-    "real_stock": 115,
+    "real_stock": 79,
     "master_stock": 488,
     "auto_replenish": true,
     "active": true,
@@ -404,7 +404,7 @@
   "MLM2910806871": {
     "title": "Parlante Jbl Clip 5 Portátil Con Bluetooth Waterproof Azul",
     "min_visible": 1,
-    "real_stock": 85,
+    "real_stock": 68,
     "master_stock": 274,
     "auto_replenish": true,
     "active": true,
@@ -429,7 +429,7 @@
     "active": true,
     "auto_replenish": false,
     "agotado": false,
-    "real_stock": 138,
+    "real_stock": 133,
     "master_stock": 278,
     "available_quantity": 0,
     "title": "BAJA MELI under_review/forbidden - clonado a MLM5351937060",
@@ -450,7 +450,7 @@
   "MLM2910806881": {
     "title": "Parlante Bluetooth Jbl Go 3 Color Negro",
     "min_visible": 1,
-    "real_stock": 115,
+    "real_stock": 79,
     "master_stock": 488,
     "auto_replenish": true,
     "active": true,
@@ -555,7 +555,7 @@
   "MLM2910768333": {
     "title": "Parlante Jbl Go 3 Jblgo3 Portátil Con Bluetooth Waterproof Negro",
     "min_visible": 1,
-    "real_stock": 115,
+    "real_stock": 79,
     "master_stock": 488,
     "auto_replenish": true,
     "active": true,
@@ -580,7 +580,7 @@
   "MLM2910457973": {
     "title": "Bocina Portátil Jbl Clip 5 Bluetooth Azul",
     "min_visible": 1,
-    "real_stock": 85,
+    "real_stock": 68,
     "master_stock": 274,
     "auto_replenish": true,
     "active": true,
@@ -851,7 +851,7 @@
   "MLM5337919270": {
     "title": "JBL Clip 5 Camuflada",
     "min_visible": 1,
-    "real_stock": 87,
+    "real_stock": 66,
     "master_stock": 198,
     "available_quantity": 1,
     "auto_replenish": true,
@@ -863,7 +863,7 @@
   "MLM5337919282": {
     "title": "JBL Clip 5 Squad",
     "min_visible": 1,
-    "real_stock": 87,
+    "real_stock": 66,
     "master_stock": 198,
     "available_quantity": 1,
     "auto_replenish": true,
@@ -875,7 +875,7 @@
   "MLM5337919290": {
     "title": "JBL Clip 5 Camo Verde Musgo",
     "min_visible": 1,
-    "real_stock": 87,
+    "real_stock": 66,
     "master_stock": 198,
     "available_quantity": 1,
     "auto_replenish": true,
@@ -959,15 +959,15 @@
   "MLM5347886456": {
     "title": "JBL Charge 6 Negro Portátil",
     "min_visible": 0,
-    "real_stock": 0,
-    "master_stock": 0,
+    "real_stock": 1778,
+    "master_stock": 1778,
     "available_quantity": 0,
     "auto_replenish": false,
-    "active": false,
+    "active": true,
     "floor_price": 1499,
     "ceiling_price": 1999,
     "paused_by_user": true,
-    "agotado": true,
+    "agotado": false,
     "floor_locked_by_user": true,
     "sku": "JBL-CHARGE6-NEGRO"
   },
@@ -991,7 +991,7 @@
   "MLM5351937060": {
     "title": "Go 4 Camuflaje (clone alterno MLM2910880749 baja)",
     "min_visible": 1,
-    "real_stock": 138,
+    "real_stock": 133,
     "master_stock": 278,
     "available_quantity": 1,
     "auto_replenish": true,
@@ -1003,11 +1003,11 @@
   "MLM5347216886": {
     "title": "Bocina Bluetooth Portátil Flip 7 Calidad Espejo (multi-color)",
     "min_visible": 4,
-    "real_stock": 0,
-    "master_stock": 40,
+    "real_stock": 1000,
+    "master_stock": 1000,
     "available_quantity": 4,
     "auto_replenish": true,
-    "active": false,
+    "active": true,
     "variations_min_visible": {
       "Negro": 1,
       "Morado": 1,
@@ -1020,7 +1020,7 @@
       "Azul": 10,
       "Rojo": 10
     },
-    "agotado": true,
+    "agotado": false,
     "sku": "JBL-FLIP7-NEGRO"
   },
   "MLM2914422351": {

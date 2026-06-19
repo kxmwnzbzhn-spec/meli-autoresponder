@@ -61,7 +61,7 @@
     "line": "Juan-Go4",
     "title": "Bocina Portátil Jbl Go 4 Bluetooth, Camuflaje. Color Camuflaje",
     "active": true,
-    "real_stock": 138,
+    "real_stock": 133,
     "available_quantity": 1,
     "sku": "JBL-GO4-CAMUFLAJE"
   },
@@ -102,13 +102,14 @@
   "MLM2894660533": {
     "auto_replenish": true,
     "min_visible": 1,
-    "master_stock": 21,
+    "master_stock": 1000,
     "line": "Juan-Flip7-Reacond",
     "title": "Bocina Jbl Flip 7 Bluetooth Ip67 Portatil Reacondicionada Negro",
-    "active": false,
-    "real_stock": 0,
-    "agotado": true,
-    "sku": "JBL-FLIP7-NEGRO"
+    "active": true,
+    "real_stock": 1000,
+    "agotado": false,
+    "sku": "JBL-FLIP7-NEGRO",
+    "available_quantity": 1
   },
   "MLM2894660069": {
     "auto_replenish": true,
@@ -124,17 +125,18 @@
   "MLM2894654315": {
     "auto_replenish": true,
     "min_visible": 1,
-    "master_stock": 30,
+    "master_stock": 1778,
     "line": "Juan-Charge6",
     "title": "Bocina Jbl Charge 6 Bluetooth Ip67 Portatil Reacondicionada",
-    "active": false,
-    "real_stock": 0,
+    "active": true,
+    "real_stock": 1778,
     "color": "Negro",
     "user_product_id": "MLMU3920529895",
     "family_id": "1599970057545363",
     "sibling_of": "MLM2907632461",
-    "agotado": true,
-    "sku": "JBL-CHARGE6-NEGRO"
+    "agotado": false,
+    "sku": "JBL-CHARGE6-NEGRO",
+    "available_quantity": 1
   },
   "MLM2894631211": {
     "auto_replenish": true,
