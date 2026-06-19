@@ -1,0 +1,43 @@
+{
+  "date": "2026-06-19",
+  "decrements": {},
+  "events": [],
+  "errors": [],
+  "unmapped": {
+    "MLM5374101788": {
+      "qty": 1,
+      "title": "Auriculares Xiaomi Redmi Buds 4 Lite Bluetooth 5.3 In-ear Color Negro",
+      "accounts": [
+        "Yiriam"
+      ]
+    },
+    "MLM3849137034": {
+      "qty": 76,
+      "title": "Perfume Alma De Tenochtitlán The Alchemia Lab Eau De Parfum 100ml | Amaderado Es",
+      "accounts": [
+        "Asva"
+      ]
+    },
+    "MLM2886030837": {
+      "qty": 2,
+      "title": "Bocina Bluetooth Portatil Impermeable Ip67 Bass 35w Rojo Rojo",
+      "accounts": [
+        "Asva"
+      ]
+    },
+    "MLM2886136351": {
+      "qty": 8,
+      "title": "Bocina Bluetooth Portatil Impermeable Ip67 Bass 35w Morado Morado",
+      "accounts": [
+        "Asva"
+      ]
+    },
+    "MLM2378087893": {
+      "qty": 27,
+      "title": "Perfume The Alchemia Lab Flor De Nopal Mexico En La Piel Eau De Parfum 100 Ml Un",
+      "accounts": [
+        "Asva"
+      ]
+    }
+  }
+}
