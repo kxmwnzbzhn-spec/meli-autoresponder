@@ -213,7 +213,7 @@
     "title": "CERRADA — relisted as MLM5346655686"
   },
   "MLM2911241921": {
-    "real_stock": 1761,
+    "real_stock": 1751,
     "master_stock": 1778,
     "min_visible": 1,
     "auto_replenish": true,
@@ -356,7 +356,7 @@
   "MLM2910806845": {
     "title": "Bocina Jbl Go 3 Jblgo3 Portátil Con Bluetooth Waterproof Negra Negro",
     "min_visible": 1,
-    "real_stock": 77,
+    "real_stock": 76,
     "master_stock": 488,
     "auto_replenish": true,
     "active": true,
@@ -450,7 +450,7 @@
   "MLM2910806881": {
     "title": "Parlante Bluetooth Jbl Go 3 Color Negro",
     "min_visible": 1,
-    "real_stock": 77,
+    "real_stock": 76,
     "master_stock": 488,
     "auto_replenish": true,
     "active": true,
@@ -555,7 +555,7 @@
   "MLM2910768333": {
     "title": "Parlante Jbl Go 3 Jblgo3 Portátil Con Bluetooth Waterproof Negro",
     "min_visible": 1,
-    "real_stock": 77,
+    "real_stock": 76,
     "master_stock": 488,
     "auto_replenish": true,
     "active": true,
@@ -851,7 +851,7 @@
   "MLM5337919270": {
     "title": "JBL Clip 5 Camuflada",
     "min_visible": 1,
-    "real_stock": 65,
+    "real_stock": 64,
     "master_stock": 198,
     "available_quantity": 1,
     "auto_replenish": true,
@@ -863,7 +863,7 @@
   "MLM5337919282": {
     "title": "JBL Clip 5 Squad",
     "min_visible": 1,
-    "real_stock": 65,
+    "real_stock": 64,
     "master_stock": 198,
     "available_quantity": 1,
     "auto_replenish": true,
@@ -875,7 +875,7 @@
   "MLM5337919290": {
     "title": "JBL Clip 5 Camo Verde Musgo",
     "min_visible": 1,
-    "real_stock": 65,
+    "real_stock": 64,
     "master_stock": 198,
     "available_quantity": 1,
     "auto_replenish": true,
@@ -959,7 +959,7 @@
   "MLM5347886456": {
     "title": "JBL Charge 6 Negro Portátil",
     "min_visible": 0,
-    "real_stock": 1761,
+    "real_stock": 1751,
     "master_stock": 1778,
     "available_quantity": 0,
     "auto_replenish": false,
