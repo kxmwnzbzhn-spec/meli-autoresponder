@@ -213,7 +213,7 @@
     "title": "CERRADA — relisted as MLM5346655686"
   },
   "MLM2911241921": {
-    "real_stock": 1624,
+    "real_stock": 1615,
     "master_stock": 1778,
     "min_visible": 1,
     "auto_replenish": true,
@@ -384,7 +384,7 @@
     "active": true,
     "auto_replenish": false,
     "agotado": false,
-    "real_stock": 1283,
+    "real_stock": 1282,
     "master_stock": 1377,
     "available_quantity": 0,
     "title": "CERRADA - clonada como MLM2937969761",
@@ -404,7 +404,7 @@
   "MLM2910806871": {
     "title": "Parlante Jbl Clip 5 Portátil Con Bluetooth Waterproof Azul",
     "min_visible": 1,
-    "real_stock": 59,
+    "real_stock": 58,
     "master_stock": 274,
     "auto_replenish": true,
     "active": true,
@@ -580,7 +580,7 @@
   "MLM2910457973": {
     "title": "Bocina Portátil Jbl Clip 5 Bluetooth Azul",
     "min_visible": 1,
-    "real_stock": 59,
+    "real_stock": 58,
     "master_stock": 274,
     "auto_replenish": true,
     "active": true,
@@ -959,7 +959,7 @@
   "MLM5347886456": {
     "title": "JBL Charge 6 Negro Portátil",
     "min_visible": 0,
-    "real_stock": 1624,
+    "real_stock": 1615,
     "master_stock": 1778,
     "available_quantity": 0,
     "auto_replenish": false,
@@ -1177,7 +1177,7 @@
   },
   "MLM2937969761": {
     "title": "Sony XB100 Negro (clone Wilbert)",
-    "real_stock": 1283,
+    "real_stock": 1282,
     "master_stock": 1422,
     "min_visible": 1,
     "available_quantity": 1,
