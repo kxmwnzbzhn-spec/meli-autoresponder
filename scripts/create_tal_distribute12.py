@@ -86,7 +86,20 @@ for cid, account in PLAN:
     title=p.get("name","").strip()
     print(f"  title: {title[:80]}")
     pics_src=p.get("pictures") or []
-    pics=[{"url": pp.get("secure_url") or pp.get("url")} for pp in pics_src[:6] if (pp.get("secure_url") or pp.get("url"))]
+    pics=[]
+    for idx,pp in enumerate(pics_src[:6]):
+        u = pp.get("secure_url") or pp.get("url")
+        if not u: continue
+        try:
+            img=requests.get(u,timeout=60).content
+            rpi=requests.post(f"{API}/pictures/items/upload",headers=H,
+                files={"file":(f"{cid}_{idx}.jpg",img,"image/jpeg")},timeout=120)
+            if rpi.status_code in (200,201):
+                pics.append({"id":rpi.json()["id"]})
+            else:
+                print(f"    pic[{idx}] upload {rpi.status_code}: {rpi.text[:120]}")
+        except Exception as e:
+            print(f"    pic[{idx}] err: {e}")
     print(f"  fotos:{len(pics)}")
     m=re.search(r"Perfume\s+(.+?)\s+The Alchemia Lab", title)
     perfume_name = m.group(1) if m else "TAL"
