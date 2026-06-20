@@ -40,6 +40,7 @@ ATTRS=[
  {"id":"GTIN","values":[{"name":EAN}]},
  {"id":"ITEM_CONDITION","values":[{"name":"Nuevo"}]},
  {"id":"COUNTRY_OF_ORIGIN","values":[{"name":"México"}]},
+ {"id":"FRAGRANCE","values":[{"name":"Otros"}]},
 ]
 
 DESC=(
