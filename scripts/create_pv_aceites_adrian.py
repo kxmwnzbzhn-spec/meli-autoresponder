@@ -40,6 +40,7 @@ ATTRS=[
  {"id":"GTIN","values":[{"name":EAN}]},
  {"id":"ITEM_CONDITION","values":[{"name":"Nuevo"}]},
  {"id":"COUNTRY_OF_ORIGIN","values":[{"name":"México"}]},
+ {"id":"SCENT","values":[{"name":"Sándalo"}]},
  {"id":"ESSENTIAL_OIL_NAME","values":[{"name":"Piedra Viva"}]},
 ]
 
