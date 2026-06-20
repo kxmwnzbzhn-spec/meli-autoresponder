@@ -1,0 +1,23 @@
+name: create_tal_distribute12
+on: { workflow_dispatch: {}, push: { paths: ['.github/workflows/create_tal_distribute12.yml'] } }
+permissions: {contents: write}
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          TOKEN_SHARED: ${{ secrets.TOKEN_SHARED }}
+          MELI_REFRESH_TOKEN_MAYRELY: ${{ secrets.MELI_REFRESH_TOKEN_MAYRELY }}
+          MELI_REFRESH_TOKEN_ASGARI: ${{ secrets.MELI_REFRESH_TOKEN_ASGARI }}
+          MELI_REFRESH_TOKEN_WILBERT: ${{ secrets.MELI_REFRESH_TOKEN_WILBERT }}
+          MELI_REFRESH_TOKEN_CLARIBEL: ${{ secrets.MELI_REFRESH_TOKEN_CLARIBEL }}
+          MELI_REFRESH_TOKEN_RAYMUNDO: ${{ secrets.MELI_REFRESH_TOKEN_RAYMUNDO }}
+          MELI_REFRESH_TOKEN_JUAN: ${{ secrets.MELI_REFRESH_TOKEN_JUAN }}
+        run: python scripts/create_tal_distribute12.py
