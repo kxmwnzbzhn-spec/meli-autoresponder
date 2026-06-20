@@ -213,7 +213,7 @@
     "title": "CERRADA — relisted as MLM5346655686"
   },
   "MLM2911241921": {
-    "real_stock": 1678,
+    "real_stock": 1669,
     "master_stock": 1778,
     "min_visible": 1,
     "auto_replenish": true,
@@ -404,7 +404,7 @@
   "MLM2910806871": {
     "title": "Parlante Jbl Clip 5 Portátil Con Bluetooth Waterproof Azul",
     "min_visible": 1,
-    "real_stock": 64,
+    "real_stock": 63,
     "master_stock": 274,
     "auto_replenish": true,
     "active": true,
@@ -580,7 +580,7 @@
   "MLM2910457973": {
     "title": "Bocina Portátil Jbl Clip 5 Bluetooth Azul",
     "min_visible": 1,
-    "real_stock": 64,
+    "real_stock": 63,
     "master_stock": 274,
     "auto_replenish": true,
     "active": true,
@@ -959,7 +959,7 @@
   "MLM5347886456": {
     "title": "JBL Charge 6 Negro Portátil",
     "min_visible": 0,
-    "real_stock": 1678,
+    "real_stock": 1669,
     "master_stock": 1778,
     "available_quantity": 0,
     "auto_replenish": false,
