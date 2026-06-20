@@ -213,7 +213,7 @@
     "title": "CERRADA — relisted as MLM5346655686"
   },
   "MLM2911241921": {
-    "real_stock": 1669,
+    "real_stock": 1657,
     "master_stock": 1778,
     "min_visible": 1,
     "auto_replenish": true,
@@ -384,7 +384,7 @@
     "active": true,
     "auto_replenish": false,
     "agotado": false,
-    "real_stock": 1284,
+    "real_stock": 1283,
     "master_stock": 1377,
     "available_quantity": 0,
     "title": "CERRADA - clonada como MLM2937969761",
@@ -851,7 +851,7 @@
   "MLM5337919270": {
     "title": "JBL Clip 5 Camuflada",
     "min_visible": 1,
-    "real_stock": 64,
+    "real_stock": 62,
     "master_stock": 198,
     "available_quantity": 1,
     "auto_replenish": true,
@@ -863,7 +863,7 @@
   "MLM5337919282": {
     "title": "JBL Clip 5 Squad",
     "min_visible": 1,
-    "real_stock": 64,
+    "real_stock": 62,
     "master_stock": 198,
     "available_quantity": 1,
     "auto_replenish": true,
@@ -875,7 +875,7 @@
   "MLM5337919290": {
     "title": "JBL Clip 5 Camo Verde Musgo",
     "min_visible": 1,
-    "real_stock": 64,
+    "real_stock": 62,
     "master_stock": 198,
     "available_quantity": 1,
     "auto_replenish": true,
@@ -959,7 +959,7 @@
   "MLM5347886456": {
     "title": "JBL Charge 6 Negro Portátil",
     "min_visible": 0,
-    "real_stock": 1669,
+    "real_stock": 1657,
     "master_stock": 1778,
     "available_quantity": 0,
     "auto_replenish": false,
@@ -1177,7 +1177,7 @@
   },
   "MLM2937969761": {
     "title": "Sony XB100 Negro (clone Wilbert)",
-    "real_stock": 1284,
+    "real_stock": 1283,
     "master_stock": 1422,
     "min_visible": 1,
     "available_quantity": 1,
