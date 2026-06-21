@@ -64,7 +64,6 @@ attrs=[
 attrs=[a for a in attrs if a["id"] in valid]
 
 payload={
-  "title": TITLE,
   "family_name": TITLE,
   "category_id": TARGET_CAT,
   "price": 999,
