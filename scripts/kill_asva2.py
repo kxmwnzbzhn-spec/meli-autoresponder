@@ -1,4 +1,4 @@
-import os, requests
+import os, requests, re
 API="https://api.mercadolibre.com"
 CID=os.environ["MELI_APP_ID"]; CSEC=os.environ["MELI_APP_SECRET"]
 RT=os.environ["MELI_REFRESH_TOKEN_ASVA"]
@@ -6,35 +6,31 @@ r=requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token","client_
 AT=r.json()["access_token"]
 H={"Authorization":f"Bearer {AT}"}
 
-# Probe known/suspected category IDs
-CANDIDATES=["MLM3937","MLM179232","MLM179230","MLM5286","MLM1499","MLM1500","MLM1574","MLM2553","MLM2563","MLM45353","MLM423275","MLM5113"]
-for c in CANDIDATES:
-  try:
-    r=requests.get(f"{API}/categories/{c}",headers=H,timeout=10).json()
-    if r.get("name"):
-      path=" > ".join(p.get("name") for p in r.get("path_from_root",[]))
-      print(f"  {c}: {path}")
-  except: pass
+# Known esoteric perfume item from search results
+KNOWN="MLM2852170458"
+print(f"=== probe {KNOWN} ===")
+g=requests.get(f"{API}/items/{KNOWN}?attributes=id,title,category_id,catalog_product_id",headers=H,timeout=15).json()
+print(g)
+if g.get("category_id"):
+  c=g["category_id"]
+  ci=requests.get(f"{API}/categories/{c}",headers=H,timeout=10).json()
+  print(f"\ncat name: {ci.get('name')}")
+  print(f"path: {' > '.join(p.get('name') for p in ci.get('path_from_root',[]))}")
+  print(f"children: {len(ci.get('children_categories',[]))}")
+  for ch in ci.get("children_categories",[]):
+    print(f"  child: {ch['id']} - {ch['name']}")
 
-# Walk MLM1474 (Salud y Belleza?)
-print("\n=== Walking ESO type cats ===")
-# Try search via items endpoint (categories of items in similar listings)
-# Actually let me just check by exploring deeper
-
-# Try /domains/MLM-PERFUMES_BODY_SPLASH
-for dom in ["MLM-PERFUMES_BODY_SPLASH","MLM-ESOTERIC_PERFUMES","MLM-PERFUMES_AMBIENT","MLM-PERFUMES","MLM-ESOTERIC","MLM-RITUAL_PRODUCTS"]:
-  rd=requests.get(f"{API}/domains/{dom}",headers=H,timeout=10)
-  print(f"\n/domains/{dom}: {rd.status_code} {rd.text[:300]}")
-
-# Try one ASVA item that might be in esoteric cat
-print("\n=== Other ASVA items category check ===")
-# Search Mayrely/Asva for similar
-me=requests.get(f"{API}/users/me",headers=H,timeout=10).json()
-uid=me.get("id")
-si=requests.get(f"{API}/users/{uid}/items/search?q=esoterico&limit=10",headers=H,timeout=15)
-print(f"search esoterico in ASVA items: {si.status_code}")
-if si.status_code==200:
-  ids=si.json().get("results",[])
-  for i in ids[:5]:
-    g=requests.get(f"{API}/items/{i}?attributes=id,title,category_id",headers=H,timeout=10).json()
-    print(f"  {g.get('id')} cat={g.get('category_id')} - {(g.get('title') or '')[:60]}")
+# Also: walk MLM6111 or wherever esoterismo lives (try various roots)
+# Try: GET parent of perfumes esotericos
+print("\n=== check tree path from cat ===")
+for c in [g.get("category_id")] if g.get("category_id") else []:
+  if not c: continue
+  parent_id=None
+  ci=requests.get(f"{API}/categories/{c}",headers=H,timeout=10).json()
+  pfr=ci.get("path_from_root",[])
+  if len(pfr)>=2: parent_id=pfr[-2].get("id")
+  print(f"parent: {parent_id}")
+  if parent_id:
+    pi=requests.get(f"{API}/categories/{parent_id}",headers=H,timeout=10).json()
+    for ch in pi.get("children_categories",[]):
+      print(f"  sibling: {ch['id']} - {ch['name']}")
