@@ -5,37 +5,32 @@ RT=os.environ["MELI_REFRESH_TOKEN_ASVA"]
 r=requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token","client_id":CID,"client_secret":CSEC,"refresh_token":RT},timeout=20)
 AT=r.json()["access_token"]
 H={"Authorization":f"Bearer {AT}"}
-HJ={"Authorization":f"Bearer {AT}","Content-Type":"application/json"}
 
-for SRC,PRICE,LABEL in [("MLM3849137034",999,"Alma de Tenochtitlán"),("MLM2378087893",999,"Flor de Nopal")]:
-  print(f"\n=== Republicando {SRC} ({LABEL}) ===")
-  src=requests.get(f"{API}/items/{SRC}",headers=H,timeout=15).json()
-  CAT=src.get("category_id")
-  CPID=src.get("catalog_product_id")
-  LIST_TYPE=src.get("listing_type_id") or "gold_special"
-  print(f"  category: {CAT} | CPID: {CPID} | list_type: {LIST_TYPE}")
-  
-  # Catalog listing: NO title
-  payload={
-    "catalog_product_id":CPID,
-    "catalog_listing":True,
-    "category_id":CAT,
-    "price":PRICE,
-    "currency_id":"MXN",
-    "available_quantity":1,
-    "listing_type_id":LIST_TYPE,
-    "condition":"new",
-    "buying_mode":"buy_it_now",
-    "sale_terms":[
-      {"id":"WARRANTY_TYPE","value_name":"Garantía del vendedor"},
-      {"id":"WARRANTY_TIME","value_name":"30 días"}
-    ]
-  }
-  p=requests.post(f"{API}/items",headers=HJ,json=payload,timeout=30)
-  print(f"  POST: {p.status_code}")
-  if p.status_code==201:
-    d=p.json()
-    print(f"  ✅ RE-PUBLICADO {d.get('id')} @ ${d.get('price')} status={d.get('status')}")
-    print(f"  permalink: {d.get('permalink')}")
-  else:
-    print(f"  ❌ {p.text[:600]}")
+# Tree: top categories
+tree=requests.get(f"{API}/sites/MLM/categories",headers=H,timeout=15).json()
+print("=== TOP MLM CATS ===")
+for t in tree:
+  n=(t.get("name") or "").lower()
+  if "espir" in n or "esot" in n or "religi" in n or "ocult" in n:
+    print(f"  {t['id']} - {t['name']}")
+
+# Try predict from title
+for q in ["Perfume esoterico Flor de Nopal","Perfume ritual","Perfume santeria","Lociones esotericas","Locion ritual ataccion"]:
+  pr=requests.get(f"{API}/sites/MLM/category_predictor/predict?title={requests.utils.quote(q)}",headers=H,timeout=10)
+  print(f"\npredict '{q}': {pr.status_code}", pr.text[:300])
+
+# Walk tree for esoterismo
+def walk(cid,depth=0):
+  if depth>4: return
+  ci=requests.get(f"{API}/categories/{cid}",headers=H,timeout=10).json()
+  n=(ci.get("name") or "").lower()
+  if "esot" in n or "ritual" in n or "espir" in n or "ocult" in n or "magic" in n:
+    print(f"{'  '*depth}{cid} - {ci.get('name')} [LEAF={not ci.get('children_categories')}]")
+  for ch in ci.get("children_categories",[]):
+    walk(ch["id"],depth+1)
+
+# Probe Belleza y Cuidado (parent of perfumes)
+print("\n=== Walking MLM1246 (Belleza) for esoterico ===")
+walk("MLM1246")
+print("\n=== Walking MLM1431 (Hogar) for esoterico ===")
+walk("MLM1431")
