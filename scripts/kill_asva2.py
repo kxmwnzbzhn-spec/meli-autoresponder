@@ -1,4 +1,4 @@
-import os, requests, re
+import os, requests
 API="https://api.mercadolibre.com"
 CID=os.environ["MELI_APP_ID"]; CSEC=os.environ["MELI_APP_SECRET"]
 RT=os.environ["MELI_REFRESH_TOKEN_ASVA"]
@@ -6,31 +6,29 @@ r=requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token","client_
 AT=r.json()["access_token"]
 H={"Authorization":f"Bearer {AT}"}
 
-# Known esoteric perfume item from search results
-KNOWN="MLM2852170458"
-print(f"=== probe {KNOWN} ===")
-g=requests.get(f"{API}/items/{KNOWN}?attributes=id,title,category_id,catalog_product_id",headers=H,timeout=15).json()
-print(g)
-if g.get("category_id"):
-  c=g["category_id"]
-  ci=requests.get(f"{API}/categories/{c}",headers=H,timeout=10).json()
-  print(f"\ncat name: {ci.get('name')}")
-  print(f"path: {' > '.join(p.get('name') for p in ci.get('path_from_root',[]))}")
-  print(f"children: {len(ci.get('children_categories',[]))}")
-  for ch in ci.get("children_categories",[]):
-    print(f"  child: {ch['id']} - {ch['name']}")
+# MLM3937 is "Otras categorías" most likely
+# Walk it deep
+def walk(cid,depth=0,out=[]):
+  if depth>5: return
+  try:
+    ci=requests.get(f"{API}/categories/{cid}",headers=H,timeout=10).json()
+    n=(ci.get("name") or "")
+    nl=n.lower()
+    if "esot" in nl or "ritual" in nl or "perfum" in nl or "ocult" in nl or "san" in nl[:3]:
+      print(f"{'  '*depth}{cid} - {n} {'[LEAF]' if not ci.get('children_categories') else ''}")
+    for ch in ci.get("children_categories",[]):
+      walk(ch["id"],depth+1,out)
+  except Exception as e: pass
 
-# Also: walk MLM6111 or wherever esoterismo lives (try various roots)
-# Try: GET parent of perfumes esotericos
-print("\n=== check tree path from cat ===")
-for c in [g.get("category_id")] if g.get("category_id") else []:
-  if not c: continue
-  parent_id=None
-  ci=requests.get(f"{API}/categories/{c}",headers=H,timeout=10).json()
-  pfr=ci.get("path_from_root",[])
-  if len(pfr)>=2: parent_id=pfr[-2].get("id")
-  print(f"parent: {parent_id}")
-  if parent_id:
-    pi=requests.get(f"{API}/categories/{parent_id}",headers=H,timeout=10).json()
-    for ch in pi.get("children_categories",[]):
-      print(f"  sibling: {ch['id']} - {ch['name']}")
+# Common top categories MLM site
+TOP_CATS=["MLM3937","MLM43385","MLM1953","MLM5726","MLM1276","MLM86","MLM1500","MLM1574","MLM440","MLM1132"]
+# Also try the ones we know
+for c in TOP_CATS:
+  print(f"\n=== {c} ===")
+  walk(c)
+
+# Better: list all top-level cats
+print("\n=== ALL TOP-LEVEL CATS ===")
+tree=requests.get(f"{API}/sites/MLM/categories",headers=H,timeout=15).json()
+for t in tree:
+  print(f"  {t['id']} - {t['name']}")
