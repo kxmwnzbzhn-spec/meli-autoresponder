@@ -7,26 +7,41 @@ AT=r.json()["access_token"]
 H={"Authorization":f"Bearer {AT}"}
 HJ={"Authorization":f"Bearer {AT}","Content-Type":"application/json"}
 
-for IID in ["MLM3849137034","MLM2378087893"]:
-  print(f"\n=== {IID} ===")
-  g=requests.get(f"{API}/items/{IID}",headers=H,timeout=15).json()
-  print(f"  PRE: status={g.get('status')} sub={g.get('sub_status')} qty={g.get('available_quantity')} sold={g.get('sold_quantity')}")
+for SRC,PRICE,LABEL in [("MLM3849137034",999,"Alma de Tenochtitlán"),("MLM2378087893",999,"Flor de Nopal")]:
+  print(f"\n=== Republicando {SRC} ({LABEL}) ===")
+  src=requests.get(f"{API}/items/{SRC}",headers=H,timeout=15).json()
+  TITLE=src.get("title")
+  CAT=src.get("category_id")
+  CPID=src.get("catalog_product_id")
+  LIST_TYPE=src.get("listing_type_id") or "gold_pro"
+  IS_CATALOG=bool(src.get("catalog_listing"))
+  print(f"  title: {TITLE[:70]}")
+  print(f"  category: {CAT} | CPID: {CPID} | catalog_listing: {IS_CATALOG} | list_type: {LIST_TYPE}")
   
-  # Try undelete first
-  p1=requests.put(f"{API}/items/{IID}",headers=HJ,json={"deleted":"false"},timeout=20)
-  print(f"  undelete: {p1.status_code} {p1.text[:300]}")
+  payload={
+    "title": TITLE,
+    "category_id": CAT,
+    "price": PRICE,
+    "currency_id":"MXN",
+    "available_quantity":1,
+    "listing_type_id": LIST_TYPE,
+    "condition":"new",
+    "buying_mode":"buy_it_now",
+    "sale_terms":[
+      {"id":"WARRANTY_TYPE","value_name":"Garantía del vendedor"},
+      {"id":"WARRANTY_TIME","value_name":"30 días"}
+    ]
+  }
+  if CPID and IS_CATALOG:
+    payload["catalog_product_id"]=CPID
+    payload["catalog_listing"]=True
   
-  # Try set qty
-  p2=requests.put(f"{API}/items/{IID}",headers=HJ,json={"available_quantity":1},timeout=20)
-  print(f"  qty=1: {p2.status_code} {p2.text[:300]}")
-  
-  # Try activate
-  p3=requests.put(f"{API}/items/{IID}",headers=HJ,json={"status":"active"},timeout=20)
-  print(f"  active: {p3.status_code} {p3.text[:300]}")
-  
-  # Try paused
-  p4=requests.put(f"{API}/items/{IID}",headers=HJ,json={"status":"paused"},timeout=20)
-  print(f"  paused: {p4.status_code} {p4.text[:300]}")
-  
-  g2=requests.get(f"{API}/items/{IID}?attributes=id,status,sub_status,available_quantity",headers=H,timeout=15).json()
-  print(f"  POST: {g2}")
+  p=requests.post(f"{API}/items",headers=HJ,json=payload,timeout=30)
+  print(f"  POST: {p.status_code}")
+  if p.status_code==201:
+    d=p.json()
+    new_id=d.get("id")
+    print(f"  ✅ RE-PUBLICADO {new_id} @ ${d.get('price')} status={d.get('status')}")
+    print(f"  permalink: {d.get('permalink')}")
+  else:
+    print(f"  ❌ {p.text[:600]}")
