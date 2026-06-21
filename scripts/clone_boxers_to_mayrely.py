@@ -78,7 +78,7 @@ if src_chart.status_code==200:
       
       variations.append({
         "attribute_combinations": combo,
-        "attributes": v_attrs + ([{"id":"SIZE_GRID_ROW_ID","value_id":new_row_id}] if new_row_id else []),
+        "attributes": v_attrs + ([{"id":"SIZE_GRID_ROW_ID","value_name":str(new_row_id)}] if new_row_id else []),
         "available_quantity": v.get("available_quantity") or 10,
         "price": v.get("price") or src.get("price"),
         "picture_ids": PICS[:3]
@@ -93,7 +93,7 @@ if src_chart.status_code==200:
         if a.get("value_id"): e["value_id"]=a.get("value_id")
         if a.get("value_name"): e["value_name"]=a.get("value_name")
         attrs.append(e)
-    attrs.append({"id":"SIZE_GRID_ID","value_id":NEW_GRID})
+    attrs.append({"id":"SIZE_GRID_ID","value_name":str(NEW_GRID)})
     
     payload={
       "title": src.get("title"),
