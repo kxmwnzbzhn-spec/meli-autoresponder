@@ -1,4 +1,4 @@
-import os, requests, json
+import os, requests
 API="https://api.mercadolibre.com"
 CID=os.environ["MELI_APP_ID"]; CSEC=os.environ["MELI_APP_SECRET"]
 RT=os.environ["MELI_REFRESH_TOKEN_ASVA"]
@@ -6,31 +6,35 @@ r=requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token","client_
 AT=r.json()["access_token"]
 H={"Authorization":f"Bearer {AT}"}
 
-# Tree: top categories
-tree=requests.get(f"{API}/sites/MLM/categories",headers=H,timeout=15).json()
-print("=== TOP MLM CATS ===")
-for t in tree:
-  n=(t.get("name") or "").lower()
-  if "espir" in n or "esot" in n or "religi" in n or "ocult" in n:
-    print(f"  {t['id']} - {t['name']}")
+# Probe known/suspected category IDs
+CANDIDATES=["MLM3937","MLM179232","MLM179230","MLM5286","MLM1499","MLM1500","MLM1574","MLM2553","MLM2563","MLM45353","MLM423275","MLM5113"]
+for c in CANDIDATES:
+  try:
+    r=requests.get(f"{API}/categories/{c}",headers=H,timeout=10).json()
+    if r.get("name"):
+      path=" > ".join(p.get("name") for p in r.get("path_from_root",[]))
+      print(f"  {c}: {path}")
+  except: pass
 
-# Try predict from title
-for q in ["Perfume esoterico Flor de Nopal","Perfume ritual","Perfume santeria","Lociones esotericas","Locion ritual ataccion"]:
-  pr=requests.get(f"{API}/sites/MLM/category_predictor/predict?title={requests.utils.quote(q)}",headers=H,timeout=10)
-  print(f"\npredict '{q}': {pr.status_code}", pr.text[:300])
+# Walk MLM1474 (Salud y Belleza?)
+print("\n=== Walking ESO type cats ===")
+# Try search via items endpoint (categories of items in similar listings)
+# Actually let me just check by exploring deeper
 
-# Walk tree for esoterismo
-def walk(cid,depth=0):
-  if depth>4: return
-  ci=requests.get(f"{API}/categories/{cid}",headers=H,timeout=10).json()
-  n=(ci.get("name") or "").lower()
-  if "esot" in n or "ritual" in n or "espir" in n or "ocult" in n or "magic" in n:
-    print(f"{'  '*depth}{cid} - {ci.get('name')} [LEAF={not ci.get('children_categories')}]")
-  for ch in ci.get("children_categories",[]):
-    walk(ch["id"],depth+1)
+# Try /domains/MLM-PERFUMES_BODY_SPLASH
+for dom in ["MLM-PERFUMES_BODY_SPLASH","MLM-ESOTERIC_PERFUMES","MLM-PERFUMES_AMBIENT","MLM-PERFUMES","MLM-ESOTERIC","MLM-RITUAL_PRODUCTS"]:
+  rd=requests.get(f"{API}/domains/{dom}",headers=H,timeout=10)
+  print(f"\n/domains/{dom}: {rd.status_code} {rd.text[:300]}")
 
-# Probe Belleza y Cuidado (parent of perfumes)
-print("\n=== Walking MLM1246 (Belleza) for esoterico ===")
-walk("MLM1246")
-print("\n=== Walking MLM1431 (Hogar) for esoterico ===")
-walk("MLM1431")
+# Try one ASVA item that might be in esoteric cat
+print("\n=== Other ASVA items category check ===")
+# Search Mayrely/Asva for similar
+me=requests.get(f"{API}/users/me",headers=H,timeout=10).json()
+uid=me.get("id")
+si=requests.get(f"{API}/users/{uid}/items/search?q=esoterico&limit=10",headers=H,timeout=15)
+print(f"search esoterico in ASVA items: {si.status_code}")
+if si.status_code==200:
+  ids=si.json().get("results",[])
+  for i in ids[:5]:
+    g=requests.get(f"{API}/items/{i}?attributes=id,title,category_id",headers=H,timeout=10).json()
+    print(f"  {g.get('id')} cat={g.get('category_id')} - {(g.get('title') or '')[:60]}")
