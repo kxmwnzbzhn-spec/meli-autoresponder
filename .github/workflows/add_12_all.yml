@@ -1,0 +1,36 @@
+name: add_12_all
+on: { workflow_dispatch: {} }
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests -q
+      - run: python3 scripts/add_12_all.py
+        env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_AH: ${{ secrets.MELI_REFRESH_TOKEN_AH }}
+          MELI_REFRESH_TOKEN_ASVA: ${{ secrets.MELI_REFRESH_TOKEN_ASVA }}
+          MELI_REFRESH_TOKEN_CLARIBEL: ${{ secrets.MELI_REFRESH_TOKEN_CLARIBEL }}
+          MELI_REFRESH_TOKEN_WILBERT: ${{ secrets.MELI_REFRESH_TOKEN_WILBERT }}
+          MELI_REFRESH_TOKEN_JUAN: ${{ secrets.MELI_REFRESH_TOKEN_JUAN }}
+          MELI_REFRESH_TOKEN_RAYMUNDO: ${{ secrets.MELI_REFRESH_TOKEN_RAYMUNDO }}
+          MELI_REFRESH_TOKEN_MAYRELY: ${{ secrets.MELI_REFRESH_TOKEN_MAYRELY }}
+          MELI_REFRESH_TOKEN_YC_NEW: ${{ secrets.MELI_REFRESH_TOKEN_YC_NEW }}
+          MELI_REFRESH_TOKEN_ADRIAN: ${{ secrets.MELI_REFRESH_TOKEN_ADRIAN }}
+          MELI_REFRESH_TOKEN_ANGEL: ${{ secrets.MELI_REFRESH_TOKEN_ANGEL }}
+          MELI_REFRESH_TOKEN_ANGEL_DAMIAN: ${{ secrets.MELI_REFRESH_TOKEN_ANGEL_DAMIAN }}
+          MELI_REFRESH_TOKEN_ASGARI: ${{ secrets.MELI_REFRESH_TOKEN_ASGARI }}
+          MELI_REFRESH_TOKEN_MC: ${{ secrets.MELI_REFRESH_TOKEN_MC }}
+          MELI_REFRESH_TOKEN_OFICIAL: ${{ secrets.MELI_REFRESH_TOKEN_OFICIAL }}
+          MELI_REFRESH_TOKEN_USER1668: ${{ secrets.MELI_REFRESH_TOKEN_USER1668 }}
+          MELI_REFRESH_TOKEN_RAYMUNDO_MAY: ${{ secrets.MELI_REFRESH_TOKEN_RAYMUNDO_MAY }}
+          MELI_REFRESH_TOKEN_RMAYCHI: ${{ secrets.MELI_REFRESH_TOKEN_RMAYCHI }}
+          MELI_REFRESH_TOKEN_BREN: ${{ secrets.MELI_REFRESH_TOKEN_BREN }}
+          MELI_REFRESH_TOKEN_MILDRED: ${{ secrets.MELI_REFRESH_TOKEN_MILDRED }}
+          MELI_REFRESH_TOKEN_DILCIE: ${{ secrets.MELI_REFRESH_TOKEN_DILCIE }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
