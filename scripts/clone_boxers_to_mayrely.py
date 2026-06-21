@@ -58,7 +58,7 @@ for v in src.get("variations",[]):
     "picture_ids": PICS[:3]
   })
 
-keep={"BRAND","GENDER","MAIN_MATERIAL","UNITS_PER_PACK","ITEM_CONDITION","MODEL","LINE","CLOTHING_TYPE","UNDERWEAR_TYPE","PATTERN","DESIGN","MAIN_COLOR","COLOR"}
+keep={"BRAND","GENDER","MAIN_MATERIAL","UNITS_PER_PACK","ITEM_CONDITION","MODEL","LINE","CLOTHING_TYPE","UNDERWEAR_TYPE","MALE_UNDERWEAR_TYPE","PATTERN","DESIGN","MAIN_COLOR","COLOR","AGE_GROUP"}
 attrs=[]
 for a in src.get("attributes",[]):
   aid=a.get("id")
@@ -68,6 +68,10 @@ for a in src.get("attributes",[]):
     if a.get("value_name"): e["value_name"]=a.get("value_name")
     attrs.append(e)
 attrs.append({"id":"SIZE_GRID_ID","value_name":NEW_GRID})
+
+# Ensure MALE_UNDERWEAR_TYPE
+if not any(a["id"]=="MALE_UNDERWEAR_TYPE" for a in attrs):
+  attrs.append({"id":"MALE_UNDERWEAR_TYPE","value_name":"Bóxer"})
 
 payload={
   "title": src.get("title"),
