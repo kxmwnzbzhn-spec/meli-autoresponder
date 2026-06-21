@@ -213,7 +213,7 @@
     "title": "CERRADA — relisted as MLM5346655686"
   },
   "MLM2911241921": {
-    "real_stock": 1595,
+    "real_stock": 1594,
     "master_stock": 1778,
     "min_visible": 1,
     "auto_replenish": true,
@@ -959,7 +959,7 @@
   "MLM5347886456": {
     "title": "JBL Charge 6 Negro Portátil",
     "min_visible": 0,
-    "real_stock": 1595,
+    "real_stock": 1594,
     "master_stock": 1778,
     "available_quantity": 0,
     "auto_replenish": false,
