@@ -1,31 +1,45 @@
 import os, requests, json
 API="https://api.mercadolibre.com"
 CID=os.environ["MELI_APP_ID"]; CSEC=os.environ["MELI_APP_SECRET"]
+RT=os.environ["MELI_REFRESH_TOKEN_ASVA"]
+r=requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token","client_id":CID,"client_secret":CSEC,"refresh_token":RT},timeout=20)
+AT=r.json()["access_token"]
+H={"Authorization":f"Bearer {AT}"}
 
-ACC={"AH":"MELI_REFRESH_TOKEN_AH","ASVA":"MELI_REFRESH_TOKEN_ASVA","CLARIBEL":"MELI_REFRESH_TOKEN_CLARIBEL","WILBERT":"MELI_REFRESH_TOKEN_WILBERT","JUAN":"MELI_REFRESH_TOKEN_JUAN","RAYMUNDO":"MELI_REFRESH_TOKEN_RAYMUNDO","MAYRELY":"MELI_REFRESH_TOKEN_MAYRELY","YC_NEW":"MELI_REFRESH_TOKEN_YC_NEW","ADRIAN":"MELI_REFRESH_TOKEN_ADRIAN","ANGEL":"MELI_REFRESH_TOKEN_ANGEL","ASGARI":"MELI_REFRESH_TOKEN_ASGARI","MC":"MELI_REFRESH_TOKEN_MC"}
+# Get all open claims for seller respondent
+cs=requests.get(f"{API}/post-purchase/v1/claims/search?status=opened&player.role=respondent&limit=100",headers=H,timeout=20).json()
+claims=cs.get("data") or cs.get("results") or []
+print(f"open ASVA claims: {len(claims)}")
+print()
 
-ORDER_ID="2000013579459581"
-for n,k in ACC.items():
-  rt=os.environ.get(k)
-  if not rt: continue
+# Find ones related to "empty package" or "missing items"
+for c in claims:
+  cid=c.get("id")
+  full=requests.get(f"{API}/post-purchase/v1/claims/{cid}",headers=H,timeout=10).json()
+  reason=full.get("reason_id","")
+  res=full.get("resource_id")
+  stage=full.get("stage")
+  status=full.get("status")
+  # Get reason name
   try:
-    tr=requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token","client_id":CID,"client_secret":os.environ["MELI_APP_SECRET"],"refresh_token":rt},timeout=20)
-    if tr.status_code>=400: continue
-    AT=tr.json()["access_token"]
-    g=requests.get(f"{API}/orders/{ORDER_ID}",headers={"Authorization":f"Bearer {AT}"},timeout=15)
-    if g.status_code==200 and g.json().get("total_amount"):
-      info=g.json()
-      print(f"✓ {n}: total=${info.get('total_amount')} buyer={info.get('buyer',{}).get('nickname')} status={info.get('status')}")
-      # Probe claims
-      cs=requests.get(f"{API}/post-purchase/v1/claims/search?resource=order&resource_id={ORDER_ID}",headers={"Authorization":f"Bearer {AT}"},timeout=15)
-      print(f"  claims: {cs.status_code} {cs.text[:600]}")
-      # Also try seller claims search
-      cs2=requests.get(f"{API}/post-purchase/v1/claims/search?status=opened&player.role=respondent&limit=100",headers={"Authorization":f"Bearer {AT}"},timeout=15)
-      if cs2.status_code==200:
-        for c in cs2.json().get("data") or cs2.json().get("results") or []:
-          if str(c.get("resource_id")) == ORDER_ID:
-            print(f"  FOUND CLAIM: {c.get('id')} stage={c.get('stage')}")
-      break
-    else:
-      print(f"✗ {n}: HTTP {g.status_code}")
-  except Exception as e: print(f"  {n} err: {e}")
+    rn=requests.get(f"{API}/post-purchase/v1/claims/reasons/{reason}",headers=H,timeout=5).json().get("name","")
+  except: rn=""
+  # Find order title
+  title=""
+  if res and full.get("resource")=="order":
+    try:
+      o=requests.get(f"{API}/orders/{res}",headers=H,timeout=10).json()
+      title=(o.get("order_items",[{}])[0].get("item",{}).get("title","") or "")[:60]
+    except: pass
+  # Actions available
+  acts=[]
+  for p in full.get("players",[]):
+    if p.get("role")=="respondent":
+      acts=[a.get("action") if isinstance(a,dict) else a for a in (p.get("available_actions") or [])]
+  flag=""
+  rnl=(rn or "").lower()
+  if "vacio" in rnl or "empty" in rnl or "missing" in rnl or "incomplete" in rnl or "incompleto" in rnl:
+    flag=" 🚨 PAQUETE_VACIO_FRAUDE"
+  print(f"  claim {cid} | order {res} | {stage}/{status} | reason={reason} '{rn}'{flag}")
+  print(f"    title: {title}")
+  print(f"    actions: {acts}")
