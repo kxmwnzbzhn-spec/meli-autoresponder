@@ -66,6 +66,39 @@ TEMPLATES_ACCEPT={
 }
 
 # Plantilla para >30 días post-entrega (Compra Protegida expirada)
+
+# Plantillas DEFENDER (fraude — NO ofrecer devolución, lavarse las manos)
+TEMPLATES_DEFEND={
+  "empty_box":(
+    "Hola, mediador. La reclamación de paquete vacío no se sostiene contra la evidencia objetiva. "
+    "El producto fue empacado y enviado completo, con peso bruto del paquete que coincide con el "
+    "peso real del artículo más embalaje (aproximadamente 400 a 600 gramos según el producto). "
+    "Si el comprador hubiera recibido un paquete vacío, el peso facturado por la paquetería sería "
+    "de apenas embalaje (menos de 50 gramos), lo cual NO ocurrió en este envío. Adicionalmente, "
+    "todo nuestro proceso de armado y empaque está documentado por video y fotografías previas al "
+    "despacho. El tracking confirma entrega exitosa. Nuestra postura es que el producto fue "
+    "enviado y entregado completo. Quedamos atentos a la resolución del mediador."),
+  "missing_items":(
+    "Hola, mediador. El envío fue empacado de manera completa con todos los items declarados. "
+    "El peso y dimensiones del paquete registrados por la paquetería corresponden al producto "
+    "completo. Contamos con video y fotografías del proceso de armado previo al envío. El "
+    "tracking confirma entrega exitosa al comprador. Nuestra postura es que el envío fue "
+    "despachado y entregado íntegro. Quedamos atentos a la resolución del mediador."),
+  "delivered_but_not_receive_package":(
+    "Hola, mediador. El tracking de la paquetería confirma entrega exitosa del paquete en el "
+    "domicilio registrado por el comprador. Nuestra responsabilidad como vendedor concluye con la "
+    "entrega documentada por la paquetería. No es procedente atribuirnos un evento posterior a la "
+    "entrega confirmada. Quedamos atentos a la resolución del mediador."),
+  "default_fraud":(
+    "Hola, mediador. El producto fue enviado completo y en óptimas condiciones, lo cual se "
+    "respalda con el peso y dimensiones del paquete registrados por la paquetería, fotografías "
+    "previas al despacho y tracking de entrega exitosa. Nuestra postura es firme: el envío fue "
+    "completo y la entrega exitosa. Quedamos atentos a la resolución del mediador.")
+}
+
+# Reasons que activan DEFEND_NO_RETURN (fraude)
+FRAUD_REASONS={"empty_box","missing_items","missing_part_of_item","delivered_but_not_receive_package","not_received","package_not_received"}
+
 TEMPLATE_EXPIRED_30D=(
   "Hola, lamentamos el inconveniente. Sin embargo, la garantía de Compra Protegida de MercadoLibre tiene una "
   "vigencia de 30 días posteriores a la entrega del producto, y este plazo ya expiró en tu compra. Por esta "
@@ -188,6 +221,10 @@ def main():
         if rs.status_code==200: reason_name=rs.json().get("name") or rs.json().get("id")
       except: pass
       
+      # === REGLA FRAUDE: empty_box, missing_items, not_received con delivery confirmada ===
+      key_lookup=(reason_name or "").lower().replace(" ","_")
+      is_fraud=key_lookup in FRAUD_REASONS
+      
       # === REGLA 30 DÍAS POST-ENTREGA ===
       delivered=get_delivered_date(AT, order_id)
       use_expired_template=False
@@ -197,12 +234,14 @@ def main():
         if days_since_delivery>30:
           use_expired_template=True
       
-      if use_expired_template:
+      if is_fraud:
+        msg=TEMPLATES_DEFEND.get(key_lookup, TEMPLATES_DEFEND["default_fraud"])
+        strategy=f"{reason_name}/DEFEND_NO_RETURN_fraud"
+      elif use_expired_template:
         msg=TEMPLATE_EXPIRED_30D
         strategy=f"{reason_name}/decline_compra_protegida_expired_{days_since_delivery}d"
         total_expired+=1
       else:
-        key_lookup=(reason_name or "").lower().replace(" ","_")
         msg=TEMPLATES_ACCEPT.get(key_lookup, TEMPLATES_ACCEPT["default"])
         strategy=f"{reason_name}/accept_return"
       
@@ -233,3 +272,4 @@ def main():
   tg(f"🤖 Claims bot v4: ✅{total_responded} (expirados {total_expired}) ⏭{total_skipped} ❌{total_failed}")
 
 if __name__=="__main__": main()
+
