@@ -1,0 +1,15 @@
+name: fix_model_florNopal
+on: { workflow_dispatch: {}, push: { paths: ['.github/workflows/fix_model_florNopal.yml'] } }
+permissions: {contents: write}
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests
+      - env:
+          TOKEN_SHARED: ${{ secrets.TOKEN_SHARED }}
+        run: python scripts/fix_model_florNopal.py
