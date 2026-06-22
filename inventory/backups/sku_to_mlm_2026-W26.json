@@ -1,0 +1,10 @@
+{
+  "_meta": {
+    "version": "1.0",
+    "description": "Reverse-map MLM listing ID → SKU canonico. Construido auto via discover_sku_mappings.py + correcciones manual.",
+    "last_rebuild": null,
+    "policy": "Si un MLM no esta aqui, sync lo registra en sku_unmapped_listings.json para revision manual"
+  },
+  "by_mlm": {},
+  "by_sku": {}
+}
