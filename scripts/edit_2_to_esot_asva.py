@@ -43,8 +43,8 @@ for cid in CIDS:
         print(f"  >>> EDIT SID = {sid}  status={rb.get('status')}")
         continue
 
-    # 3) si pide attrs, payload con BRAND+MODEL+GTIN reutilizando del producto
-    print(f"  → intento 2: EDIT con attrs mínimos")
+    # 3) payload completo con attrs + fotos re-subidas
+    print(f"  → intento 2: EDIT con attrs + fotos")
     brand=""; model=""
     for a in p.get("attributes",[]):
         if a.get("id")=="BRAND": brand=(a.get("values") or [{}])[0].get("name","")
@@ -58,15 +58,31 @@ for cid in CIDS:
      {"id":"MODEL","values":[{"name":model}]},
      {"id":"ITEM_CONDITION","values":[{"name":"Nuevo"}]},
     ]
+    # re-upload fotos
+    pics=[]
+    for idx,pp in enumerate((p.get("pictures") or [])[:6]):
+        u=pp.get("secure_url") or pp.get("url")
+        if not u: continue
+        try:
+            img=requests.get(u,timeout=60).content
+            rpi=requests.post(f"{API}/pictures/items/upload",headers=H,
+                files={"file":(f"{cid}_{idx}.jpg",img,"image/jpeg")},timeout=120)
+            if rpi.status_code in (200,201):
+                pics.append({"id":rpi.json()["id"]})
+            else:
+                print(f"    pic[{idx}] upload {rpi.status_code}")
+        except Exception as e:
+            print(f"    pic[{idx}] err: {e}")
+    print(f"    fotos:{len(pics)}")
     payload_attrs={
         "site_id":"MLM","type":"EDIT","catalog_product_id":cid,
         "domain_id":"MLM-ESOTERIC_PERFUMES","title":title,
-        "attributes":ATTRS,
+        "attributes":ATTRS,"pictures":pics,
     }
     rp2=requests.post(f"{API}/catalog_suggestions",headers=HJ,json=payload_attrs,timeout=40)
     print(f"    POST {rp2.status_code}")
     rb2=rp2.json()
-    print(f"    body: {json.dumps(rb2,ensure_ascii=False)[:500]}")
+    print(f"    body: {json.dumps(rb2,ensure_ascii=False)[:600]}")
     sid2=rb2.get("id") or rb2.get("suggestion_id")
     if sid2:
         print(f"  >>> EDIT SID = {sid2}  status={rb2.get('status')}")
