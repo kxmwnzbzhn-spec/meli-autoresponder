@@ -6,35 +6,27 @@ r=requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token","client_
 AT=r.json()["access_token"]
 H={"Authorization":f"Bearer {AT}"}
 
-# Test on a known-popular CPID: MLM44715070 (which we use in Adrián)
-for cpid in ["MLM44715070","MLM37108208","MLM68969359"]:
-  print(f"\n=== {cpid} ===")
-  # Full product dump
-  p=requests.get(f"{API}/products/{cpid}",headers=H,timeout=15).json()
-  # Look at all keys at root
-  for k in sorted(p.keys()):
-    v=p[k]
-    if isinstance(v,(str,int,float,bool,type(None))):
-      print(f"  {k}: {v}")
-    elif isinstance(v,(list,dict)):
-      print(f"  {k}: <{type(v).__name__} len={len(v)}>")
-  # buy_box_winner deep dump
-  bbw=p.get("buy_box_winner")
-  if bbw:
-    print("  buy_box_winner keys:",list(bbw.keys()))
-    print("  buy_box_winner:",{k:v for k,v in bbw.items() if k in ("sold_quantity","price","item_id","seller_id","status")})
-  
-  # Try /products/{cpid}/items
-  it=requests.get(f"{API}/products/{cpid}/items?limit=50",headers=H,timeout=15)
-  print(f"  /items HTTP {it.status_code}")
-  if it.status_code==200:
-    d=it.json()
-    items=d.get("results",[]) if isinstance(d,dict) else d
-    if not isinstance(items,list): items=[]
-    print(f"  items count: {len(items)}")
-    total_sold=0
-    for ii in items[:30]:
-      if isinstance(ii,dict):
-        sq=ii.get("sold_quantity",0)
-        total_sold+=sq or 0
-    print(f"  sold total (top 30): {total_sold}")
+# Try site search by catalog_product_id
+for cpid in ["MLM44715070","MLM68969359","MLM44731934"]:
+  print(f"\n=== {cpid} via site search ===")
+  url=f"{API}/sites/MLM/search?catalog_product_id={cpid}&limit=50"
+  r=requests.get(url,headers=H,timeout=15)
+  print(f"  HTTP {r.status_code}")
+  if r.status_code==200:
+    d=r.json()
+    res=d.get("results",[])
+    print(f"  results: {len(res)}, paging total: {d.get('paging',{}).get('total')}")
+    tot=0
+    for it in res[:50]:
+      sq=it.get("sold_quantity",0) or 0
+      tot+=sq
+    print(f"  sum sold_quantity (this page): {tot}")
+    if res: 
+      sample=res[0]
+      print(f"  sample keys: {[k for k in sample.keys() if 'sold' in k.lower() or 'qty' in k.lower() or 'available' in k.lower()]}")
+      print(f"  sample seller: {sample.get('seller',{}).get('nickname')} sold={sample.get('sold_quantity')}")
+
+# Try /items by catalog
+print("\n=== /products/{cpid}/items deep inspection ===")
+it=requests.get(f"{API}/products/MLM44715070/items?limit=10",headers=H,timeout=15).json()
+print(json.dumps(it,indent=2,default=str)[:3000])
