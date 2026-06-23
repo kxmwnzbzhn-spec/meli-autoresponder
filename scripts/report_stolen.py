@@ -6,18 +6,11 @@ r=requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token","client_
 AT=r.json()["access_token"]
 H={"Authorization":f"Bearer {AT}"}
 
-cpid="MLM52129273"
-p=requests.get(f"{API}/products/{cpid}",headers=H,timeout=15).json()
-print("=== CPID ===")
-print("name:",p.get("name"))
-print("status:",p.get("status"),"domain:",p.get("domain_id"),"cat:",p.get("category_id"))
-print("brand:",[a for a in (p.get("attributes") or []) if a.get("id") in ("BRAND","MODEL","LINE","FAMILY_NAME","GTIN")])
-print("buy_box_winner:",p.get("buy_box_winner"))
-print("lowest_price:",p.get("lowest_price"))
-
-# Check if ASVA already has this CPID
-search=requests.get(f"{API}/users/me",headers=H,timeout=15).json()
-print("\nuser_id:",search.get("id"),"nickname:",search.get("nickname"))
-sid=search.get("id")
-ex=requests.get(f"{API}/users/{sid}/items/search?catalog_product_id={cpid}",headers=H,timeout=15).json()
-print("existing in ASVA:",ex.get("results",[])[:5])
+# Find ASVA items in category MLM456032 (esoteric perfumes) from Alchemia
+sid=1668713481
+sr=requests.get(f"{API}/users/{sid}/items/search?category=MLM456032&limit=20",headers=H,timeout=15).json()
+ids=sr.get("results",[])
+print("found",len(ids),"items in MLM456032")
+for iid in ids[:5]:
+  it=requests.get(f"{API}/items/{iid}?attributes=id,title,price,available_quantity,category_id,attributes,catalog_product_id,family_name,status",headers=H,timeout=10).json()
+  print(f"  {iid}: cat={it.get('category_id')} price={it.get('price')} cpid={it.get('catalog_product_id')} family={it.get('family_name')} title={it.get('title')[:60]}")
