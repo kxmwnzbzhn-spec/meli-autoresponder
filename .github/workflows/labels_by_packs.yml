@@ -1,0 +1,26 @@
+name: labels-by-packs
+on:
+  workflow_dispatch:
+    inputs:
+      pack_ids: { required: true, type: string }
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests pypdf -q
+      - env:
+          PACK_IDS:           ${{ inputs.pack_ids }}
+          MELI_APP_ID:        ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET:    ${{ secrets.MELI_APP_SECRET }}
+          SUPABASE_URL:       ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: python scripts/labels_by_packs.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: labels-by-packs
+          path: ETIQUETAS_PACKS.pdf
+          if-no-files-found: error
