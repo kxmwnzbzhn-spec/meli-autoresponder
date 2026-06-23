@@ -1,60 +1,36 @@
-import os, requests, json
+import os, requests
 API="https://api.mercadolibre.com"
 CID=os.environ["MELI_APP_ID"]; CSEC=os.environ["MELI_APP_SECRET"]
-RT=os.environ["MELI_REFRESH_TOKEN_ASVA"]
-r=requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token","client_id":CID,"client_secret":CSEC,"refresh_token":RT},timeout=20)
-AT=r.json()["access_token"]
-H={"Authorization":f"Bearer {AT}"}
-HJ={"Authorization":f"Bearer {AT}","Content-Type":"application/json"}
 
-CLAIM=5531714512
-ORDER="2000016996164296"
+ACC={"AH":"MELI_REFRESH_TOKEN_AH","ASVA":"MELI_REFRESH_TOKEN_ASVA","CLARIBEL":"MELI_REFRESH_TOKEN_CLARIBEL",
+     "WILBERT":"MELI_REFRESH_TOKEN_WILBERT","JUAN":"MELI_REFRESH_TOKEN_JUAN","RAYMUNDO":"MELI_REFRESH_TOKEN_RAYMUNDO",
+     "MAYRELY":"MELI_REFRESH_TOKEN_MAYRELY","YC_NEW":"MELI_REFRESH_TOKEN_YC_NEW","ADRIAN":"MELI_REFRESH_TOKEN_ADRIAN",
+     "ANGEL":"MELI_REFRESH_TOKEN_ANGEL","ASGARI":"MELI_REFRESH_TOKEN_ASGARI","MC":"MELI_REFRESH_TOKEN_MC",
+     "OFICIAL":"MELI_REFRESH_TOKEN_OFICIAL","USER1668":"MELI_REFRESH_TOKEN_USER1668","RAYMUNDO_MAY":"MELI_REFRESH_TOKEN_RAYMUNDO_MAY",
+     "RMAYCHI":"MELI_REFRESH_TOKEN_RMAYCHI","BREN":"MELI_REFRESH_TOKEN_BREN","MILDRED":"MELI_REFRESH_TOKEN_MILDRED",
+     "DILCIE":"MELI_REFRESH_TOKEN_DILCIE","ANGEL_DAMIAN":"MELI_REFRESH_TOKEN_ANGEL_DAMIAN"}
 
-# Get shipment for weight evidence
-o=requests.get(f"{API}/orders/{ORDER}",headers=H,timeout=15).json()
-sid=o.get("shipping",{}).get("id")
-print(f"shipping_id: {sid}")
-print(f"buyer: {o.get('buyer',{}).get('nickname')}")
-print(f"total: ${o.get('total_amount')}")
-weight_g=None
-dims=None
-if sid:
-  s=requests.get(f"{API}/shipments/{sid}",headers=H,timeout=15).json()
-  print(f"status: {s.get('status')} sub: {s.get('substatus')}")
-  print(f"date_shipped: {s.get('status_history',{}).get('date_shipped')}")
-  print(f"date_delivered: {s.get('status_history',{}).get('date_delivered')}")
-  print(f"tracking: {s.get('tracking_number')}")
-  # Find package weight
-  pkg=s.get("shipping_items",[]) or []
-  for x in pkg:
-    print(f"item: {x}")
-  # Cost components may have peso
-  cc=s.get("cost_components",{})
-  print(f"cost: {cc}")
-  # Look in shipping_option / declarations
-  so=s.get("shipping_option",{})
-  print(f"shipping_option keys: {list(so.keys())}")
-  for k in ("delivery_type","declared_value","name","speed"):
-    if k in so: print(f"  {k}: {so[k]}")
-  # Package details
-  print(f"\nfull shipment dump (selected):")
-  for k in ("id","mode","logistic_type","status","substatus","tracking_number","tracking_method"):
-    if k in s: print(f"  {k}: {s[k]}")
+ORDERS=["2000013543063645","2000013543121015"]
+TOKENS={}
+for n,k in ACC.items():
+  rt=os.environ.get(k)
+  if not rt: continue
+  try:
+    r=requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token","client_id":CID,"client_secret":CSEC,"refresh_token":rt},timeout=15)
+    if r.status_code<400: TOKENS[n]=r.json()["access_token"]
+  except: pass
 
-# Send strong defense message to mediator (no signature)
-msg=(
-"Hola, mediador. La reclamación de paquete vacío no se sostiene contra la evidencia objetiva. "
-"El producto enviado es un perfume de 100ml con frasco de vidrio y caja, con peso bruto de "
-"aproximadamente 400 gramos. El paquete fue recibido por la paquetería con ese peso registrado "
-"al despacho y reflejado en la guía de envío entregada al comprador. Si el comprador hubiera "
-"recibido un paquete vacío, el peso facturado por la paquetería sería de menos de 50 gramos "
-"(solo embalaje), lo que NO ocurrió en este envío. Adicionalmente, todo nuestro proceso de "
-"armado y empaque está documentado por video y fotografías previas al despacho. Solicitamos "
-"que el comprador devuelva el paquete completo tal cual fue recibido — incluyendo caja, "
-"etiquetas y peso original — para inspección por nuestro equipo. Quedamos atentos a la "
-"coordinación del envío de retorno."
-)
-print(f"\nmsg len: {len(msg)}")
-r2=requests.post(f"{API}/marketplace/v2/claims/{CLAIM}/actions/send-message",headers=HJ,
-  json={"receiver_role":"mediator","message":msg,"attachments":[]},timeout=25)
-print(f"\nSEND: {r2.status_code} {r2.text[:500]}")
+for ORD in ORDERS:
+  print(f"\n=== {ORD} ===")
+  for n,AT in TOKENS.items():
+    try:
+      g=requests.get(f"{API}/orders/{ORD}",headers={"Authorization":f"Bearer {AT}"},timeout=10)
+      if g.status_code==200 and g.json().get("total_amount"):
+        info=g.json()
+        print(f"  ✓ {n}: total=${info.get('total_amount')} status={info.get('status')} buyer={info.get('buyer',{}).get('nickname')}")
+        for it in info.get("order_items",[]):
+          print(f"    {it.get('item',{}).get('title','')[:60]} x{it.get('quantity')}")
+        break
+    except: pass
+  else:
+    print(f"  ✗ not found in any of {len(TOKENS)} accounts")
