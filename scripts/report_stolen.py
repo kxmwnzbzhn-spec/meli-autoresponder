@@ -6,17 +6,18 @@ r=requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token","client_
 AT=r.json()["access_token"]
 HJ={"Authorization":f"Bearer {AT}","Content-Type":"application/json"}
 
-# Full claim dump to see action structure
-for cid in [5530358522]:
-  c=requests.get(f"{API}/post-purchase/v1/claims/{cid}",headers=HJ,timeout=20).json()
-  print(json.dumps(c, indent=2, default=str)[:5000])
-  # Try GET available actions
-  print("\n--- /actions GET ---")
-  a=requests.get(f"{API}/post-purchase/v1/claims/{cid}/actions",headers=HJ,timeout=15)
-  print(a.status_code, a.text[:1500])
-  print("\n--- /available_actions GET ---")
-  a=requests.get(f"{API}/post-purchase/v1/claims/{cid}/available_actions",headers=HJ,timeout=15)
-  print(a.status_code, a.text[:1500])
-  print("\n--- /returns GET ---")
-  a=requests.get(f"{API}/post-purchase/v1/claims/{cid}/returns/expected_resolutions",headers=HJ,timeout=15)
-  print(a.status_code, a.text[:600])
+for cid in [5530358522,5530353540]:
+  print(f"\n=== CLAIM {cid} ===")
+  # Get return associated
+  for p in [
+    f"/post-purchase/v1/claims/{cid}/related/return",
+    f"/post-purchase/v1/claims/{cid}/returns",
+    f"/post-purchase/v1/claims/{cid}/related_entities",
+    f"/post-purchase/v2/claims/{cid}/related/return",
+    f"/post-purchase/v1/claims/{cid}/return",
+    f"/marketplace/v2/claims/{cid}/returns",
+    f"/marketplace/v1/claims/{cid}/returns",
+  ]:
+    rr=requests.get(f"{API}{p}",headers=HJ,timeout=15)
+    if rr.status_code not in (404,):
+      print(f"  GET {p} {rr.status_code} {rr.text[:600]}")
