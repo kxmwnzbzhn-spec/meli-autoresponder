@@ -3,7 +3,7 @@
     "description": "Yiriam stock real almacén - 12 perfumes",
     "updated": "2026-05-16",
     "total": 239,
-    "synced_from_supabase_at": "2026-06-15T22:27:22.471046+00:00"
+    "synced_from_supabase_at": "2026-06-23T17:26:57.976197+00:00"
   },
   "MLM2935286605": {
     "title": "Angel Nova",
@@ -17,7 +17,7 @@
   },
   "MLM2935286537": {
     "title": "Billie Eilish",
-    "real_stock": 34,
+    "real_stock": 33,
     "master_stock": 40,
     "min_visible": 1,
     "available_quantity": 1,
