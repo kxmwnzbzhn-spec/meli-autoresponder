@@ -4,31 +4,27 @@ CID=os.environ["MELI_APP_ID"]; CSEC=os.environ["MELI_APP_SECRET"]
 RT=os.environ["MELI_REFRESH_TOKEN_ASVA"]
 r=requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token","client_id":CID,"client_secret":CSEC,"refresh_token":RT},timeout=20)
 AT=r.json()["access_token"]
+H={"Authorization":f"Bearer {AT}"}
 
-rid=143755516
-url=f"{API}/post-purchase/v1/returns/{rid}/return-review"
-auth={"Authorization":f"Bearer {AT}"}
+# Check current state of return 143755516 and claim 5530358522
+print("=== CLAIM 5530358522 STATE ===")
+c=requests.get(f"{API}/post-purchase/v1/claims/5530358522",headers=H,timeout=15).json()
+print("stage:",c.get("stage"),"status:",c.get("status"),"resolution:",c.get("resolution"))
+print("respondent actions:",[a.get("action") for p in c.get("players",[]) if p.get("role")=="respondent" for a in p.get("available_actions",[])])
+print("related:",c.get("related_entities"))
 
-# Try x-format-new header + various content-types
-configs=[
-  ("JSON+xfn-true",{**auth,"Content-Type":"application/json","x-format-new":"true"},json.dumps({"outcome":"fail","reason":"SRF5"})),
-  ("JSON+xfn-false",{**auth,"Content-Type":"application/json","x-format-new":"false"},json.dumps({"outcome":"fail","reason":"SRF5"})),
-  ("form",{**auth,"Content-Type":"application/x-www-form-urlencoded"},"outcome=fail&reason=SRF5"),
-  ("multipart",{**auth},None),
-  ("no-content-type",{**auth},json.dumps({"outcome":"fail","reason":"SRF5"})),
-  ("text-plain",{**auth,"Content-Type":"text/plain"},json.dumps({"outcome":"fail","reason":"SRF5"})),
-  ("empty-body-no-ct",{**auth},""),
-  ("xfn-1",{**auth,"Content-Type":"application/json","x-format-new":"1"},json.dumps({"outcome":"fail","reason":"SRF5"})),
-]
-for lbl,h,b in configs:
-  if lbl=="multipart":
-    rr=requests.post(url,headers=h,files={"outcome":(None,"fail"),"reason":(None,"SRF5")},timeout=15)
-  else:
-    rr=requests.post(url,headers=h,data=b,timeout=15)
-  print(f"  {lbl} -> {rr.status_code} {rr.text[:200]}")
+print("\n=== CLAIM 5530353540 STATE ===")
+c=requests.get(f"{API}/post-purchase/v1/claims/5530353540",headers=H,timeout=15).json()
+print("stage:",c.get("stage"),"status:",c.get("status"),"resolution:",c.get("resolution"))
+print("respondent actions:",[a.get("action") for p in c.get("players",[]) if p.get("role")=="respondent" for a in p.get("available_actions",[])])
 
-# Try the SRF reason as URL param
-print("\n--- query string variants ---")
-for q in ["?outcome=fail&reason=SRF5","?reason=SRF5","?srf=SRF5"]:
-  rr=requests.post(url+q,headers={**auth,"Content-Type":"application/json"},json={"outcome":"fail","reason":"SRF5"},timeout=15)
-  print(f"  {q} -> {rr.status_code} {rr.text[:200]}")
+print("\n=== RETURN 143755516 STATE ===")
+ret=requests.get(f"{API}/marketplace/v2/claims/5530358522/returns",headers=H,timeout=15).json()
+print("status:",ret.get("status"),"status_money:",ret.get("status_money"),"date_closed:",ret.get("date_closed"))
+
+print("\n=== REVIEWS for 143755516 ===")
+rv=requests.get(f"{API}/marketplace/v2/returns/143755516/reviews",headers=H,timeout=15)
+print(rv.status_code, rv.text[:500])
+print("\n=== REVIEWS for 150143661 ===")
+rv=requests.get(f"{API}/marketplace/v2/returns/150143661/reviews",headers=H,timeout=15)
+print(rv.status_code, rv.text[:500])
