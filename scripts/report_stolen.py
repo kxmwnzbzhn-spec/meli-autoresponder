@@ -8,9 +8,14 @@ H={"Authorization":f"Bearer {AT}"}
 for cid in [5530358522,5530353540]:
   c=requests.get(f"{API}/post-purchase/v1/claims/{cid}",headers=H,timeout=20).json()
   print(f"\n=== CLAIM {cid} ===")
-  print("stage:",c.get("stage"),"status:",c.get("status"),"sub:",c.get("status_detail"),"resolution:",c.get("resolution"))
-  print("type:",c.get("type"),"reason:",c.get("reason_id"))
-  print("players:",[(p.get("role"),p.get("type"),p.get("available_actions",[])) for p in c.get("players",[])])
-  # try actions endpoint
-  a=requests.get(f"{API}/post-purchase/v1/claims/{cid}/players/respondent",headers=H,timeout=20)
-  print("respondent actions:",a.status_code,a.text[:400])
+  for k in ("type","stage","status","reason_id","resolution","expected_resolutions","resource","resource_id","date_created","quantity_type","fulfilled","related_entities","shipping","tracking","tracking_number","return"):
+    if k in c: print(f"  {k}: {c.get(k)}")
+  # try returns endpoint
+  ret=requests.get(f"{API}/post-purchase/v1/claims/{cid}/returns",headers=H,timeout=15)
+  print("  /returns:",ret.status_code,ret.text[:400])
+  # try expected resolutions
+  er=requests.get(f"{API}/post-purchase/v1/claims/{cid}/expected_resolutions",headers=H,timeout=15)
+  print("  /expected_resolutions:",er.status_code,er.text[:400])
+  # try messages
+  m=requests.get(f"{API}/post-purchase/v1/claims/{cid}/messages",headers=H,timeout=15)
+  print("  /messages:",m.status_code,m.text[:600])
