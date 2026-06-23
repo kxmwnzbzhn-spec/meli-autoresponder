@@ -4,27 +4,28 @@ CID=os.environ["MELI_APP_ID"]; CSEC=os.environ["MELI_APP_SECRET"]
 RT=os.environ["MELI_REFRESH_TOKEN_ASVA"]
 r=requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token","client_id":CID,"client_secret":CSEC,"refresh_token":RT},timeout=20)
 AT=r.json()["access_token"]
-H={"Authorization":f"Bearer {AT}"}
 
-# Check current state of return 143755516 and claim 5530358522
-print("=== CLAIM 5530358522 STATE ===")
-c=requests.get(f"{API}/post-purchase/v1/claims/5530358522",headers=H,timeout=15).json()
-print("stage:",c.get("stage"),"status:",c.get("status"),"resolution:",c.get("resolution"))
-print("respondent actions:",[a.get("action") for p in c.get("players",[]) if p.get("role")=="respondent" for a in p.get("available_actions",[])])
-print("related:",c.get("related_entities"))
+# IMPORTANT: only probe with return 150143661 which is still open
+rid=150143661
+url=f"{API}/post-purchase/v1/returns/{rid}/return-review"
+HJ={"Authorization":f"Bearer {AT}","Content-Type":"application/json"}
 
-print("\n=== CLAIM 5530353540 STATE ===")
-c=requests.get(f"{API}/post-purchase/v1/claims/5530353540",headers=H,timeout=15).json()
-print("stage:",c.get("stage"),"status:",c.get("status"),"resolution:",c.get("resolution"))
-print("respondent actions:",[a.get("action") for p in c.get("players",[]) if p.get("role")=="respondent" for a in p.get("available_actions",[])])
-
-print("\n=== RETURN 143755516 STATE ===")
-ret=requests.get(f"{API}/marketplace/v2/claims/5530358522/returns",headers=H,timeout=15).json()
-print("status:",ret.get("status"),"status_money:",ret.get("status_money"),"date_closed:",ret.get("date_closed"))
-
-print("\n=== REVIEWS for 143755516 ===")
-rv=requests.get(f"{API}/marketplace/v2/returns/143755516/reviews",headers=H,timeout=15)
-print(rv.status_code, rv.text[:500])
-print("\n=== REVIEWS for 150143661 ===")
-rv=requests.get(f"{API}/marketplace/v2/returns/150143661/reviews",headers=H,timeout=15)
-print(rv.status_code, rv.text[:500])
+# Try path-based variants (don't touch the open return with body=empty)
+candidates=[
+  ("POST",f"{API}/post-purchase/v1/returns/{rid}/return-review?outcome=fail&reason=SRF5",HJ,None),
+  ("POST",f"{API}/post-purchase/v1/returns/{rid}/return-review?action=fail",HJ,None),
+  ("POST",f"{API}/post-purchase/v1/returns/{rid}/return-review",HJ,json.dumps({"resource_reviews":[{"seller_status":"fail","reason_id":"SRF5"}]})),
+  ("POST",f"{API}/post-purchase/v1/returns/{rid}/return-review",HJ,json.dumps({"resource_reviews":[{"status":"fail","reason_id":"SRF5"}]})),
+  ("POST",f"{API}/post-purchase/v1/returns/{rid}/return-review",HJ,json.dumps([{"status":"fail","reason":"SRF5"}])),
+  ("POST",f"{API}/post-purchase/v1/returns/{rid}/return-review",HJ,json.dumps({"reviews":[{"status":"fail","reason":"SRF5"}]})),
+]
+for m,u,h,b in candidates:
+  rr=requests.request(m,u,headers=h,data=b,timeout=15)
+  print(f"  {u.split('?')[-1] if '?' in u else 'body='+str(b)[:60]} -> {rr.status_code} {rr.text[:250]}")
+  if rr.status_code in (200,201,204):
+    print("  *** SUCCESS ***")
+    # verify
+    import time; time.sleep(1)
+    rv=requests.get(f"{API}/marketplace/v2/returns/{rid}/reviews",headers=HJ,timeout=10)
+    print(f"  REVIEW STATE: {rv.text[:600]}")
+    break
