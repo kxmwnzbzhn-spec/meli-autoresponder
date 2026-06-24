@@ -1084,7 +1084,7 @@
     "active": true,
     "auto_replenish": false,
     "agotado": false,
-    "real_stock": 8,
+    "real_stock": 7,
     "master_stock": 8,
     "min_visible": 1,
     "available_quantity": 1,
