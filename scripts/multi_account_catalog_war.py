@@ -225,8 +225,8 @@ for cpid, items in by_cpid.items():
     # Calculate winner target
     if winner_item:
         original = max(state["items"].get(winner_item["iid"],{}).get("original_price", winner_item["price"]), winner_item["price"])
-        floor = max(FLOOR_OVERRIDES.get(winner_item["iid"], original * DEFAULT_FLOOR_PCT), MIN_FLOOR_PRICE)
-        ceiling = CEIL_OVERRIDES.get(winner_item["iid"], original * DEFAULT_CEIL_PCT)
+        floor = max(SB_FLOOR_BY_CPID.get(cpid) or FLOOR_OVERRIDES.get(winner_item["iid"]) or (original * DEFAULT_FLOOR_PCT), MIN_FLOOR_PRICE)
+        ceiling = SB_CEIL_BY_CPID.get(cpid) or CEIL_OVERRIDES.get(winner_item["iid"]) or (original * DEFAULT_CEIL_PCT)
         # GAP agresivo cuando hay competidor en FULL ($80 abajo) para vencer ventaja logística
         effective_gap = 250 if has_full else GAP  # FULL super agresivo (era 150, sube a 250 para vencer ventaja envío)
         if ext_price is not None:
@@ -298,8 +298,8 @@ for cpid, items in by_cpid.items():
             print(f"    ⊘ [{it['account']}] {it['iid']} sin ref — mantener")
             continue
         original = max(state["items"].get(it["iid"],{}).get("original_price", it["price"]), it["price"])
-        floor = max(FLOOR_OVERRIDES.get(it["iid"], original * DEFAULT_FLOOR_PCT), MIN_FLOOR_PRICE)
-        ceiling = CEIL_OVERRIDES.get(it["iid"], original * DEFAULT_CEIL_PCT)
+        floor = max(SB_FLOOR_BY_CPID.get(cpid) or FLOOR_OVERRIDES.get(it["iid"]) or (original * DEFAULT_FLOOR_PCT), MIN_FLOOR_PRICE)
+        ceiling = SB_CEIL_BY_CPID.get(cpid) or CEIL_OVERRIDES.get(it["iid"]) or (original * DEFAULT_CEIL_PCT)
         # Step (idx+1) above winner
         target = winner_target + (idx + 1) * STAIRCASE_GAP
         target = max(floor, min(ceiling, target))
