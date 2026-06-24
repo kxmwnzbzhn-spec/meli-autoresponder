@@ -6,10 +6,11 @@ r=requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token","client_
 AT=r.json()["access_token"]
 HJ={"Authorization":f"Bearer {AT}","Content-Type":"application/json"}
 
-# Use the known leaf category for Go 4 catalog items
+cp=requests.get(f"{API}/products/MLM44731934",headers=HJ,timeout=15).json()
+print("CPID:",cp.get("name"))
 payload={
   "catalog_listing": True,
-  "catalog_product_id": "MLM44710240",
+  "catalog_product_id": "MLM44731934",
   "category_id": "MLM59800",
   "price": 599,
   "currency_id": "MXN",
@@ -21,4 +22,4 @@ payload={
 }
 r=requests.post(f"{API}/items",headers=HJ,json=payload,timeout=30)
 print(f"PUBLISH: {r.status_code}")
-print(r.text[:1500])
+print(r.text[:1200])
