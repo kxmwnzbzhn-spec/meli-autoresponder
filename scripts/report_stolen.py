@@ -6,22 +6,19 @@ r=requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token","client_
 AT=r.json()["access_token"]
 HJ={"Authorization":f"Bearer {AT}","Content-Type":"application/json"}
 
-cp=requests.get(f"{API}/products/MLM44710240",headers=HJ,timeout=15).json()
-cat=cp.get("category_id")
-fname=cp.get("family_name") or cp.get("name") or "Bocina JBL Go 4 Negra"
-print(f"CPID cat: {cat} family: {fname}")
-
-# Look at parent_id and get its category
-print("parent_id:",cp.get("parent_id"))
-print("children_ids:",cp.get("children_ids"))
-
-# Find a leaf category from MLM-SPEAKERS / portable speakers
-# Use predict category endpoint
-pred=requests.get(f"{API}/sites/MLM/category_predictor/predict?title=Bocina%20JBL%20Go%204%20portatil%20bluetooth%20waterproof%20negra",headers=HJ,timeout=15)
-print(f"predict: {pred.status_code} {pred.text[:400]}")
-
-# Also fetch typical Go 4 category via existing item search
-sr=requests.get(f"{API}/sites/MLM/search?q=JBL%20Go%204%20Negro&condition=new&limit=5",headers=HJ,timeout=15)
-if sr.status_code==200:
-  for res in sr.json().get("results",[])[:5]:
-    print(f"  item cat: {res.get('category_id')} title: {res.get('title')[:50]}")
+# Use the known leaf category for Go 4 catalog items
+payload={
+  "catalog_listing": True,
+  "catalog_product_id": "MLM44710240",
+  "category_id": "MLM59800",
+  "price": 599,
+  "currency_id": "MXN",
+  "available_quantity": 1,
+  "listing_type_id": "gold_pro",
+  "condition": "new",
+  "title": "Bocina JBL Go 4 Portátil Bluetooth Waterproof Negra",
+  "sale_terms":[{"id":"WARRANTY_TYPE","value_name":"Garantía del vendedor"},{"id":"WARRANTY_TIME","value_name":"30 días"}]
+}
+r=requests.post(f"{API}/items",headers=HJ,json=payload,timeout=30)
+print(f"PUBLISH: {r.status_code}")
+print(r.text[:1500])
