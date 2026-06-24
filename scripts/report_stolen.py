@@ -6,7 +6,7 @@ r=requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token","client_
 AT=r.json()["access_token"]
 HJ={"Authorization":f"Bearer {AT}","Content-Type":"application/json"}
 
-cp=requests.get(f"{API}/products/MLM63973616",headers=HJ,timeout=15).json()
+cp=requests.get(f"{API}/products/MLM65056521",headers=HJ,timeout=15).json()
 print("CPID:",cp.get("name"),"status:",cp.get("status"))
 color=None
 for a in (cp.get("attributes") or []):
@@ -16,7 +16,7 @@ print("color:",color)
 title=cp.get("name","")[:60]
 payload={
   "catalog_listing": True,
-  "catalog_product_id": "MLM63973616",
+  "catalog_product_id": "MLM65056521",
   "category_id": "MLM59800",
   "price": 599,
   "currency_id": "MXN",
@@ -27,5 +27,5 @@ payload={
   "sale_terms":[{"id":"WARRANTY_TYPE","value_name":"Garantía del vendedor"},{"id":"WARRANTY_TIME","value_name":"30 días"}]
 }
 r=requests.post(f"{API}/items",headers=HJ,json=payload,timeout=30)
-print(f"\nPUBLISH MLM63973616: {r.status_code}")
+print(f"\nPUBLISH MLM65056521: {r.status_code}")
 print(r.text[:1200])
