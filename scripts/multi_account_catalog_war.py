@@ -21,12 +21,13 @@ ACCOUNTS = [
     ("RAYMUNDO", "MELI_REFRESH_TOKEN_RAYMUNDO"),
     ("DILCIE", "MELI_REFRESH_TOKEN_DILCIE"),
     ("MILDRED", "MELI_REFRESH_TOKEN_MILDRED"),
+    ("MAYRELY", "MELI_REFRESH_TOKEN_MAYRELY"),
 ]
 
 WINNER_ACCOUNT = "RAYMUNDO"  # Raymundo gana siempre
 GAP = 10                         # winner = ext_competitor - $10
 STAIRCASE_GAP = 100  # Claribel queda +$500 (5×$100) arriba del winner = NO compite               # cada cuenta sucesiva: winner + N*50
-STAIRCASE_ORDER = ["JUAN", "ASVA", "DILCIE", "MILDRED", "CLARIBEL"]  # Sin Raymundo (winner)
+STAIRCASE_ORDER = ["MAYRELY", "JUAN", "ASVA", "DILCIE", "MILDRED", "CLARIBEL"]  # Sin Raymundo (winner)
 DEFAULT_FLOOR_PCT = 0.55
 MIN_FLOOR_PRICE = 299  # piso absoluto: nunca bajar de $299
 DEFAULT_CEIL_PCT  = 1.30
