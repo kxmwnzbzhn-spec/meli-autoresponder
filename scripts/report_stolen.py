@@ -1,63 +1,35 @@
 import os,requests,json
 API="https://api.mercadolibre.com"
 CID=os.environ["MELI_APP_ID"]; CSEC=os.environ["MELI_APP_SECRET"]
-RT_AH=os.environ["MELI_REFRESH_TOKEN_AH"]
-RT_MAY=os.environ["MELI_REFRESH_TOKEN_MAYRELY"]
+RT=os.environ["MELI_REFRESH_TOKEN_MAYRELY"]
+r=requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token","client_id":CID,"client_secret":CSEC,"refresh_token":RT},timeout=20)
+AT=r.json()["access_token"]
+HJ={"Authorization":f"Bearer {AT}","Content-Type":"application/json"}
 
-# Get Adrián token
-r=requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token","client_id":CID,"client_secret":CSEC,"refresh_token":RT_AH},timeout=20)
-AT_AH=r.json()["access_token"]
-H_AH={"Authorization":f"Bearer {AT_AH}"}
+# Read bounds from Supabase
+SB="https://wnuhslmryspnypbxbfjf.supabase.co"
+SBH={"apikey":os.environ["SUPABASE_SERVICE_KEY"],"Authorization":f"Bearer {os.environ['SUPABASE_SERVICE_KEY']}"}
+strats=requests.get(f"{SB}/rest/v1/meli_catalog_strategy?active=eq.true&select=catalog_product_id,floor,ceiling",headers=SBH,timeout=15).json()
+bounds={s["catalog_product_id"]:(float(s["floor"]),float(s["ceiling"])) for s in strats if s.get("floor") and s.get("ceiling")}
+print(f"loaded {len(bounds)} bounds")
 
-# Get source item full
-src=requests.get(f"{API}/items/MLM3025719815?include_attributes=all",headers=H_AH,timeout=15).json()
-print("Source:",src.get("title"),"price:",src.get("price"),"cat:",src.get("category_id"),"listing:",src.get("listing_type_id"))
-print("attrs count:",len(src.get("attributes",[])))
-print("pics count:",len(src.get("pictures",[])))
-
-# Get description
-desc=requests.get(f"{API}/items/MLM3025719815/description",headers=H_AH,timeout=10).json()
-desc_text=desc.get("plain_text","")
-print("desc bytes:",len(desc_text))
-
-# Switch to Mayrely
-r=requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token","client_id":CID,"client_secret":CSEC,"refresh_token":RT_MAY},timeout=20)
-AT_M=r.json()["access_token"]
-HJ_M={"Authorization":f"Bearer {AT_M}","Content-Type":"application/json"}
-
-# Build clone payload (tradicional, NO catalog_listing)
-attrs=[]
-for a in src.get("attributes",[]):
-  aid=a.get("id"); v=a.get("value_name")
-  if not aid or not v: continue
-  # skip auto fields
-  if aid in ("ITEM_CONDITION","CATALOG_PRODUCT_ID","UNIVERSAL_PRODUCT_CODE","SELLER_SKU"): continue
-  attrs.append({"id":aid,"value_name":v})
-
-payload={
-  "title":src.get("title"),
-  "category_id":src.get("category_id"),
-  "price":src.get("price"),
-  "currency_id":"MXN",
-  "available_quantity":src.get("available_quantity") or 1,
-  "buying_mode":"buy_it_now",
-  "listing_type_id":"gold_pro",
-  "condition":"new",
-  "pictures":[{"source":p.get("secure_url") or p.get("url")} for p in src.get("pictures",[])[:12]],
-  "attributes":attrs,
-  "sale_terms":src.get("sale_terms",[]),
-}
-r=requests.post(f"{API}/items",headers=HJ_M,json=payload,timeout=40)
-print(f"\nPUBLISH: {r.status_code}")
-j={}
-try: j=r.json()
-except: pass
-new_id=j.get("id")
-print(f"new_id: {new_id}")
-if r.status_code>=400:
-  print(r.text[:1500])
-else:
-  # Add description
-  if desc_text:
-    dd=requests.post(f"{API}/items/{new_id}/description",headers=HJ_M,json={"plain_text":desc_text},timeout=15)
-    print("desc:",dd.status_code)
+# Mayrely items published today
+ITEMS=["MLM3045514191","MLM3045514543","MLM5569350350","MLM5569282738","MLM5569400988","MLM3045606657","MLM3045607131","MLM5569353088","MLM5569353878","MLM3045609271","MLM3045609843","MLM5569443364","MLM3045612883","MLM5569443994","MLM5569446604","MLM3045615611"]
+for iid in ITEMS:
+  it=requests.get(f"{API}/items/{iid}?attributes=id,title,price,catalog_product_id",headers=HJ,timeout=10).json()
+  cpid=it.get("catalog_product_id")
+  price=it.get("price")
+  if not cpid or not price: continue
+  fl,ce = bounds.get(cpid,(None,None))
+  if not fl: continue
+  if price < fl:
+    # FIX: bump to floor
+    print(f"⚠️ {iid} {cpid} ${price} < floor ${fl} -> setting to ${fl}")
+    rr=requests.put(f"{API}/items/{iid}",headers=HJ,json={"price":fl},timeout=20)
+    print(f"   PUT: {rr.status_code} {rr.text[:200]}")
+  elif price > ce:
+    print(f"⚠️ {iid} {cpid} ${price} > ceiling ${ce} -> setting to ${ce}")
+    rr=requests.put(f"{API}/items/{iid}",headers=HJ,json={"price":ce},timeout=20)
+    print(f"   PUT: {rr.status_code} {rr.text[:200]}")
+  else:
+    print(f"OK {iid} {cpid} ${price} in [{fl},{ce}]")
