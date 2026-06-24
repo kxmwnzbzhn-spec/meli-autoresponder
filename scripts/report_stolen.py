@@ -6,20 +6,11 @@ r=requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token","client_
 AT=r.json()["access_token"]
 HJ={"Authorization":f"Bearer {AT}","Content-Type":"application/json"}
 
-# Get Mayrely user info
-me=requests.get(f"{API}/users/me",headers=HJ,timeout=15).json()
-print("MAYRELY user_id:",me.get("id"),"nickname:",me.get("nickname"))
-
-# Inspect CPID
 cp=requests.get(f"{API}/products/MLM44710240",headers=HJ,timeout=15).json()
-print("CPID:",cp.get("name"))
-print("domain:",cp.get("domain_id"))
-# Find category
-cat="MLM1051"  # Bocinas Bluetooth
-for a in (cp.get("attributes") or []):
-  if a.get("id")=="CATEGORY": cat=a.get("value_id") or cat
+fname=cp.get("family_name") or cp.get("name") or "Bocina JBL Go 4 Negra"
+print("family_name:",fname)
 
-# Publish payload
+# Try with family_name
 payload={
   "catalog_listing": True,
   "catalog_product_id": "MLM44710240",
@@ -29,8 +20,17 @@ payload={
   "available_quantity": 1,
   "listing_type_id": "gold_pro",
   "condition": "new",
+  "family_name": fname,
   "sale_terms":[{"id":"WARRANTY_TYPE","value_name":"Garantía del vendedor"},{"id":"WARRANTY_TIME","value_name":"30 días"}]
 }
 r=requests.post(f"{API}/items",headers=HJ,json=payload,timeout=30)
-print(f"\nPUBLISH: {r.status_code}")
-print(r.text[:1500])
+print(f"\nPUBLISH family_name: {r.status_code}")
+print(r.text[:800])
+if r.status_code==201:
+  print("\n=== SUCCESS ===")
+else:
+  # Try with title
+  payload2=dict(payload); del payload2["family_name"]; payload2["title"]=fname[:60]
+  r2=requests.post(f"{API}/items",headers=HJ,json=payload2,timeout=30)
+  print(f"\nPUBLISH title: {r2.status_code}")
+  print(r2.text[:800])
