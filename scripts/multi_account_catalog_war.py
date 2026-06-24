@@ -36,6 +36,28 @@ MIN_DELTA = 5                    # solo cambiar si delta ≥ $5
 FLOOR_OVERRIDES = {}
 CEIL_OVERRIDES = {}
 
+
+# === SUPABASE bounds loader (highest priority) ===
+SB_URL = os.environ.get("SUPABASE_URL","https://wnuhslmryspnypbxbfjf.supabase.co")
+SB_KEY = os.environ.get("SUPABASE_SERVICE_KEY") or os.environ.get("SUPABASE_ANON_KEY","")
+SB_FLOOR_BY_CPID = {}
+SB_CEIL_BY_CPID = {}
+if SB_KEY:
+    try:
+        rr = requests.get(f"{SB_URL}/rest/v1/meli_catalog_strategy?active=eq.true&select=catalog_product_id,floor,ceiling",
+            headers={"apikey":SB_KEY,"Authorization":f"Bearer {SB_KEY}"}, timeout=10)
+        if rr.status_code == 200:
+            for s in rr.json():
+                cpid = s.get("catalog_product_id")
+                if not cpid: continue
+                if s.get("floor") is not None: SB_FLOOR_BY_CPID[cpid] = float(s["floor"])
+                if s.get("ceiling") is not None: SB_CEIL_BY_CPID[cpid] = float(s["ceiling"])
+        print(f"[supabase] loaded {len(SB_FLOOR_BY_CPID)} floors + {len(SB_CEIL_BY_CPID)} ceilings from meli_catalog_strategy")
+    except Exception as e:
+        print(f"[supabase] load failed: {e}")
+else:
+    print("[supabase] no key; skipping bounds load")
+
 # Load per-item overrides from stock_config files
 def _load_stock_overrides():
     floors, ceils = {}, {}
@@ -52,6 +74,27 @@ _F, _C = _load_stock_overrides()
 FLOOR_OVERRIDES.update(_F)
 CEIL_OVERRIDES.update(_C)
 print(f"Loaded {len(FLOOR_OVERRIDES)} floor + {len(CEIL_OVERRIDES)} ceiling overrides from stock_config")
+
+
+def _resolve_bounds(cpid, original_price):
+    """Returns (floor, ceiling) using Supabase first, then overrides, then defaults."""
+    fl = SB_FLOOR_BY_CPID.get(cpid)
+    ce = SB_CEIL_BY_CPID.get(cpid)
+    if fl is None:
+        fl = FLOOR_OVERRIDES.get(cpid)
+    if ce is None:
+        ce = CEIL_OVERRIDES.get(cpid)
+    if fl is None:
+        fl = max(MIN_FLOOR_PRICE, original_price * DEFAULT_FLOOR_PCT)
+    if ce is None:
+        ce = original_price * DEFAULT_CEIL_PCT
+    return float(fl), float(ce)
+
+def _clamp(cpid, price, original_price):
+    fl, ce = _resolve_bounds(cpid, original_price)
+    if price < fl: return fl
+    if price > ce: return ce
+    return price
 
 STATE_FILE = "catalog_war_state.json"
 try: state = json.load(open(STATE_FILE))
