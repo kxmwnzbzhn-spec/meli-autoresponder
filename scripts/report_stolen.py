@@ -8,16 +8,16 @@ HJ={"Authorization":f"Bearer {AT}","Content-Type":"application/json"}
 
 payload={
   "catalog_listing": True,
-  "catalog_product_id": "MLM37361021",
+  "catalog_product_id": "MLM70607552",
   "category_id": "MLM59800",
   "price": 599,
   "currency_id": "MXN",
   "available_quantity": 1,
   "listing_type_id": "gold_pro",
   "condition": "new",
-  "title": "Bocina Portátil JBL Go 4 Bluetooth Camuflaje",
+  "title": "Parlante JBL Go 4 Bluetooth Portátil Resistente Al Agua Camuflado",
   "sale_terms":[{"id":"WARRANTY_TYPE","value_name":"Garantía del vendedor"},{"id":"WARRANTY_TIME","value_name":"30 días"}]
 }
 r=requests.post(f"{API}/items",headers=HJ,json=payload,timeout=30)
-print(f"PUBLISH MLM37361021: {r.status_code}")
+print(f"PUBLISH MLM70607552: {r.status_code}")
 print(r.text[:1200])
