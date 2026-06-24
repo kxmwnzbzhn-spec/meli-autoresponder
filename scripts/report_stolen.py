@@ -6,18 +6,27 @@ r=requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token","client_
 AT=r.json()["access_token"]
 HJ={"Authorization":f"Bearer {AT}","Content-Type":"application/json"}
 
+cp=requests.get(f"{API}/products/MLM44710313",headers=HJ,timeout=15).json()
+print("CPID:",cp.get("name"))
+print("status:",cp.get("status"),"domain:",cp.get("domain_id"))
+color=None
+for a in (cp.get("attributes") or []):
+  if a.get("id") in ("COLOR","MAIN_COLOR") and not color: color=a.get("value_name")
+print("color:",color)
+
+title=cp.get("name","")[:60]
 payload={
   "catalog_listing": True,
-  "catalog_product_id": "MLM70607552",
+  "catalog_product_id": "MLM44710313",
   "category_id": "MLM59800",
   "price": 599,
   "currency_id": "MXN",
   "available_quantity": 1,
   "listing_type_id": "gold_pro",
   "condition": "new",
-  "title": "Parlante JBL Go 4 Bluetooth Portátil Resistente Al Agua Camuflado",
+  "title": title,
   "sale_terms":[{"id":"WARRANTY_TYPE","value_name":"Garantía del vendedor"},{"id":"WARRANTY_TIME","value_name":"30 días"}]
 }
 r=requests.post(f"{API}/items",headers=HJ,json=payload,timeout=30)
-print(f"PUBLISH MLM70607552: {r.status_code}")
+print(f"\nPUBLISH MLM44710313: {r.status_code}")
 print(r.text[:1200])
