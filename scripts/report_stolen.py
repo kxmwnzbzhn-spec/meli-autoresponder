@@ -7,18 +7,19 @@ AT=r.json()["access_token"]
 HJ={"Authorization":f"Bearer {AT}","Content-Type":"application/json"}
 
 results={}
-for cpid in ["MLM50444272","MLM69907677"]:
+for cpid in ["MLM25912333","MLM41991186"]:
   cp=requests.get(f"{API}/products/{cpid}",headers=HJ,timeout=15).json()
-  print(f"\n=== {cpid}: {cp.get('name')} ===")
+  print(f"\n=== {cpid}: {cp.get('name')} status={cp.get('status')} ===")
   it=requests.get(f"{API}/products/{cpid}/items?limit=5",headers=HJ,timeout=10).json()
   cats=[i.get("category_id") for i in it.get("results",[])[:3]]
   cat=cats[0] if cats else "MLM59800"
+  print(f"  cat: {cat}")
   title=cp.get("name","")[:60]
   payload={
     "catalog_listing": True,
     "catalog_product_id": cpid,
     "category_id": cat,
-    "price": 2399,
+    "price": 799,
     "currency_id": "MXN",
     "available_quantity": 1,
     "listing_type_id": "gold_pro",
@@ -27,12 +28,13 @@ for cpid in ["MLM50444272","MLM69907677"]:
     "sale_terms":[{"id":"WARRANTY_TYPE","value_name":"Garantía del vendedor"},{"id":"WARRANTY_TIME","value_name":"30 días"}]
   }
   r=requests.post(f"{API}/items",headers=HJ,json=payload,timeout=30)
-  print(f"PUBLISH: {r.status_code}")
   j={}
   try: j=r.json()
   except: pass
   iid=j.get("id")
-  results[cpid]={"item":iid,"status":r.status_code,"err":r.text[:400] if r.status_code>=400 else None}
-  print(f"  -> {iid}")
+  print(f"  PUBLISH {r.status_code} -> {iid}")
+  if r.status_code>=400:
+    print(f"  ERR: {r.text[:600]}")
+  results[cpid]={"item":iid,"status":r.status_code}
 
-print("\n\nRESULTS:",json.dumps(results,indent=2,default=str))
+print("\nRESULTS:",json.dumps(results,indent=2))
