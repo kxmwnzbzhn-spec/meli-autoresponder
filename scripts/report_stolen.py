@@ -8,16 +8,16 @@ HJ={"Authorization":f"Bearer {AT}","Content-Type":"application/json"}
 
 payload={
   "catalog_listing": True,
-  "catalog_product_id": "MLM61262890",
+  "catalog_product_id": "MLM37361021",
   "category_id": "MLM59800",
   "price": 599,
   "currency_id": "MXN",
   "available_quantity": 1,
   "listing_type_id": "gold_pro",
   "condition": "new",
-  "title": "Bocina JBL Go 4 Portátil Bluetooth Waterproof Celeste",
+  "title": "Bocina Portátil JBL Go 4 Bluetooth Camuflaje",
   "sale_terms":[{"id":"WARRANTY_TYPE","value_name":"Garantía del vendedor"},{"id":"WARRANTY_TIME","value_name":"30 días"}]
 }
 r=requests.post(f"{API}/items",headers=HJ,json=payload,timeout=30)
-print(f"PUBLISH MLM61262890: {r.status_code}")
+print(f"PUBLISH MLM37361021: {r.status_code}")
 print(r.text[:1200])
