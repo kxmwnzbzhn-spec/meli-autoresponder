@@ -126,7 +126,7 @@
     "line": "Armaf-Aqua",
     "auto_replenish": true,
     "min_visible": 1,
-    "active": false,
+    "active": true,
     "title": "Armaf Odyssey Aqua Men 100ml Edp",
     "catalog_product_id": "MLM23633415",
     "type": "catalog_no_variations",
@@ -135,7 +135,7 @@
     "master_stock": 6,
     "floor_price": 299,
     "ceiling_price": 999,
-    "agotado": true,
+    "agotado": false,
     "sku": "PERF-ARMAF-ODYSSEY-AQUA-MEN",
     "available_quantity": 1
   },
@@ -191,7 +191,7 @@
     "real_stock": 0
   },
   "MLM2910457937": {
-    "real_stock": 3000,
+    "real_stock": 2968,
     "master_stock": 3000,
     "min_visible": 0,
     "auto_replenish": false,
@@ -213,7 +213,7 @@
     "title": "CERRADA — relisted as MLM5346655686"
   },
   "MLM2911241921": {
-    "real_stock": 1594,
+    "real_stock": 1434,
     "master_stock": 1778,
     "min_visible": 1,
     "auto_replenish": true,
@@ -317,10 +317,10 @@
   },
   "MLM2910806817": {
     "closed": true,
-    "active": false,
+    "active": true,
     "auto_replenish": false,
-    "agotado": true,
-    "real_stock": 0,
+    "agotado": false,
+    "real_stock": 43,
     "master_stock": 121,
     "available_quantity": 0,
     "title": "CERRADA — clonada como MLM5354755946",
@@ -330,7 +330,7 @@
   "MLM2910880717": {
     "title": "Bocina Jbl Go 4 Jblgo4 Portátil Con Bluetooth Waterproof Negra Negro",
     "min_visible": 0,
-    "real_stock": 3000,
+    "real_stock": 2968,
     "master_stock": 3000,
     "auto_replenish": false,
     "active": true,
@@ -384,7 +384,7 @@
     "active": true,
     "auto_replenish": false,
     "agotado": false,
-    "real_stock": 1282,
+    "real_stock": 1276,
     "master_stock": 1377,
     "available_quantity": 0,
     "title": "CERRADA - clonada como MLM2937969761",
@@ -429,7 +429,7 @@
     "active": true,
     "auto_replenish": false,
     "agotado": false,
-    "real_stock": 133,
+    "real_stock": 129,
     "master_stock": 278,
     "available_quantity": 0,
     "title": "BAJA MELI under_review/forbidden - clonado a MLM5351937060",
@@ -499,13 +499,13 @@
   "MLM2910768369": {
     "title": "Altavoz Bluetooth Jbl Go 4 Portátil Impermeable En Rojo",
     "min_visible": 1,
-    "real_stock": 0,
+    "real_stock": 43,
     "master_stock": 121,
     "auto_replenish": true,
-    "active": false,
+    "active": true,
     "available_quantity": 1,
     "sku": "JBL-GO4-ROJO",
-    "agotado": true
+    "agotado": false
   },
   "MLM2910457991": {
     "title": "Altavoz Impermeable Negro Jbl Clip 5",
@@ -533,24 +533,24 @@
   "MLM2910768335": {
     "title": "Jbl Go 4 - Altavoz Bluetooth Ultraportátil Rosa",
     "min_visible": 1,
-    "real_stock": 0,
+    "real_stock": 29,
     "master_stock": 75,
     "auto_replenish": true,
-    "active": false,
+    "active": true,
     "available_quantity": 1,
     "sku": "JBL-GO4-ROSA",
-    "agotado": true
+    "agotado": false
   },
   "MLM2910768325": {
     "title": "Parlante Bluetooth Jbl Go 4 Portátil Rosa",
     "min_visible": 1,
-    "real_stock": 0,
+    "real_stock": 29,
     "master_stock": 75,
     "auto_replenish": true,
-    "active": false,
+    "active": true,
     "available_quantity": 1,
     "sku": "JBL-GO4-ROSA",
-    "agotado": true
+    "agotado": false
   },
   "MLM2910768333": {
     "title": "Parlante Jbl Go 3 Jblgo3 Portátil Con Bluetooth Waterproof Negro",
@@ -959,7 +959,7 @@
   "MLM5347886456": {
     "title": "JBL Charge 6 Negro Portátil",
     "min_visible": 0,
-    "real_stock": 1594,
+    "real_stock": 1434,
     "master_stock": 1778,
     "available_quantity": 0,
     "auto_replenish": false,
@@ -991,7 +991,7 @@
   "MLM5351937060": {
     "title": "Go 4 Camuflaje (clone alterno MLM2910880749 baja)",
     "min_visible": 1,
-    "real_stock": 133,
+    "real_stock": 129,
     "master_stock": 278,
     "available_quantity": 1,
     "auto_replenish": true,
@@ -1026,15 +1026,15 @@
   "MLM2914422351": {
     "title": "JBL Go 4 Rojo (clone)",
     "min_visible": 1,
-    "real_stock": 0,
+    "real_stock": 43,
     "master_stock": 121,
     "available_quantity": 1,
     "auto_replenish": true,
-    "active": false,
+    "active": true,
     "floor_price": 449,
     "ceiling_price": 699,
     "sku": "JBL-GO4-ROJO",
-    "agotado": true
+    "agotado": false
   },
   "MLM5347901578": {
     "title": "Charge 6 Espejo $899",
@@ -1152,16 +1152,16 @@
   },
   "MLM5354755946": {
     "title": "JBL Go 4 Rojo (clone Wilbert)",
-    "real_stock": 0,
+    "real_stock": 43,
     "master_stock": 121,
     "min_visible": 1,
     "available_quantity": 1,
     "auto_replenish": true,
-    "active": false,
+    "active": true,
     "floor_price": 449,
     "ceiling_price": 699,
     "sku": "JBL-GO4-ROJO",
-    "agotado": true
+    "agotado": false
   },
   "MLM5351547624": {
     "paused_by_user": true,
@@ -1177,7 +1177,7 @@
   },
   "MLM2937969761": {
     "title": "Sony XB100 Negro (clone Wilbert)",
-    "real_stock": 1282,
+    "real_stock": 1276,
     "master_stock": 1422,
     "min_visible": 1,
     "available_quantity": 1,

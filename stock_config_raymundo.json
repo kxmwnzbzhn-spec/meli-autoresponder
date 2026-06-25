@@ -82,13 +82,13 @@
     "line": "Raymundo",
     "auto_replenish": true,
     "min_visible": 1,
-    "active": false,
+    "active": true,
     "title": "Altavoz Bluetooth Jbl Go 4 Rosa Rosa Chicle",
-    "real_stock": 0,
+    "real_stock": 29,
     "master_stock": 75,
     "available_quantity": 1,
     "sku": "JBL-GO4-ROSA",
-    "agotado": true
+    "agotado": false
   },
   "MLM2891189883": {
     "line": "Raymundo",
@@ -137,13 +137,13 @@
     "line": "Raymundo",
     "auto_replenish": true,
     "min_visible": 1,
-    "active": false,
+    "active": true,
     "title": "Jbl Go 4 - Altavoz Ultraportátil Bluetooth Color Rojo",
-    "real_stock": 0,
+    "real_stock": 43,
     "master_stock": 121,
     "available_quantity": 1,
     "sku": "JBL-GO4-ROJO",
-    "agotado": true
+    "agotado": false
   },
   "MLM5246077386": {
     "line": "Raymundo",
@@ -151,7 +151,7 @@
     "min_visible": 1,
     "active": true,
     "title": "Bocina Portátil Jbl Go 4 Bluetooth, Camuflaje. Color Camufla",
-    "real_stock": 133,
+    "real_stock": 129,
     "master_stock": 196,
     "available_quantity": 1,
     "sku": "JBL-GO4-CAMUFLAJE"
@@ -171,13 +171,13 @@
     "line": "Raymundo",
     "auto_replenish": true,
     "min_visible": 1,
-    "active": false,
+    "active": true,
     "title": "Parlante Bluetooth Jbl Go 4 Portátil Rosa",
-    "real_stock": 0,
+    "real_stock": 29,
     "master_stock": 75,
     "available_quantity": 1,
     "sku": "JBL-GO4-ROSA",
-    "agotado": true
+    "agotado": false
   },
   "MLM2891189859": {
     "line": "Raymundo",
@@ -200,15 +200,15 @@
     "line": "Raymundo",
     "auto_replenish": true,
     "min_visible": 1,
-    "active": false,
+    "active": true,
     "title": "Bocina Jbl Go 4 Jblgo4 Portátil Con Bluetooth Waterproof Roj",
     "floor_price": 449,
     "floor_locked_by_user": true,
-    "real_stock": 0,
+    "real_stock": 43,
     "master_stock": 121,
     "available_quantity": 1,
     "sku": "JBL-GO4-ROJO",
-    "agotado": true
+    "agotado": false
   },
   "MLM2891178577": {
     "line": "Raymundo",
@@ -224,13 +224,13 @@
     "line": "Raymundo",
     "auto_replenish": true,
     "min_visible": 1,
-    "active": false,
+    "active": true,
     "title": "Altavoz Bluetooth Jbl Go 4 Portátil Impermeable En Rojo",
-    "real_stock": 0,
+    "real_stock": 43,
     "master_stock": 121,
     "available_quantity": 1,
     "sku": "JBL-GO4-ROJO",
-    "agotado": true
+    "agotado": false
   },
   "MLM2891178583": {
     "line": "Raymundo",
@@ -246,13 +246,13 @@
     "line": "Raymundo",
     "auto_replenish": true,
     "min_visible": 1,
-    "active": false,
+    "active": true,
     "title": "Jbl Go 4 - Altavoz Bluetooth Ultraportátil Rosa",
-    "real_stock": 0,
+    "real_stock": 29,
     "master_stock": 75,
     "available_quantity": 1,
     "sku": "JBL-GO4-ROSA",
-    "agotado": true
+    "agotado": false
   },
   "MLM2891178511": {
     "line": "Raymundo",
@@ -260,7 +260,7 @@
     "min_visible": 1,
     "active": true,
     "title": "Sony Srs-xb100 Altavoz De Viaje Inalámbrico Bluetooth Port C",
-    "real_stock": 1282,
+    "real_stock": 1276,
     "master_stock": 1422,
     "available_quantity": 1,
     "sku": "SONY-XB100-NEGRO"
