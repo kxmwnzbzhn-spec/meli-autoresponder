@@ -6,24 +6,18 @@ r=requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token","client_
 AT=r.json()["access_token"]
 HJ={"Authorization":f"Bearer {AT}","Content-Type":"application/json"}
 
-# Get current item
-it=requests.get(f"{API}/items/MLM3035212177",headers=HJ,timeout=15).json()
-print("status_before:",it.get("status"))
-
-# Ensure active
-if it.get("status")!="active":
-  rr=requests.put(f"{API}/items/MLM3035212177",headers=HJ,json={"status":"active"},timeout=20)
-  print("activate:",rr.status_code,rr.text[:200])
-
-# Set qty=1 for ALL 3 variants
-vars_payload=[]
-for v in (it.get("variations") or []):
-  vars_payload.append({"id":v["id"],"available_quantity":1})
-rr=requests.put(f"{API}/items/MLM3035212177",headers=HJ,json={"variations":vars_payload},timeout=25)
-print(f"variants qty=1 PUT: {rr.status_code}")
-# Verify
-it2=requests.get(f"{API}/items/MLM3035212177",headers=HJ,timeout=15).json()
-for v in (it2.get("variations") or []):
-  size=next((a.get("value_name") for a in v.get("attribute_combinations",[]) if a.get("id")=="SIZE"),"?")
-  print(f"  variant {v.get('id')} size={size} qty={v.get('available_quantity')}")
-print("status_after:",it2.get("status"),"qty_total:",it2.get("available_quantity"))
+# Items + target prices
+PINS=[
+  ("MLM5569359030",1199,"Marshall Emberton"),
+  ("MLM5569444970",999,"Marshall Willen II"),
+  ("MLM3045613145",1199,"Beats Pill Negro Mate"),
+  ("MLM5569408564",1199,"Beats Pill Rojo"),
+]
+for iid,price,name in PINS:
+  r=requests.put(f"{API}/items/{iid}",headers=HJ,json={"price":price},timeout=20)
+  print(f"PIN {name} {iid} -> ${price}: HTTP {r.status_code}")
+  if r.status_code>=400:
+    print(f"  ERR: {r.text[:300]}")
+  else:
+    j=r.json()
+    print(f"  ✓ price now: ${j.get('price')}")
