@@ -673,10 +673,10 @@
       "catalog_product_id": "MLM21765262"
     },
     "MLM5280635546": {
-      "original_price": 689.0,
-      "floor": 378.95000000000005,
-      "ceiling": 895.7,
-      "last_change_at": 1777796783,
+      "original_price": 699.0,
+      "floor": 499.0,
+      "ceiling": 549.0,
+      "last_change_at": 1782422142,
       "role": "winner",
       "label": "Jbl Go 4 - Altavoz Ultraport\u00e1til Bl"
     },
@@ -860,7 +860,7 @@
       "original_price": 599.0,
       "floor": 329.45000000000005,
       "ceiling": 778.7,
-      "last_change_at": 1782329220,
+      "last_change_at": 1782422142,
       "role": "winner",
       "label": "Secadora De Cabello Asva Electronic"
     },
@@ -868,7 +868,7 @@
       "original_price": 599.0,
       "floor": 329.45000000000005,
       "ceiling": 778.7,
-      "last_change_at": 1782329220,
+      "last_change_at": 1782422142,
       "role": "winner",
       "label": "Secadora De Cabello Asva Electronic"
     },
@@ -876,7 +876,7 @@
       "original_price": 599.0,
       "floor": 329.45000000000005,
       "ceiling": 778.7,
-      "last_change_at": 1782329220,
+      "last_change_at": 1782422142,
       "role": "winner",
       "label": "Secadora De Cabello Asva Electronic"
     },
@@ -884,7 +884,7 @@
       "original_price": 599.0,
       "floor": 329.45000000000005,
       "ceiling": 778.7,
-      "last_change_at": 1782329220,
+      "last_change_at": 1782422142,
       "role": "winner",
       "label": "Secadora De Cabello Asva Electronic"
     },
@@ -977,6 +977,6 @@
       "label": "Altavoz Bluetooth Jbl Charge 6 Negr"
     }
   },
-  "last_run": 1782415721,
+  "last_run": 1782422142,
   "winner_account": "RAYMUNDO"
 }
