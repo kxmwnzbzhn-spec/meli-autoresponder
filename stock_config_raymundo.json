@@ -303,7 +303,7 @@
   },
   "MLM5281123246": {
     "label": "Clip 5 Negro",
-    "real_stock": 1,
+    "real_stock": 15,
     "min_visible": 1,
     "auto_replenish": true,
     "replenish_quantity": 1,
@@ -316,7 +316,8 @@
     "shares_with": "MLM2904676579",
     "stock_note": "Negro (comparte fisico con 7W)",
     "available_quantity": 1,
-    "sku": "JBL-CLIP5-NEGRO"
+    "sku": "JBL-CLIP5-NEGRO",
+    "master_stock": 15
   },
   "MLM2904687747": {
     "label": "Clip 5 Azul",
@@ -370,7 +371,7 @@
   },
   "MLM2904676579": {
     "label": "Clip 5 Negro 7W",
-    "real_stock": 1,
+    "real_stock": 15,
     "min_visible": 1,
     "auto_replenish": true,
     "replenish_quantity": 1,
@@ -383,6 +384,7 @@
     "shares_with": "MLM5281123246",
     "stock_note": "Negro 7W (comparte fisico con orig)",
     "available_quantity": 1,
-    "sku": "JBL-CLIP5-NEGRO"
+    "sku": "JBL-CLIP5-NEGRO",
+    "master_stock": 15
   }
 }
