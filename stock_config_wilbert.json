@@ -191,7 +191,7 @@
     "real_stock": 0
   },
   "MLM2910457937": {
-    "real_stock": 2913,
+    "real_stock": 2909,
     "master_stock": 3000,
     "min_visible": 0,
     "auto_replenish": false,
@@ -213,7 +213,7 @@
     "title": "CERRADA — relisted as MLM5346655686"
   },
   "MLM2911241921": {
-    "real_stock": 1209,
+    "real_stock": 1192,
     "master_stock": 1778,
     "min_visible": 1,
     "auto_replenish": true,
@@ -320,7 +320,7 @@
     "active": true,
     "auto_replenish": false,
     "agotado": false,
-    "real_stock": 42,
+    "real_stock": 41,
     "master_stock": 121,
     "available_quantity": 0,
     "title": "CERRADA — clonada como MLM5354755946",
@@ -330,7 +330,7 @@
   "MLM2910880717": {
     "title": "Bocina Jbl Go 4 Jblgo4 Portátil Con Bluetooth Waterproof Negra Negro",
     "min_visible": 0,
-    "real_stock": 2913,
+    "real_stock": 2909,
     "master_stock": 3000,
     "auto_replenish": false,
     "active": true,
@@ -343,7 +343,7 @@
   "MLM2910806853": {
     "title": "Bocina Jbl Audio Clip 5 Clip 5 Portátil Con Bluetooth Waterproof Negra Negro",
     "min_visible": 0,
-    "real_stock": 15,
+    "real_stock": 14,
     "master_stock": 15,
     "auto_replenish": false,
     "active": true,
@@ -460,7 +460,7 @@
   "MLM2910880769": {
     "title": "Altavoz Impermeable Negro Jbl Clip 5",
     "min_visible": 0,
-    "real_stock": 15,
+    "real_stock": 14,
     "master_stock": 15,
     "auto_replenish": false,
     "active": true,
@@ -473,7 +473,7 @@
   "MLM2910457983": {
     "title": "Bocina Portátil Jbl Clip 5 Potencia De Salida 7w Color Negro",
     "min_visible": 0,
-    "real_stock": 15,
+    "real_stock": 14,
     "master_stock": 15,
     "auto_replenish": false,
     "active": true,
@@ -486,7 +486,7 @@
   "MLM2910768361": {
     "title": "Bocina Jbl Audio Clip 5 Clip 5 Portátil Con Bluetooth Waterproof Negra Negro",
     "min_visible": 0,
-    "real_stock": 15,
+    "real_stock": 14,
     "master_stock": 15,
     "auto_replenish": false,
     "active": true,
@@ -499,7 +499,7 @@
   "MLM2910768369": {
     "title": "Altavoz Bluetooth Jbl Go 4 Portátil Impermeable En Rojo",
     "min_visible": 1,
-    "real_stock": 42,
+    "real_stock": 41,
     "master_stock": 121,
     "auto_replenish": true,
     "active": true,
@@ -510,7 +510,7 @@
   "MLM2910457991": {
     "title": "Altavoz Impermeable Negro Jbl Clip 5",
     "min_visible": 0,
-    "real_stock": 15,
+    "real_stock": 14,
     "master_stock": 15,
     "auto_replenish": false,
     "active": true,
@@ -533,7 +533,7 @@
   "MLM2910768335": {
     "title": "Jbl Go 4 - Altavoz Bluetooth Ultraportátil Rosa",
     "min_visible": 1,
-    "real_stock": 28,
+    "real_stock": 27,
     "master_stock": 75,
     "auto_replenish": true,
     "active": true,
@@ -544,7 +544,7 @@
   "MLM2910768325": {
     "title": "Parlante Bluetooth Jbl Go 4 Portátil Rosa",
     "min_visible": 1,
-    "real_stock": 28,
+    "real_stock": 27,
     "master_stock": 75,
     "auto_replenish": true,
     "active": true,
@@ -567,7 +567,7 @@
   "MLM2910457977": {
     "title": "Bocina Portátil Jbl Clip 5 Bluetooth Negro",
     "min_visible": 0,
-    "real_stock": 15,
+    "real_stock": 14,
     "master_stock": 15,
     "auto_replenish": false,
     "active": true,
@@ -887,7 +887,7 @@
   "MLM2931612609": {
     "title": "JBL Clip 5 Negro/Naranja",
     "min_visible": 1,
-    "real_stock": 15,
+    "real_stock": 14,
     "master_stock": 15,
     "available_quantity": 1,
     "auto_replenish": true,
@@ -913,7 +913,7 @@
   "MLM2931341689": {
     "title": "JBL Clip 5 Negro/Naranja IP67",
     "min_visible": 1,
-    "real_stock": 15,
+    "real_stock": 14,
     "master_stock": 15,
     "available_quantity": 1,
     "auto_replenish": true,
@@ -959,7 +959,7 @@
   "MLM5347886456": {
     "title": "JBL Charge 6 Negro Portátil",
     "min_visible": 0,
-    "real_stock": 1209,
+    "real_stock": 1192,
     "master_stock": 1778,
     "available_quantity": 0,
     "auto_replenish": false,
@@ -1026,7 +1026,7 @@
   "MLM2914422351": {
     "title": "JBL Go 4 Rojo (clone)",
     "min_visible": 1,
-    "real_stock": 42,
+    "real_stock": 41,
     "master_stock": 121,
     "available_quantity": 1,
     "auto_replenish": true,
@@ -1152,7 +1152,7 @@
   },
   "MLM5354755946": {
     "title": "JBL Go 4 Rojo (clone Wilbert)",
-    "real_stock": 42,
+    "real_stock": 41,
     "master_stock": 121,
     "min_visible": 1,
     "available_quantity": 1,
