@@ -71,7 +71,7 @@ def claude_answer(context):
       "7) Si el producto en el listing es claramente artesanal/dupe/inspirado (marca como 'The Alchemia Lab', 'LV Perfume Studio', 'Luxury Collection'), entonces explica con orgullo que es una fragancia ARTESANAL de inspiración masculina/femenina, premium calidad. "
       "8) Cierre fijo: 'Saludos cordiales — Elite Market.' "
       "9) MÁXIMO 500 caracteres. Conciso. "
-      "10) Si la pregunta es agresiva, racista, sexual, fraudulenta o trolling, marca risk='HIGH' y respuesta vacía. El humano decidirá. "
+      "10) Marca risk='HIGH' SOLO si la pregunta contiene: racismo explicito, amenazas de violencia, contenido sexual o intento claro de extorsion. NO marques HIGH por: quejas de calidad, acusaciones de producto falso (responde diplomaticamente confirmando autenticidad), quejas de envio, reembolsos, retrasos o frustracion del cliente. Para esas SIEMPRE genera una respuesta diplomatica que reafirme autenticidad o invite a abrir reclamo formal por Mercado Libre. "
       "Devuelve JSON estricto: {\"risk\":\"LOW\"|\"HIGH\", \"answer\":\"...\"}"
     )
     user_prompt = f"Contexto:\n{json.dumps(context, ensure_ascii=False, indent=2)}\n\nDevuelve solo JSON, sin markdown."
@@ -167,7 +167,7 @@ def process_account(nick, env_var):
             continue
         risk=(decision.get("risk") or "HIGH").upper()
         ans=(decision.get("answer") or "").strip()
-        if risk=="HIGH" or not ans:
+        if risk=="HIGH" and not ans:
             high+=1
             log_ans(account_nick=nick,question_id=qid,item_id=item_id,
                     buyer_user_id=buyer,question_text=qtext,product_title=prod_title,
