@@ -964,7 +964,7 @@
       "original_price": 599.0,
       "floor": 499.0,
       "ceiling": 599.0,
-      "last_change_at": 1782408749,
+      "last_change_at": 1782494713,
       "role": "winner",
       "label": "Bocina Jbl Go Jbl Go 4 Go4 Port\u00e1til"
     },
@@ -972,11 +972,11 @@
       "original_price": 2399.0,
       "floor": 1999.0,
       "ceiling": 2399.0,
-      "last_change_at": 1782401269,
+      "last_change_at": 1782494713,
       "role": "winner",
       "label": "Altavoz Bluetooth Jbl Charge 6 Negr"
     }
   },
-  "last_run": 1782488496,
+  "last_run": 1782494713,
   "winner_account": "RAYMUNDO"
 }
