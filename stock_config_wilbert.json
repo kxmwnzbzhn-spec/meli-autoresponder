@@ -126,7 +126,7 @@
     "line": "Armaf-Aqua",
     "auto_replenish": true,
     "min_visible": 1,
-    "active": false,
+    "active": true,
     "title": "Armaf Odyssey Aqua Men 100ml Edp",
     "catalog_product_id": "MLM23633415",
     "type": "catalog_no_variations",
@@ -135,7 +135,7 @@
     "master_stock": 6,
     "floor_price": 299,
     "ceiling_price": 999,
-    "agotado": true,
+    "agotado": false,
     "sku": "PERF-ARMAF-ODYSSEY-AQUA-MEN",
     "available_quantity": 1
   },
@@ -191,7 +191,7 @@
     "real_stock": 0
   },
   "MLM2910457937": {
-    "real_stock": 2827,
+    "real_stock": 2826,
     "master_stock": 3000,
     "min_visible": 0,
     "auto_replenish": false,
@@ -213,7 +213,7 @@
     "title": "CERRADA — relisted as MLM5346655686"
   },
   "MLM2911241921": {
-    "real_stock": 813,
+    "real_stock": 810,
     "master_stock": 1778,
     "min_visible": 1,
     "auto_replenish": true,
@@ -330,7 +330,7 @@
   "MLM2910880717": {
     "title": "Bocina Jbl Go 4 Jblgo4 Portátil Con Bluetooth Waterproof Negra Negro",
     "min_visible": 0,
-    "real_stock": 2827,
+    "real_stock": 2826,
     "master_stock": 3000,
     "auto_replenish": false,
     "active": true,
@@ -384,7 +384,7 @@
     "active": true,
     "auto_replenish": false,
     "agotado": false,
-    "real_stock": 1270,
+    "real_stock": 1269,
     "master_stock": 1377,
     "available_quantity": 0,
     "title": "CERRADA - clonada como MLM2937969761",
@@ -429,7 +429,7 @@
     "active": true,
     "auto_replenish": false,
     "agotado": false,
-    "real_stock": 107,
+    "real_stock": 106,
     "master_stock": 278,
     "available_quantity": 0,
     "title": "BAJA MELI under_review/forbidden - clonado a MLM5351937060",
@@ -959,7 +959,7 @@
   "MLM5347886456": {
     "title": "JBL Charge 6 Negro Portátil",
     "min_visible": 0,
-    "real_stock": 813,
+    "real_stock": 810,
     "master_stock": 1778,
     "available_quantity": 0,
     "auto_replenish": false,
@@ -991,7 +991,7 @@
   "MLM5351937060": {
     "title": "Go 4 Camuflaje (clone alterno MLM2910880749 baja)",
     "min_visible": 1,
-    "real_stock": 107,
+    "real_stock": 106,
     "master_stock": 278,
     "available_quantity": 1,
     "auto_replenish": true,
@@ -1177,7 +1177,7 @@
   },
   "MLM2937969761": {
     "title": "Sony XB100 Negro (clone Wilbert)",
-    "real_stock": 1270,
+    "real_stock": 1269,
     "master_stock": 1422,
     "min_visible": 1,
     "available_quantity": 1,
