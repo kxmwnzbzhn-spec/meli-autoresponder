@@ -924,7 +924,7 @@
       "original_price": 599.0,
       "floor": 499.0,
       "ceiling": 599.0,
-      "last_change_at": 1782408749,
+      "last_change_at": 1782627830,
       "role": "winner",
       "label": "Parlante Jbl Go 4 Color Negro"
     },
@@ -948,8 +948,8 @@
       "original_price": 599.0,
       "floor": 499.0,
       "ceiling": 599.0,
-      "last_change_at": 1782330074,
-      "role": "winner",
+      "last_change_at": 1782627830,
+      "role": "step_1",
       "label": "Bocina Jbl Go 4 Jblgo4 Port\u00e1til Con"
     },
     "MLM5569353088": {
@@ -993,6 +993,6 @@
       "label": "Body Mist Bare Vainilla 250ml Fraga"
     }
   },
-  "last_run": 1782611727,
+  "last_run": 1782627830,
   "winner_account": "RAYMUNDO"
 }
