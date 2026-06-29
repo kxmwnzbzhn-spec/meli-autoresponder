@@ -37,10 +37,10 @@
   },
   "MLM2886030837": {
     "color": "Rojo",
-    "stock": 10002,
+    "stock": 10000,
     "max_stock": 10015,
     "active": true,
-    "real_stock": 10002,
+    "real_stock": 10000,
     "master_stock": 10015,
     "min_visible": 1,
     "available_quantity": 1,
