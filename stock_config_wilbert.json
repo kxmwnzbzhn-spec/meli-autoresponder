@@ -191,7 +191,7 @@
     "real_stock": 0
   },
   "MLM2910457937": {
-    "real_stock": 2744,
+    "real_stock": 2743,
     "master_stock": 3000,
     "min_visible": 0,
     "auto_replenish": false,
@@ -213,7 +213,7 @@
     "title": "CERRADA — relisted as MLM5346655686"
   },
   "MLM2911241921": {
-    "real_stock": 1006,
+    "real_stock": 1005,
     "master_stock": 1778,
     "min_visible": 1,
     "auto_replenish": true,
@@ -330,7 +330,7 @@
   "MLM2910880717": {
     "title": "Bocina Jbl Go 4 Jblgo4 Portátil Con Bluetooth Waterproof Negra Negro",
     "min_visible": 0,
-    "real_stock": 2744,
+    "real_stock": 2743,
     "master_stock": 3000,
     "auto_replenish": false,
     "active": true,
@@ -959,7 +959,7 @@
   "MLM5347886456": {
     "title": "JBL Charge 6 Negro Portátil",
     "min_visible": 0,
-    "real_stock": 1006,
+    "real_stock": 1005,
     "master_stock": 1778,
     "available_quantity": 0,
     "auto_replenish": false,
