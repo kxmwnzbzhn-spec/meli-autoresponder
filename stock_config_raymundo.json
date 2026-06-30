@@ -82,13 +82,13 @@
     "line": "Raymundo",
     "auto_replenish": true,
     "min_visible": 1,
-    "active": true,
+    "active": false,
     "title": "Altavoz Bluetooth Jbl Go 4 Rosa Rosa Chicle",
-    "real_stock": 7,
+    "real_stock": 0,
     "master_stock": 75,
     "available_quantity": 1,
     "sku": "JBL-GO4-ROSA",
-    "agotado": false
+    "agotado": true
   },
   "MLM2891189883": {
     "line": "Raymundo",
@@ -151,7 +151,7 @@
     "min_visible": 1,
     "active": true,
     "title": "Bocina Portátil Jbl Go 4 Bluetooth, Camuflaje. Color Camufla",
-    "real_stock": 91,
+    "real_stock": 90,
     "master_stock": 196,
     "available_quantity": 1,
     "sku": "JBL-GO4-CAMUFLAJE"
@@ -171,13 +171,13 @@
     "line": "Raymundo",
     "auto_replenish": true,
     "min_visible": 1,
-    "active": true,
+    "active": false,
     "title": "Parlante Bluetooth Jbl Go 4 Portátil Rosa",
-    "real_stock": 7,
+    "real_stock": 0,
     "master_stock": 75,
     "available_quantity": 1,
     "sku": "JBL-GO4-ROSA",
-    "agotado": false
+    "agotado": true
   },
   "MLM2891189859": {
     "line": "Raymundo",
@@ -246,13 +246,13 @@
     "line": "Raymundo",
     "auto_replenish": true,
     "min_visible": 1,
-    "active": true,
+    "active": false,
     "title": "Jbl Go 4 - Altavoz Bluetooth Ultraportátil Rosa",
-    "real_stock": 7,
+    "real_stock": 0,
     "master_stock": 75,
     "available_quantity": 1,
     "sku": "JBL-GO4-ROSA",
-    "agotado": false
+    "agotado": true
   },
   "MLM2891178511": {
     "line": "Raymundo",
