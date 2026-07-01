@@ -20,6 +20,7 @@ ACCOUNTS=[
   (3367276814,"MELI_REFRESH_TOKEN_WILBERT","Wilbert"),
   (3417664339,"MELI_REFRESH_TOKEN_AH","Adrian"),
   (3419500448,"MELI_REFRESH_TOKEN_MAYRELY","Mayrely"),
+  (3512220356,"MELI_REFRESH_TOKEN_YERALDIN","Yeraldin"),
 ]
 
 SB_URL=os.environ.get("SUPABASE_URL","https://wnuhslmryspnypbxbfjf.supabase.co")
@@ -251,10 +252,3 @@ if gh:
             json={"ref":"main","inputs":{}},timeout=20)
         print(f"REDISPATCH: HTTP {r.status_code}")
     except Exception as e: print(f"redispatch err: {e}")
-
-
-
-
-
-
-
