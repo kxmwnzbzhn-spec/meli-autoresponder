@@ -1,0 +1,29 @@
+name: exchange-yeraldin-oauth
+on:
+  workflow_dispatch:
+    inputs:
+      code:
+        description: 'OAuth code'
+        required: true
+      account:
+        description: 'Account name'
+        required: true
+        default: 'YERALDIN'
+permissions: { contents: write }
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests -q
+      - run: python scripts/exchange_yeraldin.py
+        env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          OAUTH_CODE: ${{ inputs.code }}
+          ACCOUNT: ${{ inputs.account }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
