@@ -45,14 +45,18 @@ TRADICIONAL=[
     ("MLM3054168351",399),  # JBL Clip 5 USADA
 ]
 
-def get_token(rt):
+def get_token(rt,name=""):
     r=requests.post("https://api.mercadolibre.com/oauth/token",data={
-        "grant_type":"refresh_token","client_id":APP_ID,"client_secret":APP_SECRET,"refresh_token":rt},timeout=20).json()
-    return r["access_token"], r.get("refresh_token",rt)
+        "grant_type":"refresh_token","client_id":APP_ID,"client_secret":APP_SECRET,"refresh_token":rt},timeout=20)
+    print(f"OAuth [{name}] status={r.status_code} body={r.text[:400]}",flush=True)
+    j=r.json()
+    if "access_token" not in j:
+        raise SystemExit(f"OAuth FAIL {name}: {j}")
+    return j["access_token"], j.get("refresh_token",rt)
 
 # Auth
-AT_MC,_=get_token(RT_MC)
-AT_MI,_=get_token(RT_MI)
+AT_MC,_=get_token(RT_MC,"MC")
+AT_MI,_=get_token(RT_MI,"MILDRED")
 H_MC={"Authorization":f"Bearer {AT_MC}","Content-Type":"application/json"}
 H_MI={"Authorization":f"Bearer {AT_MI}","Content-Type":"application/json"}
 me_mi=requests.get("https://api.mercadolibre.com/users/me",headers=H_MI,timeout=10).json()
