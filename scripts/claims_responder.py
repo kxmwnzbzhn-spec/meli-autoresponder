@@ -28,6 +28,7 @@ ACCOUNTS=[
   ("MILDRED","MELI_REFRESH_TOKEN_MILDRED"),
   ("DILCIE","MELI_REFRESH_TOKEN_DILCIE"),
   ("YC_NEW","MELI_REFRESH_TOKEN_YC_NEW"),
+  ("YERALDIN","MELI_REFRESH_TOKEN_YERALDIN"),
 ]
 
 # Sin firma. Termina con "Quedamos atentos."
@@ -273,4 +274,3 @@ def main():
   tg(f"🤖 Claims bot v4: ✅{total_responded} (expirados {total_expired}) ⏭{total_skipped} ❌{total_failed}")
 
 if __name__=="__main__": main()
-
