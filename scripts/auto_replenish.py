@@ -21,6 +21,7 @@ ACCOUNTS=[
   (3417664339,"MELI_REFRESH_TOKEN_AH","Adrian"),
   (3419500448,"MELI_REFRESH_TOKEN_MAYRELY","Mayrely"),
   (3512220356,"MELI_REFRESH_TOKEN_YERALDIN","Yeraldin"),
+  (3513686981,"MELI_REFRESH_TOKEN_LUPITA","Lupita"),
 ]
 
 SB_URL=os.environ.get("SUPABASE_URL","https://wnuhslmryspnypbxbfjf.supabase.co")
