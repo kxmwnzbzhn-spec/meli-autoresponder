@@ -36,6 +36,8 @@ jobs:
           MELI_REFRESH_TOKEN_WILBERT: ${{ secrets.MELI_REFRESH_TOKEN_WILBERT }}
           MELI_REFRESH_TOKEN_AH: ${{ secrets.MELI_REFRESH_TOKEN_AH }}
           MELI_REFRESH_TOKEN_MAYRELY: ${{ secrets.MELI_REFRESH_TOKEN_MAYRELY }}
+          MELI_REFRESH_TOKEN_YERALDIN: ${{ secrets.MELI_REFRESH_TOKEN_YERALDIN }}
+          MELI_REFRESH_TOKEN_LUPITA: ${{ secrets.MELI_REFRESH_TOKEN_LUPITA }}
           GH_TOKEN_FOR_SECRETS: ${{ secrets.GH_TOKEN_FOR_SECRETS }}
         run: |
           python3 scripts/messages_responder.py | tee /tmp/mr.log
