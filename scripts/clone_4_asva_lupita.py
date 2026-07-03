@@ -32,7 +32,7 @@ for src_id in TARGETS:
             attrs.append({"id":aid,"value_name":v})
         
         payload={
-            "title":s.get("title"),
+            "family_name":s.get("family_name") or s.get("title"),
             "category_id":s.get("category_id"),
             "price":s.get("price"),
             "currency_id":"MXN",
