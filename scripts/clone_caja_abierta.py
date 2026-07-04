@@ -13,6 +13,11 @@ H={"Authorization":f"Bearer {AT}","Content-Type":"application/json"}
 
 SOURCES=["MLM5633114418","MLM5633114492"]
 
+# Attributes MELI marks as not modifiable when posting new items
+BAD_ATTRS={"ALPHANUMERIC_MODEL","HAZMAT_TRANSPORTABILITY","IS_DUAL_SIM","GPU_MODEL",
+           "PACKAGE_WEIGHT","PACKAGE_LENGTH","PACKAGE_HEIGHT","PACKAGE_WIDTH",
+           "SELLER_SKU","ITEM_CONDITION","GTIN","EAN","UPC","ISBN","CATALOG_PRODUCT_ID"}
+
 def desc_for(model_name):
     return f"""⚠️ ═══════════════════════════════════════
 🚨 PRODUCTO CAJA ABIERTA / REACONDICIONADO 🚨
@@ -61,52 +66,46 @@ def extract_pic_url(p):
 
 def detect_model(title):
     t=title.lower()
-    if "charge 6" in t or "charge6" in t: return "Charge 6","1799"
-    if "charge 5" in t or "charge5" in t: return "Charge 5","1499"
-    if "go 4" in t or "go4" in t: return "Go 4","499"
-    if "go 3" in t or "go3" in t: return "Go 3","399"
-    if "clip 5" in t or "clip5" in t: return "Clip 5","799"
-    if "flip 7" in t or "flip7" in t: return "Flip 7","1799"
-    if "flip 6" in t or "flip6" in t: return "Flip 6","1299"
-    if "xtreme" in t: return "Xtreme","3999"
-    return "Bluetooth","999"
+    if "charge 6" in t or "charge6" in t: return "Charge 6",1799
+    if "charge 5" in t or "charge5" in t: return "Charge 5",1499
+    if "go 4" in t or "go4" in t: return "Go 4",499
+    if "go 3" in t or "go3" in t: return "Go 3",399
+    if "clip 5" in t or "clip5" in t: return "Clip 5",799
+    if "flip 7" in t or "flip7" in t: return "Flip 7",1799
+    return "Bluetooth",999
 
 for SRC in SOURCES:
     print(f"\n=== SOURCE {SRC} ===",flush=True)
     s=requests.get(f"https://api.mercadolibre.com/items/{SRC}",headers=H,timeout=15).json()
     title_src=s.get("title","?")
-    price_src=s.get("price")
     cat=s.get("category_id")
-    fam=s.get("family_name") or title_src
     pics_raw=s.get("pictures",[])
     pics=[extract_pic_url(p) for p in pics_raw[:10]]
     pics=[u for u in pics if u]
     attrs_src=s.get("attributes",[])
-    print(f"  src title: {title_src[:80]}",flush=True)
-    print(f"  src cat: {cat}  price: ${price_src}  pics: {len(pics)}  family: {fam[:50]}",flush=True)
     
-    model, default_price = detect_model(title_src)
+    model, new_price = detect_model(title_src)
     is_camo="camuflaje" in title_src.lower() or "camuflado" in title_src.lower()
-    color = "Camuflaje" if is_camo else "Negro"
-    new_title = f"Bocina Jbl {model} Bluetooth Ip67 Caja Abierta Excelente Estado"[:60]
-    new_price = int(default_price)
+    print(f"  src cat: {cat}  pics: {len(pics)}  model: {model}  price: ${new_price}",flush=True)
     
+    # Clean attrs
     new_attrs=[]
     seen=set()
     for a in attrs_src:
         aid=a.get("id","")
-        if aid in ("SELLER_SKU","ITEM_CONDITION"): continue
-        if aid in seen: continue
+        if aid in BAD_ATTRS or aid in seen: continue
+        v_id=a.get("value_id")
+        v_name=a.get("value_name")
+        # Skip null/empty
+        if not v_id and (not v_name or v_name=="null"): continue
         seen.add(aid)
         entry={"id":aid}
-        if a.get("value_id"): entry["value_id"]=a["value_id"]
-        elif a.get("value_name"): entry["value_name"]=a["value_name"]
-        else: continue
+        if v_id: entry["value_id"]=v_id
+        elif v_name: entry["value_name"]=v_name
         new_attrs.append(entry)
     new_attrs.append({"id":"ITEM_CONDITION","value_name":"Usado"})
     
-    # Family name for caja abierta variant — distinct from catalog
-    new_family = f"JBL {model} Caja Abierta Reacondicionado"
+    new_family = f"JBL {model} Caja Abierta Reacondicionado Elite Market"
     
     payload={
       "family_name":new_family,
@@ -124,15 +123,15 @@ for SRC in SOURCES:
       "shipping":{"mode":"me2","free_shipping":False,"local_pick_up":False,"logistic_type":"drop_off"}
     }
     
-    print(f"  posting: title={new_title} price=${new_price} model={model}",flush=True)
+    print(f"  posting: {len(new_attrs)} attrs, family={new_family}",flush=True)
     p=requests.post("https://api.mercadolibre.com/items",headers=H,json=payload,timeout=25).json()
     if "id" in p:
         new_id=p["id"]
-        print(f"  ✅ POSTED: {new_id} status={p.get('status')} price=${p.get('price')}",flush=True)
+        print(f"  ✅ POSTED: {new_id} status={p.get('status')} price=${p.get('price')} title={p.get('title','?')[:60]}",flush=True)
         d=requests.post(f"https://api.mercadolibre.com/items/{new_id}/description",
                        headers=H,json={"plain_text":desc_for(model)},timeout=15)
         print(f"  description: {d.status_code}",flush=True)
         print(f"  URL: {p.get('permalink','?')}",flush=True)
     else:
-        print(f"  ❌ FAIL: {json.dumps(p)[:600]}",flush=True)
+        print(f"  ❌ FAIL full: {json.dumps(p)}",flush=True)
     time.sleep(1)
