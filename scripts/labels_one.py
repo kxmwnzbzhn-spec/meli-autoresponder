@@ -363,7 +363,8 @@ for s in ships:
         if r.status_code!=200 or not r.headers.get("content-type","").lower().startswith("application/pdf"):
             fail.append(s["sid"]); continue
         raw=r.content; lp=PdfReader(io.BytesIO(raw))
-        for pi,page in enumerate(lp.pages):
+        # solo primera página por shipment (MELI a veces adjunta acuse/2ª pág)
+        for pi,page in enumerate(lp.pages[:1]):
             box=page.cropbox if page.cropbox else page.mediabox
             lx0=float(box.left); ly0=float(box.bottom); lw=float(box.width); lh=float(box.height)
             bb=detect_bbox(raw,pi)
