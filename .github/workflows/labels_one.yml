@@ -59,6 +59,7 @@ jobs:
           MELI_REFRESH_TOKEN_RMAYCHI:  ${{ secrets.MELI_REFRESH_TOKEN_RMAYCHI }}
           MELI_REFRESH_TOKEN_AH:       ${{ secrets.MELI_REFRESH_TOKEN_AH }}
           MELI_REFRESH_TOKEN_MC:       ${{ secrets.MELI_REFRESH_TOKEN_MC }}
+          MELI_REFRESH_TOKEN_LUPITA:   ${{ secrets.MELI_REFRESH_TOKEN_LUPITA }}
         run: python scripts/labels_one.py
       - uses: actions/upload-artifact@v4
         if: always()
