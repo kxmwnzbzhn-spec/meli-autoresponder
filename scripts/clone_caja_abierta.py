@@ -88,7 +88,7 @@ for SRC in SOURCES:
     is_camo="camuflaje" in title_src.lower() or "camuflado" in title_src.lower()
     print(f"  src cat: {cat}  pics: {len(pics)}  model: {model}  price: ${new_price}",flush=True)
     
-    # Clean attrs
+    # Clean attrs — send BOTH value_id and value_name; skip null-value attrs
     new_attrs=[]
     seen=set()
     for a in attrs_src:
@@ -96,12 +96,14 @@ for SRC in SOURCES:
         if aid in BAD_ATTRS or aid in seen: continue
         v_id=a.get("value_id")
         v_name=a.get("value_name")
-        # Skip null/empty
-        if not v_id and (not v_name or v_name=="null"): continue
+        # Skip if BOTH are missing or value_name is null
+        if (not v_id) and (not v_name or v_name in ("null","Null","NULL")): continue
+        # Skip attrs with only value_id but no value_name (unresolvable)
+        if v_id and not v_name: continue
         seen.add(aid)
         entry={"id":aid}
         if v_id: entry["value_id"]=v_id
-        elif v_name: entry["value_name"]=v_name
+        if v_name: entry["value_name"]=v_name
         new_attrs.append(entry)
     new_attrs.append({"id":"ITEM_CONDITION","value_name":"Usado"})
     
