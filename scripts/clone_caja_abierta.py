@@ -88,7 +88,7 @@ for SRC in SOURCES:
     model, default_price = detect_model(title_src)
     is_camo="camuflaje" in title_src.lower() or "camuflado" in title_src.lower()
     color = "Camuflaje" if is_camo else "Negro"
-    new_title = f"Bocina Jbl {model} Bluetooth Ip67 Caja Abierta Excelente 1:1"[:60]
+    new_title = f"Bocina Jbl {model} Bluetooth Ip67 Caja Abierta Excelente Estado"[:60]
     new_price = int(default_price)
     
     new_attrs=[]
