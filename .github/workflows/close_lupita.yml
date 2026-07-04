@@ -1,0 +1,14 @@
+name: close_lupita_items
+on:
+  workflow_dispatch:
+jobs:
+  close:
+    runs-on: ubuntu-latest
+    env:
+      MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+      MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+      MELI_REFRESH_TOKEN_LUPITA: ${{ secrets.MELI_REFRESH_TOKEN_LUPITA }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install requests
+      - run: python scripts/close_lupita_items.py
