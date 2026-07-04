@@ -109,7 +109,6 @@ for SRC in SOURCES:
     new_family = f"JBL {model} Caja Abierta Reacondicionado"
     
     payload={
-      "title":new_title,
       "family_name":new_family,
       "category_id":cat,
       "price":new_price,
