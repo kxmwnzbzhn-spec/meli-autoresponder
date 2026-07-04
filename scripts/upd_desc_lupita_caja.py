@@ -11,48 +11,74 @@ AT=r["access_token"]
 print(f"NEW_RT_LUPITA: {r['refresh_token']}",flush=True)
 H={"Authorization":f"Bearer {AT}","Content-Type":"application/json"}
 
-def desc(model):
-    return f"""ATENCION - PRODUCTO CAJA ABIERTA / REACONDICIONADO
+def desc(model, price):
+    return f"""====================================================
+       LEE ANTES DE COMPRAR - INFORMACION IMPORTANTE
+====================================================
 
-*** IMPORTANTE: ESTE PRODUCTO NO ES COMPATIBLE CON LA APP OFICIAL JBL PORTABLE ***
-*** LEE ANTES DE COMPRAR ***
+*** PRODUCTO DE PROCEDENCIA ALTERNA - CALIDAD 1:1 ***
 
-CALIDAD 1:1 - EXCELENTE ESTADO
-100% FUNCIONAL - Sonido, bateria, conectividad Bluetooth impecables
-Empaque de caja abierta (revisado y probado por nuestro equipo tecnico)
+Este articulo NO es distribuido de manera oficial por la marca.
+Se trata de una version calidad premium 1:1 con acabado, sonido y
+funcionamiento identicos al original de fabrica.
 
-============================================
-PRODUCTO CAJA ABIERTA CALIDAD PREMIUM 1:1
-NO SE CONECTA CON LA APP JBL PORTABLE
-Todas las demas funciones al 100%
-============================================
+El precio de ${price} MXN habla por si solo:
+si buscas un producto 100% oficial de la marca, este NO es para ti.
+Si buscas la MISMA experiencia a una fraccion del costo, lo tienes.
 
-QUE INCLUYE:
-- 1 Bocina JBL {model}
+====================================================
+  POR FAVOR EVITA HACER PREGUNTAS OBVIAS COMO:
+====================================================
+- "Es original de fabrica?"
+- "Viene con caja sellada / hologramas oficiales?"
+- "Se puede registrar en la pagina oficial de la marca?"
+- "Es compatible con la app oficial?"
+
+*** RESPUESTAS RAPIDAS ***
+- El precio te indica lo que es. NO es produccion oficial.
+- NO SE CONECTA con la app oficial JBL Portable.
+- Todas las demas funciones operan al 100%.
+- Sonido, bateria y Bluetooth de calidad excepcional.
+
+====================================================
+                    CONDICION DEL PRODUCTO
+====================================================
+- Producto CAJA ABIERTA - revisado y probado por nuestro equipo
+- 100% funcional - Sonido, bateria y Bluetooth impecables
+- Acabado 1:1 con el original - dificil de distinguir a simple vista
+- Empaque puede presentar detalles minimos de manipulacion
+
+QUE INCLUYE EN LA CAJA:
+- 1 Bocina modelo {model}
 - 1 Cable de carga USB-C
-- Manual de usuario
+- Manual de usuario / instrucciones basicas
 
-CARACTERISTICAS PRINCIPALES:
-- Sonido JBL Pro potente y nitido
+CARACTERISTICAS TECNICAS:
+- Sonido potente y nitido
 - Bluetooth 5.3 estable
-- Resistencia al agua y polvo IP67 (sumergible)
+- Resistencia al agua y polvo IP67
 - Bateria recargable de larga duracion
 - Diseno resistente y portatil
 
-CONDICIONES DE VENTA:
-- ENVIO INMEDIATO: Enviamos el mismo dia antes de las 3pm.
-- GARANTIA POR ELITE MARKET: 30 dias contra fallas de fabrica.
-- COMPRA PROTEGIDA MERCADO LIBRE.
+====================================================
+                    CONDICIONES DE VENTA
+====================================================
+- ENVIO EL MISMO DIA si compras antes de las 3pm.
+- GARANTIA POR ELITE MARKET - 30 dias contra fallas de funcionamiento.
+- COMPRA PROTEGIDA por MERCADO LIBRE - devolucion sin preguntas.
 
-Cualquier duda antes de comprar, pregunta y te respondemos rapido.
-Gracias por preferir Elite Market."""
+Si el precio te parece razonable y aceptas las condiciones descritas,
+adelante con tu compra. Enviamos hoy mismo.
 
-items=[("MLM5638939412","Go 4"),("MLM5638926762","Charge 6")]
-for iid,model in items:
-    print(f"\n=== {iid} ===",flush=True)
-    text=desc(model)
-    for method in ("PUT","POST"):
-        r=requests.request(method,f"https://api.mercadolibre.com/items/{iid}/description",
-                          headers=H,json={"plain_text":text},timeout=15)
-        print(f"  {method}: {r.status_code} {r.text[:200]}",flush=True)
-        if r.status_code==200: break
+Cualquier duda DIFERENTE a las obvias arriba, escribenos y te
+respondemos rapido. Gracias por preferir Elite Market."""
+
+items=[("MLM5638939412","Go 4","$499"),("MLM5638926762","Charge 6","$1,799")]
+for iid,model,price in items:
+    print(f"\n=== {iid} {model} ===",flush=True)
+    text=desc(model, price)
+    r=requests.put(f"https://api.mercadolibre.com/items/{iid}/description",
+                   headers=H,json={"plain_text":text},timeout=15)
+    print(f"  PUT: {r.status_code}",flush=True)
+    if r.status_code!=200:
+        print(f"  err: {r.text[:400]}",flush=True)
