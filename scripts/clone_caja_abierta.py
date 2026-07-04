@@ -4,7 +4,6 @@ APP_ID=os.environ["MELI_APP_ID"]
 APP_SECRET=os.environ["MELI_APP_SECRET"]
 RT=os.environ["MELI_REFRESH_TOKEN_LUPITA"]
 
-# refresh
 r=requests.post("https://api.mercadolibre.com/oauth/token",
   data={"grant_type":"refresh_token","client_id":APP_ID,"client_secret":APP_SECRET,"refresh_token":RT},
   timeout=25).json()
@@ -28,7 +27,7 @@ DESC_TMPL = """⚠️ ═══════════════════�
 📢 IMPORTANTE — LEE ANTES DE COMPRAR:
 
 🔴 ESTE PRODUCTO NO SE CONECTA CON LA APP OFICIAL JBL PORTABLE.
-🔴 Todas las demás funciones operan al 100% (Bluetooth 5.3, JBL Pro Sound, resistencia al agua IP67, PartyBoost/Auracast según modelo).
+🔴 Todas las demás funciones operan al 100% (Bluetooth 5.3, JBL Pro Sound, resistencia al agua IP67).
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -55,33 +54,40 @@ DESC_TMPL = """⚠️ ═══════════════════�
 
 Cualquier duda antes de comprar, pregunta y te respondemos rápido. Gracias por preferir Elite Market."""
 
+def extract_pic_url(p):
+    for k in ("secure_url","url","source"):
+        if p.get(k): return p[k]
+    return None
+
 for SRC in SOURCES:
     print(f"\n=== SOURCE {SRC} ===",flush=True)
     s=requests.get(f"https://api.mercadolibre.com/items/{SRC}",headers=H,timeout=15).json()
     title_src=s.get("title","?")
     price_src=s.get("price")
     cat=s.get("category_id")
-    pics=[p["source"] for p in s.get("pictures",[])[:10]]
+    pics_raw=s.get("pictures",[])
+    pics=[extract_pic_url(p) for p in pics_raw[:10]]
+    pics=[u for u in pics if u]
     attrs_src=s.get("attributes",[])
     print(f"  src title: {title_src[:80]}",flush=True)
-    print(f"  src cat: {cat}  price: ${price_src}",flush=True)
+    print(f"  src cat: {cat}  price: ${price_src}  pics: {len(pics)}",flush=True)
     
-    # Build new title: mark as caja abierta
-    # Original: "Bocina Portátil Jbl Go 4 Bluetooth, Camuflaje. Color Camuflaje" or "Parlante Jbl Go4 Bluetooth Portátil ..."
-    new_title = f"Bocina Jbl Go 4 Bluetooth Ip67 Caja Abierta Excelente Estado"
-    if "camuflaje" in title_src.lower() or "camuflaje" in title_src.lower():
-        new_title = "Bocina Jbl Go 4 Bluetooth Ip67 Camuflaje Caja Abierta 1:1"
+    is_camo="camuflaje" in title_src.lower() or "camuflado" in title_src.lower()
+    new_title = "Bocina Jbl Go 4 Bluetooth Ip67 Camuflaje Caja Abierta 1:1" if is_camo else "Bocina Jbl Go 4 Bluetooth Ip67 Caja Abierta Excelente Estado"
     new_title=new_title[:60]
     
-    # Attributes: strip catalog_product_id, condition = used
     new_attrs=[]
+    seen=set()
     for a in attrs_src:
         aid=a.get("id","")
-        if aid in ("SELLER_SKU",): continue
-        if a.get("value_name") or a.get("value_id"):
-            new_attrs.append({"id":aid,"value_name":a.get("value_name"),"value_id":a.get("value_id")})
-    # Force condition=used
-    new_attrs=[a for a in new_attrs if a["id"]!="ITEM_CONDITION"]
+        if aid in ("SELLER_SKU","ITEM_CONDITION"): continue
+        if aid in seen: continue
+        seen.add(aid)
+        entry={"id":aid}
+        if a.get("value_id"): entry["value_id"]=a["value_id"]
+        elif a.get("value_name"): entry["value_name"]=a["value_name"]
+        else: continue
+        new_attrs.append(entry)
     new_attrs.append({"id":"ITEM_CONDITION","value_name":"Usado"})
     
     payload={
@@ -100,16 +106,15 @@ for SRC in SOURCES:
       "shipping":{"mode":"me2","free_shipping":False,"local_pick_up":False,"logistic_type":"drop_off"}
     }
     
-    print(f"  posting new item: title={new_title}",flush=True)
+    print(f"  posting: title={new_title}",flush=True)
     p=requests.post("https://api.mercadolibre.com/items",headers=H,json=payload,timeout=25).json()
     if "id" in p:
         new_id=p["id"]
         print(f"  ✅ POSTED: {new_id} status={p.get('status')} price=${p.get('price')}",flush=True)
-        # Update description
         d=requests.post(f"https://api.mercadolibre.com/items/{new_id}/description",
                        headers=H,json={"plain_text":DESC_TMPL},timeout=15)
         print(f"  description: {d.status_code}",flush=True)
         print(f"  URL: {p.get('permalink','?')}",flush=True)
     else:
-        print(f"  ❌ FAIL: {json.dumps(p)[:400]}",flush=True)
+        print(f"  ❌ FAIL: {json.dumps(p)[:600]}",flush=True)
     time.sleep(1)
