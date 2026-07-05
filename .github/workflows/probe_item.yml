@@ -1,18 +1,14 @@
-name: probe-item
-on: { workflow_dispatch: {}, push: { paths: ['.github/workflows/probe_item.yml'] } }
-permissions: {contents: write}
+name: probe_item
+on:
+  workflow_dispatch:
 jobs:
-  go:
+  p:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    env:
+      MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+      MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+      MELI_REFRESH_TOKEN_ASVA: ${{ secrets.MELI_REFRESH_TOKEN_ASVA }}
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with: { python-version: '3.11' }
       - run: pip install requests
-      - env:
-          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
-          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
-          MELI_REFRESH_TOKEN_ASVA: ${{ secrets.MELI_REFRESH_TOKEN_ASVA }}
-          TOKEN_SHARED: ${{ secrets.TOKEN_SHARED }}
-        run: python scripts/probe_item.py
+      - run: python scripts/probe_item.py
