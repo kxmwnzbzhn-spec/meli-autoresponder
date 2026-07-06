@@ -7,7 +7,7 @@ AT=r["access_token"]
 print(f"NEW_RT_ASVA: {r['refresh_token']}",flush=True)
 H={"Authorization":f"Bearer {AT}","Content-Type":"application/json"}
 
-IID="MLM5634575706"
+IID="MLM5510900006"
 g=requests.get(f"https://api.mercadolibre.com/items/{IID}",headers=H,timeout=10).json()
 print(f"BEFORE: status={g.get('status')} qty={g.get('available_quantity')} title={g.get('title','?')[:60]}",flush=True)
 
