@@ -1,0 +1,13 @@
+name: exchange_karime
+on:
+  workflow_dispatch:
+jobs:
+  ex:
+    runs-on: ubuntu-latest
+    env:
+      MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+      MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install requests
+      - run: python scripts/exchange_karime.py
