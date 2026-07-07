@@ -22,6 +22,7 @@ ACCOUNTS=[
   # (3419500448,"MELI_REFRESH_TOKEN_MAYRELY","Mayrely"),  # DESACTIVADO 2026-07-03 por directiva usuario - NO REACTIVAR
   (3512220356,"MELI_REFRESH_TOKEN_YERALDIN","Yeraldin"),
   (3513686981,"MELI_REFRESH_TOKEN_LUPITA","Lupita"),
+  (3527879962,"MELI_REFRESH_TOKEN_KARIME","Karime"),
 ]
 
 SB_URL=os.environ.get("SUPABASE_URL","https://wnuhslmryspnypbxbfjf.supabase.co")
