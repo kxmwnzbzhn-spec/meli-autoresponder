@@ -36,6 +36,7 @@ jobs:
           MELI_REFRESH_TOKEN_MAYRELY: ${{ secrets.MELI_REFRESH_TOKEN_MAYRELY }}
           MELI_REFRESH_TOKEN_YERALDIN: ${{ secrets.MELI_REFRESH_TOKEN_YERALDIN }}
           MELI_REFRESH_TOKEN_LUPITA: ${{ secrets.MELI_REFRESH_TOKEN_LUPITA }}
+          MELI_REFRESH_TOKEN_KARIME: ${{ secrets.MELI_REFRESH_TOKEN_KARIME }}
           GH_TOKEN_FOR_SECRETS: ${{ secrets.GH_TOKEN_FOR_SECRETS }}
         run: |
           python3 scripts/questions_responder.py | tee /tmp/qr.log
