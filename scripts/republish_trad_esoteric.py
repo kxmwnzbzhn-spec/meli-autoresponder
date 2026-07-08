@@ -38,7 +38,7 @@ new_attrs.append({"id":"BRAND","value_name":"The Alchemia Lab"})
 print(f"  attrs: {len(new_attrs)}",flush=True)
 
 payload={
-    "title":title,
+    
     "family_name":title,
     "category_id":NEW_CAT,
     "price":999,
