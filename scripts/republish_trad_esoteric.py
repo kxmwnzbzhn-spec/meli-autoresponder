@@ -35,6 +35,7 @@ for a in p.get("attributes",[]):
     new_attrs.append(e)
 new_attrs.append({"id":"ITEM_CONDITION","value_name":"Nuevo"})
 new_attrs.append({"id":"BRAND","value_name":"The Alchemia Lab"})
+new_attrs.append({"id":"MODEL","value_name":"Flor de Nopal"})
 print(f"  attrs: {len(new_attrs)}",flush=True)
 
 payload={
