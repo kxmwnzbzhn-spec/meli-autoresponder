@@ -8,7 +8,7 @@ AT=r["access_token"]
 print(f"NEW_RT_ASVA: {r['refresh_token']}",flush=True)
 H={"Authorization":f"Bearer {AT}","Content-Type":"application/json"}
 
-CPID="MLM75279296"
+CPID="MLM74984237"
 
 p=requests.get(f"https://api.mercadolibre.com/products/{CPID}",headers=H,timeout=10).json()
 print(f"\n=== CATALOG {CPID} ===",flush=True)
