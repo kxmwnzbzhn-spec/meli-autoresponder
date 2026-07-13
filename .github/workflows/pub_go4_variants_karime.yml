@@ -1,0 +1,14 @@
+name: pub_go4_variants_karime
+on:
+  workflow_dispatch:
+jobs:
+  p:
+    runs-on: ubuntu-latest
+    env:
+      MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+      MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+      MELI_REFRESH_TOKEN_KARIME: ${{ secrets.MELI_REFRESH_TOKEN_KARIME }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install requests
+      - run: python scripts/pub_go4_variants_karime.py
