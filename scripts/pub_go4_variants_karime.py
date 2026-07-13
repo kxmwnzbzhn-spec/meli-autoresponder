@@ -125,7 +125,7 @@ for cname, cpid in COLORS:
     })
 
 payload={
-    "family_name":"Bocina Bluetooth Go 4 Reacondicionada Excelente Estado",
+    "title":"Bocina Bluetooth Portatil Go 4 Reacondicionada Ip67 Excelente",
     "category_id":"MLM59800",
     "condition":"used",
     "listing_type_id":"gold_pro",
