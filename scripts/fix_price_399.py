@@ -7,15 +7,8 @@ AT=r["access_token"]
 print(f"NEW_RT_KARIME: {r['refresh_token']}",flush=True)
 H={"Authorization":f"Bearer {AT}","Content-Type":"application/json"}
 
-ITEMS=[
-  ("MLM3129467021","Negra"),
-  ("MLM3129476473","Rosa"),
-  ("MLM3129467131","Roja"),
-  ("MLM3129476561","Celeste"),
-]
-
-for iid, cname in ITEMS:
-    r=requests.put(f"https://api.mercadolibre.com/items/{iid}",headers=H,json={"price":399},timeout=15).json()
+for iid,cname in [("MLM3129467021","Negra"),("MLM3129476473","Rosa"),("MLM3129467131","Roja"),("MLM3129476561","Celeste")]:
+    r=requests.put(f"https://api.mercadolibre.com/items/{iid}",headers=H,json={"price":299},timeout=15).json()
     if r.get("error"):
         print(f"  {iid} ({cname}) err: {r.get('message','?')}",flush=True)
     else:
