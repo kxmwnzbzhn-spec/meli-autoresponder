@@ -1,0 +1,14 @@
+name: pause_veslira_asva
+on:
+  workflow_dispatch:
+jobs:
+  p:
+    runs-on: ubuntu-latest
+    env:
+      MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+      MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+      MELI_REFRESH_TOKEN_ASVA: ${{ secrets.MELI_REFRESH_TOKEN_ASVA }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install requests
+      - run: python scripts/pause_veslira_asva.py
