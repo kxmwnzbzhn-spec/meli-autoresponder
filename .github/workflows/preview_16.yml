@@ -7,7 +7,7 @@ jobs:
     env:
       MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
       MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
-      MELI_REFRESH_TOKEN_KARIME: ${{ secrets.MELI_REFRESH_TOKEN_KARIME }}
+      MELI_REFRESH_TOKEN_MAYRELY: ${{ secrets.MELI_REFRESH_TOKEN_MAYRELY }}
     steps:
       - uses: actions/checkout@v4
       - run: pip install requests
