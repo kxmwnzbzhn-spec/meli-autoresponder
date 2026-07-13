@@ -132,6 +132,7 @@ payload={
     "buying_mode":"buy_it_now",
     "currency_id":"MXN",
     "price":499,
+    "available_quantity":400,
     "attributes":[
         {"id":"BRAND","value_name":"Genérica"},
         {"id":"MODEL","value_name":"Go 4"},
