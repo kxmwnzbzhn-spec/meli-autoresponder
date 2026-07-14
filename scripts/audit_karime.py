@@ -5,11 +5,10 @@ r=requests.post("https://api.mercadolibre.com/oauth/token",
   data={"grant_type":"refresh_token","client_id":APP_ID,"client_secret":APP_SECRET,"refresh_token":RT},timeout=25).json()
 AT=r["access_token"]
 print(f"NEW_RT_KARIME: {r['refresh_token']}",flush=True)
-H={"Authorization":f"Bearer {AT}"}
+H={"Authorization":f"Bearer {AT}","Content-Type":"application/json"}
 
+# Get all KARIME items
 USER_ID=3527879962
-
-# List all KARIME items - pagination
 all_ids=[]
 offset=0
 while True:
@@ -19,34 +18,42 @@ while True:
     all_ids.extend(ids)
     if len(ids)<50: break
     offset+=50
+print(f"Total: {len(all_ids)}",flush=True)
 
-print(f"Total items in KARIME: {len(all_ids)}",flush=True)
-
-# Get status for each - batch multiget
-active_items=[]
-inactive_items=[]
+# Get status
+items=[]
 for i in range(0, len(all_ids), 20):
     batch=all_ids[i:i+20]
-    r=requests.get(f"https://api.mercadolibre.com/items?ids={','.join(batch)}&attributes=id,title,status,available_quantity,price",headers=H,timeout=15).json()
+    r=requests.get(f"https://api.mercadolibre.com/items?ids={','.join(batch)}&attributes=id,status,available_quantity,price,sub_status,title",headers=H,timeout=15).json()
     for entry in r:
-        body=entry.get("body",{})
-        iid=body.get("id")
-        st=body.get("status")
-        title=(body.get("title") or "?")[:60]
-        qty=body.get("available_quantity") or 0
-        price=body.get("price") or 0
-        if st=="active":
-            active_items.append((iid,title,qty,price))
-        else:
-            inactive_items.append((iid,title,st,qty))
+        b=entry.get("body",{})
+        items.append({
+            "iid":b.get("id"),"status":b.get("status"),"qty":b.get("available_quantity"),
+            "price":b.get("price"),"sub":b.get("sub_status"),"title":(b.get("title") or "?")[:50]
+        })
 
-print(f"\n=== ACTIVE ({len(active_items)}) ===",flush=True)
-for iid,title,qty,price in active_items:
-    print(f"  {iid} qty={qty} ${price} | {title}",flush=True)
+# Group
+by_status={}
+for it in items:
+    s=it["status"]
+    by_status.setdefault(s,[]).append(it)
 
-print(f"\n=== NOT ACTIVE ({len(inactive_items)}) ===",flush=True)
-for iid,title,st,qty in inactive_items[:20]:
-    print(f"  {iid} {st} qty={qty} | {title}",flush=True)
+print(f"\n=== STATUS BREAKDOWN ===",flush=True)
+for s,lst in by_status.items():
+    print(f"  {s}: {len(lst)}",flush=True)
 
-# Print pipe-separated active ID list for Supabase
-print(f"\nACTIVE_IDS: {','.join(x[0] for x in active_items)}",flush=True)
+print(f"\n=== ACTIVE items ({len(by_status.get('active',[]))}) ===",flush=True)
+for it in by_status.get("active",[]):
+    print(f"  {it['iid']} qty={it['qty']} ${it['price']} sub={it['sub']} | {it['title']}",flush=True)
+
+print(f"\n=== PAUSED items ({len(by_status.get('paused',[]))}) ===",flush=True)
+for it in by_status.get("paused",[]):
+    print(f"  {it['iid']} qty={it['qty']} ${it['price']} sub={it['sub']} | {it['title']}",flush=True)
+
+# Under review / other
+for s in ["under_review","closed","inactive"]:
+    lst=by_status.get(s,[])
+    if lst:
+        print(f"\n=== {s} ({len(lst)}) ===",flush=True)
+        for it in lst[:5]:
+            print(f"  {it['iid']} sub={it['sub']} | {it['title']}",flush=True)
