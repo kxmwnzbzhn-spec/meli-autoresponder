@@ -7,21 +7,11 @@ AT=r["access_token"]
 print(f"NEW_RT_KARIME: {r['refresh_token']}",flush=True)
 H={"Authorization":f"Bearer {AT}","Content-Type":"application/json"}
 
-ITEMS=["MLM5705924442","MLM3129625701","MLM5705923808","MLM5705934154",
-       "MLM3129625793","MLM3129625781","MLM3129625757"]
-
-for iid in ITEMS:
-    g=requests.get(f"https://api.mercadolibre.com/items/{iid}?attributes=id,status,title",headers=H,timeout=10).json()
-    before=g.get("status")
-    title=(g.get("title") or "?")[:50]
-    # Pause first
-    if before=="active":
-        pr=requests.put(f"https://api.mercadolibre.com/items/{iid}",headers=H,json={"status":"paused"},timeout=10).json()
-        paused=pr.get("status")
-    else:
-        paused=before
-    # Close
-    cr=requests.put(f"https://api.mercadolibre.com/items/{iid}",headers=H,json={"status":"closed"},timeout=10).json()
-    closed=cr.get("status")
-    err=cr.get("error","")
-    print(f"{iid} {before} -> paused:{paused} -> closed:{closed} err={err} | {title}",flush=True)
+IID="MLM5705924452"
+g=requests.get(f"https://api.mercadolibre.com/items/{IID}?attributes=id,status,title",headers=H,timeout=10).json()
+print(f"BEFORE: {g.get('status')} | {g.get('title','?')[:60]}",flush=True)
+if g.get("status")=="active":
+    pr=requests.put(f"https://api.mercadolibre.com/items/{IID}",headers=H,json={"status":"paused"},timeout=10).json()
+    print(f"paused: {pr.get('status')}",flush=True)
+cr=requests.put(f"https://api.mercadolibre.com/items/{IID}",headers=H,json={"status":"closed"},timeout=10).json()
+print(f"closed: {cr.get('status')} err={cr.get('error','')}",flush=True)
