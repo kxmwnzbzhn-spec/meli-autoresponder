@@ -7,16 +7,21 @@ AT=r["access_token"]
 print(f"NEW_RT_KARIME: {r['refresh_token']}",flush=True)
 H={"Authorization":f"Bearer {AT}","Content-Type":"application/json"}
 
-IID="MLM5705924474"
-g=requests.get(f"https://api.mercadolibre.com/items/{IID}",headers=H,timeout=10).json()
-print(f"BEFORE: status={g.get('status')} sub={g.get('sub_status')} title={g.get('title','?')[:60]}",flush=True)
-st=g.get("status")
-if st=="active":
-    pr=requests.put(f"https://api.mercadolibre.com/items/{IID}",headers=H,json={"status":"paused"},timeout=10).json()
-    print(f"paused: {pr.get('status')} err={pr.get('message','')}",flush=True)
-    time.sleep(1)
-if st!="closed":
-    cr=requests.put(f"https://api.mercadolibre.com/items/{IID}",headers=H,json={"status":"closed"},timeout=10).json()
-    print(f"closed: {cr.get('status')} err={cr.get('message','')}",flush=True)
-g2=requests.get(f"https://api.mercadolibre.com/items/{IID}?attributes=id,status",headers=H,timeout=10).json()
-print(f"FINAL: status={g2.get('status')}",flush=True)
+for IID in ["MLM3129625771","MLM5705924474"]:
+    print(f"\n=== {IID} ===",flush=True)
+    g=requests.get(f"https://api.mercadolibre.com/items/{IID}",headers=H,timeout=10).json()
+    st=g.get("status")
+    print(f"  BEFORE: status={st} sub={g.get('sub_status')} title={g.get('title','?')[:60]}",flush=True)
+    if st=="active":
+        pr=requests.put(f"https://api.mercadolibre.com/items/{IID}",headers=H,json={"status":"paused"},timeout=10).json()
+        print(f"  paused: {pr.get('status')} err={pr.get('message','')}",flush=True)
+        time.sleep(1)
+    if st not in ("closed","under_review"):
+        cr=requests.put(f"https://api.mercadolibre.com/items/{IID}",headers=H,json={"status":"closed"},timeout=10).json()
+        print(f"  closed: {cr.get('status')} err={cr.get('message','')}",flush=True)
+    elif st=="under_review":
+        # try close anyway
+        cr=requests.put(f"https://api.mercadolibre.com/items/{IID}",headers=H,json={"status":"closed"},timeout=10).json()
+        print(f"  closed_attempt: {cr.get('status')} err={cr.get('message','')}",flush=True)
+    g2=requests.get(f"https://api.mercadolibre.com/items/{IID}?attributes=id,status",headers=H,timeout=10).json()
+    print(f"  FINAL: status={g2.get('status')}",flush=True)
