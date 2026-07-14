@@ -8,13 +8,26 @@ print(f"NEW_RT_KARIME: {r['refresh_token']}",flush=True)
 H={"Authorization":f"Bearer {AT}","Content-Type":"application/json"}
 
 IID="MLM5706709764"
-g=requests.get(f"https://api.mercadolibre.com/items/{IID}?attributes=id,status,sub_status,title",headers=H,timeout=10).json()
-print(f"BEFORE: status={g.get('status')} sub={g.get('sub_status')} title={g.get('title','?')[:60]}",flush=True)
-if g.get("status")=="active":
+g=requests.get(f"https://api.mercadolibre.com/items/{IID}",headers=H,timeout=10).json()
+print(f"CURRENT: status={g.get('status')} sub={g.get('sub_status')} qty={g.get('available_quantity')} price=${g.get('price')} title={g.get('title','?')[:60]}",flush=True)
+print(f"last_updated={g.get('last_updated')}",flush=True)
+
+st=g.get("status")
+if st=="active":
+    # Force pause + close
     pr=requests.put(f"https://api.mercadolibre.com/items/{IID}",headers=H,json={"status":"paused"},timeout=10).json()
-    print(f"paused: status={pr.get('status')} err={pr.get('message','')}",flush=True)
+    print(f"paused: {pr.get('status')} err={pr.get('message','')}",flush=True)
     time.sleep(1)
-cr=requests.put(f"https://api.mercadolibre.com/items/{IID}",headers=H,json={"status":"closed"},timeout=10).json()
-print(f"closed: status={cr.get('status')} err={cr.get('message','')}",flush=True)
+    cr=requests.put(f"https://api.mercadolibre.com/items/{IID}",headers=H,json={"status":"closed"},timeout=10).json()
+    print(f"closed: {cr.get('status')} err={cr.get('message','')}",flush=True)
+elif st=="paused":
+    cr=requests.put(f"https://api.mercadolibre.com/items/{IID}",headers=H,json={"status":"closed"},timeout=10).json()
+    print(f"closed: {cr.get('status')} err={cr.get('message','')}",flush=True)
+elif st=="under_review":
+    print(f"still under_review by MELI - cannot force close via API",flush=True)
+elif st=="closed":
+    print(f"already closed",flush=True)
+
+# Final check
 g2=requests.get(f"https://api.mercadolibre.com/items/{IID}?attributes=id,status",headers=H,timeout=10).json()
 print(f"FINAL: status={g2.get('status')}",flush=True)
