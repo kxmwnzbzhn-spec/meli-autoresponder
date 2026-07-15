@@ -1044,7 +1044,7 @@
       "original_price": 499.0,
       "floor": 299,
       "ceiling": 648.7,
-      "last_change_at": 1784148691,
+      "last_change_at": 1784152350,
       "role": "winner",
       "label": "Bocina Bluetooth Port\u00e1til Charge 6 "
     },
@@ -1055,8 +1055,40 @@
       "last_change_at": 1784105825,
       "role": "winner",
       "label": "Perfume The Alchemia Lab Flor De No"
+    },
+    "MLM5667078514": {
+      "original_price": 999.0,
+      "floor": 549.45,
+      "ceiling": 1298.7,
+      "last_change_at": 1784152350,
+      "role": "winner",
+      "label": "Perfume Cenote Azul The Alchemia La"
+    },
+    "MLM5667073620": {
+      "original_price": 499.0,
+      "floor": 299,
+      "ceiling": 648.7,
+      "last_change_at": 1784152350,
+      "role": "winner",
+      "label": "Perfume Tl\u00e1loc Intenso The Alchemia"
+    },
+    "MLM3107469913": {
+      "original_price": 999.0,
+      "floor": 549.45,
+      "ceiling": 1298.7,
+      "last_change_at": 1784152350,
+      "role": "winner",
+      "label": "Perfume Xibalba Royal The Alchemia "
+    },
+    "MLM5677984204": {
+      "original_price": 999.0,
+      "floor": 549.45,
+      "ceiling": 1298.7,
+      "last_change_at": 1784152350,
+      "role": "winner",
+      "label": "Perfume Alma De Tenochtitl\u00e1n The Al"
     }
   },
-  "last_run": 1784148691,
+  "last_run": 1784152350,
   "winner_account": "RAYMUNDO"
 }
