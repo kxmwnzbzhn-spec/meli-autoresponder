@@ -1,0 +1,14 @@
+name: add_lig_autostock
+on:
+  workflow_dispatch:
+jobs:
+  a:
+    runs-on: ubuntu-latest
+    env:
+      MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+      MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+      MELI_REFRESH_TOKEN_LIGIA: ${{ secrets.MELI_REFRESH_TOKEN_LIGIA }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install requests
+      - run: python scripts/add_lig_autostock.py
