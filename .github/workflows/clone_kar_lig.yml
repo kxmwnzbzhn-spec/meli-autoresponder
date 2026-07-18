@@ -1,0 +1,15 @@
+name: clone_kar_lig
+on:
+  workflow_dispatch:
+jobs:
+  c:
+    runs-on: ubuntu-latest
+    env:
+      MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+      MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+      MELI_REFRESH_TOKEN_KARIME: ${{ secrets.MELI_REFRESH_TOKEN_KARIME }}
+      MELI_REFRESH_TOKEN_LIGIA: ${{ secrets.MELI_REFRESH_TOKEN_LIGIA }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install requests
+      - run: python scripts/clone_kar_lig.py
