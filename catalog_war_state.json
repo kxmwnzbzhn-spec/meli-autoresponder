@@ -1052,7 +1052,7 @@
       "original_price": 999.0,
       "floor": 549.45,
       "ceiling": 1298.7,
-      "last_change_at": 1784398361,
+      "last_change_at": 1784403286,
       "role": "winner",
       "label": "Perfume The Alchemia Lab Flor De No"
     },
@@ -1060,7 +1060,7 @@
       "original_price": 999.0,
       "floor": 549.45,
       "ceiling": 1298.7,
-      "last_change_at": 1784398361,
+      "last_change_at": 1784403286,
       "role": "winner",
       "label": "Perfume Cenote Azul The Alchemia La"
     },
@@ -1068,7 +1068,7 @@
       "original_price": 499.0,
       "floor": 299,
       "ceiling": 648.7,
-      "last_change_at": 1784398361,
+      "last_change_at": 1784403286,
       "role": "winner",
       "label": "Perfume Tl\u00e1loc Intenso The Alchemia"
     },
@@ -1076,7 +1076,7 @@
       "original_price": 999.0,
       "floor": 549.45,
       "ceiling": 1298.7,
-      "last_change_at": 1784398361,
+      "last_change_at": 1784403286,
       "role": "winner",
       "label": "Perfume Xibalba Royal The Alchemia "
     },
@@ -1084,7 +1084,7 @@
       "original_price": 999.0,
       "floor": 549.45,
       "ceiling": 1298.7,
-      "last_change_at": 1784398361,
+      "last_change_at": 1784403286,
       "role": "winner",
       "label": "Perfume Alma De Tenochtitl\u00e1n The Al"
     },
@@ -1095,8 +1095,16 @@
       "last_change_at": 1784310751,
       "role": "winner",
       "label": "Perfume Mandarin Quetzal The Alchem"
+    },
+    "MLM3152563611": {
+      "original_price": 499.0,
+      "floor": 299,
+      "ceiling": 648.7,
+      "last_change_at": 1784403286,
+      "role": "step_1",
+      "label": "Jbl Go Jblgo4blk Go4 Negro"
     }
   },
-  "last_run": 1784398361,
+  "last_run": 1784403286,
   "winner_account": "RAYMUNDO"
 }
