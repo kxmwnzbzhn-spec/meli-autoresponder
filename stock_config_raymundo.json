@@ -303,7 +303,7 @@
   },
   "MLM5281123246": {
     "label": "Clip 5 Negro",
-    "real_stock": 8,
+    "real_stock": 7,
     "min_visible": 1,
     "auto_replenish": true,
     "replenish_quantity": 1,
@@ -371,7 +371,7 @@
   },
   "MLM2904676579": {
     "label": "Clip 5 Negro 7W",
-    "real_stock": 8,
+    "real_stock": 7,
     "min_visible": 1,
     "auto_replenish": true,
     "replenish_quantity": 1,
