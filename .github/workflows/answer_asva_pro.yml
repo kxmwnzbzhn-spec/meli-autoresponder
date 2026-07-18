@@ -20,6 +20,7 @@ jobs:
           MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
           MELI_REFRESH_TOKEN_ASVA: ${{ secrets.MELI_REFRESH_TOKEN_ASVA }}
           MELI_REFRESH_TOKEN_KARIME: ${{ secrets.MELI_REFRESH_TOKEN_KARIME }}
+          MELI_REFRESH_TOKEN_LIGIA: ${{ secrets.MELI_REFRESH_TOKEN_LIGIA }}
           TOKEN_SHARED: ${{ secrets.TOKEN_SHARED }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
