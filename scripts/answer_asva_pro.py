@@ -15,6 +15,7 @@ import meli_token
 ACCOUNTS = {
     "ASVA":   os.environ.get("MELI_REFRESH_TOKEN_ASVA"),
     "KARIME": os.environ.get("MELI_REFRESH_TOKEN_KARIME"),
+    "LIGIA":  os.environ.get("MELI_REFRESH_TOKEN_LIGIA"),
 }
 GEMINI_KEY = os.environ.get("GEMINI_API_KEY")
 TG_BOT     = os.environ.get("TELEGRAM_BOT_TOKEN")
