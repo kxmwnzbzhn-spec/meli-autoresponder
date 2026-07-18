@@ -10,7 +10,12 @@ ASVA pro context-aware bot.
 import os, sys, json, time, re, requests
 import meli_token
 
-ASVA_TOKEN = os.environ.get("MELI_REFRESH_TOKEN_ASVA")
+# Cuentas gestionadas por este bot context-aware con Gemini.
+# Agregar mas cuentas aqui es "solo" mapear label -> env var.
+ACCOUNTS = {
+    "ASVA":   os.environ.get("MELI_REFRESH_TOKEN_ASVA"),
+    "KARIME": os.environ.get("MELI_REFRESH_TOKEN_KARIME"),
+}
 GEMINI_KEY = os.environ.get("GEMINI_API_KEY")
 TG_BOT     = os.environ.get("TELEGRAM_BOT_TOKEN")
 TG_CHAT    = os.environ.get("TELEGRAM_CHAT_ID")
@@ -208,37 +213,46 @@ def craft(q_text, item):
     # Fallback ultra seguro
     return ("fallback", "Buen dia, gracias por tu pregunta. Toda la informacion del producto se encuentra detallada en la descripcion de la publicacion. Si hay algo especifico que necesites, con gusto te apoyamos. Gracias.")
 
-def main():
-    if not ASVA_TOKEN:
-        print("ERROR: MELI_REFRESH_TOKEN_ASVA missing"); sys.exit(1)
-    if not GEMINI_KEY:
-        print("WARN: GEMINI_API_KEY missing — solo templates + fallback")
-
-    r = meli_token.refresh(ASVA_TOKEN)
-    j = r if isinstance(r, dict) else r.json()
+def process_account(label, refresh_tok):
+    """Procesa preguntas UNANSWERED de una cuenta. Devuelve (answered, skipped, errored)."""
+    if not refresh_tok:
+        print(f"\n=== {label}: sin refresh_token, skip ===")
+        return (0, 0, 0)
+    try:
+        r = meli_token.refresh(refresh_tok)
+        j = r if isinstance(r, dict) else r.json()
+    except Exception as e:
+        print(f"\n=== {label}: ERROR refresh ({e}) ===")
+        return (0, 0, 1)
     at = j.get("access_token")
     if not at:
-        print(f"ERROR: refresh fallo: {j}"); sys.exit(1)
+        print(f"\n=== {label}: token invalido ({j.get('error','?')}) ===")
+        return (0, 0, 1)
     H  = {"Authorization": f"Bearer {at}"}
     Hp = {"Authorization": f"Bearer {at}", "Content-Type": "application/json"}
-
-    me = requests.get("https://api.mercadolibre.com/users/me", headers=H, timeout=15).json()
+    try:
+        me = requests.get("https://api.mercadolibre.com/users/me", headers=H, timeout=15).json()
+    except Exception as e:
+        print(f"\n=== {label}: error /me ({e}) ===")
+        return (0, 0, 1)
     uid = me.get("id")
     if not uid:
-        print(f"ERROR: /me sin id: {me}"); sys.exit(1)
-    print(f"=== ASVA ({me.get('nickname')} {uid}) ===")
-
-    q = requests.get(f"https://api.mercadolibre.com/questions/search?seller_id={uid}&status=UNANSWERED&limit=50",
-                     headers=H, timeout=20).json()
+        print(f"\n=== {label}: /me sin id (token expirado) ===")
+        return (0, 0, 1)
+    print(f"\n=== {label} ({me.get('nickname')} {uid}) ===")
+    try:
+        q = requests.get(
+            f"https://api.mercadolibre.com/questions/search?seller_id={uid}&status=UNANSWERED&limit=50",
+            headers=H, timeout=20).json()
+    except Exception as e:
+        print(f"  err questions: {e}")
+        return (0, 0, 1)
     qs = q.get("questions") or []
-    print(f"unanswered: {len(qs)}")
+    print(f"  unanswered: {len(qs)}")
     if not qs:
-        print("nada pendiente"); return
-
+        return (0, 0, 0)
     items_cache = {}
     answered = skipped_paused = errored = 0
-    detail = []
-
     for ques in qs:
         qid = ques.get("id")
         text = ques.get("text", "")
@@ -247,7 +261,6 @@ def main():
             items_cache[iid] = fetch_item(iid, H)
         item = items_cache[iid]
         title_short = (item["title"][:55] if item else iid)
-        # Saltar items no activos
         if item and item.get("status") and item["status"] != "active":
             skipped_paused += 1
             print(f"  [SKIP {item['status']}] {iid} '{title_short}' Q: '{text[:70]}'")
@@ -261,7 +274,6 @@ def main():
                                json={"question_id": qid, "text": ans}, timeout=20)
             if rp.status_code in (200, 201):
                 answered += 1
-                detail.append((title_short, text[:80], ans[:120]))
             else:
                 errored += 1
                 print(f"    err {rp.status_code}: {rp.text[:200]}")
@@ -269,13 +281,28 @@ def main():
             errored += 1
             print(f"    exc: {e}")
         time.sleep(1)
+    print(f"  --- {label} respondidas={answered} pausadas={skipped_paused} errores={errored}")
+    return (answered, skipped_paused, errored)
 
-    print(f"\n=== ASVA RESUMEN  respondidas={answered}  saltadas_pausadas={skipped_paused}  errores={errored} ===")
-    # Telegram solo si hubo trabajo
-    if answered or errored:
-        msg = f"<b>ASVA bot</b>\nRespondidas: {answered}\nPausadas (skip): {skipped_paused}\nErrores: {errored}"
-        if errored:
-            telegram(msg)
+
+def main():
+    if not GEMINI_KEY:
+        print("WARN: GEMINI_API_KEY missing - solo templates + fallback")
+
+    tot_ans = tot_skip = tot_err = 0
+    per_acct = {}
+    for label, rt in ACCOUNTS.items():
+        a, s_, e_ = process_account(label, rt)
+        per_acct[label] = (a, s_, e_)
+        tot_ans += a; tot_skip += s_; tot_err += e_
+
+    print(f"\n=== TOTAL respondidas={tot_ans}  pausadas={tot_skip}  errores={tot_err} ===")
+    # Telegram: solo si hubo errores o mucho trabajo
+    if tot_err or tot_ans >= 5:
+        lines = ["<b>MELI answer-pro</b>"]
+        for lbl,(a,s_,e_) in per_acct.items():
+            lines.append(f"{lbl}: resp {a} / skip {s_} / err {e_}")
+        telegram("\n".join(lines))
 
 if __name__ == "__main__":
     main()
