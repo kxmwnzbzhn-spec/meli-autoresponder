@@ -7,30 +7,14 @@ AT=r["access_token"]
 print(f"NEW_RT_LIGIA: {r['refresh_token']}",flush=True)
 H={"Authorization":f"Bearer {AT}","Content-Type":"application/json"}
 
-sb_url="https://wnuhslmryspnypbxbfjf.supabase.co"
-sb_key="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndudWhzbG1yeXNwbnlwYnhiZmpmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwNDMzOTMsImV4cCI6MjA5NDYxOTM5M30.Rj3RIWyGvqRk91bYVRQpFF4al3oMWfjNs-IPIdHQP3E"
-sh={"apikey":sb_key,"Authorization":f"Bearer {sb_key}","Content-Type":"application/json"}
-
 for iid in ["MLM3152563611","MLM5745385304"]:
-    # 1. Quitar de priority_replenish PRIMERO (para que bot no reactive mientras pausamos)
-    r=requests.delete(f"{sb_url}/rest/v1/meli_priority_replenish?item_id=eq.{iid}",headers=sh,timeout=10)
-    print(f"{iid} priority DELETE: {r.status_code}",flush=True)
-    # 2. Insertar en no_replenish
-    row={"item_id":iid,"account":"LIGIA","reason":"user pidió pausar + block 2026-07-19"}
-    r=requests.post(f"{sb_url}/rest/v1/meli_no_replenish_items",headers={**sh,"Prefer":"resolution=merge-duplicates"},json=row,timeout=10)
-    print(f"{iid} no_replenish INSERT: {r.status_code}",flush=True)
-    # 3. Pausar en MELI
-    g=requests.get(f"https://api.mercadolibre.com/items/{iid}?attributes=id,status",headers=H,timeout=10).json()
-    before=g.get("status")
-    if before=="active":
-        pr=requests.put(f"https://api.mercadolibre.com/items/{iid}",headers=H,json={"status":"paused"},timeout=10).json()
-        print(f"  {iid} {before} -> {pr.get('status')} err={pr.get('message','')}",flush=True)
+    g=requests.get(f"https://api.mercadolibre.com/items/{iid}?attributes=id,status,sub_status,available_quantity,last_updated",headers=H,timeout=10).json()
+    print(f"\n{iid} status={g.get('status')} qty={g.get('available_quantity')} sub={g.get('sub_status')} last_upd={g.get('last_updated')}",flush=True)
+    
+    # Force pause NOW regardless of current state
+    if g.get("status")=="active":
+        pr=requests.put(f"https://api.mercadolibre.com/items/{iid}",headers=H,json={"status":"paused"},timeout=15).json()
+        print(f"  FORCE PAUSED: status={pr.get('status')} err={pr.get('message','')}",flush=True)
     else:
-        print(f"  {iid} already {before} — no PUT needed",flush=True)
-    time.sleep(0.5)
-
-# Verify none currently active
-print(f"\n=== VERIFY ===",flush=True)
-for iid in ["MLM3152563611","MLM5745385304"]:
-    g=requests.get(f"https://api.mercadolibre.com/items/{iid}?attributes=id,status",headers=H,timeout=10).json()
-    print(f"  {iid}: status={g.get('status')}",flush=True)
+        print(f"  ya está {g.get('status')}, no PUT",flush=True)
+    time.sleep(1)
