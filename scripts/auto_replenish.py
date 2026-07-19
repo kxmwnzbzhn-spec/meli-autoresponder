@@ -92,17 +92,21 @@ while time.time()<end:
                                           "account":r.get("account"),
                                           "auto_pause":bool(r.get("auto_pause_when_zero",True))}
         except: pass
-    # Reload priority list every 10 ticks (~5 min) so new entries are picked up mid-loop
+    # Reload priority list AND no_replenish blocklist every 10 ticks (~5 min)
     if tick_num % 10 == 0:
         try:
             priority=[r for r in sb_get("meli_priority_replenish","select=item_id,account,default_qty") if r.get("item_id")]
-            print(f"[t{tick_num} RELOAD] priority list reloaded: {len(priority)} items")
+            no_replenish_items=set(r["item_id"] for r in sb_get("meli_no_replenish_items","select=item_id"))
+            print(f"[t{tick_num} RELOAD] priority={len(priority)} no_replenish={len(no_replenish_items)}")
         except: pass
     try:
         if 'priority' not in dir():
             priority=[r for r in sb_get("meli_priority_replenish","select=item_id,account,default_qty") if r.get("item_id")]
         for pr in priority:
             iid=pr["item_id"]; acct=pr.get("account"); qty=int(pr.get("default_qty") or 1)
+            # DEFENSIVE: skip if in no_replenish blocklist (never reactivate user-blocked items)
+            if iid in no_replenish_items:
+                continue
             cap=capped_map.get(iid)
             if cap:
                 qty=cap["visible_qty"]
