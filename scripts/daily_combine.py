@@ -220,9 +220,9 @@ def main():
     per_account = {}
     delivered_records = []  # para INSERT batch al final
     today_cdmx = (datetime.now(TZ)).strftime("%Y-%m-%d")
-    accounts = ["Claribel", "Asva", "Adrian", "Mayrely", "Lupita", "Karime"]
-    artifact_map = {"Claribel": "Claribel", "Asva": "Asva", "Adrian": "Ah", "Mayrely": "Mc", "Lupita": "Lupita", "Karime": "Karime"}
-    file_map     = {"Claribel": "CLARIBEL", "Asva": "ASVA", "Adrian": "AH", "Mayrely": "MC", "Lupita": "LUPITA", "Karime": "KARIME"}
+    accounts = ["Claribel", "Asva", "Adrian", "Mayrely", "Lupita", "Karime", "Ligia"]
+    artifact_map = {"Claribel": "Claribel", "Asva": "Asva", "Adrian": "Ah", "Mayrely": "Mc", "Lupita": "Lupita", "Karime": "Karime", "Ligia": "Ligia"}
+    file_map     = {"Claribel": "CLARIBEL", "Asva": "ASVA", "Adrian": "AH", "Mayrely": "MC", "Lupita": "LUPITA", "Karime": "KARIME", "Ligia": "LIGIA"}
     for acc in accounts:
         adir = artifact_map[acc]; fname = file_map[acc]
         candidates = [
