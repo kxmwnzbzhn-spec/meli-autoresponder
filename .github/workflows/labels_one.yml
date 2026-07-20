@@ -61,6 +61,7 @@ jobs:
           MELI_REFRESH_TOKEN_MC:       ${{ secrets.MELI_REFRESH_TOKEN_MC }}
           MELI_REFRESH_TOKEN_LUPITA:   ${{ secrets.MELI_REFRESH_TOKEN_LUPITA }}
           MELI_REFRESH_TOKEN_KARIME:   ${{ secrets.MELI_REFRESH_TOKEN_KARIME }}
+          MELI_REFRESH_TOKEN_LIGIA:    ${{ secrets.MELI_REFRESH_TOKEN_LIGIA }}
         run: python scripts/labels_one.py
       - uses: actions/upload-artifact@v4
         if: always()
