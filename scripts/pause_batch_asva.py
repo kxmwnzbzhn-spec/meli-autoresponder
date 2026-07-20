@@ -1,4 +1,4 @@
-import os, requests, json
+import os, requests, json, time
 APP_ID=os.environ["MELI_APP_ID"]; APP_SECRET=os.environ["MELI_APP_SECRET"]
 RT=os.environ["MELI_REFRESH_TOKEN_ASVA"]
 r=requests.post("https://api.mercadolibre.com/oauth/token",
@@ -7,14 +7,25 @@ AT=r["access_token"]
 print(f"NEW_RT_ASVA: {r['refresh_token']}",flush=True)
 H={"Authorization":f"Bearer {AT}","Content-Type":"application/json"}
 
-ITEMS=["MLM2886030837","MLM5233480022","MLM3066033037","MLM3066095021",
-       "MLM5607789818","MLM5576391292","MLM3049333265","MLM5656253306"]
+sb_url="https://wnuhslmryspnypbxbfjf.supabase.co"
+sb_key="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndudWhzbG1yeXNwbnlwYnhiZmpmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwNDMzOTMsImV4cCI6MjA5NDYxOTM5M30.Rj3RIWyGvqRk91bYVRQpFF4al3oMWfjNs-IPIdHQP3E"
+sh={"apikey":sb_key,"Authorization":f"Bearer {sb_key}","Content-Type":"application/json"}
 
-for iid in ITEMS:
-    g=requests.get(f"https://api.mercadolibre.com/items/{iid}?attributes=id,status,available_quantity,title",headers=H,timeout=10).json()
-    before=g.get("status")
-    title=g.get("title","?")[:50]
-    r=requests.put(f"https://api.mercadolibre.com/items/{iid}",headers=H,json={"status":"paused"},timeout=10).json()
-    after=r.get("status")
-    err=r.get("error","")
-    print(f"{iid} {before} -> {after} err={err} | {title}",flush=True)
+IID="MLM5705146584"
+
+r=requests.delete(f"{sb_url}/rest/v1/meli_priority_replenish?item_id=eq.{IID}",headers=sh,timeout=10)
+print(f"priority DELETE: {r.status_code}",flush=True)
+row={"item_id":IID,"account":"ASVA","reason":"user pidió pausar + no reactivar 2026-07-20"}
+r=requests.post(f"{sb_url}/rest/v1/meli_no_replenish_items",headers={**sh,"Prefer":"resolution=merge-duplicates"},json=row,timeout=10)
+print(f"no_replenish INSERT: {r.status_code}",flush=True)
+
+g=requests.get(f"https://api.mercadolibre.com/items/{IID}?attributes=id,status,title",headers=H,timeout=10).json()
+before=g.get("status")
+print(f"BEFORE: {before} | {(g.get('title') or '?')[:60]}",flush=True)
+if before=="active":
+    pr=requests.put(f"https://api.mercadolibre.com/items/{IID}",headers=H,json={"status":"paused"},timeout=10).json()
+    print(f"PAUSED: status={pr.get('status')} err={pr.get('message','')}",flush=True)
+
+time.sleep(1)
+g=requests.get(f"https://api.mercadolibre.com/items/{IID}?attributes=id,status,sub_status",headers=H,timeout=10).json()
+print(f"VERIFY: status={g.get('status')} sub={g.get('sub_status')}",flush=True)
