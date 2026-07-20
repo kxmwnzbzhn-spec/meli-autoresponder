@@ -161,8 +161,34 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
+  build-ligia:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: |
+          sudo apt-get update || true
+          sudo apt-get install -y poppler-utils || (sudo apt-get update && sudo apt-get install -y poppler-utils)
+      - run: pip install requests pypdf reportlab pdf2image Pillow -q
+      - env:
+          ACCOUNT: Ligia
+          MELI_APP_ID:              ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET:          ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_LIGIA: ${{ secrets.MELI_REFRESH_TOKEN_LIGIA }}
+          SUPABASE_URL:             ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY:     ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: python scripts/labels_one.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: labels-Ligia
+          path: ETIQUETAS_LIGIA.pdf
+          if-no-files-found: error
+          retention-days: 7
+
   combine-and-upload:
-    needs: [build-claribel, build-asva, build-adrian, build-mc, build-lupita, build-karime]
+    needs: [build-claribel, build-asva, build-adrian, build-mc, build-lupita, build-karime, build-ligia]
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
