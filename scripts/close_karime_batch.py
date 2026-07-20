@@ -6,16 +6,28 @@ r=requests.post("https://api.mercadolibre.com/oauth/token",
 AT=r["access_token"]
 print(f"NEW_RT_KARIME: {r['refresh_token']}",flush=True)
 H={"Authorization":f"Bearer {AT}","Content-Type":"application/json"}
-IID="MLM3129625715"
-g=requests.get(f"https://api.mercadolibre.com/items/{IID}?attributes=id,status,sub_status,title",headers=H,timeout=10).json()
-print(f"BEFORE: status={g.get('status')} sub={g.get('sub_status')} title={g.get('title','?')[:60]}",flush=True)
-st=g.get("status")
-if st=="active":
-    pr=requests.put(f"https://api.mercadolibre.com/items/{IID}",headers=H,json={"status":"paused"},timeout=10).json()
-    print(f"paused: {pr.get('status')} err={pr.get('message','')}",flush=True)
-    time.sleep(1)
-if st not in ("closed","under_review"):
-    cr=requests.put(f"https://api.mercadolibre.com/items/{IID}",headers=H,json={"status":"closed"},timeout=10).json()
-    print(f"closed: {cr.get('status')} err={cr.get('message','')}",flush=True)
-g2=requests.get(f"https://api.mercadolibre.com/items/{IID}?attributes=id,status",headers=H,timeout=10).json()
-print(f"FINAL: status={g2.get('status')}",flush=True)
+
+sb_url="https://wnuhslmryspnypbxbfjf.supabase.co"
+sb_key="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndudWhzbG1yeXNwbnlwYnhiZmpmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwNDMzOTMsImV4cCI6MjA5NDYxOTM5M30.Rj3RIWyGvqRk91bYVRQpFF4al3oMWfjNs-IPIdHQP3E"
+sh={"apikey":sb_key,"Authorization":f"Bearer {sb_key}","Content-Type":"application/json"}
+
+for iid in ["MLM3129626365","MLM5705924478"]:
+    r=requests.delete(f"{sb_url}/rest/v1/meli_priority_replenish?item_id=eq.{iid}",headers=sh,timeout=10)
+    print(f"{iid} priority DELETE: {r.status_code}",flush=True)
+    row={"item_id":iid,"account":"KARIME","reason":"user pidió pausar + block 2026-07-19"}
+    r=requests.post(f"{sb_url}/rest/v1/meli_no_replenish_items",headers={**sh,"Prefer":"resolution=merge-duplicates"},json=row,timeout=10)
+    print(f"{iid} no_replenish INSERT: {r.status_code}",flush=True)
+    g=requests.get(f"https://api.mercadolibre.com/items/{iid}?attributes=id,status",headers=H,timeout=10).json()
+    before=g.get("status")
+    if before=="active":
+        pr=requests.put(f"https://api.mercadolibre.com/items/{iid}",headers=H,json={"status":"paused"},timeout=10).json()
+        print(f"  {iid} {before} -> {pr.get('status')} err={pr.get('message','')}",flush=True)
+    else:
+        print(f"  {iid} already {before}",flush=True)
+    time.sleep(0.5)
+
+# Verify
+print(f"\n=== VERIFY ===",flush=True)
+for iid in ["MLM3129626365","MLM5705924478"]:
+    g=requests.get(f"https://api.mercadolibre.com/items/{iid}?attributes=id,status,sub_status",headers=H,timeout=10).json()
+    print(f"  {iid}: status={g.get('status')} sub={g.get('sub_status')}",flush=True)
