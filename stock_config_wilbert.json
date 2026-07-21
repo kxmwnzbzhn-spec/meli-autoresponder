@@ -126,7 +126,7 @@
     "line": "Armaf-Aqua",
     "auto_replenish": true,
     "min_visible": 1,
-    "active": true,
+    "active": false,
     "title": "Armaf Odyssey Aqua Men 100ml Edp",
     "catalog_product_id": "MLM23633415",
     "type": "catalog_no_variations",
@@ -135,7 +135,7 @@
     "master_stock": 6,
     "floor_price": 299,
     "ceiling_price": 999,
-    "agotado": false,
+    "agotado": true,
     "sku": "PERF-ARMAF-ODYSSEY-AQUA-MEN",
     "available_quantity": 1
   },
