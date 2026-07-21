@@ -1132,11 +1132,27 @@
       "original_price": 199.0,
       "floor": 299,
       "ceiling": 258.7,
-      "last_change_at": 1784638916,
+      "last_change_at": 1784646834,
       "role": "winner",
       "label": "Bocina Bluetooth Port\u00e1til Asva Clip"
+    },
+    "MLM3152557697": {
+      "original_price": 999.0,
+      "floor": 549.45,
+      "ceiling": 1298.7,
+      "last_change_at": 1784646834,
+      "role": "step_1",
+      "label": "Bocina Inal\u00e1mbrica Beats Pill Con B"
+    },
+    "MLM3152557241": {
+      "original_price": 999.0,
+      "floor": 549.45,
+      "ceiling": 1298.7,
+      "last_change_at": 1784646834,
+      "role": "step_1",
+      "label": "Bocina Inal\u00e1mbrica Beats Pill Con B"
     }
   },
-  "last_run": 1784638916,
+  "last_run": 1784646834,
   "winner_account": "RAYMUNDO"
 }
