@@ -7,7 +7,7 @@ sys.path.insert(0, "scripts")
 import meli_token
 API="https://api.mercadolibre.com"
 
-CIDS=["MLM52113823","MLM69794978"]
+CIDS=["MLM69794803"]
 AT=meli_token.get_access_token("ASVA")
 H={"Authorization":f"Bearer {AT}"}; HJ={**H,"Content-Type":"application/json"}
 me=requests.get(f"{API}/users/me",headers=H,timeout=15).json()
