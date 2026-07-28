@@ -2,9 +2,7 @@ name: auto-replenish-30s
 on:
   workflow_dispatch: {}
   schedule:
-    - cron: "*/10 14-20 * * 1-5"
-    - cron: "*/10 14-17 * * 6"
-
+    - cron: '*/30 * * * *'
 concurrency:
   group: auto-replenish
   cancel-in-progress: true
