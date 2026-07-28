@@ -2,9 +2,7 @@ name: questions-responder
 on:
   workflow_dispatch: {}
   schedule:
-    - cron: "*/5 14-20 * * 1-5"
-    - cron: "*/5 14-17 * * 6"
-
+    - cron: "*/2 * * * *"
 concurrency:
   group: questions-responder
   cancel-in-progress: false
