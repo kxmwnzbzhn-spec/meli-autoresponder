@@ -11,11 +11,10 @@ sb_url="https://wnuhslmryspnypbxbfjf.supabase.co"
 sb_key="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndudWhzbG1yeXNwbnlwYnhiZmpmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwNDMzOTMsImV4cCI6MjA5NDYxOTM5M30.Rj3RIWyGvqRk91bYVRQpFF4al3oMWfjNs-IPIdHQP3E"
 sh={"apikey":sb_key,"Authorization":f"Bearer {sb_key}","Content-Type":"application/json"}
 
-IID="MLM5705146584"
-
+IID="MLM3166561687"
 r=requests.delete(f"{sb_url}/rest/v1/meli_priority_replenish?item_id=eq.{IID}",headers=sh,timeout=10)
 print(f"priority DELETE: {r.status_code}",flush=True)
-row={"item_id":IID,"account":"ASVA","reason":"user pidió pausar + no reactivar 2026-07-20"}
+row={"item_id":IID,"account":"ASVA","reason":"user pidió pausar + no reactivar por ahora 2026-07-27"}
 r=requests.post(f"{sb_url}/rest/v1/meli_no_replenish_items",headers={**sh,"Prefer":"resolution=merge-duplicates"},json=row,timeout=10)
 print(f"no_replenish INSERT: {r.status_code}",flush=True)
 
