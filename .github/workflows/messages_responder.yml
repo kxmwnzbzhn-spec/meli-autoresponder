@@ -2,9 +2,7 @@ name: messages-responder
 on:
   workflow_dispatch: {}
   schedule:
-    - cron: "*/5 14-20 * * 1-5"
-    - cron: "*/5 14-17 * * 6"
-
+    - cron: "*/10 * * * *"
 concurrency:
   group: messages-responder
   cancel-in-progress: false
