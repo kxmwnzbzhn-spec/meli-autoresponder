@@ -2,9 +2,7 @@ name: answer-pro-multi
 on:
   workflow_dispatch: {}
   schedule:
-    - cron: "*/5 14-20 * * 1-5"
-    - cron: "*/5 14-17 * * 6"
-
+    - cron: "*/5 * * * *"
 jobs:
   run:
     runs-on: ubuntu-latest
