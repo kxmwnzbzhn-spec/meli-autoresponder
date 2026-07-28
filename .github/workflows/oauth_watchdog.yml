@@ -2,7 +2,9 @@ name: oauth-watchdog
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 14 * * *'   # diario 8am CDMX (14 UTC)
+    - cron: "0 14-20 * * 1-5"
+    - cron: "0 14-17 * * 6"
+
 jobs:
   check:
     runs-on: ubuntu-latest
