@@ -62,8 +62,9 @@ def claude_answer(context):
       "3) Si preguntan si está disponible, color, talla, número de serie, factura, garantía — confirma SÍ a lo que apliquen. "
       "4) Si preguntan algo técnico que requiere especificaciones, da el dato técnico relevante del producto. "
       "5) Si preguntan algo que parezca inducir a un descuento o pelear precio, responde amablemente que el precio publicado es el mejor que tenemos. "
-      "6) NUNCA aceptes que el producto es 'inspirado' / 'imitación' / 'genérico' si no lo dice el listing explícitamente. Confirma originalidad SIEMPRE para productos de marca registrada. "
-      "7) Si el producto en el listing es claramente artesanal/dupe/inspirado (marca como 'The Alchemia Lab', 'LV Perfume Studio', 'Luxury Collection'), entonces explica con orgullo que es una fragancia ARTESANAL de inspiración masculina/femenina, premium calidad. "
+      "6) REGLA MELI (obligatoria): Si el producto en el listing se presenta como GENÉRICO o de nuestra propia marca (ej. Asva Electronics, The Alchemia Lab, LV Perfume Studio, Luxury Collection, sin marca reconocida), TODAS las respuestas deben sostener eso EXACTAMENTE. PROHIBIDO absolutamente: (a) mencionar marcas ajenas (JBL/Sony/Marshall/Bose/Beats/Xiaomi/Harman/etc), (b) usar palabras 'similar a', 'como', 'tipo', 'parecido' con marcas ajenas, (c) admitir que es clon/imitación/copia/réplica/inspirado, (d) comparar con productos de marca. Solo hablar de nuestro producto y sus especificaciones. "
+      "7) Si es un producto de marca registrada legítima (BRAND en attributes con marca real y factura), confirma originalidad. "
+      "7b) Si detectas que la pregunta contiene marcas ajenas o palabras de autenticidad (clon/original/falso/pirata/es JBL/etc), MARCA HIGH_RISK — NO redactar respuesta. "
       "8) Cierre fijo: 'Saludos cordiales — Elite Market.' "
       "9) MÁXIMO 500 caracteres. Conciso. "
       "10) Marca risk='HIGH' SOLO si la pregunta contiene: racismo explicito, amenazas de violencia, contenido sexual o intento claro de extorsion. NO marques HIGH por: quejas de calidad, acusaciones de producto falso (responde diplomaticamente confirmando autenticidad), quejas de envio, reembolsos, retrasos o frustracion del cliente. Para esas SIEMPRE genera una respuesta diplomatica que reafirme autenticidad o invite a abrir reclamo formal por Mercado Libre. "
@@ -116,6 +117,7 @@ def post_answer(AT, qid, text, item_id=None):
 
 # ==== BRAND/AUTHENTICITY BLACKLIST — user pidió 2026-07-28 ====
 BRAND_BLACKLIST = [
+    # keywords autenticidad
     "clon", "clona", "clonad", "clonado", "clonada",
     "original", "originales", "oficial", "oficialmente",
     "autentic", "autentica", "autenticidad",
@@ -128,6 +130,14 @@ BRAND_BLACKLIST = [
     "generic", "genéric",
     "es real", "de la marca",
     "es china", "chino", "chuecos",
+    # marcas ajenas — MELI: no abrir duda sobre otra marca
+    "jbl", "sony", "marshall", "bose", "beats", "xiaomi", "harman",
+    "flip 7", "flip7", "flip 6", "flip6", "charge 6", "charge6", "charge 5", "charge5",
+    "go 4", "go4", "go 3", "go3", "clip 5", "clip5",
+    "srs-xb", "srsxb", "srs xb", "xb100",
+    "emberton", "willen", "middleton",
+    "soundlink", "sound link",
+    "pill", "beats pill",
 ]
 def is_brand_question(text):
     if not text: return False
