@@ -191,7 +191,10 @@ def process_account(nick, env_var):
                f"Item: <code>{item_id}</code>\n"
                f"Producto: {prod_title[:70]}\n"
                f"Pregunta: {qtext[:300]}\n"
-               f"→ CONTESTA MANUAL en MELI")
+               f"Buyer ID: <code>{buyer}</code>\n"
+               f"👤 Perfil: https://www.mercadolibre.com.mx/perfil/{buyer}\n"
+               f"❓ Pregunta MELI: https://www.mercadolibre.com.mx/vender/preguntas?q={qid}\n"
+               f"🚫 En el panel MELI: click en <i>Denunciar / Bloquear</i> junto a la pregunta")
             print(f"  [BRAND_SKIP] Q{qid} {qtext[:80]}")
             continue
         ctx={
