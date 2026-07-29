@@ -5,31 +5,31 @@ r=requests.post("https://api.mercadolibre.com/oauth/token",
   data={"grant_type":"refresh_token","client_id":APP_ID,"client_secret":APP_SECRET,"refresh_token":RT},timeout=25).json()
 AT=r["access_token"]
 print(f"NEW_RT_ASVA: {r['refresh_token']}",flush=True)
-H={"Authorization":f"Bearer {AT}"}
+H={"Authorization":f"Bearer {AT}","Content-Type":"application/json"}
+USER_ID=1668713481
 
-IID="MLM5705329722"
+# 1) List current blacklist
+for ep in [
+    f"/users/{USER_ID}/black_list/users",  # v1
+    f"/users/{USER_ID}/black_list",         # v0
+    f"/users/{USER_ID}/blacklists",         # alt
+    f"/users/{USER_ID}/blocked_users",      # alt
+    f"/marketplace/moderation/black_list?seller_id={USER_ID}",
+    f"/messaging/moderation/users?seller_id={USER_ID}",
+]:
+    r=requests.get(f"https://api.mercadolibre.com{ep}",headers=H,timeout=8)
+    print(f"\nGET {ep} → {r.status_code}",flush=True)
+    print(f"  body: {r.text[:300]}",flush=True)
 
-# 1) Verify item exists and status
-g=requests.get(f"https://api.mercadolibre.com/items/{IID}",headers=H,timeout=10).json()
-print(f"\n=== ITEM {IID} ===",flush=True)
-print(f"  title: {g.get('title','?')[:80]}",flush=True)
-print(f"  status: {g.get('status')} sub_status: {g.get('sub_status')}",flush=True)
-print(f"  seller_id: {g.get('seller_id')}",flush=True)
-print(f"  health: {g.get('health')}",flush=True)
-
-# 2) Get ALL questions on this item (answered + pending)
-q=requests.get(f"https://api.mercadolibre.com/questions/search?item={IID}&sort_fields=date_created&sort_types=DESC&limit=50",headers=H,timeout=15).json()
-print(f"\n=== QUESTIONS on {IID}: total={q.get('total','?')} ===",flush=True)
-for question in q.get("questions",[])[:20]:
-    qtext=question.get("text","")[:120]
-    qid=question.get("id")
-    qdate=question.get("date_created","")
-    status=question.get("status","")
-    from_user=question.get("from",{}).get("id","?")
-    ans=question.get("answer") or {}
-    atext=ans.get("text","")[:200] if ans else ""
-    adate=ans.get("date_created","") if ans else ""
-    print(f"\n  QID {qid} [{status}] {qdate}",flush=True)
-    print(f"    Q [{from_user}]: {qtext}",flush=True)
-    if atext:
-        print(f"    A ({adate}): {atext}",flush=True)
+# 2) Try block a test user (using idiot from the JBL question: 731409256)
+TEST_BUYER = 731409256
+for ep in [
+    (f"/users/{USER_ID}/black_list/users/{TEST_BUYER}", "POST"),
+    (f"/users/{USER_ID}/black_list", "POST"),  # body: {"user_id":...}
+    (f"/marketplace/moderation/black_list", "POST"),  # body: {"user_id":...}
+]:
+    url, method = ep
+    body = {"user_id": TEST_BUYER}
+    r=requests.request(method, f"https://api.mercadolibre.com{url}", headers=H, json=body, timeout=8)
+    print(f"\n{method} {url} → {r.status_code}",flush=True)
+    print(f"  body: {r.text[:400]}",flush=True)
