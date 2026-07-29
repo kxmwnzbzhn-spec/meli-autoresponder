@@ -312,7 +312,7 @@ def process_account(label, refresh_tok):
         if is_brand_question(text):
             skipped_paused += 1
             print(f"  [BRAND_SKIP] {iid} '{title_short}' Q: '{text[:100]}'")
-            telegram(f"⚠️ Pregunta MARCA sin responder\nItem: {iid}\nTitulo: {title_short}\nQ: {text[:200]}\n→ CONTESTA MANUAL en MELI")
+            telegram(f"⚠️ Pregunta MARCA sin responder\nItem: {iid}\nTitulo: {title_short}\nQ: {text[:200]}\nBuyer: {ques.get('from',{}).get('id','?')}\nPerfil: https://www.mercadolibre.com.mx/perfil/{ques.get('from',{}).get('id','')}\n→ En MELI: Denunciar / Bloquear junto a la pregunta")
             continue
         kind, ans = craft(text, item)
         print(f"  [{kind}] {iid} '{title_short}'")
