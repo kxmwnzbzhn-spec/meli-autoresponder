@@ -5,42 +5,31 @@ r=requests.post("https://api.mercadolibre.com/oauth/token",
   data={"grant_type":"refresh_token","client_id":APP_ID,"client_secret":APP_SECRET,"refresh_token":RT},timeout=25).json()
 AT=r["access_token"]
 print(f"NEW_RT_ASVA: {r['refresh_token']}",flush=True)
-H={"Authorization":f"Bearer {AT}","Content-Type":"application/json"}
-USER_ID=1668713481
+H={"Authorization":f"Bearer {AT}"}
 
-IID="MLM5656253306"
+IID="MLM5705329722"
 
-# 1) Item details + fulfillment info
-print(f"\n=== 1. ITEM {IID} ===",flush=True)
+# 1) Verify item exists and status
 g=requests.get(f"https://api.mercadolibre.com/items/{IID}",headers=H,timeout=10).json()
-print(f"  title: {g.get('title','?')[:70]}",flush=True)
-print(f"  status: {g.get('status')} sub={g.get('sub_status')}",flush=True)
-print(f"  price: ${g.get('price')} qty: {g.get('available_quantity')}",flush=True)
-print(f"  catalog_product_id: {g.get('catalog_product_id')}",flush=True)
-sh=g.get("shipping",{})
-print(f"  shipping mode: {sh.get('mode')} logistic_type: {sh.get('logistic_type')}",flush=True)
-print(f"  inventory_id: {g.get('inventory_id')}",flush=True)
-user_product_id=g.get("user_product_id")
-print(f"  user_product_id: {user_product_id}",flush=True)
+print(f"\n=== ITEM {IID} ===",flush=True)
+print(f"  title: {g.get('title','?')[:80]}",flush=True)
+print(f"  status: {g.get('status')} sub_status: {g.get('sub_status')}",flush=True)
+print(f"  seller_id: {g.get('seller_id')}",flush=True)
+print(f"  health: {g.get('health')}",flush=True)
 
-# 2) Check user fulfillment onboarding
-print(f"\n=== 2. USER FULFILLMENT STATUS ===",flush=True)
-u=requests.get(f"https://api.mercadolibre.com/users/{USER_ID}",headers=H,timeout=10).json()
-print(f"  status.mercadopago_account_type: {u.get('status',{}).get('mercadopago_account_type')}",flush=True)
-tag=u.get("tags",[])
-print(f"  tags: {tag[:10]}",flush=True)
-
-# 3) Try fulfillment endpoints
-for ep in [
-    "/fulfillment/inventory/warehouses",
-    f"/users/{USER_ID}/fulfillment/inventory/eligibility",
-    f"/fulfillment/inventory/eligibility?item_ids={IID}",
-    f"/inventories/{IID}",
-    f"/users/{USER_ID}/products/search?limit=5",
-    "/fbm/inbound_shipments",  # experimental
-]:
-    r=requests.get(f"https://api.mercadolibre.com{ep}",headers=H,timeout=10)
-    ct=r.headers.get('content-type','')
-    body=r.text[:300] if 'json' in ct or r.status_code!=404 else "..."
-    print(f"\n  GET {ep} → {r.status_code}",flush=True)
-    print(f"    body: {body[:400]}",flush=True)
+# 2) Get ALL questions on this item (answered + pending)
+q=requests.get(f"https://api.mercadolibre.com/questions/search?item={IID}&sort_fields=date_created&sort_types=DESC&limit=50",headers=H,timeout=15).json()
+print(f"\n=== QUESTIONS on {IID}: total={q.get('total','?')} ===",flush=True)
+for question in q.get("questions",[])[:20]:
+    qtext=question.get("text","")[:120]
+    qid=question.get("id")
+    qdate=question.get("date_created","")
+    status=question.get("status","")
+    from_user=question.get("from",{}).get("id","?")
+    ans=question.get("answer") or {}
+    atext=ans.get("text","")[:200] if ans else ""
+    adate=ans.get("date_created","") if ans else ""
+    print(f"\n  QID {qid} [{status}] {qdate}",flush=True)
+    print(f"    Q [{from_user}]: {qtext}",flush=True)
+    if atext:
+        print(f"    A ({adate}): {atext}",flush=True)
