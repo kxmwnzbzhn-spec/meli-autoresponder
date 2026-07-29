@@ -33,6 +33,10 @@ ACCOUNTS=[
 ]
 
 # Sin firma. Termina con "Quedamos atentos."
+# ==== KILL SWITCH: user pidió NO aceptar devoluciones automáticamente 2026-07-28 ====
+AUTO_ACCEPT_RETURN_ENABLED = False  # cambiar a True para reactivar
+# ==================================================================================
+
 TEMPLATES_ACCEPT={
   "not_working_item":(
     "Hola, lamentamos el inconveniente. Aceptamos la devolución del producto. Por favor inicia el proceso desde "
@@ -245,6 +249,15 @@ def main():
         strategy=f"{reason_name}/decline_compra_protegida_expired_{days_since_delivery}d"
         total_expired+=1
       else:
+        # KILL SWITCH check: user pidió NO aceptar devoluciones automáticamente 2026-07-28
+        if not AUTO_ACCEPT_RETURN_ENABLED:
+          total_skipped+=1
+          print(f"  [{cid}] ⏭ SKIP accept_return (kill switch OFF) reason={reason_name}")
+          upsert_tracked({"claim_id":cid,"account_nick":acct,"status":"opened",
+                          "stage":stage,"reason_id":reason_id,"reason_name":reason_name,
+                          "action_responsible":"respondent",
+                          "last_polled_at":now.isoformat()})
+          continue
         msg=TEMPLATES_ACCEPT.get(key_lookup, TEMPLATES_ACCEPT["default"])
         strategy=f"{reason_name}/accept_return"
       
