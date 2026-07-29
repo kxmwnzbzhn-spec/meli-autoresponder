@@ -35,6 +35,13 @@ REGLAS DURAS:
 - NUNCA discutas con el comprador.
 - NUNCA inventes datos que no esten en el contexto. Si no lo sabes, di que esta en la descripcion.
 
+REGLA MELI OBLIGATORIA (violacion = suspension de publicacion):
+- Si el producto se presenta como GENERICO o de nuestra propia marca (Asva Electronics, The Alchemia Lab, LV Perfume Studio, Luxury Collection, o cualquier marca no reconocida), TODAS las respuestas deben sostener eso EXACTAMENTE.
+- PROHIBIDO: mencionar marcas ajenas (JBL/Sony/Marshall/Bose/Beats/Xiaomi/Harman/etc). PROHIBIDO decir 'similar a', 'como el', 'tipo', 'parecido' con marcas ajenas. PROHIBIDO admitir clon/imitacion/copia/replica/inspirado. PROHIBIDO comparar con productos de marca.
+- Solo hablas del producto de nuestra marca y sus especificaciones concretas.
+- Si la pregunta menciona una marca ajena o palabra de autenticidad, NO respondes — devuelves cadena vacia para escalar a humano.
+
+
 INSTRUCCION DE CONTEXTO:
 - Reflejas EXACTAMENTE lo que dice la descripcion. Si la familia olfativa es amaderada y preguntan 'es fresco?', respondes que NO es fresco, es amaderado segun ficha.
 - Si preguntan por talla/medida y la descripcion incluye guia de tallas, refierete a ella con valores concretos cuando esten disponibles.
@@ -209,18 +216,27 @@ def gemini_answer(q_text, item):
 # ==== BRAND/AUTHENTICITY BLACKLIST — user pidió 2026-07-28 ====
 # Si pregunta contiene UNA de estas → NO responder, alertar Telegram
 BRAND_BLACKLIST = [
+    # keywords autenticidad
     "clon", "clona", "clonad", "clonado", "clonada",
     "original", "originales", "oficial", "oficialmente",
-    "autentic", "autentica", "autenticidad",  # cubre: autentico/a
+    "autentic", "autentica", "autenticidad",
     "falso", "falsa", "falsificad", "falsific",
     "pirata", "piratas", "pirateado",
     "imitacion", "imitación", "imitaciones",
     "replica", "réplica", "réplicas", "replicas",
     "copia", "copiad",
-    "de verdad", "verdader",  # verdadera/verdadero
-    "generic", "genéric",  # generico/a
+    "de verdad", "verdader",
+    "generic", "genéric",
     "es real", "es real?", "de la marca",
     "es china", "chino", "chuecos",
+    # marcas ajenas — MELI: no abrir duda sobre otra marca
+    "jbl", "sony", "marshall", "bose", "beats", "xiaomi", "harman",
+    "flip 7", "flip7", "flip 6", "flip6", "charge 6", "charge6", "charge 5", "charge5",
+    "go 4", "go4", "go 3", "go3", "clip 5", "clip5",
+    "srs-xb", "srsxb", "srs xb", "xb100",
+    "emberton", "willen", "middleton",
+    "soundlink", "sound link",
+    "pill", "beats pill",
 ]
 def is_brand_question(text: str) -> bool:
     """True if question contains any brand/authenticity keyword."""
