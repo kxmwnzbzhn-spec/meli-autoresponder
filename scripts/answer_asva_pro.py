@@ -206,6 +206,32 @@ def gemini_answer(q_text, item):
             return None
     return ans
 
+# ==== BRAND/AUTHENTICITY BLACKLIST — user pidió 2026-07-28 ====
+# Si pregunta contiene UNA de estas → NO responder, alertar Telegram
+BRAND_BLACKLIST = [
+    "clon", "clona", "clonad", "clonado", "clonada",
+    "original", "originales", "oficial", "oficialmente",
+    "autentic", "autentica", "autenticidad",  # cubre: autentico/a
+    "falso", "falsa", "falsificad", "falsific",
+    "pirata", "piratas", "pirateado",
+    "imitacion", "imitación", "imitaciones",
+    "replica", "réplica", "réplicas", "replicas",
+    "copia", "copiad",
+    "de verdad", "verdader",  # verdadera/verdadero
+    "generic", "genéric",  # generico/a
+    "es real", "es real?", "de la marca",
+    "es china", "chino", "chuecos",
+]
+def is_brand_question(text: str) -> bool:
+    """True if question contains any brand/authenticity keyword."""
+    if not text: return False
+    t = text.lower()
+    for kw in BRAND_BLACKLIST:
+        if kw in t:
+            return True
+    return False
+# ================================================================
+
 def craft(q_text, item):
     a = template_answer(q_text, item)
     if a: return ("template", a)
@@ -265,6 +291,12 @@ def process_account(label, refresh_tok):
         if item and item.get("status") and item["status"] != "active":
             skipped_paused += 1
             print(f"  [SKIP {item['status']}] {iid} '{title_short}' Q: '{text[:70]}'")
+            continue
+        # BRAND BLACKLIST: preguntas sobre marca/autenticidad NO se responden automáticamente
+        if is_brand_question(text):
+            skipped_paused += 1
+            print(f"  [BRAND_SKIP] {iid} '{title_short}' Q: '{text[:100]}'")
+            telegram(f"⚠️ Pregunta MARCA sin responder\nItem: {iid}\nTitulo: {title_short}\nQ: {text[:200]}\n→ CONTESTA MANUAL en MELI")
             continue
         kind, ans = craft(text, item)
         print(f"  [{kind}] {iid} '{title_short}'")
