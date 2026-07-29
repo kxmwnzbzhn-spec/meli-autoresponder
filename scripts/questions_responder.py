@@ -114,6 +114,27 @@ def post_answer(AT, qid, text, item_id=None):
             print(f"  [delete err] {e}")
     return r.status_code, r.text[:400]
 
+# ==== BRAND/AUTHENTICITY BLACKLIST — user pidió 2026-07-28 ====
+BRAND_BLACKLIST = [
+    "clon", "clona", "clonad", "clonado", "clonada",
+    "original", "originales", "oficial", "oficialmente",
+    "autentic", "autentica", "autenticidad",
+    "falso", "falsa", "falsificad", "falsific",
+    "pirata", "piratas", "pirateado",
+    "imitacion", "imitación", "imitaciones",
+    "replica", "réplica", "réplicas", "replicas",
+    "copia", "copiad",
+    "de verdad", "verdader",
+    "generic", "genéric",
+    "es real", "de la marca",
+    "es china", "chino", "chuecos",
+]
+def is_brand_question(text):
+    if not text: return False
+    t = text.lower()
+    return any(kw in t for kw in BRAND_BLACKLIST)
+# ================================================================
+
 def process_account(nick, env_var):
     AT, NEW_RT = get_token(env_var)
     if not AT: print(f"[{nick}] no token"); return None
@@ -149,6 +170,20 @@ def process_account(nick, env_var):
                 item=ig.json()
         except: pass
         prod_title=item.get("title","")
+        # BRAND BLACKLIST: no responder preguntas sobre marca/autenticidad
+        if is_brand_question(qtext):
+            high+=1
+            log_ans(account_nick=nick,question_id=qid,item_id=item_id,
+                    buyer_user_id=buyer,question_text=qtext,product_title=prod_title,
+                    risk_level="BRAND_BLACKLIST",
+                    telegram_notified=True,notes="brand_keyword_detected — bot skipped")
+            tg(f"⚠️ <b>Pregunta MARCA sin responder</b>\n<b>{nick}</b> · Q <code>{qid}</code>\n"
+               f"Item: <code>{item_id}</code>\n"
+               f"Producto: {prod_title[:70]}\n"
+               f"Pregunta: {qtext[:300]}\n"
+               f"→ CONTESTA MANUAL en MELI")
+            print(f"  [BRAND_SKIP] Q{qid} {qtext[:80]}")
+            continue
         ctx={
           "account":nick,"product":prod_title,"product_brand":next((a.get("value_name") for a in (item.get("attributes") or []) if a.get("id")=="BRAND"),None),
           "product_price":item.get("price"),"product_status":item.get("status"),
