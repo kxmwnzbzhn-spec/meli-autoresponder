@@ -26,7 +26,6 @@ TITLE = "Bocina Jbl Go 4 Bluetooth Portatil Leer Descripcion Antes Compra"[:60]
 print(f"title: {TITLE} ({len(TITLE)} chars)", flush=True)
 
 payload = {
-    "title": TITLE,
     "family_name": TITLE,
     "category_id": "MLM59800",
     "price": 399,
