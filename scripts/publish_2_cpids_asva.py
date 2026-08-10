@@ -1,4 +1,4 @@
-import os, requests, json, time
+import os, requests, json
 APP_ID=os.environ["MELI_APP_ID"]; APP_SECRET=os.environ["MELI_APP_SECRET"]
 RT=os.environ["MELI_REFRESH_TOKEN_ASVA"]
 r=requests.post("https://api.mercadolibre.com/oauth/token",
@@ -7,73 +7,90 @@ AT=r["access_token"]
 print(f"NEW_RT_ASVA: {r['refresh_token']}",flush=True)
 H={"Authorization":f"Bearer {AT}","Content-Type":"application/json"}
 
-CPIDS=["MLM75774569","MLM75774568"]
-results=[]
+CPID = "MLM44713972"
 
-for CPID in CPIDS:
-    print(f"\n=== CPID {CPID} ===",flush=True)
-    p=requests.get(f"https://api.mercadolibre.com/products/{CPID}",headers=H,timeout=10).json()
-    name=p.get("name","?")
-    dom=p.get("domain_id","?")
-    print(f"  name: {name[:90]}",flush=True)
-    print(f"  domain: {dom}",flush=True)
-    bbw=p.get("buy_box_winner") or {}
-    bbw_price=bbw.get("price")
-    print(f"  buy_box_winner: ${bbw_price}",flush=True)
-    
-    # Elegir categoría según dominio
-    cat_id=None
-    for a in p.get("attributes",[]):
-        if a.get("id")=="ITEM_CATEGORY":
-            cat_id=a.get("value_id"); break
-    if not cat_id:
-        if "ESOTERIC" in dom.upper() or "esoteric" in dom.lower():
-            cat_id="MLM456032"
-        elif "PERFUME" in dom.upper():
-            cat_id="MLM1271"
-        else:
-            cat_id="MLM1271"
-    print(f"  cat: {cat_id}",flush=True)
-    
-    price=int(bbw_price or 399)
-    payload={
-        "catalog_product_id":CPID,
-        "category_id":cat_id,
-        "price":price,
-        "currency_id":"MXN",
-        "available_quantity":1,
-        "buying_mode":"buy_it_now",
-        "condition":"new",
-        "listing_type_id":"gold_pro",
-        "catalog_listing":True,
-        "sale_terms":[{"id":"WARRANTY_TYPE","value_name":"Garantía del vendedor"},
-                      {"id":"WARRANTY_TIME","value_name":"30 días"}]
-    }
-    print(f"  posting: price=${price} cat={cat_id}",flush=True)
-    post=requests.post("https://api.mercadolibre.com/items",headers=H,json=payload,timeout=25).json()
-    if "id" in post:
-        new_id=post["id"]
-        print(f"  ✅ POSTED: {new_id} status={post.get('status')} price=${post.get('price')} qty={post.get('available_quantity')}",flush=True)
-        print(f"  title: {post.get('title','?')[:80]}",flush=True)
-        print(f"  URL: {post.get('permalink','?')}",flush=True)
-        results.append((CPID,new_id,name[:60],price))
-    else:
-        print(f"  ❌ FAIL: {json.dumps(post)[:800]}",flush=True)
-        results.append((CPID,None,name[:60],None))
-    time.sleep(1)
+# Publish catalog listing
+payload = {
+    "catalog_product_id": CPID,
+    "category_id": "MLM59800",
+    "price": 399,
+    "currency_id": "MXN",
+    "available_quantity": 5,
+    "buying_mode": "buy_it_now",
+    "condition": "new",
+    "listing_type_id": "gold_pro",
+    "catalog_listing": True,
+    "sale_terms": [
+        {"id":"WARRANTY_TYPE","value_name":"Garantía del vendedor"},
+        {"id":"WARRANTY_TIME","value_name":"30 días"}
+    ]
+}
+print(f"POSTING catalog CPID={CPID} price=$399 qty=5", flush=True)
+p = requests.post("https://api.mercadolibre.com/items", headers=H, json=payload, timeout=25).json()
+if "id" not in p:
+    print(f"❌ FAIL: {json.dumps(p)[:1500]}", flush=True)
+    exit(1)
 
-# Save to Supabase
-sb_url="https://wnuhslmryspnypbxbfjf.supabase.co"
-sb_key="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndudWhzbG1yeXNwbnlwYnhiZmpmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwNDMzOTMsImV4cCI6MjA5NDYxOTM5M30.Rj3RIWyGvqRk91bYVRQpFF4al3oMWfjNs-IPIdHQP3E"
-sh={"apikey":sb_key,"Authorization":f"Bearer {sb_key}","Content-Type":"application/json","Prefer":"resolution=merge-duplicates"}
-for CPID,new_id,name,price in results:
-    if not new_id: continue
-    row={"item_id":new_id,"account":"ASVA","default_qty":1,"product_name":name,
-         "reason":f"publicado catalog CPID {CPID} en ASVA 2026-07-21"}
-    requests.post(f"{sb_url}/rest/v1/meli_priority_replenish",headers=sh,json=row,timeout=10)
+new_id = p["id"]
+print(f"✅ POSTED: {new_id} status={p.get('status')} price=${p.get('price')} qty={p.get('available_quantity')}", flush=True)
+print(f"  MELI title: {p.get('title','?')[:80]}", flush=True)
+print(f"  URL: {p.get('permalink','?')}", flush=True)
 
-requests.patch(f"{sb_url}/rest/v1/meli_tokens?account=eq.ASVA",headers=sh,json={"refresh_token":r["refresh_token"] if False else os.environ.get("_","")},timeout=10)
+# Set the custom description
+DESC = """BOCINA JBL GO 4 BLUETOOTH – IMPORTANTE: LEER ANTES DE COMPRAR
 
-print(f"\n=== SUMMARY ===",flush=True)
-for CPID,new_id,name,price in results:
-    print(f"  {CPID} -> {new_id} ${price} | {name}",flush=True)
+INFORMACIÓN IMPORTANTE SOBRE ESTA VARIANTE
+Esta publicación corresponde a una bocina JBL GO 4 fabricada en China. Esta variante NO ES COMPATIBLE CON LA APLICACIÓN OFICIAL DE JBL.
+Esto significa que la bocina funciona mediante conexión Bluetooth directa con tu celular, tablet u otro dispositivo compatible, pero NO puede vincularse, configurarse ni administrarse desde la aplicación oficial de JBL.
+Esta característica es una de las razones por las que esta variante se ofrece a un PRECIO MÁS ECONÓMICO.
+Por favor, considera esta información antes de realizar tu compra.
+
+CARACTERÍSTICAS IMPORTANTES
+• JBL GO 4
+• Conexión inalámbrica mediante Bluetooth
+• Diseño compacto y portátil
+• Fabricada en China
+• NO compatible con la aplicación oficial de JBL
+• No requiere aplicación para reproducir música mediante Bluetooth
+• Precio más económico debido a las características específicas de esta variante
+• Ideal para uso cotidiano, viajes, oficina, habitación, reuniones y actividades al aire libre
+
+MUY IMPORTANTE: NO COMPATIBLE CON APP JBL
+Esta variante NO se conecta con la aplicación oficial de JBL.
+Si necesitas específicamente una JBL GO 4 que pueda vincularse y administrarse mediante la aplicación de JBL, esta variante NO es la indicada para ti.
+La incompatibilidad con la aplicación no significa necesariamente que la bocina tenga una falla. Es una característica específica de esta variante y se informa claramente desde antes de realizar la compra.
+
+FABRICADA EN CHINA
+Esta JBL GO 4 está fabricada en China. Queremos que el comprador conozca esta información desde el inicio para que pueda tomar una decisión de compra informada.
+
+¿CÓMO SE UTILIZA?
+Simplemente activa el Bluetooth de tu teléfono o dispositivo compatible, busca la bocina entre los dispositivos Bluetooth disponibles y realiza la conexión.
+No necesitas utilizar la aplicación de JBL para reproducir música mediante una conexión Bluetooth convencional.
+
+CONTENIDO
+• 1 Bocina JBL GO 4
+• Cable de carga
+• Empaque correspondiente
+
+IMPORTANTE ANTES DE FINALIZAR TU COMPRA
+Al comprar este producto debes considerar expresamente lo siguiente:
+
+1. Es una bocina JBL GO 4.
+2. Está fabricada en China.
+3. Esta variante NO ES COMPATIBLE CON LA APP OFICIAL DE JBL.
+4. Se utiliza mediante conexión Bluetooth directa.
+5. Su precio es más económico considerando las características de esta variante.
+
+Toda esta información se proporciona antes de la compra con el objetivo de que conozcas exactamente las características del producto que estás adquiriendo y evitar confusiones o reclamos posteriores.
+Si la compatibilidad con la aplicación oficial de JBL es indispensable para ti, por favor NO COMPRES ESTA VARIANTE.
+
+PALABRAS CLAVE DE BÚSQUEDA
+JBL GO 4, JBL GO4, bocina JBL GO 4, bocina Bluetooth, bocina portátil, altavoz Bluetooth, altavoz portátil, mini bocina, bocina inalámbrica, bocina para celular, speaker Bluetooth, JBL Go, bocina portátil Bluetooth."""
+
+d = requests.put(f"https://api.mercadolibre.com/items/{new_id}/description",
+                 headers=H, json={"plain_text": DESC}, timeout=15)
+print(f"  description PUT: {d.status_code}", flush=True)
+if d.status_code >= 400:
+    print(f"    err: {d.text[:300]}", flush=True)
+
+print(f"\nNEW_ITEM_ID={new_id}", flush=True)
