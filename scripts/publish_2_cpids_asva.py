@@ -1,4 +1,4 @@
-import os, requests, json, time
+import os, requests, json
 APP_ID=os.environ["MELI_APP_ID"]; APP_SECRET=os.environ["MELI_APP_SECRET"]
 RT=os.environ["MELI_REFRESH_TOKEN_ASVA"]
 r=requests.post("https://api.mercadolibre.com/oauth/token",
@@ -7,24 +7,21 @@ AT=r["access_token"]
 print(f"NEW_RT_ASVA: {r['refresh_token']}",flush=True)
 H={"Authorization":f"Bearer {AT}","Content-Type":"application/json"}
 
-# already closed
-# STEP 2: Fetch pictures from CPID for the new tradicional
+# 1) Fotos del CPID que user pasó
 CPID="MLM44713972"
 p=requests.get(f"https://api.mercadolibre.com/products/{CPID}",headers=H,timeout=10).json()
-pics_raw=p.get("pictures",[])[:8]
-pics=[{"source": pic.get("url")} for pic in pics_raw if pic.get("url")]
-print(f"\n=== CPID pics: {len(pics)} ===", flush=True)
+pics=[{"source":pic.get("url")} for pic in p.get("pictures",[])[:8] if pic.get("url")]
+print(f"pics from CPID {CPID}: {len(pics)}",flush=True)
 
-# STEP 3: Publish as TRADICIONAL with custom title + all attrs
-TITLE = "Bocina Jbl Go 4 Bluetooth Portatil Leer Descripcion Antes Compra"[:60]
-print(f"title: {TITLE} ({len(TITLE)} chars)", flush=True)
+TITLE = "BOCINA JBL GO 4 BLUETOOTH IMPORTANTE LEER ANTES DE COMPRAR"  # 58 chars
+print(f"title: {TITLE} ({len(TITLE)} chars)",flush=True)
 
 payload = {
     "family_name": TITLE,
     "category_id": "MLM59800",
     "price": 399,
     "currency_id": "MXN",
-    "available_quantity": 5,
+    "available_quantity": 50,
     "buying_mode": "buy_it_now",
     "condition": "new",
     "listing_type_id": "gold_pro",
@@ -40,19 +37,16 @@ payload = {
     ],
     "shipping":{"mode":"me2","free_shipping":False,"local_pick_up":False,"logistic_type":"drop_off"}
 }
-
-print(f"\n=== POSTING tradicional ===", flush=True)
-post = requests.post("https://api.mercadolibre.com/items", headers=H, json=payload, timeout=25).json()
+print(f"\n=== POSTING tradicional 50 pcs ===",flush=True)
+post=requests.post("https://api.mercadolibre.com/items",headers=H,json=payload,timeout=25).json()
 if "id" not in post:
-    print(f"❌ FAIL: {json.dumps(post)[:1800]}", flush=True)
+    print(f"❌ FAIL: {json.dumps(post)[:1800]}",flush=True)
     exit(1)
+new_id=post["id"]
+print(f"✅ POSTED: {new_id} status={post.get('status')} price=${post.get('price')} qty={post.get('available_quantity')}",flush=True)
+print(f"  title: {post.get('title','?')}",flush=True)
+print(f"  URL: {post.get('permalink','?')}",flush=True)
 
-new_id = post["id"]
-print(f"✅ POSTED: {new_id} status={post.get('status')} price=${post.get('price')} qty={post.get('available_quantity')}", flush=True)
-print(f"  title: {post.get('title','?')}", flush=True)
-print(f"  URL: {post.get('permalink','?')}", flush=True)
-
-# STEP 4: Custom description
 DESC = """BOCINA JBL GO 4 BLUETOOTH – IMPORTANTE: LEER ANTES DE COMPRAR
 
 INFORMACION IMPORTANTE SOBRE ESTA VARIANTE
@@ -103,10 +97,8 @@ Si la compatibilidad con la aplicacion oficial de JBL es indispensable para ti, 
 PALABRAS CLAVE
 JBL GO 4, JBL GO4, bocina JBL GO 4, bocina Bluetooth, bocina portatil, altavoz Bluetooth, altavoz portatil, mini bocina, bocina inalambrica, bocina para celular, speaker Bluetooth, JBL Go, bocina portatil Bluetooth."""
 
-d = requests.put(f"https://api.mercadolibre.com/items/{new_id}/description",
-                 headers=H, json={"plain_text": DESC}, timeout=15)
-print(f"  description PUT: {d.status_code}", flush=True)
+d=requests.put(f"https://api.mercadolibre.com/items/{new_id}/description",headers=H,json={"plain_text":DESC},timeout=15)
+print(f"  description PUT: {d.status_code}",flush=True)
 if d.status_code >= 400:
-    print(f"    err: {d.text[:400]}", flush=True)
-
-print(f"\nNEW_ITEM_ID={new_id}", flush=True)
+    print(f"    err: {d.text[:400]}",flush=True)
+print(f"\nNEW_ITEM_ID={new_id}",flush=True)
