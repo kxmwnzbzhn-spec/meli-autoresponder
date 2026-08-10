@@ -30,11 +30,9 @@ payload = {
     "listing_type_id": "gold_pro",
     "pictures": pics,
     "attributes": [
-        {"id":"BRAND","value_name":"JBL"},
+        {"id":"BRAND","value_name":"Genérica"},
         {"id":"MODEL","value_name":"Go 4"},
-        {"id":"LINE","value_name":"Go 4"},
         {"id":"ITEM_CONDITION","value_name":"Nuevo"},
-        {"id":"POWER_SOURCE","value_name":"Bluetooth"},
     ],
     "sale_terms":[
         {"id":"WARRANTY_TYPE","value_name":"Garantía del vendedor"},
