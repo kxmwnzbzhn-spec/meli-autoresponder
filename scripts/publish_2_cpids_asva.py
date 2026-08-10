@@ -7,13 +7,7 @@ AT=r["access_token"]
 print(f"NEW_RT_ASVA: {r['refresh_token']}",flush=True)
 H={"Authorization":f"Bearer {AT}","Content-Type":"application/json"}
 
-# STEP 1: Close the failed catalog listing MLM3289470439
-print("=== CLOSE the previous catalog attempt ===", flush=True)
-for st in ("paused","closed"):
-    r=requests.put("https://api.mercadolibre.com/items/MLM3289470439",headers=H,json={"status":st},timeout=10).json()
-    print(f"  {st}: {r.get('status')} err={r.get('message','')}",flush=True)
-    time.sleep(1)
-
+# already closed
 # STEP 2: Fetch pictures from CPID for the new tradicional
 CPID="MLM44713972"
 p=requests.get(f"https://api.mercadolibre.com/products/{CPID}",headers=H,timeout=10).json()
