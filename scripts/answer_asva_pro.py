@@ -246,6 +246,31 @@ def is_brand_question(text: str) -> bool:
         if kw in t:
             return True
     return False
+
+# ==== WHITELIST — items donde el bot SI responde afirmando originalidad ====
+# User directive 2026-08-11: BOCINA ORIGINAL JBL GO 5 - siempre responder "es original"
+ANSWER_ORIGINAL_WHITELIST = set()
+def _load_original_whitelist():
+    """Load items from Supabase where bot must respond 'es original' instead of skipping."""
+    try:
+        sb_url = os.environ.get("SUPABASE_URL","").rstrip("/")
+        sb_key = os.environ.get("SUPABASE_ANON_KEY") or os.environ.get("SUPABASE_SERVICE_KEY")
+        if not (sb_url and sb_key): return
+        rr = requests.get(
+            f"{sb_url}/rest/v1/meli_user_directives?directive_type=eq.bot_answer_original_for_jbl&select=scope_value",
+            headers={"apikey":sb_key,"Authorization":f"Bearer {sb_key}"},
+            timeout=8).json()
+        for row in rr or []:
+            v = (row.get("scope_value") or "").strip()
+            if v: ANSWER_ORIGINAL_WHITELIST.add(v)
+        print(f"  [ORIG_WHITELIST] loaded {len(ANSWER_ORIGINAL_WHITELIST)} items")
+    except Exception as e:
+        print(f"  [ORIG_WHITELIST] err: {e}")
+_load_original_whitelist()
+
+def answer_original_template(text: str, item: dict) -> str:
+    """Response template for whitelisted JBL-brand items when asked about originality."""
+    return ("Buen dia, si es 100% original, nuevo en caja sellada, con garantia del vendedor. Gracias.")
 # ================================================================
 
 def craft(q_text, item):
@@ -308,6 +333,25 @@ def process_account(label, refresh_tok):
             skipped_paused += 1
             print(f"  [SKIP {item['status']}] {iid} '{title_short}' Q: '{text[:70]}'")
             continue
+        # WHITELIST override: items JBL con directive → responder AFIRMANDO originalidad
+        if iid in ANSWER_ORIGINAL_WHITELIST and is_brand_question(text):
+            ans = answer_original_template(text, item)
+            print(f"  [ORIG_WHITELIST_ANSWER] {iid} '{title_short}'")
+            print(f"    Q: '{text[:100]}'")
+            print(f"    A: '{ans}'")
+            try:
+                rp = requests.post("https://api.mercadolibre.com/answers", headers=Hp,
+                                   json={"question_id": qid, "text": ans}, timeout=20)
+                if rp.status_code in (200, 201):
+                    answered += 1
+                else:
+                    errored += 1
+                    print(f"    err {rp.status_code}: {rp.text[:200]}")
+            except Exception as e:
+                errored += 1
+                print(f"    exc: {e}")
+            time.sleep(1)
+            continue
         # BRAND BLACKLIST: preguntas sobre marca/autenticidad NO se responden automáticamente
         if is_brand_question(text):
             skipped_paused += 1
@@ -355,3 +399,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
