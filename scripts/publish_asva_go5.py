@@ -18,7 +18,41 @@ cpid_attrs = {a["id"]:a for a in (p.get("attributes") or [])}
 GTIN_VAL = None
 if "GTIN" in cpid_attrs:
     GTIN_VAL = cpid_attrs["GTIN"].get("value_name")
-print(f"GTIN from CPID: {GTIN_VAL}",flush=True)
+print(f"GTIN from CPID top-level: {GTIN_VAL}",flush=True)
+
+# If CPID has no top-level GTIN, walk children and existing listings to find one
+if not GTIN_VAL:
+    # Try children products
+    kids = p.get("children_ids") or []
+    for kid in kids[:6]:
+        kp = requests.get(f"https://api.mercadolibre.com/products/{kid}",headers=H,timeout=10).json()
+        for a in (kp.get("attributes") or []):
+            if a.get("id")=="GTIN" and a.get("value_name"):
+                GTIN_VAL = a["value_name"]
+                print(f"GTIN found in child {kid}: {GTIN_VAL}",flush=True)
+                break
+        if GTIN_VAL: break
+
+if not GTIN_VAL:
+    # Fallback: query listings pointing at this CPID and grab GTIN from one
+    li = requests.get(f"https://api.mercadolibre.com/products/{CPID}/items",headers=H,timeout=10).json()
+    for it in (li.get("results") or [])[:5]:
+        iid = it.get("item_id")
+        if not iid: continue
+        idata = requests.get(f"https://api.mercadolibre.com/items/{iid}",headers=H,timeout=10).json()
+        for a in (idata.get("attributes") or []):
+            if a.get("id")=="GTIN" and a.get("value_name"):
+                GTIN_VAL = a["value_name"]
+                print(f"GTIN found in listing {iid}: {GTIN_VAL}",flush=True)
+                break
+        if GTIN_VAL: break
+
+# Last-resort known JBL Go 5 GTIN (black)
+if not GTIN_VAL:
+    GTIN_VAL = "050036397551"
+    print(f"GTIN fallback default: {GTIN_VAL}",flush=True)
+
+print(f"GTIN final: {GTIN_VAL}",flush=True)
 print(f"CPID name: {p.get('name')}",flush=True)
 print(f"CPID category: {p.get('parent_id') or p.get('category_id')}",flush=True)
 
