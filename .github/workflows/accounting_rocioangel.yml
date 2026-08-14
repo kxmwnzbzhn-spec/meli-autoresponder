@@ -1,0 +1,29 @@
+name: accounting-rocioangel
+on:
+  workflow_dispatch:
+    inputs:
+      start_date:
+        description: 'Fecha inicial YYYY-MM-DD'
+        required: false
+        default: '2026-01-01'
+  schedule:
+    - cron: '30 14 * * *'
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests openpyxl google-api-python-client google-auth -q
+      - name: Construir y subir contabilidad ROCIOANGEL
+        env:
+          ACCOUNTING_START_DATE: ${{ inputs.start_date || '2026-01-01' }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_ROCIOANGEL: ${{ secrets.MELI_REFRESH_TOKEN_ROCIOANGEL }}
+          GOOGLE_OAUTH_CLIENT_ID: ${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}
+          GOOGLE_OAUTH_CLIENT_SECRET: ${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}
+          GOOGLE_OAUTH_REFRESH_TOKEN: ${{ secrets.GOOGLE_OAUTH_REFRESH_TOKEN }}
+          DRIVE_FOLDER_ID: '1aIDN3iq6zwCacL57iamptvQCPoSDyRbL'
+        run: python scripts/accounting_rocioangel.py
