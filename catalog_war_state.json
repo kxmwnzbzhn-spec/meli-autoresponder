@@ -1052,7 +1052,7 @@
       "original_price": 999.0,
       "floor": 549.45,
       "ceiling": 1298.7,
-      "last_change_at": 1786746983,
+      "last_change_at": 1786748327,
       "role": "winner",
       "label": "Perfume The Alchemia Lab Flor De No"
     },
@@ -1084,7 +1084,7 @@
       "original_price": 999.0,
       "floor": 549.45,
       "ceiling": 1298.7,
-      "last_change_at": 1786746983,
+      "last_change_at": 1786748327,
       "role": "winner",
       "label": "Perfume Alma De Tenochtitl\u00e1n The Al"
     },
@@ -1193,6 +1193,6 @@
       "label": "Asva Electronics P - Rojo"
     }
   },
-  "last_run": 1786746983,
+  "last_run": 1786748327,
   "winner_account": "RAYMUNDO"
 }
