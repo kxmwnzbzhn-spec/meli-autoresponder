@@ -19,7 +19,7 @@ jobs:
         with: { python-version: '3.11' }
       - run: pip install requests pynacl -q
       - env:
-          MELI_APP_SECRET:    ${{ secrets.MELI_APP_SECRET }}
+          MELI_APP_SECRET:    ${{ secrets.MELI_APP_SECRET_NEW }}
           CODE:               ${{ inputs.code }}
           ACCOUNT_NAME:       ${{ inputs.account_name }}
           REPO_PAT:           ${{ secrets.REPO_PAT }}
