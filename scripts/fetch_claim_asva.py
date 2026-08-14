@@ -6,78 +6,61 @@ r=requests.post("https://api.mercadolibre.com/oauth/token",
 AT=r["access_token"]
 H={"Authorization":f"Bearer {AT}"}
 
-ORDER_ID = "2000014411673879"
+CLAIM_ID = "5559906352"
+PACK_ID  = "2000017809614694"
 
-# Get seller ID
-me = requests.get("https://api.mercadolibre.com/users/me", headers=H, timeout=15).json()
-SELLER_ID = me.get("id")
-print(f"seller: {me.get('nickname')} id={SELLER_ID}")
+print("=== CLAIM DETAIL ===")
+c = requests.get(f"https://api.mercadolibre.com/post-purchase/v1/claims/{CLAIM_ID}", headers=H, timeout=15).json()
+print(json.dumps(c, indent=2)[:6000])
 
-# Search claims by seller (list active)
-cl = requests.get(f"https://api.mercadolibre.com/post-purchase/v1/claims/search?stage=claim&status=opened&role=respondent&limit=50", headers=H, timeout=20).json()
-print("=== ACTIVE CLAIMS (respondent=seller) ===")
-if isinstance(cl, dict) and cl.get("data"):
-    for c in cl["data"][:20]:
-        rr = c.get("resource_id")
-        print(f"  claim_id={c.get('id')} order/pack={rr} reason={c.get('reason_id')} stage={c.get('stage')} status={c.get('status')} type={c.get('type')} claimant={c.get('players',[{}])[0].get('role','?') if c.get('players') else '?'}")
-else:
-    print(json.dumps(cl, indent=2)[:1500])
+print("\n=== CLAIM MESSAGES ===")
+msgs = requests.get(f"https://api.mercadolibre.com/post-purchase/v1/claims/{CLAIM_ID}/messages", headers=H, timeout=15).json()
+print(json.dumps(msgs, indent=2)[:8000])
 
-# Try pack lookup
-p = requests.get(f"https://api.mercadolibre.com/packs/{ORDER_ID}", headers=H, timeout=15).json()
-print(f"\n=== PACK {ORDER_ID} ===")
-print(json.dumps(p, indent=2)[:1500])
+print("\n=== CLAIM EVIDENCES ===")
+ev = requests.get(f"https://api.mercadolibre.com/post-purchase/v1/claims/{CLAIM_ID}/evidences", headers=H, timeout=15).json()
+print(json.dumps(ev, indent=2)[:3000])
 
-# Try claim by resource=pack
-csp = requests.get(f"https://api.mercadolibre.com/post-purchase/v1/claims/search?resource=pack&resource_id={ORDER_ID}", headers=H, timeout=15).json()
-print(f"\n=== CLAIM SEARCH by pack {ORDER_ID} ===")
-print(json.dumps(csp, indent=2)[:1500])
+print("\n=== CLAIM RETURNS (if any) ===")
+try:
+    rn = requests.get(f"https://api.mercadolibre.com/post-purchase/v1/claims/{CLAIM_ID}/returns", headers=H, timeout=15).json()
+    print(json.dumps(rn, indent=2)[:3000])
+except Exception as e:
+    print(f"err: {e}")
 
-# 1. Fetch order
-o = requests.get(f"https://api.mercadolibre.com/orders/{ORDER_ID}", headers=H, timeout=15).json()
-print("=== ORDER ===")
-print(f"status: {o.get('status')} status_detail: {o.get('status_detail')}")
-print(f"date_created: {o.get('date_created')}")
-print(f"date_closed: {o.get('date_closed')}")
-print(f"buyer: {o.get('buyer',{}).get('nickname')} id={o.get('buyer',{}).get('id')}")
-items = o.get("order_items") or []
-for it in items:
-    itm = it.get("item",{})
-    print(f"item: {itm.get('id')} '{itm.get('title')}' qty={it.get('quantity')} price={it.get('unit_price')} cond={itm.get('condition')}")
-    for va in (itm.get('variation_attributes') or []):
-        print(f"  var_attr: {va.get('id')}={va.get('value_name')}")
-shipping = o.get("shipping",{})
-print(f"shipping.id: {shipping.get('id')}")
+# Fetch order(s) inside pack
+print(f"\n=== PACK {PACK_ID} ===")
+p = requests.get(f"https://api.mercadolibre.com/packs/{PACK_ID}", headers=H, timeout=15).json()
+print(json.dumps(p, indent=2)[:2000])
 
-# 2. Find claim
-cs = requests.get(f"https://api.mercadolibre.com/post-purchase/v1/claims/search?resource=order&resource_id={ORDER_ID}", headers=H, timeout=15).json()
-print("\n=== CLAIM SEARCH ===")
-print(json.dumps(cs, indent=2)[:2000])
+if isinstance(p, dict) and p.get("orders"):
+    for od in p["orders"][:3]:
+        oid = od.get("id")
+        oo = requests.get(f"https://api.mercadolibre.com/orders/{oid}", headers=H, timeout=15).json()
+        print(f"\n=== ORDER {oid} ===")
+        buy = oo.get("buyer",{})
+        print(f"buyer: {buy.get('nickname')} id={buy.get('id')} first_name={buy.get('first_name')}")
+        for it in (oo.get("order_items") or []):
+            itm = it.get("item",{})
+            print(f"item: {itm.get('id')} '{itm.get('title')}' qty={it.get('quantity')} price={it.get('unit_price')}")
+            for va in (itm.get('variation_attributes') or []):
+                print(f"  var_attr: {va.get('id')}={va.get('value_name')}")
+        # Shipping status
+        sh = oo.get("shipping",{})
+        print(f"shipping.id: {sh.get('id')}")
+        if sh.get('id'):
+            ship = requests.get(f"https://api.mercadolibre.com/shipments/{sh['id']}", headers=H, timeout=15).json()
+            print(f"shipping.status: {ship.get('status')} substatus={ship.get('substatus')}")
+            print(f"shipping.date_first_visit: {ship.get('status_history',{}).get('date_first_visit')}")
+            print(f"shipping.date_delivered: {ship.get('status_history',{}).get('date_delivered')}")
+            # Also check tracking history
+            for ev in (ship.get("status_history") or {}).items():
+                print(f"  hist: {ev}")
 
-claim_id = None
-if isinstance(cs, dict) and cs.get("data"):
-    claim_id = cs["data"][0].get("id")
-elif isinstance(cs, list) and cs:
-    claim_id = cs[0].get("id")
-
-if claim_id:
-    print(f"\nclaim_id={claim_id}")
-    c = requests.get(f"https://api.mercadolibre.com/post-purchase/v1/claims/{claim_id}", headers=H, timeout=15).json()
-    print("\n=== CLAIM DETAIL ===")
-    print(json.dumps(c, indent=2)[:3500])
-
-    msgs = requests.get(f"https://api.mercadolibre.com/post-purchase/v1/claims/{claim_id}/messages", headers=H, timeout=15).json()
-    print("\n=== MESSAGES ===")
-    print(json.dumps(msgs, indent=2)[:4000])
-
-    # Evidences
-    ev = requests.get(f"https://api.mercadolibre.com/post-purchase/v1/claims/{claim_id}/evidences", headers=H, timeout=15).json()
-    print("\n=== EVIDENCES ===")
-    print(json.dumps(ev, indent=2)[:2000])
-else:
-    # try v2 endpoint or return endpoint
-    ret = requests.get(f"https://api.mercadolibre.com/post-purchase/v2/claims/search?resource=order&resource_id={ORDER_ID}", headers=H, timeout=15).json()
-    print("\n=== v2 CLAIM SEARCH ===")
-    print(json.dumps(ret, indent=2)[:2000])
-
-print(f"\nCLAIM_ID={claim_id}")
+# Claim reasons lookup (PDD9949)
+print("\n=== REASON DETAIL PDD9949 ===")
+try:
+    rd = requests.get(f"https://api.mercadolibre.com/post-purchase/v1/claims/reasons/PDD9949?flow=complaints&role=respondent", headers=H, timeout=15).json()
+    print(json.dumps(rd, indent=2)[:1500])
+except Exception as e:
+    print(f"err reason: {e}")
