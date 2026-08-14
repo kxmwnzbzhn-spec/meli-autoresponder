@@ -20,7 +20,7 @@ jobs:
       - name: Construir y subir contabilidad ROCIOANGEL
         env:
           ACCOUNTING_START_DATE: ${{ inputs.start_date || '2026-01-01' }}
-          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET_NEW }}
           MELI_REFRESH_TOKEN_ROCIOANGEL: ${{ secrets.MELI_REFRESH_TOKEN_ROCIOANGEL }}
           GOOGLE_OAUTH_CLIENT_ID: ${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}
           GOOGLE_OAUTH_CLIENT_SECRET: ${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}
