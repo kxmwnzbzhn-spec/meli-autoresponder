@@ -119,4 +119,6 @@ if TG and TGCID:
                   timeout=15)
     print("\n📨 Confirmación enviada a Telegram")
 
-print(f"\n{'✅' if len(saved_in) == 2 else '⚠️'} Listo. Saved in: {saved_in}")
+if len(saved_in) != len(REPOS):
+    raise SystemExit(f"❌ Alta incompleta: token guardado en {saved_in}; esperados {REPOS}")
+print(f"\n✅ Listo. Saved in: {saved_in}")
