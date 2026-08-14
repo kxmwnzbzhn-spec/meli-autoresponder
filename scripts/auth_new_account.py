@@ -19,7 +19,7 @@ OWNER = "kxmwnzbzhn-spec"
 REPOS = ["meli-autoresponder", "elitemarket-chatbot"]
 TG = os.environ.get("TELEGRAM_BOT_TOKEN", "")
 TGCID = os.environ.get("TELEGRAM_CHAT_ID", "")
-REDIRECT = "https://oauth.pstmn.io/v1/callback"
+REDIRECT = "https://meli-webhook.elite-market-1779161651.workers.dev/oauth/callback"
 
 SECRET_NAME = f"MELI_REFRESH_TOKEN_{ACCOUNT_NAME}"
 
