@@ -9,7 +9,7 @@ from openpyxl import Workbook
 from openpyxl.styles import Alignment, Font, PatternFill
 from openpyxl.utils import get_column_letter
 
-APP_ID = "5211907102822632"
+APP_ID = "2008666770714005"
 APP_SECRET = os.environ["MELI_APP_SECRET"]
 REFRESH_TOKEN = os.environ["MELI_REFRESH_TOKEN_ROCIOANGEL"]
 START_DATE = os.environ.get("ACCOUNTING_START_DATE", "2026-01-01")
