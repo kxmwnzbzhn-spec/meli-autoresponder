@@ -8,6 +8,31 @@ H={"Authorization":f"Bearer {AT}"}
 
 ORDER_ID = "2000014411673879"
 
+# Get seller ID
+me = requests.get("https://api.mercadolibre.com/users/me", headers=H, timeout=15).json()
+SELLER_ID = me.get("id")
+print(f"seller: {me.get('nickname')} id={SELLER_ID}")
+
+# Search claims by seller (list active)
+cl = requests.get(f"https://api.mercadolibre.com/post-purchase/v1/claims/search?stage=claim&status=opened&role=respondent&limit=50", headers=H, timeout=20).json()
+print("=== ACTIVE CLAIMS (respondent=seller) ===")
+if isinstance(cl, dict) and cl.get("data"):
+    for c in cl["data"][:20]:
+        rr = c.get("resource_id")
+        print(f"  claim_id={c.get('id')} order/pack={rr} reason={c.get('reason_id')} stage={c.get('stage')} status={c.get('status')} type={c.get('type')} claimant={c.get('players',[{}])[0].get('role','?') if c.get('players') else '?'}")
+else:
+    print(json.dumps(cl, indent=2)[:1500])
+
+# Try pack lookup
+p = requests.get(f"https://api.mercadolibre.com/packs/{ORDER_ID}", headers=H, timeout=15).json()
+print(f"\n=== PACK {ORDER_ID} ===")
+print(json.dumps(p, indent=2)[:1500])
+
+# Try claim by resource=pack
+csp = requests.get(f"https://api.mercadolibre.com/post-purchase/v1/claims/search?resource=pack&resource_id={ORDER_ID}", headers=H, timeout=15).json()
+print(f"\n=== CLAIM SEARCH by pack {ORDER_ID} ===")
+print(json.dumps(csp, indent=2)[:1500])
+
 # 1. Fetch order
 o = requests.get(f"https://api.mercadolibre.com/orders/{ORDER_ID}", headers=H, timeout=15).json()
 print("=== ORDER ===")
