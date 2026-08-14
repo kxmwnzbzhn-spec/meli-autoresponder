@@ -34,8 +34,10 @@ ACCOUNTS = [
      "exclude_models":set(), "exclude_titles":set()},
     {"name":"Asva",    "rt_env":"MELI_REFRESH_TOKEN_ASVA",    "expected_uid":1668713481,"expected_nick":"ASVAELECTRONICS",
      "exclude_models":set(), "exclude_titles":set()},
+    {"name":"RocioAngel","rt_env":"MELI_REFRESH_TOKEN_ROCIOANGEL","expected_uid":3478435727,"expected_nick":"RF20260617003604",
+     "exclude_models":set(), "exclude_titles":set()},
 ]
-ALLOWED_SUBS = {"printed", "ready_to_print"}
+ALLOWED_SUBS = {"ready_to_print"}
 
 
 # ============ HELPERS DE COLOR/MODELO/CONDICIÓN ============
