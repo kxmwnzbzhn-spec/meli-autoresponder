@@ -112,14 +112,21 @@ for d in rows:
                d["refund_date"], d["refund_reason"], d["allocation"]])
     r = ws.max_row
     ws.cell(r, 19, f"=L{r}-M{r}-N{r}-O{r}")
-    ws.cell(r, 20, f'=IFERROR(VLOOKUP(F{r},Costos!A:B,2,FALSE),0)')
+    ws.cell(r, 20, f'=IFERROR(VLOOKUP(F{r},Costos!A:D,4,FALSE),0)')
     ws.cell(r, 21, f"=J{r}*T{r}")
     ws.cell(r, 22, f"=S{r}-U{r}")
 
 cost = wb.create_sheet("Costos")
-cost.append(["Item ID", "Costo unitario", "Notas"])
+cost.append(["Item ID", "Costo producto", "Gastos operativos", "Costo unitario total", "Notas"])
 for iid, title in sorted({(d["item_id"], d["title"]) for d in rows}):
-    cost.append([iid, 0, title])
+    normalized = (title or "").lower().replace("-", " ")
+    if "go 5" in normalized or "go5" in normalized:
+        product_cost, operating_cost = 260, 10
+    elif "go 4" in normalized or "go4" in normalized:
+        product_cost, operating_cost = 213, 10
+    else:
+        product_cost, operating_cost = 0, 0
+    cost.append([iid, product_cost, operating_cost, product_cost + operating_cost, title])
 
 daily = wb.create_sheet("Resumen diario")
 daily.append(["Fecha", "Órdenes", "Unidades", "Venta bruta", "Comisiones", "Envíos", "Devoluciones", "Ingreso neto", "Utilidad"])
