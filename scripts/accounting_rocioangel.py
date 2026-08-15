@@ -121,9 +121,9 @@ cost.append(["Item ID", "Costo producto", "Gastos operativos", "Costo unitario t
 for iid, title in sorted({(d["item_id"], d["title"]) for d in rows}):
     normalized = (title or "").lower().replace("-", " ")
     if "go 5" in normalized or "go5" in normalized:
-        product_cost, operating_cost = 260, 10
+        product_cost, operating_cost = 260, 20
     elif "go 4" in normalized or "go4" in normalized:
-        product_cost, operating_cost = 213, 10
+        product_cost, operating_cost = 213, 20
     else:
         product_cost, operating_cost = 0, 0
     cost.append([iid, product_cost, operating_cost, product_cost + operating_cost, title])
