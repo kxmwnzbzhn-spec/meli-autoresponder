@@ -213,18 +213,18 @@
     "title": "CERRADA — relisted as MLM5346655686"
   },
   "MLM2911241921": {
-    "real_stock": 964,
+    "real_stock": 0,
     "master_stock": 1778,
     "min_visible": 1,
     "auto_replenish": true,
-    "active": true,
+    "active": false,
     "color": "Negro",
     "floor_price": 499,
     "ceiling_price": 799,
     "floor_locked_by_user": true,
     "title": "Charge 6 Negro Reacondicionada",
     "available_quantity": 1,
-    "agotado": false,
+    "agotado": true,
     "sku": "JBL-CHARGE6-NEGRO"
   },
   "MLM5295749840": {
@@ -959,15 +959,15 @@
   "MLM5347886456": {
     "title": "JBL Charge 6 Negro Portátil",
     "min_visible": 0,
-    "real_stock": 964,
+    "real_stock": 0,
     "master_stock": 1778,
     "available_quantity": 0,
     "auto_replenish": false,
-    "active": true,
+    "active": false,
     "floor_price": 1499,
     "ceiling_price": 1999,
     "paused_by_user": true,
-    "agotado": false,
+    "agotado": true,
     "floor_locked_by_user": true,
     "sku": "JBL-CHARGE6-NEGRO"
   },
