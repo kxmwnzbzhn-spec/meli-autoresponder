@@ -1,0 +1,28 @@
+name: recover-rocio-labels
+on:
+  workflow_dispatch:
+jobs:
+  recover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install poppler
+        run: sudo apt-get update && sudo apt-get install -y poppler-utils
+      - name: Install Python deps
+        run: pip install requests pypdf reportlab pdf2image Pillow google-api-python-client google-auth -q
+      - name: Recover and upload Rocio labels
+        env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_ROCIOANGEL: ${{ secrets.MELI_REFRESH_TOKEN_ROCIOANGEL }}
+          GOOGLE_OAUTH_CLIENT_ID: ${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}
+          GOOGLE_OAUTH_CLIENT_SECRET: ${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}
+          GOOGLE_OAUTH_REFRESH_TOKEN: ${{ secrets.GOOGLE_OAUTH_REFRESH_TOKEN }}
+          DRIVE_FOLDER_ID: '1aIDN3iq6zwCacL57iamptvQCPoSDyRbL'
+        run: |
+          python scripts/recover_rocio_labels.py
+          python -c "import glob; import scripts.daily_run as d; p=glob.glob('ETIQUETAS_ROCIOANGEL_*.pdf')[0]; s=d.drive_service(); f=d.drive_find_or_create_day_folder(s,d.DRIVE_FOLDER_ID,d.TODAY); u=d.drive_upload_pdf(s,p,p,f); print('FILE_URL='+u.get('webViewLink','')); print('FILE_ID='+u.get('id',''))"
