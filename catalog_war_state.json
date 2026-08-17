@@ -1199,8 +1199,16 @@
       "last_change_at": 1786761553,
       "role": "winner",
       "label": "Perfume Dark Oud Cacao The Alchemia"
+    },
+    "MLM5777938082": {
+      "original_price": 599.0,
+      "floor": 329.45000000000005,
+      "ceiling": 778.7,
+      "last_change_at": 1786998419,
+      "role": "winner",
+      "label": "Bocina Port\u00e1til Bluetooth Asva Retr"
     }
   },
-  "last_run": 1786996364,
+  "last_run": 1786998419,
   "winner_account": "RAYMUNDO"
 }
