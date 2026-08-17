@@ -108,8 +108,10 @@ def main():
     output = f"ETIQUETAS_ROCIOANGEL_{d.TODAY}.pdf"
     pages, failures = d.build_pdf(shipments, output)
     print(f"RECOVERED={len(shipments)} PAGES={pages} FAILURES={len(failures)} FILE={output}")
-    if pages == 0 or failures:
-        raise RuntimeError(f"PDF incompleto: pages={pages}, failures={failures}")
+    if pages == 0:
+        raise RuntimeError("Mercado Libre no devolvió ninguna etiqueta imprimible")
+    if failures:
+        print(f"OMITIDOS_SIN_PDF={len(failures)} IDS={failures}")
 
 
 if __name__ == "__main__":
