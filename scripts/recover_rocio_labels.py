@@ -8,18 +8,8 @@ import daily_run as d
 
 
 def printed_today(shipment):
-    if shipment.get("substatus") == "ready_to_print":
-        return True
-    if shipment.get("substatus") != "printed":
-        return False
-    raw = (shipment.get("status_history") or {}).get("date_first_printed")
-    if not raw:
-        return False
-    try:
-        when = datetime.fromisoformat(raw.replace("Z", "+00:00"))
-        return when.astimezone(d.TZ).strftime("%Y-%m-%d") == d.TODAY
-    except Exception:
-        return raw[:10] == d.TODAY
+    """En recuperación, acepta todo envío que aún siga listo para despachar."""
+    return shipment.get("status") == "ready_to_ship"
 
 
 def collect_rocio(access_token, account):
