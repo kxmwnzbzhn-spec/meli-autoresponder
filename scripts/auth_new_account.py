@@ -10,8 +10,9 @@ Inputs (env):
 import os, requests, json, base64
 from nacl import encoding, public
 
-APP_ID = "5211907102822632"
+APP_ID = os.environ.get("MELI_APP_ID_NEW", "5211907102822632")
 APP_SECRET = os.environ["MELI_APP_SECRET_NEW"]
+print(f"Using APP_ID={APP_ID} len(APP_SECRET)={len(APP_SECRET)}")
 CODE = os.environ["CODE"].strip()
 ACCOUNT_NAME = os.environ.get("ACCOUNT_NAME", "RAYMUNDO_MAY").strip().upper()
 GH_PAT = os.environ.get("REPO_PAT") or os.environ.get("GH_TOKEN_OPS") or os.environ.get("GITHUB_TOKEN")
