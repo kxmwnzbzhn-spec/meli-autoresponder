@@ -99,10 +99,40 @@ def get_model(title):
         return "JBL Impermeable"
     return t[:24]
 
+def _marshall_model(item_obj, H):
+    """Obtiene el modelo Marshall real; evita títulos genéricos o truncados."""
+    iid = item_obj.get("id")
+    candidates = [item_obj.get("title", "")]
+    if iid:
+        try:
+            r = requests.get(f"https://api.mercadolibre.com/items/{iid}", headers=H, timeout=8)
+            if r.status_code == 200:
+                detail = r.json() or {}
+                candidates.append(detail.get("title", ""))
+                for attr in detail.get("attributes") or []:
+                    if attr.get("id") in {"MODEL", "LINE", "ALPHANUMERIC_MODEL"}:
+                        candidates.append(attr.get("value_name", ""))
+        except Exception:
+            pass
+    joined = " ".join(x for x in candidates if x).lower()
+    if "willen" in joined:
+        return "Marshall Willen II" if "willen ii" in joined or "willen 2" in joined else "Marshall Willen"
+    if "emberton" in joined:
+        if "emberton iii" in joined or "emberton 3" in joined:
+            return "Marshall Emberton III"
+        if "emberton ii" in joined or "emberton 2" in joined:
+            return "Marshall Emberton II"
+        return "Marshall Emberton"
+    if "middleton" in joined: return "Marshall Middleton"
+    if "stockwell" in joined: return "Marshall Stockwell"
+    if "kilburn" in joined: return "Marshall Kilburn"
+    return None
+
 def clean_title(item_obj, H):
     title = item_obj.get("title","")
     tl = title.lower()
-    model = get_model(title)
+    model = _marshall_model(item_obj, H) if ("marshall" in tl or "marsh" in tl) else None
+    model = model or get_model(title)
     color = get_variant_color(item_obj, H) or _parse_color_map(title)
     base = f"{model} {color}" if color else model
     if "reacondicionado" in tl or "reacond" in tl: base = f"{base} (Reacond.)"
