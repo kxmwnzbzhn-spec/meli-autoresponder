@@ -10,8 +10,8 @@ Inputs (env):
 import os, requests, json, base64
 from nacl import encoding, public
 
-APP_ID = "2008666770714005"
-APP_SECRET = os.environ["MELI_APP_SECRET"]
+APP_ID = "5211907102822632"
+APP_SECRET = os.environ["MELI_APP_SECRET_NEW"]
 CODE = os.environ["CODE"].strip()
 ACCOUNT_NAME = os.environ.get("ACCOUNT_NAME", "RAYMUNDO_MAY").strip().upper()
 GH_PAT = os.environ.get("REPO_PAT") or os.environ.get("GH_TOKEN_OPS") or os.environ.get("GITHUB_TOKEN")
@@ -122,3 +122,4 @@ if TG and TGCID:
 if len(saved_in) != len(REPOS):
     raise SystemExit(f"❌ Alta incompleta: token guardado en {saved_in}; esperados {REPOS}")
 print(f"\n✅ Listo. Saved in: {saved_in}")
+
