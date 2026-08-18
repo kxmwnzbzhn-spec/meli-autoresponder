@@ -10,9 +10,44 @@ Inputs (env):
 import os, requests, json, base64
 from nacl import encoding, public
 
-APP_ID = os.environ.get("MELI_APP_ID_NEW", "5211907102822632")
-APP_SECRET = os.environ["MELI_APP_SECRET_NEW"]
-print(f"Using APP_ID={APP_ID} len(APP_SECRET)={len(APP_SECRET)}")
+# Try both combos to find which app_id/secret pair matches the code
+import sys as _s
+_id_new = os.environ.get("MELI_APP_ID_NEW","")
+_sec_new = os.environ.get("MELI_APP_SECRET_NEW","")
+_id_old = os.environ.get("MELI_APP_ID","")
+_sec_old = os.environ.get("MELI_APP_SECRET","")
+print(f"NEW app_id_len={len(_id_new)} secret_len={len(_sec_new)}")
+print(f"OLD app_id_len={len(_id_old)} secret_len={len(_sec_old)}")
+
+# Try in order: NEW/NEW, hardcoded/NEW, hardcoded/OLD, NEW/OLD, OLD/NEW, OLD/OLD
+_combos = [
+    ("MELI_APP_ID_NEW", "MELI_APP_SECRET_NEW", _id_new, _sec_new),
+    ("hardcoded 5211907102822632", "MELI_APP_SECRET_NEW", "5211907102822632", _sec_new),
+    ("MELI_APP_ID_NEW", "MELI_APP_SECRET", _id_new, _sec_old),
+    ("hardcoded 5211907102822632", "MELI_APP_SECRET", "5211907102822632", _sec_old),
+    ("MELI_APP_ID", "MELI_APP_SECRET_NEW", _id_old, _sec_new),
+    ("MELI_APP_ID", "MELI_APP_SECRET", _id_old, _sec_old),
+]
+import requests as _rq
+_ok = False
+for label_id, label_sec, aid, asec in _combos:
+    if not aid or not asec:
+        print(f"  skip {label_id} / {label_sec} (empty)")
+        continue
+    _r = _rq.post("https://api.mercadolibre.com/oauth/token", data={
+        "grant_type":"authorization_code","client_id":aid,"client_secret":asec,
+        "code":CODE,"redirect_uri":"https://oauth.pstmn.io/v1/callback"},timeout=15)
+    print(f"  try {label_id} + {label_sec}: {_r.status_code} err={_r.json().get('error','ok') if _r.status_code>=400 else 'OK'}")
+    if _r.status_code == 200:
+        APP_ID = aid
+        APP_SECRET = asec
+        print(f"✅ WORKING COMBO: {label_id} + {label_sec}")
+        _ok = True
+        break
+
+if not _ok:
+    print("❌ Ninguna combinación funcionó — el code puede haber sido consumido en un intento previo o el APP_ID que lo generó no está en el repo")
+    _s.exit(1)
 CODE = os.environ["CODE"].strip()
 ACCOUNT_NAME = os.environ.get("ACCOUNT_NAME", "RAYMUNDO_MAY").strip().upper()
 GH_PAT = os.environ.get("REPO_PAT") or os.environ.get("GH_TOKEN_OPS") or os.environ.get("GITHUB_TOKEN")
