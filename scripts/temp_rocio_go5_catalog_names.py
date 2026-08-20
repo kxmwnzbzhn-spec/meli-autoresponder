@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import json
+# Consulta temporal autorizada de nombres de catálogo\nimport json
 import os
 import requests
 
