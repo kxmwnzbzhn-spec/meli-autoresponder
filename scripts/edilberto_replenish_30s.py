@@ -24,11 +24,22 @@ WAR_SOURCE_ITEMS = [
     "MLM6042920954",
     "MLM6042921184",
 ]
+PRICE_CEILINGS = {
+    "MLM6042921636": 699,
+    "MLM6043044650": 699,
+    "MLM6042920630": 699,
+    "MLM6042920954": 699,
+    "MLM6042921184": 699,
+}
+PRICE_FLOOR = 499
+PRICE_STEP = 10
+WIN_STREAK_REQUIRED = 4
+WIN_STREAKS = {}
 FALLBACK_ITEMS = {
     "MLMU4851933870": ["MLM3355625791", "MLM3355650889"],
     "MLMU4821841613": ["MLM3355626501"],
 }
-TICK = 30  # diagnostic run captures current catalog state
+TICK = 30
 DURATION = int(os.environ.get("RUN_DURATION_SEC", str(5 * 3600 + 30 * 60)))
 
 def refresh():
@@ -207,14 +218,152 @@ def ensure_catalog_item(source_item_id):
     print(f"[CATALOG-OPTIN] {source_item_id}->{catalog_item_id} product={product_id}", flush=True)
     return catalog_item_id
 
+def change_price(item_id, current_price, new_price, reason):
+    if new_price == current_price:
+        return
+    response = requests.put(
+        f"{API}/items/{item_id}",
+        headers=HJ,
+        json={"price": new_price},
+        timeout=20,
+    )
+    if response.status_code not in (200, 201):
+        raise RuntimeError(
+            f"{item_id}: price PUT {response.status_code} {response.text[:400]}"
+        )
+    updated_price = response.json().get("price")
+    print(
+        f"[CATALOG-PRICE] {item_id} {current_price}->{updated_price} "
+        f"reason={reason}",
+        flush=True,
+    )
+
+def external_competitor_prices(product_id):
+    response = requests.get(
+        f"{API}/products/{product_id}/items",
+        headers=H,
+        params={"limit": 100},
+        timeout=20,
+    )
+    if response.status_code != 200:
+        raise RuntimeError(
+            f"{product_id}: competitors GET {response.status_code} {response.text[:300]}"
+        )
+    prices = []
+    for result in response.json().get("results") or []:
+        if int(result.get("seller_id") or 0) == SELLER_ID:
+            continue
+        price = result.get("price")
+        if price is not None:
+            prices.append(float(price))
+    return prices
+
+def manage_catalog_price(item_id, ceiling, initial=False):
+    item_response = requests.get(f"{API}/items/{item_id}", headers=H, timeout=15)
+    item_response.raise_for_status()
+    item = item_response.json()
+    if int(item.get("seller_id") or 0) != SELLER_ID:
+        raise RuntimeError(f"{item_id}: seller inesperado {item.get('seller_id')}")
+    if "dynamic_standard_price" in (item.get("tags") or []):
+        if initial:
+            print(
+                f"[CATALOG-SKIP] {item_id} usa automatización nativa; "
+                "precio API protegido",
+                flush=True,
+            )
+        return
+    competition_response = requests.get(
+        f"{API}/items/{item_id}/price_to_win",
+        headers=H,
+        params={"siteId": "MLM", "version": "v2"},
+        timeout=20,
+    )
+    if competition_response.status_code != 200:
+        raise RuntimeError(
+            f"{item_id}: price_to_win {competition_response.status_code} "
+            f"{competition_response.text[:400]}"
+        )
+    competition = competition_response.json()
+    status = competition.get("status")
+    current = competition.get("current_price")
+    if current is None:
+        current = item.get("price")
+    if current is None:
+        raise RuntimeError(f"{item_id}: no se pudo determinar precio actual")
+    current = float(current)
+    ceiling = float(ceiling)
+    floor = float(PRICE_FLOOR)
+
+    if status in ("competing", "sharing_first_place"):
+        WIN_STREAKS[item_id] = 0
+        if current <= floor:
+            if initial:
+                print(
+                    f"[CATALOG-FLOOR] {item_id} status={status} price={current} "
+                    f"floor={floor} reason={competition.get('reason')}",
+                    flush=True,
+                )
+            return
+        new_price = max(floor, current - PRICE_STEP)
+        change_price(item_id, current, new_price, f"status={status}")
+        return
+
+    if status == "winning":
+        WIN_STREAKS[item_id] = WIN_STREAKS.get(item_id, 0) + 1
+        if current >= ceiling:
+            if initial:
+                print(
+                    f"[CATALOG-WINNING] {item_id} price={current} ceiling={ceiling}",
+                    flush=True,
+                )
+            return
+        if WIN_STREAKS[item_id] < WIN_STREAK_REQUIRED:
+            return
+        product_id = competition.get("catalog_product_id") or item.get("catalog_product_id")
+        competitors = external_competitor_prices(product_id) if product_id else []
+        candidate = min(ceiling, current + PRICE_STEP)
+        no_competition_above = not competitors
+        safe_below_next = bool(competitors) and candidate < min(competitors)
+        if no_competition_above or safe_below_next:
+            change_price(
+                item_id,
+                current,
+                candidate,
+                "winning_no_competitor" if no_competition_above else
+                f"winning_next_competitor={min(competitors)}",
+            )
+            WIN_STREAKS[item_id] = 0
+        elif initial:
+            print(
+                f"[CATALOG-HOLD] {item_id} winning price={current} "
+                f"next_competitor={min(competitors) if competitors else None}",
+                flush=True,
+            )
+        return
+
+    WIN_STREAKS[item_id] = 0
+    if initial or status not in ("listed", "not_listed"):
+        print(
+            f"[CATALOG-SKIP] {item_id} status={status} "
+            f"reason={competition.get('reason')}",
+            flush=True,
+        )
+
 print("=== EDILBERTO: validación inicial de publicaciones autorizadas ===", flush=True)
 for target in TARGETS:
     check(target, initial=True)
 
-print("=== EDILBERTO: opt-in de publicaciones para competencia de catálogo ===", flush=True)
+print("=== EDILBERTO: catálogo y Buy Box ===", flush=True)
+WAR_CATALOG_ITEMS = {}
 for source_item_id in WAR_SOURCE_ITEMS:
     try:
-        ensure_catalog_item(source_item_id)
+        catalog_item_id = ensure_catalog_item(source_item_id)
+        WAR_CATALOG_ITEMS[source_item_id] = catalog_item_id
+        manage_catalog_price(
+            catalog_item_id,
+            PRICE_CEILINGS[source_item_id],
+            initial=True,
+        )
     except Exception as exc:
         print(f"[CATALOG-ERROR] {source_item_id}: {exc}", flush=True)
 
@@ -228,6 +377,14 @@ while time.time() - started < DURATION:
             check(target)
         except Exception as exc:
             print(f"[ERROR] {target}: {exc}", flush=True)
+    for source_item_id, catalog_item_id in WAR_CATALOG_ITEMS.items():
+        try:
+            manage_catalog_price(
+                catalog_item_id,
+                PRICE_CEILINGS[source_item_id],
+            )
+        except Exception as exc:
+            print(f"[CATALOG-ERROR] {source_item_id}: {exc}", flush=True)
     if cycles % 20 == 0:
         print(f"[HEARTBEAT] cycles={cycles} elapsed={int(time.time()-started)}s", flush=True)
     delay = TICK - (time.time() - cycle_start)
