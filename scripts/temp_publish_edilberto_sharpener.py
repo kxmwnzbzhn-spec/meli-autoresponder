@@ -120,8 +120,8 @@ else:
         if not attr_id or attr_id in ignored:
             continue
         cleaned = {"id": attr_id}
-        if attr_id in {"UNITS_PER_PACK", "HOLE_COUNT"}:
-            cleaned["value_name"] = 1
+        if attribute.get("value_type") == "number":
+            cleaned["value_name"] = int(float(attribute["value_name"]))
         elif attribute.get("value_struct") is not None:
             cleaned["value_struct"] = attribute["value_struct"]
         elif attribute.get("value_id") is not None:
