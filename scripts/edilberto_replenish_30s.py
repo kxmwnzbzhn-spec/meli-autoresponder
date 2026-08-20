@@ -1,12 +1,18 @@
 #!/usr/bin/env python3
-"""Mantiene una unidad visible en las dos publicaciones autorizadas de Edilberto.\nValidado para ejecución continua cada 30 segundos y prueba inicial controlada.\n"""
+"""Mantiene una unidad visible en las dos publicaciones autorizadas de Edilberto.
+Validado para ejecución continua cada 30 segundos y prueba inicial controlada.
+"""
 import os
 import time
 import requests
 
 API = "https://api.mercadolibre.com"
 SELLER_ID = 3616975257
-TARGETS = ["MLMU4851933870", "MLM3355626501"]\nFALLBACK_ITEMS = {\n    "MLMU4851933870": ["MLM3355625791", "MLM3355650889"],\n    "MLMU4821841613": ["MLM3355626501"],\n}
+TARGETS = ["MLMU4851933870", "MLM3355626501"]
+FALLBACK_ITEMS = {
+    "MLMU4851933870": ["MLM3355625791", "MLM3355650889"],
+    "MLMU4821841613": ["MLM3355626501"],
+}
 TICK = 30
 DURATION = int(os.environ.get("RUN_DURATION_SEC", str(5 * 3600 + 30 * 60)))
 
