@@ -35,6 +35,7 @@ PRICE_FLOOR = 499
 PRICE_STEP = 10
 WIN_STREAK_REQUIRED = 4
 WIN_STREAKS = {}
+SYNC_REPAIR_AT = {}
 FALLBACK_ITEMS = {
     "MLMU4851933870": ["MLM3355625791", "MLM3355650889"],
     "MLMU4821841613": ["MLM3355626501"],
@@ -258,6 +259,36 @@ def external_competitor_prices(product_id):
             prices.append(float(price))
     return prices
 
+def repair_buybox_sync(item_id):
+    now = time.time()
+    if now - SYNC_REPAIR_AT.get(item_id, 0) < 600:
+        return
+    SYNC_REPAIR_AT[item_id] = now
+    sync_headers = {**HJ, "x-public": "True"}
+    status_response = requests.get(
+        f"{API}/public/buybox/sync/{item_id}",
+        headers=sync_headers,
+        timeout=15,
+    )
+    status_data = status_response.json() if status_response.status_code == 200 else {}
+    if status_data.get("status") == "SYNC":
+        print(f"[CATALOG-SYNC] {item_id} already_sync", flush=True)
+        return
+    repair = requests.post(
+        f"{API}/public/buybox/sync",
+        headers=sync_headers,
+        json={"id": item_id},
+        timeout=20,
+    )
+    if repair.status_code == 200:
+        print(f"[CATALOG-SYNC] {item_id} repaired", flush=True)
+    else:
+        print(
+            f"[CATALOG-SYNC-WARN] {item_id} http={repair.status_code} "
+            f"body={repair.text[:300]}",
+            flush=True,
+        )
+
 def manage_catalog_price(item_id, ceiling, initial=False):
     item_response = requests.get(f"{API}/items/{item_id}", headers=H, timeout=15)
     item_response.raise_for_status()
@@ -278,6 +309,14 @@ def manage_catalog_price(item_id, ceiling, initial=False):
         params={"siteId": "MLM", "version": "v2"},
         timeout=20,
     )
+    if competition_response.status_code >= 500:
+        time.sleep(2)
+        competition_response = requests.get(
+            f"{API}/items/{item_id}/price_to_win",
+            headers=H,
+            params={"siteId": "MLM", "version": "v2"},
+            timeout=20,
+        )
     if competition_response.status_code != 200:
         raise RuntimeError(
             f"{item_id}: price_to_win {competition_response.status_code} "
@@ -342,10 +381,13 @@ def manage_catalog_price(item_id, ceiling, initial=False):
         return
 
     WIN_STREAKS[item_id] = 0
+    reasons = competition.get("reason") or []
+    if "item_not_opted_in" in reasons:
+        repair_buybox_sync(item_id)
     if initial or status not in ("listed", "not_listed"):
         print(
             f"[CATALOG-SKIP] {item_id} status={status} "
-            f"reason={competition.get('reason')}",
+            f"reason={reasons}",
             flush=True,
         )
 
