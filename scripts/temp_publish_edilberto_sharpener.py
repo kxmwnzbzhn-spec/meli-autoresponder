@@ -135,7 +135,6 @@ else:
             pictures.append({"source": picture_url})
 
     payload = {
-        "title": TITLE,
         "family_name": TITLE,
         "category_id": CATEGORY_ID,
         "catalog_product_id": CATALOG_PRODUCT_ID,
