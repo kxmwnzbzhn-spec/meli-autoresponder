@@ -1,0 +1,35 @@
+name: Temporary publish Edilberto sharpener
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - scripts/temp_publish_edilberto_sharpener.py
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      MELI_APP_ID: ${{ secrets.MELI_APP_ID_NEW }}
+      MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET_NEW }}
+      MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN_EDILBERTO }}
+      GH_TOKEN: ${{ secrets.GH_TOKEN_FOR_SECRETS }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install requests
+      - name: Publish and verify
+        run: python scripts/temp_publish_edilberto_sharpener.py
+      - name: Save rotated refresh token
+        if: always()
+        run: |
+          if [ -s /tmp/edilberto_publish_rt ]; then
+            gh secret set MELI_REFRESH_TOKEN_EDILBERTO --repo kxmwnzbzhn-spec/meli-autoresponder < /tmp/edilberto_publish_rt
+          fi
