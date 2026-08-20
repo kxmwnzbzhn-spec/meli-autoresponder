@@ -1,5 +1,9 @@
 name: edilberto-replenish-30s
 on:
+  push:
+    branches: [main]
+    paths:
+      - scripts/edilberto_replenish_30s.py
   workflow_dispatch:
     inputs:
       duration_sec:
@@ -11,7 +15,7 @@ on:
 
 concurrency:
   group: edilberto-replenish-30s
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   monitor:
@@ -23,7 +27,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: pip install requests -q
-      - name: Monitor two authorized Edilberto listings
+      - name: Monitor authorized Edilberto listings and catalog position
         env:
           MELI_APP_ID_NEW: ${{ secrets.MELI_APP_ID_NEW }}
           MELI_APP_SECRET_NEW: ${{ secrets.MELI_APP_SECRET_NEW }}
