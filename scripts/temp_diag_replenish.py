@@ -72,3 +72,36 @@ print("REPAIR_JSON=" + json.dumps({
     "after": r1.json(),
     "after_version": r1.headers.get("x-version"),
 }, ensure_ascii=False), flush=True)
+
+
+# Fallback compatible con MLM: localizar el item asociado al User Product y reponer por /items
+at = token("EDILBERTO")
+H = {"Authorization": f"Bearer {at}"}
+HJ = {**H, "Content-Type": "application/json"}
+uid = 3616975257
+ids = []
+offset = 0
+while True:
+    sr = requests.get(f"{API}/users/{uid}/items/search", headers=H, params={"limit": 50, "offset": offset}, timeout=15)
+    sr.raise_for_status()
+    batch = sr.json().get("results") or []
+    ids.extend(batch)
+    if len(batch) < 50:
+        break
+    offset += 50
+associated = []
+for start in range(0, len(ids), 20):
+    mg = requests.get(f"{API}/items", headers=H, params={"ids": ",".join(ids[start:start+20])}, timeout=20)
+    mg.raise_for_status()
+    for row in mg.json():
+        if row.get("code") == 200 and (row.get("body") or {}).get("user_product_id") == "MLMU4851933870":
+            associated.append(row["body"])
+repairs = []
+for x in associated:
+    body = {"available_quantity": 1}
+    if x.get("status") == "paused":
+        body["status"] = "active"
+    rp = requests.put(f"{API}/items/{x['id']}", headers=HJ, json=body, timeout=15)
+    repairs.append({"item_id": x["id"], "before_qty": x.get("available_quantity"), "before_status": x.get("status"), "http": rp.status_code, "response": rp.json() if rp.text else {}})
+after_stock = requests.get(f"{API}/user-products/MLMU4851933870/stock", headers=H, timeout=15).json()
+print("ITEM_FALLBACK_JSON=" + json.dumps({"associated": [{"id":x.get("id"),"title":x.get("title"),"status":x.get("status"),"qty":x.get("available_quantity")} for x in associated], "repairs": repairs, "after_stock": after_stock}, ensure_ascii=False), flush=True)
