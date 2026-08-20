@@ -59,6 +59,7 @@ print("SOURCE", json.dumps({
 product_response = requests.get(API + "/products/" + CATALOG_PRODUCT_ID, headers=headers, timeout=30)
 product = product_response.json() if product_response.ok else {}
 print("CATALOG_HTTP", product_response.status_code)
+print("PRODUCT_ATTRIBUTES", json.dumps(product.get("attributes", []), ensure_ascii=False))
 
 def item_ids(status):
     response = requests.get(
