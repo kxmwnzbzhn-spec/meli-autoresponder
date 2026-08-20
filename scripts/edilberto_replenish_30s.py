@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Mantiene una unidad visible en las dos publicaciones autorizadas de Edilberto."""
+"""Mantiene una unidad visible en las dos publicaciones autorizadas de Edilberto.\nValidado para ejecución continua cada 30 segundos.\n"""
 import os
 import time
 import requests
