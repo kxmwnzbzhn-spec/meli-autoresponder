@@ -32,7 +32,7 @@ jobs:
           MELI_APP_ID_NEW: ${{ secrets.MELI_APP_ID_NEW }}
           MELI_APP_SECRET_NEW: ${{ secrets.MELI_APP_SECRET_NEW }}
           MELI_REFRESH_TOKEN_EDILBERTO: ${{ secrets.MELI_REFRESH_TOKEN_EDILBERTO }}
-          RUN_DURATION_SEC: ${{ inputs.duration_sec || '19800' }}
+          RUN_DURATION_SEC: ${{ github.event_name == 'push' && '60' || inputs.duration_sec || '19800' }}
         run: python3 scripts/edilberto_replenish_30s.py
       - name: Save rotated refresh token
         if: always()
