@@ -51,12 +51,13 @@ def inspect_and_replenish(item_id, initial=False):
     needs = qty != 1 or status != "active"
     if needs:
         body = {"available_quantity": 1}
-        if status == "paused" and "out_of_stock" in (item.get("sub_status") or []):
+        if status == "paused":
             body["status"] = "active"
         u = requests.put(f"{API}/items/{item_id}", headers=HJ, json=body, timeout=15)
         if u.status_code not in (200, 201):
             raise RuntimeError(f"{item_id}: PUT {u.status_code} {u.text[:300]}")
-        print(f"[REPLENISHED] {item_id} qty {qty}->1 status={status} title={title}", flush=True)
+        updated = u.json()
+        print(f"[REPLENISHED] {item_id} qty {qty}->1 status={status}->{updated.get('status')} sub={updated.get('sub_status')} title={title}", flush=True)
     elif initial:
         print(f"[OK] {item_id} active qty=1 title={title}", flush=True)
 
