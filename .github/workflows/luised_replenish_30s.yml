@@ -1,8 +1,5 @@
 name: luised-replenish-30s
 on:
-  push:
-    paths:
-      - 'scripts/luised_replenish_30s.py'
   workflow_dispatch:
     inputs:
       duration_sec:
@@ -14,7 +11,7 @@ on:
 
 concurrency:
   group: luised-replenish-30s
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   monitor:
