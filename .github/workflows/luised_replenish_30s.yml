@@ -1,0 +1,45 @@
+name: luised-replenish-30s
+on:
+  workflow_dispatch:
+    inputs:
+      duration_sec:
+        description: 'Duración del monitor en segundos'
+        required: false
+        default: '19800'
+  schedule:
+    - cron: '17 6 * * *'
+
+concurrency:
+  group: luised-replenish-30s
+  cancel-in-progress: false
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 345
+    permissions:
+      actions: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install requests -q
+      - name: Monitor four authorized LuisEd listings
+        env:
+          MELI_APP_ID_NEW: ${{ secrets.MELI_APP_ID_NEW }}
+          MELI_APP_SECRET_NEW: ${{ secrets.MELI_APP_SECRET_NEW }}
+          MELI_REFRESH_TOKEN_LUISED: ${{ secrets.MELI_REFRESH_TOKEN_LUISED }}
+          RUN_DURATION_SEC: ${{ inputs.duration_sec || '19800' }}
+        run: python3 scripts/luised_replenish_30s.py
+      - name: Save rotated refresh token
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN_FOR_SECRETS }}
+        run: |
+          if [ -s /tmp/luised_rotated_token ]; then
+            gh secret set MELI_REFRESH_TOKEN_LUISED --repo kxmwnzbzhn-spec/meli-autoresponder < /tmp/luised_rotated_token
+          fi
+      - name: Continue monitoring
+        if: ${{ success() && (github.event_name == 'schedule' || inputs.duration_sec == '19800') }}
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN_FOR_SECRETS }}
+        run: gh workflow run luised_replenish_30s.yml --repo kxmwnzbzhn-spec/meli-autoresponder -f duration_sec=19800
