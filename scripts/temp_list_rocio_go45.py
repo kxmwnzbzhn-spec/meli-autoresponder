@@ -23,21 +23,21 @@ uid = me.json()["id"]
 print(f"ACCOUNT_UID={uid}", flush=True)
 
 ids = []
-for status in ("active", "paused"):
-    offset = 0
-    while True:
-        q = requests.get(
-            f"{API}/users/{uid}/items/search",
-            headers=H,
-            params={"status": status, "limit": 50, "offset": offset},
-            timeout=20,
-        )
-        q.raise_for_status()
-        batch = q.json().get("results") or []
-        ids.extend(batch)
-        if len(batch) < 50:
-            break
-        offset += 50
+offset = 0
+while True:
+    q = requests.get(
+        f"{API}/users/{uid}/items/search",
+        headers=H,
+        params={"limit": 50, "offset": offset},
+        timeout=20,
+    )
+    q.raise_for_status()
+    batch = q.json().get("results") or []
+    ids.extend(batch)
+    if len(batch) < 50:
+        break
+    offset += 50
+print(f"TOTAL_CATALOG_ITEMS={len(ids)}", flush=True)
 
 matches = []
 for start in range(0, len(ids), 20):
