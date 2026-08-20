@@ -120,7 +120,9 @@ else:
         if not attr_id or attr_id in ignored:
             continue
         cleaned = {"id": attr_id}
-        if attribute.get("value_id") is not None:
+        if attribute.get("value_struct") is not None:
+            cleaned["value_struct"] = attribute["value_struct"]
+        elif attribute.get("value_id") is not None:
             cleaned["value_id"] = attribute["value_id"]
         elif attribute.get("value_name") is not None:
             cleaned["value_name"] = attribute["value_name"]
@@ -129,7 +131,7 @@ else:
         attributes.append(cleaned)
 
     if not any(attribute.get("id") == "UNITS_PER_PACK" for attribute in attributes):
-        attributes.append({"id": "UNITS_PER_PACK", "value_name": "1"})
+        attributes.append({"id": "UNITS_PER_PACK", "value_struct": {"number": 1, "unit": None}})
 
     pictures = []
     for picture in product.get("pictures", []):
