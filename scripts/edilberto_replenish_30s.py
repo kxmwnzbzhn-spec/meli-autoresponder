@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Mantiene una unidad visible en las dos publicaciones autorizadas de Edilberto.
+"""Mantiene una unidad visible en las publicaciones autorizadas de Edilberto.
 Validado para ejecución continua cada 30 segundos y prueba inicial controlada.
 """
 import os
@@ -8,7 +8,15 @@ import requests
 
 API = "https://api.mercadolibre.com"
 SELLER_ID = 3616975257
-TARGETS = ["MLMU4851933870", "MLM3355626501"]
+TARGETS = [
+    "MLMU4851933870",
+    "MLM3355626501",
+    "MLM6042921636",
+    "MLM6043044650",
+    "MLM6042920630",
+    "MLM6042920954",
+    "MLM6042921184",
+]
 FALLBACK_ITEMS = {
     "MLMU4851933870": ["MLM3355625791", "MLM3355650889"],
     "MLMU4821841613": ["MLM3355626501"],
@@ -106,6 +114,24 @@ def keep_one_item(item_id, initial=False):
     item = r.json()
     if int(item.get("seller_id") or 0) != SELLER_ID:
         raise RuntimeError(f"{item_id}: seller inesperado {item.get('seller_id')}")
+    if initial:
+        competition = requests.get(
+            f"{API}/items/{item_id}/price_to_win",
+            headers=H,
+            params={"version": "v2"},
+            timeout=15,
+        )
+        competition_data = competition.json() if competition.status_code == 200 else {
+            "http": competition.status_code,
+            "body": competition.text[:300],
+        }
+        print(
+            f"[CATALOG-INSPECT] {item_id} title={item.get('title','')} "
+            f"price={item.get('price')} status={item.get('status')} "
+            f"catalog_product_id={item.get('catalog_product_id')} "
+            f"competition={competition_data}",
+            flush=True,
+        )
     upid = item.get("user_product_id")
     if upid:
         stock, _, raw = get_stock(upid)
@@ -142,7 +168,7 @@ def check(target, initial=False):
     else:
         keep_one_item(target, initial=initial)
 
-print("=== EDILBERTO: validación inicial de 2 publicaciones ===", flush=True)
+print("=== EDILBERTO: validación inicial de publicaciones autorizadas ===", flush=True)
 for target in TARGETS:
     check(target, initial=True)
 
