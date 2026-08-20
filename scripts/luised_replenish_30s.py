@@ -80,5 +80,5 @@ while time.time() - started < DURATION:
     if delay > 0:
         time.sleep(delay)
 
-print(f"FINAL_ROTATED_TOKEN={rotated_refresh_token}", flush=True)
+with open("/tmp/luised_rotated_token", "w") as fh:\n    fh.write(rotated_refresh_token)
 print(f"=== END cycles={cycles} ===", flush=True)
