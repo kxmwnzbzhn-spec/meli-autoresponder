@@ -1,5 +1,8 @@
 name: edilberto-replenish-30s
 on:
+  push:
+    paths:
+      - 'scripts/edilberto_replenish_30s.py'
   workflow_dispatch:
     inputs:
       duration_sec:
