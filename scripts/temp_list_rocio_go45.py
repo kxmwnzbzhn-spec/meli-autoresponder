@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-# Consulta temporal autorizada: solo lectura\nimport json
+# Consulta temporal autorizada: solo lectura
+import json
 import os
 import requests
 
