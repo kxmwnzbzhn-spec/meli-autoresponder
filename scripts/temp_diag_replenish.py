@@ -45,3 +45,30 @@ edilberto = {
 }
 
 print("DIAG_JSON=" + json.dumps({"LuisEd": luised, "Edilberto": edilberto}, ensure_ascii=False), flush=True)
+
+
+# Reparación autorizada y verificación exacta del User Product agotado de Edilberto
+before, version, raw = None, None, None
+at = token("EDILBERTO")
+H = {"Authorization": f"Bearer {at}"}
+r0 = requests.get(f"{API}/user-products/MLMU4851933870/stock", headers=H, timeout=15)
+before = r0.json()
+version = r0.headers.get("x-version")
+put_headers = {**H, "Content-Type": "application/json"}
+if version:
+    put_headers["x-version"] = version
+rp = requests.put(
+    f"{API}/user-products/MLMU4851933870/stock/type/selling_address",
+    headers=put_headers,
+    json={"quantity": 1},
+    timeout=15,
+)
+r1 = requests.get(f"{API}/user-products/MLMU4851933870/stock", headers=H, timeout=15)
+print("REPAIR_JSON=" + json.dumps({
+    "before": before,
+    "x_version": version,
+    "put_http": rp.status_code,
+    "put_body": rp.text,
+    "after": r1.json(),
+    "after_version": r1.headers.get("x-version"),
+}, ensure_ascii=False), flush=True)
