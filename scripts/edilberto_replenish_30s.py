@@ -17,6 +17,13 @@ TARGETS = [
     "MLM6042920954",
     "MLM6042921184",
 ]
+WAR_SOURCE_ITEMS = [
+    "MLM6042921636",
+    "MLM6043044650",
+    "MLM6042920630",
+    "MLM6042920954",
+    "MLM6042921184",
+]
 FALLBACK_ITEMS = {
     "MLMU4851933870": ["MLM3355625791", "MLM3355650889"],
     "MLMU4821841613": ["MLM3355626501"],
@@ -168,9 +175,48 @@ def check(target, initial=False):
     else:
         keep_one_item(target, initial=initial)
 
+def ensure_catalog_item(source_item_id):
+    source_response = requests.get(f"{API}/items/{source_item_id}", headers=H, timeout=15)
+    source_response.raise_for_status()
+    source = source_response.json()
+    if source.get("catalog_listing"):
+        print(f"[CATALOG-READY] {source_item_id} already_catalog=true", flush=True)
+        return source_item_id
+    for relation in source.get("item_relations") or []:
+        related_id = relation.get("id")
+        if not related_id:
+            continue
+        related_response = requests.get(f"{API}/items/{related_id}", headers=H, timeout=15)
+        if related_response.status_code == 200 and related_response.json().get("catalog_listing"):
+            print(f"[CATALOG-READY] {source_item_id}->{related_id}", flush=True)
+            return related_id
+    product_id = source.get("catalog_product_id")
+    if not product_id:
+        raise RuntimeError(f"{source_item_id}: no tiene catalog_product_id")
+    optin = requests.post(
+        f"{API}/items/catalog_listings",
+        headers=HJ,
+        json={"item_id": source_item_id, "catalog_product_id": product_id},
+        timeout=30,
+    )
+    if optin.status_code not in (200, 201):
+        raise RuntimeError(f"{source_item_id}: opt-in {optin.status_code} {optin.text[:500]}")
+    catalog_item_id = optin.json().get("id")
+    if not catalog_item_id:
+        raise RuntimeError(f"{source_item_id}: opt-in sin item_id {optin.text[:500]}")
+    print(f"[CATALOG-OPTIN] {source_item_id}->{catalog_item_id} product={product_id}", flush=True)
+    return catalog_item_id
+
 print("=== EDILBERTO: validación inicial de publicaciones autorizadas ===", flush=True)
 for target in TARGETS:
     check(target, initial=True)
+
+print("=== EDILBERTO: opt-in de publicaciones para competencia de catálogo ===", flush=True)
+for source_item_id in WAR_SOURCE_ITEMS:
+    try:
+        ensure_catalog_item(source_item_id)
+    except Exception as exc:
+        print(f"[CATALOG-ERROR] {source_item_id}: {exc}", flush=True)
 
 started = time.time()
 cycles = 0
