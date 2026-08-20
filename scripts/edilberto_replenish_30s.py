@@ -6,7 +6,7 @@ import requests
 
 API = "https://api.mercadolibre.com"
 SELLER_ID = 3616975257
-TARGETS = ["MLMU4851933870", "MLM3355626501"]
+TARGETS = ["MLMU4851933870", "MLM3355626501"]\nFALLBACK_ITEMS = {\n    "MLMU4851933870": ["MLM3355625791", "MLM3355650889"],\n    "MLMU4821841613": ["MLM3355626501"],\n}
 TICK = 30
 DURATION = int(os.environ.get("RUN_DURATION_SEC", str(5 * 3600 + 30 * 60)))
 
@@ -72,7 +72,26 @@ def keep_one_user_product(upid, initial=False):
         raise RuntimeError(f"{upid}: tipo de stock no soportado {kind}")
     u = requests.put(url, headers=headers, json=body, timeout=15)
     if u.status_code not in (200, 201, 204):
-        raise RuntimeError(f"{upid}: stock PUT {u.status_code} {u.text[:300]}")
+        blocked = u.status_code == 400 and "blocked for modifications to the selling address" in u.text
+        fallback = FALLBACK_ITEMS.get(upid) or []
+        if not blocked or not fallback:
+            raise RuntimeError(f"{upid}: stock PUT {u.status_code} {u.text[:300]}")
+        repaired = []
+        for iid in fallback:
+            current = requests.get(f"{API}/items/{iid}", headers=H, timeout=15).json()
+            item_body = {"available_quantity": 1}
+            if current.get("status") == "paused":
+                item_body["status"] = "active"
+            ri = requests.put(f"{API}/items/{iid}", headers=HJ, json=item_body, timeout=15)
+            if ri.status_code not in (200, 201):
+                raise RuntimeError(f"{upid}/{iid}: fallback PUT {ri.status_code} {ri.text[:300]}")
+            repaired.append(iid)
+        verify, _, _ = get_stock(upid)
+        new_total = sum(int(x.get("quantity") or 0) for x in (verify.get("locations") or []) if x.get("type") != "meli_facility")
+        if new_total != 1:
+            raise RuntimeError(f"{upid}: fallback ejecutado pero qty verificada={new_total}")
+        print(f"[REPLENISHED-ITEM-FALLBACK] {upid} editable_qty {total}->1 items={repaired}", flush=True)
+        return
     print(f"[REPLENISHED-UP] {upid} editable_qty {total}->1 type={kind}", flush=True)
 
 def keep_one_item(item_id, initial=False):
