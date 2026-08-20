@@ -21,6 +21,8 @@ from PIL import ImageOps
 
 APP_ID = os.environ.get("MELI_APP_ID", "2008666770714005")
 APP_SECRET = os.environ["MELI_APP_SECRET"]
+APP_ID_NEW = os.environ.get("MELI_APP_ID_NEW", "5211907102822632")
+APP_SECRET_NEW = os.environ.get("MELI_APP_SECRET_NEW", "")
 TG_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "")
 TG_CHAT  = os.environ.get("TELEGRAM_CHAT_ID", "")
 DRIVE_FOLDER_ID = os.environ.get("DRIVE_FOLDER_ID", "1aIDN3iq6zwCacL57iamptvQCPoSDyRbL")
@@ -36,6 +38,10 @@ ACCOUNTS = [
      "exclude_models":set(), "exclude_titles":set()},
     {"name":"RocioAngel","rt_env":"MELI_REFRESH_TOKEN_ROCIOANGEL","expected_uid":3478435727,"expected_nick":"RF20260617003604",
      "exclude_models":set(), "exclude_titles":set()},
+    {"name":"Edilberto","rt_env":"MELI_REFRESH_TOKEN_EDILBERTO","expected_uid":3616975257,"expected_nick":"ER20260815153348465",
+     "app_pair":"new", "exclude_models":set(), "exclude_titles":set()},
+    {"name":"LuisEd","rt_env":"MELI_REFRESH_TOKEN_LUISED","expected_uid":3584846108,"expected_nick":"LG20260801171031460",
+     "app_pair":"new", "exclude_models":set(), "exclude_titles":set()},
 ]
 ALLOWED_SUBS = {"ready_to_print"}
 
@@ -209,9 +215,14 @@ def render_header(s, header_h):
 
 # ============ TOKEN + ACCOUNT VALIDATION ============
 
-def renew_token(rt):
+def renew_token(rt, account):
+    use_new = account.get("app_pair") == "new"
+    app_id = APP_ID_NEW if use_new else APP_ID
+    app_secret = APP_SECRET_NEW if use_new else APP_SECRET
+    if not app_secret:
+        return {"error":"missing_app_secret","message":f"Falta secreto de app para {account['name']}"}
     r = requests.post("https://api.mercadolibre.com/oauth/token", data={
-        "grant_type":"refresh_token","client_id":APP_ID,"client_secret":APP_SECRET,"refresh_token":rt}, timeout=15)
+        "grant_type":"refresh_token","client_id":app_id,"client_secret":app_secret,"refresh_token":rt}, timeout=15)
     return r.json()
 
 def validate_account(account):
@@ -219,7 +230,7 @@ def validate_account(account):
     rt = os.environ.get(account["rt_env"])
     if not rt:
         return None, f"No hay token (env {account['rt_env']} vacío)"
-    j = renew_token(rt)
+    j = renew_token(rt, account)
     at = j.get("access_token")
     if not at:
         return None, f"token fail: {j.get('error')} {j.get('message','')[:120]}"
@@ -448,6 +459,7 @@ def tg_send(text):
 
 def already_done_today(svc):
     """Idempotencia: si la subcarpeta del día ya tiene ETIQUETAS_<TODAY>.pdf, no rehacer."""
+    output_prefix = os.environ.get("OUTPUT_PREFIX", "ETIQUETAS")
     safe = TODAY.replace("'", "\\'")
     q = (f"name='{safe}' and mimeType='application/vnd.google-apps.folder' "
          f"and '{DRIVE_FOLDER_ID}' in parents and trashed=false")
@@ -456,7 +468,7 @@ def already_done_today(svc):
     folders = res.get("files", [])
     if not folders: return None
     day_id = folders[0]["id"]
-    pdf_name = f"ETIQUETAS_{TODAY}.pdf"
+    pdf_name = f"{output_prefix}_{TODAY}.pdf"
     q2 = (f"name='{pdf_name}' and '{day_id}' in parents and trashed=false")
     res2 = svc.files().list(q=q2, fields="files(id,name,webViewLink,size,createdTime)",
                             supportsAllDrives=True, includeItemsFromAllDrives=True).execute()
@@ -494,8 +506,10 @@ def main():
     all_ships = []
     per_account_counts = {}
 
-    # 1) Recolectar shipments de TODAS las cuentas
-    for account in ACCOUNTS:
+    # 1) Recolectar shipments de las cuentas seleccionadas
+    account_filter = {x.strip().lower() for x in os.environ.get("ACCOUNT_FILTER", "").split(",") if x.strip()}
+    selected_accounts = [a for a in ACCOUNTS if not account_filter or a["name"].lower() in account_filter]
+    for account in selected_accounts:
         nm = account["name"]
         print(f"\n========== {nm} ==========")
         try:
@@ -547,7 +561,8 @@ def main():
     total = len(all_ships)
     breakdown = " + ".join(f"{nm}:{n}" for nm,n in per_account_counts.items())
     print(f"\n========== PDF combinado: {total} envíos ({breakdown}) ==========")
-    out_local = f"ETIQUETAS_{TODAY}.pdf"
+    output_prefix = os.environ.get("OUTPUT_PREFIX", "ETIQUETAS")
+    out_local = f"{output_prefix}_{TODAY}.pdf"
     pages, fails = build_pdf(all_ships, out_local)
     if pages == 0:
         report.append(f"❌ PDF salió vacío (fallidas {len(fails)}). NO subo.")
