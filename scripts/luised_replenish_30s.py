@@ -15,7 +15,7 @@ ITEMS = [
     "MLM3355975897",
 ]
 TICK = 30
-DURATION = 5 * 3600 + 30 * 60
+DURATION = int(os.environ.get("RUN_DURATION_SEC", str(5 * 3600 + 30 * 60)))
 
 def refresh():
     r = requests.post(f"{API}/oauth/token", data={
