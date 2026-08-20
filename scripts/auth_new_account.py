@@ -12,6 +12,9 @@ from nacl import encoding, public
 
 # Try both combos to find which app_id/secret pair matches the code
 import sys as _s
+CODE = os.environ["CODE"].strip()
+REDIRECT = "https://meli-webhook.elite-market-1779161651.workers.dev/oauth/callback"
+_token_json = None
 _id_new = os.environ.get("MELI_APP_ID_NEW","")
 _sec_new = os.environ.get("MELI_APP_SECRET_NEW","")
 _id_old = os.environ.get("MELI_APP_ID","")
@@ -36,12 +39,13 @@ for label_id, label_sec, aid, asec in _combos:
         continue
     _r = _rq.post("https://api.mercadolibre.com/oauth/token", data={
         "grant_type":"authorization_code","client_id":aid,"client_secret":asec,
-        "code":CODE,"redirect_uri":"https://oauth.pstmn.io/v1/callback"},timeout=15)
+        "code":CODE,"redirect_uri":REDIRECT},timeout=15)
     print(f"  try {label_id} + {label_sec}: {_r.status_code} err={_r.json().get('error','ok') if _r.status_code>=400 else 'OK'}")
     if _r.status_code == 200:
         APP_ID = aid
         APP_SECRET = asec
         print(f"✅ WORKING COMBO: {label_id} + {label_sec}")
+        _token_json = _r.json()
         _ok = True
         break
 
@@ -61,17 +65,9 @@ SECRET_NAME = f"MELI_REFRESH_TOKEN_{ACCOUNT_NAME}"
 
 print(f"=== Auth + Save secret: {SECRET_NAME} ===")
 
-# 1. Exchange code → token
-r = requests.post("https://api.mercadolibre.com/oauth/token", data={
-    "grant_type": "authorization_code",
-    "client_id": APP_ID,
-    "client_secret": APP_SECRET,
-    "code": CODE,
-    "redirect_uri": REDIRECT,
-}, timeout=20)
-if r.status_code != 200:
-    raise SystemExit(f"❌ OAuth fail: {r.text}")
-j = r.json()
+# 1. El intercambio ya se realizó al identificar la combinación correcta.
+# Reutilizar esa respuesta: un authorization_code de MELI es de un solo uso.
+j = _token_json
 refresh_token = j["refresh_token"]
 access_token = j["access_token"]
 
