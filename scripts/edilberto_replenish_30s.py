@@ -21,7 +21,7 @@ FALLBACK_ITEMS = {
     "MLMU4851933870": ["MLM3355625791", "MLM3355650889"],
     "MLMU4821841613": ["MLM3355626501"],
 }
-TICK = 30
+TICK = 30  # diagnostic run captures current catalog state
 DURATION = int(os.environ.get("RUN_DURATION_SEC", str(5 * 3600 + 30 * 60)))
 
 def refresh():
