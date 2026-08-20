@@ -24,6 +24,8 @@ jobs:
       - name: Run daily etiquetas
         env:
           FORCE_REGEN:                ${{ inputs.force_regen }}
+          ACCOUNT_FILTER:              'Claribel,Asva,RocioAngel'
+          OUTPUT_PREFIX:               'ETIQUETAS'
           MELI_APP_ID:                ${{ secrets.MELI_APP_ID }}
           MELI_APP_SECRET:            ${{ secrets.MELI_APP_SECRET }}
           MELI_REFRESH_TOKEN_CLARIBEL: ${{ secrets.MELI_REFRESH_TOKEN_CLARIBEL }}
