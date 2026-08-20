@@ -84,3 +84,5 @@ while time.time() - started < DURATION:
 with open("/tmp/luised_rotated_token", "w") as fh:
     fh.write(rotated_refresh_token)
 print(f"=== END cycles={cycles} ===", flush=True)
+
+# Reinicio controlado para adoptar el refresh token vigente.
