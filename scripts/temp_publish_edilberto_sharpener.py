@@ -128,6 +128,9 @@ else:
             continue
         attributes.append(cleaned)
 
+    if not any(attribute.get("id") == "UNITS_PER_PACK" for attribute in attributes):
+        attributes.append({"id": "UNITS_PER_PACK", "value_name": "1"})
+
     pictures = []
     for picture in product.get("pictures", []):
         picture_url = picture.get("secure_url") or picture.get("url")
