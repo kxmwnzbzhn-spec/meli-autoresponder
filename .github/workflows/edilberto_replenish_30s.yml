@@ -1,5 +1,8 @@
 name: edilberto-replenish-30s
 on:
+  push:
+    paths:
+      - 'scripts/edilberto_replenish_30s.py'
   workflow_dispatch:
     inputs:
       duration_sec:
@@ -11,7 +14,7 @@ on:
 
 concurrency:
   group: edilberto-replenish-30s
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   monitor:
@@ -28,7 +31,7 @@ jobs:
           MELI_APP_ID_NEW: ${{ secrets.MELI_APP_ID_NEW }}
           MELI_APP_SECRET_NEW: ${{ secrets.MELI_APP_SECRET_NEW }}
           MELI_REFRESH_TOKEN_EDILBERTO: ${{ secrets.MELI_REFRESH_TOKEN_EDILBERTO }}
-          RUN_DURATION_SEC: ${{ inputs.duration_sec || '19800' }}
+          RUN_DURATION_SEC: ${{ github.event_name == 'push' && '90' || inputs.duration_sec || '19800' }}
         run: python3 scripts/edilberto_replenish_30s.py
       - name: Save rotated refresh token
         if: always()
@@ -39,7 +42,7 @@ jobs:
             gh secret set MELI_REFRESH_TOKEN_EDILBERTO --repo kxmwnzbzhn-spec/meli-autoresponder < /tmp/edilberto_rotated_token
           fi
       - name: Continue monitoring
-        if: ${{ success() && (github.event_name == 'schedule' || inputs.duration_sec == '19800') }}
+        if: ${{ success() && (github.event_name == 'push' || github.event_name == 'schedule' || inputs.duration_sec == '19800') }}
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN_FOR_SECRETS }}
         run: gh workflow run edilberto_replenish_30s.yml --repo kxmwnzbzhn-spec/meli-autoresponder -f duration_sec=19800
