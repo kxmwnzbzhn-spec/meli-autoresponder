@@ -7,6 +7,7 @@ Auto-responder de preguntas pre-venta multi-cuenta con Claude AI.
 """
 import os, requests, json, time, base64
 from datetime import datetime, timezone, timedelta
+from question_policy import canonical_answer, user_verified_answer, validate_decision
 
 API="https://api.mercadolibre.com"
 SB=os.environ["SUPABASE_URL"].rstrip("/")
@@ -28,6 +29,7 @@ ACCOUNTS=[
 ]
 STRICT_EVIDENCE_ACCOUNTS={"ASVA","LUISED","EDILBERTO"}
 VERIFIED_BRAND_ACCOUNTS={"LUISED","EDILBERTO"}
+SEND_ANSWERS=os.environ.get("SEND_ANSWERS","").strip().lower()=="true"
 SAFE_NO_DATA_ANSWER=(
   "Buen dia, esa informacion no se especifica en la descripcion ni en la ficha tecnica "
   "de esta publicacion. Saludos cordiales — Elite Market."
@@ -86,7 +88,7 @@ def claude_answer(context, strict_evidence=False, verified_brand=False):
     )
     if strict_evidence:
         sys_prompt += (
-          " REGLA DE EVIDENCIA: cada afirmacion factual debe tener respaldo literal en product_description "
+          " REGLA ESPECIAL ASVA E: cada afirmacion factual debe tener respaldo literal en product_description "
           "o product_attributes. Copia en evidence el fragmento exacto que respalda la respuesta. "
           "Si el dato no existe, responde que no se especifica y deja evidence vacio."
         )
@@ -208,7 +210,7 @@ def process_account(nick, env_var):
         except Exception as e:
             print(f"  [description err] {item_id}: {e}")
         attrs={a.get("id"):a.get("value_name") for a in (item.get("attributes") or []) if a.get("id")}
-        # Luis Eduardo y Edilberto pueden responder preguntas de marca,
+        # LUIS EDUARDO y EDILBERTO pueden responder preguntas de marca,
         # originalidad y app, pero solo con evidencia literal de su propia ficha.
         # Las demas cuentas conservan el blacklist historico.
         if is_brand_question(qtext) and nick not in VERIFIED_BRAND_ACCOUNTS:
@@ -233,15 +235,29 @@ def process_account(nick, env_var):
           "product_attributes":attrs,"product_description":description,
           "question_text":qtext,"date_created":dt,
         }
-        decision=claude_answer(
-          ctx,
-          strict_evidence=(nick in STRICT_EVIDENCE_ACCOUNTS),
-          verified_brand=(nick in VERIFIED_BRAND_ACCOUNTS),
-        )
-        if not decision:
-            decision={"risk":"LOW","answer":SAFE_NO_DATA_ANSWER,"evidence":""}
+        directive_answer=user_verified_answer(nick,qtext)
+        if directive_answer:
+            decision={"risk":"LOW","answer":directive_answer,
+                      "evidence":"user_verified_account_directive"}
+            allowed,policy_reason=True,"user_verified_account_directive"
+        else:
+            decision=claude_answer(
+              ctx,
+              strict_evidence=(nick in STRICT_EVIDENCE_ACCOUNTS),
+              verified_brand=(nick in VERIFIED_BRAND_ACCOUNTS),
+            )
+            allowed,policy_reason=validate_decision(decision,ctx)
+        if not allowed:
+            high+=1
+            print(f"  [POLICY_SKIP {policy_reason}] Q{qid} {qtext[:80]}")
+            log_ans(account_nick=nick,question_id=qid,item_id=item_id,
+                    buyer_user_id=buyer,question_text=qtext,product_title=prod_title,
+                    risk_level="POLICY_SKIP",answer_text=(decision or {}).get("answer",""),
+                    ai_provider="anthropic",ai_model="claude-sonnet-4-20250514",
+                    telegram_notified=False,notes=policy_reason)
+            continue
         risk=(decision.get("risk") or "HIGH").upper()
-        ans=(decision.get("answer") or "").strip()
+        ans=directive_answer or canonical_answer(qtext) or (decision.get("answer") or "").strip()
         if risk=="HIGH" and not ans:
             high+=1
             log_ans(account_nick=nick,question_id=qid,item_id=item_id,
@@ -255,6 +271,9 @@ def process_account(nick, env_var):
                f"Draft AI: {ans[:200]}")
             continue
         if len(ans)>500: ans=ans[:495]+"..."
+        if not SEND_ANSWERS:
+            print(f"  [DRY_RUN VERIFIED] Q{qid} | {qtext[:50]} | ans={ans[:100]}")
+            continue
         code,body=post_answer(AT,qid,ans,item_id)
         ok=code<300
         # Compute delay
