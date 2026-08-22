@@ -131,22 +131,30 @@ def openai_answer(context, strict_evidence=False, verified_brand=False):
       "instructions":sys_prompt,
       "input":user_prompt,
       "store":False,
-      "max_output_tokens":700,
+      "max_output_tokens":1200,
+      "reasoning":{"effort":"low"},
       "text":{"format":{
         "type":"json_schema","name":"meli_question_decision",
         "strict":True,"schema":schema,
       }},
     }
     try:
-        r=requests.post(OPENAI_RESPONSES_URL,
-          headers={"Authorization":f"Bearer {OPENAI_API_KEY}","Content-Type":"application/json"},
-          json=body,timeout=50)
-        if r.status_code>=300:
-            print(f"[openai {r.status_code}] {r.text[:300]}")
-            return None
-        raw=_response_output_text(r.json())
+        raw=""
+        for attempt in range(2):
+            r=requests.post(OPENAI_RESPONSES_URL,
+              headers={"Authorization":f"Bearer {OPENAI_API_KEY}","Content-Type":"application/json"},
+              json=body,timeout=50)
+            if r.status_code>=300:
+                print(f"[openai {r.status_code}] {r.text[:300]}")
+                return None
+            payload=r.json()
+            raw=_response_output_text(payload)
+            if raw:
+                break
+            detail=payload.get("incomplete_details") or {}
+            print(f"[openai] response without output_text attempt={attempt+1} status={payload.get('status')} detail={detail}")
+            time.sleep(0.5)
         if not raw:
-            print("[openai] response without output_text")
             return None
         decision=json.loads(raw)
         if strict_evidence:
