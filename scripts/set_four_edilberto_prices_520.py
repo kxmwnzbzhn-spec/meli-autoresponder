@@ -41,16 +41,17 @@ for item_id in TARGET_IDS:
     if current.get("status") not in {"active", "paused", "under_review"}:
         raise RuntimeError(f"{item_id}: status no modificable {current.get('status')}")
     old_price = current.get("price")
-    updated = requests.put(
-        f"{API}/items/{item_id}",
-        headers=json_headers,
-        json={"price": PRICE},
-        timeout=TIMEOUT,
-    )
-    if updated.status_code not in (200, 201):
-        raise RuntimeError(
-            f"{item_id}: price PUT {updated.status_code} {updated.text[:600]}"
+    if float(old_price or 0) != float(PRICE):
+        updated = requests.put(
+            f"{API}/items/{item_id}",
+            headers=json_headers,
+            json={"price": PRICE},
+            timeout=TIMEOUT,
         )
+        if updated.status_code not in (200, 201):
+            raise RuntimeError(
+                f"{item_id}: price PUT {updated.status_code} {updated.text[:600]}"
+            )
     final_response = requests.get(
         f"{API}/items/{item_id}", headers=headers, timeout=TIMEOUT
     )
