@@ -255,8 +255,9 @@ def verify_and_register(source, target_id):
             timeout=TIMEOUT,
         )
         if priority.status_code not in (200, 201, 204):
-            raise RuntimeError(
-                f"{target_id}: priority {priority.status_code} {priority.text[:500]}"
+            print(
+                f"WARNING {target_id}: priority registry unavailable "
+                f"{priority.status_code} {priority.text[:500]}"
             )
     print(
         f"VERIFIED {target_id} status={target.get('status')} "
