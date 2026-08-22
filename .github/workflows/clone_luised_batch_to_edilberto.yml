@@ -1,0 +1,44 @@
+name: clone-luised-batch-to-edilberto
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: clone-luised-batch-to-edilberto
+  cancel-in-progress: false
+
+jobs:
+  clone:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    permissions:
+      actions: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install requests -q
+      - name: Validate batch clone
+        run: python3 -m py_compile scripts/clone_luised_batch_to_edilberto.py
+      - name: Clone and verify three listings
+        env:
+          MELI_APP_ID_NEW: ${{ secrets.MELI_APP_ID_NEW }}
+          MELI_APP_SECRET_NEW: ${{ secrets.MELI_APP_SECRET_NEW }}
+          MELI_REFRESH_TOKEN_LUISED: ${{ secrets.MELI_REFRESH_TOKEN_LUISED }}
+          MELI_REFRESH_TOKEN_EDILBERTO: ${{ secrets.MELI_REFRESH_TOKEN_EDILBERTO }}
+        run: python3 scripts/clone_luised_batch_to_edilberto.py
+      - name: Save rotated refresh tokens
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN_FOR_SECRETS }}
+        run: |
+          if [ -s /tmp/luised_rotated_token ]; then
+            gh secret set MELI_REFRESH_TOKEN_LUISED --repo kxmwnzbzhn-spec/meli-autoresponder < /tmp/luised_rotated_token
+          fi
+          if [ -s /tmp/edilberto_rotated_token ]; then
+            gh secret set MELI_REFRESH_TOKEN_EDILBERTO --repo kxmwnzbzhn-spec/meli-autoresponder < /tmp/edilberto_rotated_token
+          fi
+      - name: Results
+        if: always()
+        run: |
+          if [ -s /tmp/luised_batch_results.json ]; then
+            cat /tmp/luised_batch_results.json
+          fi
