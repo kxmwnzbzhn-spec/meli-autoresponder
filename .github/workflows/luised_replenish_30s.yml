@@ -6,8 +6,6 @@ on:
         description: 'Duración del monitor en segundos'
         required: false
         default: '19800'
-  schedule:
-    - cron: '17 6 * * *'
 
 concurrency:
   group: luised-replenish-30s
