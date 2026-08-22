@@ -20,6 +20,8 @@ TARGETS = [
     "MLM3376191333",
     "MLM6061828546",
 ]
+# Límites físicos por publicación; se llenan al validar las nuevas clonaciones.
+REAL_STOCK_LIMITS = {}
 WAR_SOURCE_ITEMS = [
     "MLM6042921636",
     "MLM6043044650",
@@ -67,6 +69,94 @@ with open("/tmp/edilberto_rotated_token", "w") as fh:
     fh.write(tok.get("refresh_token", ""))
 H = {"Authorization": f"Bearer {tok['access_token']}"}
 HJ = {**H, "Content-Type": "application/json"}
+
+def paid_units_for_item(item_id):
+    """Suma unidades de órdenes pagadas/no canceladas para este item."""
+    total_units = 0
+    offset = 0
+    limit = 50
+    while True:
+        response = requests.get(
+            f"{API}/orders/search",
+            headers=H,
+            params={
+                "seller": SELLER_ID,
+                "q": item_id,
+                "limit": limit,
+                "offset": offset,
+                "sort": "date_asc",
+            },
+            timeout=20,
+        )
+        if response.status_code != 200:
+            raise RuntimeError(
+                f"{item_id}: orders search {response.status_code} "
+                f"{response.text[:300]}"
+            )
+        data = response.json()
+        rows = data.get("results") or []
+        for order in rows:
+            if order.get("status") in {"cancelled", "invalid"}:
+                continue
+            tags = set(order.get("tags") or [])
+            approved_payment = any(
+                payment.get("status") == "approved"
+                for payment in (order.get("payments") or [])
+            )
+            if (
+                order.get("status") not in {"paid", "partially_refunded"}
+                and "paid" not in tags
+                and not approved_payment
+            ):
+                continue
+            for order_item in order.get("order_items") or []:
+                if (order_item.get("item") or {}).get("id") == item_id:
+                    total_units += int(order_item.get("quantity") or 0)
+        paging = data.get("paging") or {}
+        offset += len(rows)
+        if not rows or offset >= int(paging.get("total") or 0):
+            break
+    return total_units
+
+
+def enforce_real_stock(item_id, initial=False):
+    """Devuelve True si aún se puede mostrar una unidad; pausa al agotarse."""
+    initial_stock = REAL_STOCK_LIMITS.get(item_id)
+    if initial_stock is None:
+        return True
+    sold_units = paid_units_for_item(item_id)
+    remaining = max(0, int(initial_stock) - sold_units)
+    if initial or remaining <= 2:
+        print(
+            f"[REAL-STOCK] {item_id} initial={initial_stock} "
+            f"sold={sold_units} remaining={remaining}",
+            flush=True,
+        )
+    if remaining > 0:
+        return True
+    item_response = requests.get(
+        f"{API}/items/{item_id}", headers=H, timeout=15
+    )
+    item_response.raise_for_status()
+    item = item_response.json()
+    if item.get("status") != "paused":
+        paused = requests.put(
+            f"{API}/items/{item_id}",
+            headers=HJ,
+            json={"status": "paused"},
+            timeout=20,
+        )
+        if paused.status_code not in (200, 201):
+            raise RuntimeError(
+                f"{item_id}: pause {paused.status_code} {paused.text[:300]}"
+            )
+        print(
+            f"[REAL-STOCK-PAUSED] {item_id} sold={sold_units} "
+            f"initial={initial_stock}",
+            flush=True,
+        )
+    return False
+
 
 def get_stock(upid):
     r = requests.get(f"{API}/user-products/{upid}/stock", headers=H, timeout=15)
@@ -208,6 +298,8 @@ def check(target, initial=False):
     if target.startswith("MLMU"):
         keep_one_user_product(target, initial=initial)
     else:
+        if not enforce_real_stock(target, initial=initial):
+            return
         keep_one_item(target, initial=initial)
 
 def ensure_catalog_item(source_item_id):
