@@ -1,17 +1,11 @@
 name: edilberto-replenish-30s
 on:
-  push:
-    branches: [main]
-    paths:
-      - scripts/edilberto_replenish_30s.py
   workflow_dispatch:
     inputs:
       duration_sec:
         description: 'Duración del monitor en segundos'
         required: false
         default: '19800'
-  schedule:
-    - cron: '23 6 * * *'
 
 concurrency:
   group: edilberto-replenish-30s
