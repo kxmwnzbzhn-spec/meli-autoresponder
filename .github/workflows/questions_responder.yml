@@ -1,8 +1,6 @@
 name: questions-responder
 on:
   workflow_dispatch: {}
-  schedule:
-    - cron: "*/2 * * * *"
 concurrency:
   group: questions-responder
   cancel-in-progress: false
