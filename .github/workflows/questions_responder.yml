@@ -42,6 +42,7 @@ jobs:
           MELI_REFRESH_TOKEN_EDILBERTO: ${{ secrets.MELI_REFRESH_TOKEN_EDILBERTO }}
           GH_TOKEN_FOR_SECRETS: ${{ secrets.GH_TOKEN_FOR_SECRETS }}
         run: |
+          set -o pipefail
           python3 scripts/questions_responder.py | tee /tmp/qr.log
           grep '^FINAL_ROTATED_TOKENS=' /tmp/qr.log | sed 's/^FINAL_ROTATED_TOKENS=//' > /tmp/rot.json || echo '{}' > /tmp/rot.json
       - name: sync rotated tokens
