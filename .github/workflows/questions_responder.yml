@@ -1,6 +1,12 @@
 name: questions-responder
 on:
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      send_answers:
+        description: 'Enviar respuestas reales (false = simulacion segura)'
+        required: true
+        type: boolean
+        default: false
 concurrency:
   group: questions-responder
   cancel-in-progress: false
@@ -14,6 +20,10 @@ jobs:
       - uses: actions/setup-python@v5
         with: { python-version: "3.11" }
       - run: pip install requests pynacl -q
+      - name: safety tests
+        run: |
+          python3 -m unittest tests/test_question_policy.py -v
+          python3 -m py_compile scripts/question_policy.py scripts/questions_responder.py
       - name: run responder
         env:
           MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
@@ -23,6 +33,7 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          SEND_ANSWERS: ${{ inputs.send_answers }}
           MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
           MELI_REFRESH_TOKEN_CLARIBEL: ${{ secrets.MELI_REFRESH_TOKEN_CLARIBEL }}
           MELI_REFRESH_TOKEN_ASVA: ${{ secrets.MELI_REFRESH_TOKEN_ASVA }}
