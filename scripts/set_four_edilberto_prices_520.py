@@ -38,7 +38,7 @@ for item_id in TARGET_IDS:
         raise RuntimeError(
             f"{item_id}: seller={current.get('seller_id')} esperado={SELLER_ID}"
         )
-    if current.get("status") not in {"active", "paused"}:
+    if current.get("status") not in {"active", "paused", "under_review"}:
         raise RuntimeError(f"{item_id}: status no modificable {current.get('status')}")
     old_price = current.get("price")
     updated = requests.put(
