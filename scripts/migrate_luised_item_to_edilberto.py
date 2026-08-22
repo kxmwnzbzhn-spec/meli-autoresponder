@@ -60,16 +60,23 @@ def require_item(item_id, headers, seller_id):
 
 def target_candidates(catalog_product_id):
     response = requests.get(
-        f"{API}/sites/MLM/search",
+        f"{API}/users/{TARGET_SELLER}/items/search",
         headers=HT,
-        params={"seller_id": TARGET_SELLER, "limit": 50},
+        params={"status": "active", "limit": 100},
         timeout=TIMEOUT,
     )
     response.raise_for_status()
     found = []
-    for result in response.json().get("results") or []:
-        if result.get("catalog_product_id") == catalog_product_id:
-            found.append(result.get("id"))
+    for item_id in response.json().get("results") or []:
+        try:
+            result = require_item(item_id, HT, TARGET_SELLER)
+        except Exception:
+            continue
+        if (
+            result.get("catalog_product_id") == catalog_product_id
+            and result.get("condition") == "new"
+        ):
+            found.append(item_id)
     return [item_id for item_id in found if item_id]
 
 
@@ -112,50 +119,36 @@ def create_target(source):
             print(f"REUSED_TARGET={candidate}")
             return candidate
 
-    base = {
+    family_name = source.get("family_name") or source.get("title") or "Sony SRS-XB100"
+    attributes = [{"id": "ITEM_CONDITION", "value_name": "Nuevo"}]
+    for attribute in source.get("attributes") or []:
+        if attribute.get("id") in {"GTIN", "EAN", "UPC"}:
+            value = str(attribute.get("value_name") or "").strip()
+            if value.isdigit() and 8 <= len(value) <= 14:
+                attributes.insert(0, {"id": "GTIN", "value_name": value})
+                break
+    payload = {
+        "site_id": "MLM",
+        "family_name": family_name[:60],
+        "category_id": source.get("category_id"),
         "price": source.get("price"),
         "currency_id": source.get("currency_id") or "MXN",
         "available_quantity": 1,
         "buying_mode": source.get("buying_mode") or "buy_it_now",
         "listing_type_id": source.get("listing_type_id") or "gold_special",
-        "condition": source.get("condition") or "new",
+        "condition": "new",
+        "catalog_product_id": catalog_product_id,
+        "catalog_listing": True,
+        "attributes": attributes,
+        "shipping": {
+            "mode": "me2",
+            "local_pick_up": False,
+            "free_shipping": bool((source.get("shipping") or {}).get("free_shipping")),
+        },
     }
-    if catalog_product_id:
-        payload = {
-            **base,
-            "catalog_product_id": catalog_product_id,
-            "catalog_listing": True,
-        }
-        created = requests.post(
-            f"{API}/items", headers=HTJ, json=payload, timeout=35
-        )
-    else:
-        created = requests.Response()
-        created.status_code = 400
-        created._content = b'{"message":"source_without_catalog_product_id"}'
-
-    if created.status_code not in (200, 201):
-        pictures = [
-            {"source": picture.get("secure_url") or picture.get("url")}
-            for picture in source.get("pictures") or []
-            if picture.get("secure_url") or picture.get("url")
-        ]
-        fallback = {
-            **base,
-            "title": (source.get("title") or "Producto")[:60],
-            "category_id": source.get("category_id"),
-            "pictures": pictures,
-            "attributes": safe_attributes(source),
-            "sale_terms": source.get("sale_terms") or [],
-            "shipping": {
-                "mode": "me2",
-                "local_pick_up": False,
-                "free_shipping": bool((source.get("shipping") or {}).get("free_shipping")),
-            },
-        }
-        created = requests.post(
-            f"{API}/items", headers=HTJ, json=fallback, timeout=40
-        )
+    created = requests.post(
+        f"{API}/items", headers=HTJ, json=payload, timeout=40
+    )
     if created.status_code not in (200, 201):
         raise RuntimeError(f"clone POST {created.status_code}: {created.text[:1200]}")
 
@@ -206,9 +199,10 @@ def register_priority(target_id, title):
         timeout=TIMEOUT,
     )
     if response.status_code not in (200, 201, 204):
-        raise RuntimeError(
-            f"priority register {response.status_code}: {response.text[:500]}"
+        print(
+            f"PRIORITY_WARNING={response.status_code}: {response.text[:500]}"
         )
+        return
     print("PRIORITY_REGISTERED=true")
 
 
@@ -231,6 +225,10 @@ def verify_target(target_id):
         raise RuntimeError(
             f"{target_id}: verificación falló status={item.get('status')} "
             f"qty={item.get('available_quantity')}"
+        )
+    if item.get("condition") != "new":
+        raise RuntimeError(
+            f"{target_id}: condition={item.get('condition')} esperado=new"
         )
     print(
         f"TARGET_VERIFIED={target_id} status={item.get('status')} "
