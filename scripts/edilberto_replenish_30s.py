@@ -19,9 +19,18 @@ TARGETS = [
     "MLM6042921184",
     "MLM3376191333",
     "MLM6061828546",
+    "MLM6061793358",
+    "MLM6061831150",
+    "MLM6061856108",
+    "MLM6061793370",
 ]
 # Límites físicos por publicación; se llenan al validar las nuevas clonaciones.
-REAL_STOCK_LIMITS = {}
+REAL_STOCK_LIMITS = {
+    "MLM6061793358": 28,
+    "MLM6061831150": 28,
+    "MLM6061856108": 6,
+    "MLM6061793370": 16,
+}
 WAR_SOURCE_ITEMS = [
     "MLM6042921636",
     "MLM6043044650",
