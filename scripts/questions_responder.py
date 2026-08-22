@@ -105,7 +105,9 @@ def claude_answer(context, strict_evidence=False, verified_brand=False):
           headers={"x-api-key":ANTHROPIC_KEY,"anthropic-version":"2023-06-01","content-type":"application/json"},
           json={"model":"claude-sonnet-4-20250514","max_tokens":1000,"system":sys_prompt,
                 "messages":[{"role":"user","content":user_prompt}]},timeout=40)
-        if r.status_code>=300:\n            print(f"[claude {r.status_code}] {r.text[:300]}")\n            return None
+        if r.status_code>=300:
+            print(f"[claude {r.status_code}] {r.text[:300]}")
+            return None
         text="".join(b.get("text","") for b in r.json().get("content",[]) if b.get("type")=="text").strip()
         if text.startswith("```"):
             text=text.split("```")[1]
