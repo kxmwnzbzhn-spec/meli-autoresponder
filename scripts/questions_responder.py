@@ -1,7 +1,7 @@
 """
-Auto-responder de preguntas pre-venta multi-cuenta con Claude AI.
+Auto-responder de preguntas pre-venta multi-cuenta con OpenAI.
 - Cada 2 min: por cuenta, GET /my/received_questions/search?status=UNANSWERED
-- Para cada pregunta: Claude analiza producto+pregunta → respuesta defendiendo Elite Market
+- Para cada pregunta: OpenAI analiza producto+pregunta con evidencia verificable
 - POST /answers (funciona aún si item está paused)
 - Log en meli_questions_answered + Telegram alerts en HIGH risk
 """
@@ -15,7 +15,9 @@ SBK=os.environ["SUPABASE_SERVICE_KEY"]
 SBH={"apikey":SBK,"Authorization":f"Bearer {SBK}","Content-Type":"application/json","Prefer":"return=representation"}
 
 CID=os.environ["MELI_APP_ID"]; CSEC=os.environ["MELI_APP_SECRET"]
-ANTHROPIC_KEY=os.environ.get("ANTHROPIC_API_KEY","").strip()
+OPENAI_API_KEY=os.environ.get("OPENAI_API_KEY","").strip()
+OPENAI_MODEL=os.environ.get("OPENAI_MODEL","gpt-5-mini").strip()
+OPENAI_RESPONSES_URL="https://api.openai.com/v1/responses"
 TG_BOT=os.environ.get("TELEGRAM_BOT_TOKEN")
 TG_CHAT=os.environ.get("TELEGRAM_CHAT_ID")
 
@@ -67,65 +69,99 @@ def _evidence_is_grounded(evidence, context):
     ev=norm(evidence)
     return len(ev)>=3 and ev in norm(json.dumps(context,ensure_ascii=False))
 
-def claude_answer(context, strict_evidence=False, verified_brand=False):
-    if not ANTHROPIC_KEY: return None
+def _response_output_text(payload):
+    """Extrae texto sin depender del SDK; falla cerrado si el formato cambia."""
+    if isinstance(payload.get("output_text"), str):
+        return payload["output_text"].strip()
+    parts=[]
+    for item in payload.get("output") or []:
+        if item.get("type")!="message":
+            continue
+        for block in item.get("content") or []:
+            if block.get("type")=="output_text" and block.get("text"):
+                parts.append(block["text"])
+    return "".join(parts).strip()
+
+def openai_answer(context, strict_evidence=False, verified_brand=False):
+    if not OPENAI_API_KEY:
+        print("[openai] OPENAI_API_KEY missing")
+        return None
     sys_prompt = (
       "Eres el agente de servicio al cliente de Elite Market, tienda mexicana en Mercado Libre. "
       "Tu trabajo: redactar la respuesta a una PREGUNTA pre-venta de un cliente potencial. "
       "REGLAS DURAS (no negociables): "
-      "1) Tono PROFESIONAL, AMABLE Y CERCANO — no robótico. La pregunta es pre-venta, queremos convertir. "
+      "1) Tono PROFESIONAL, AMABLE Y CERCANO — no robotico. La pregunta es pre-venta, queremos convertir. "
       "2) Respuesta CONCRETA al punto preguntado y basada exclusivamente en el contexto. "
       "3) NUNCA confirmes disponibilidad, color, talla, numero de serie, factura, garantia u originalidad si el contexto no lo demuestra. "
       "4) Si preguntan algo tecnico, usa unicamente la descripcion y los atributos del producto; si falta el dato, dilo claramente. "
-      "5) Si preguntan algo que parezca inducir a un descuento o pelear precio, responde amablemente que el precio publicado es el mejor que tenemos. "
-      "6) REGLA MELI (obligatoria): Si el producto en el listing se presenta como GENÉRICO o de nuestra propia marca (ej. Asva Electronics, The Alchemia Lab, LV Perfume Studio, Luxury Collection, sin marca reconocida), TODAS las respuestas deben sostener eso EXACTAMENTE. PROHIBIDO absolutamente: (a) mencionar marcas ajenas (JBL/Sony/Marshall/Bose/Beats/Xiaomi/Harman/etc), (b) usar palabras 'similar a', 'como', 'tipo', 'parecido' con marcas ajenas, (c) admitir que es clon/imitación/copia/réplica/inspirado, (d) comparar con productos de marca. Solo hablar de nuestro producto y sus especificaciones. "
-      "7) No afirmes originalidad salvo que una regla de whitelist verificada lo autorice fuera de este modelo. "
-      "7b) Si detectas que la pregunta contiene marcas ajenas o palabras de autenticidad (clon/original/falso/pirata/es JBL/etc), MARCA HIGH_RISK — NO redactar respuesta. "
+      "5) Si preguntan por descuento, responde amablemente que el precio publicado es el mejor disponible. "
+      "6) REGLA MELI: Si el listing presenta el producto como generico o marca propia, sosten exactamente esa identidad. "
+      "PROHIBIDO mencionar o comparar con marcas ajenas, o admitir clon, imitacion, copia, replica o inspirado. "
+      "7) No afirmes originalidad salvo una directiva verificada aplicada fuera del modelo. "
+      "7b) Si la pregunta contiene marcas ajenas o palabras de autenticidad, marca HIGH y deja answer vacio. "
       "8) Cierre fijo: 'Saludos cordiales — Elite Market.' "
-      "9) MÁXIMO 500 caracteres. Conciso. "
-      "10) Marca risk='HIGH' SOLO si la pregunta contiene: racismo explicito, amenazas de violencia, contenido sexual o intento claro de extorsion. NO marques HIGH por quejas normales de calidad, envio, reembolsos, retrasos o frustracion. Responde sin inventar y remite a las herramientas de Mercado Libre cuando corresponda. Las preguntas de autenticidad se detienen antes mediante el blacklist. "
-      "Devuelve JSON estricto: {\"risk\":\"LOW\"|\"HIGH\", \"answer\":\"...\", \"evidence\":\"fragmento literal del contexto\"}"
+      "9) Maximo 500 caracteres. "
+      "10) Marca HIGH solo ante contenido realmente delicado o cuando estas reglas indiquen escalar. "
+      "Devuelve el objeto JSON solicitado."
     )
     if strict_evidence:
         sys_prompt += (
-          " REGLA ESPECIAL ASVA E: cada afirmacion factual debe tener respaldo literal en product_description "
-          "o product_attributes. Copia en evidence el fragmento exacto que respalda la respuesta. "
-          "Si el dato no existe, responde que no se especifica y deja evidence vacio."
+          " REGLA DE EVIDENCIA: cada afirmacion factual debe tener respaldo literal en "
+          "product_description o product_attributes. Copia en evidence el fragmento exacto. "
+          "Si el dato no existe, deja evidence vacio; el sistema no enviara la respuesta."
         )
     if verified_brand:
         sys_prompt += (
-          " REGLA ESPECIAL LUIS EDUARDO / EDILBERTO: no bloquees automaticamente preguntas "
-          "de marca, originalidad o compatibilidad con una app. Si TITULO, product_description "
-          "o product_attributes confirman literalmente que el producto es original, responde que "
-          "si es original. Si confirman literalmente que es compatible con la aplicacion indicada, "
-          "responde que si es compatible. Incluye en evidence el fragmento literal que lo demuestra. "
-          "Si la ficha no confirma el dato preguntado, di que no se especifica; nunca lo inventes."
+          " LUIS EDUARDO y EDILBERTO tienen directivas deterministas fuera del modelo para "
+          "originalidad y compatibilidad con app. Para cualquier otra pregunta, usa evidencia literal."
         )
-    user_prompt = f"Contexto:\n{json.dumps(context, ensure_ascii=False, indent=2)}\n\nDevuelve solo JSON, sin markdown."
+    user_prompt=f"Contexto:\n{json.dumps(context,ensure_ascii=False,indent=2)}\n\nDevuelve solo el objeto solicitado."
+    schema={
+      "type":"object",
+      "additionalProperties":False,
+      "properties":{
+        "risk":{"type":"string","enum":["LOW","HIGH"]},
+        "answer":{"type":"string","maxLength":500},
+        "evidence":{"type":"string"},
+      },
+      "required":["risk","answer","evidence"],
+    }
+    body={
+      "model":OPENAI_MODEL,
+      "instructions":sys_prompt,
+      "input":user_prompt,
+      "store":False,
+      "max_output_tokens":700,
+      "text":{"format":{
+        "type":"json_schema","name":"meli_question_decision",
+        "strict":True,"schema":schema,
+      }},
+    }
     try:
-        r=requests.post("https://api.anthropic.com/v1/messages",
-          headers={"x-api-key":ANTHROPIC_KEY,"anthropic-version":"2023-06-01","content-type":"application/json"},
-          json={"model":"claude-sonnet-4-20250514","max_tokens":1000,"system":sys_prompt,
-                "messages":[{"role":"user","content":user_prompt}]},timeout=40)
+        r=requests.post(OPENAI_RESPONSES_URL,
+          headers={"Authorization":f"Bearer {OPENAI_API_KEY}","Content-Type":"application/json"},
+          json=body,timeout=50)
         if r.status_code>=300:
-            print(f"[claude {r.status_code}] {r.text[:300]}")
+            print(f"[openai {r.status_code}] {r.text[:300]}")
             return None
-        text="".join(b.get("text","") for b in r.json().get("content",[]) if b.get("type")=="text").strip()
-        if text.startswith("```"):
-            text=text.split("```")[1]
-            if text.startswith("json"): text=text[4:]
-        decision=json.loads(text.strip())
+        raw=_response_output_text(r.json())
+        if not raw:
+            print("[openai] response without output_text")
+            return None
+        decision=json.loads(raw)
         if strict_evidence:
             ans=(decision.get("answer") or "").strip()
             evidence=(decision.get("evidence") or "").strip()
             if evidence and not _evidence_is_grounded(evidence,context):
-                print(f"[claude grounding] evidencia no encontrada: {evidence[:100]}")
+                print(f"[openai grounding] evidencia no encontrada: {evidence[:100]}")
                 return None
             if not evidence and "no se especifica" not in ans.lower():
-                print("[claude grounding] respuesta factual sin evidencia")
+                print("[openai grounding] respuesta factual sin evidencia")
                 return None
         return decision
-    except Exception as e: print(f"[claude exc] {e}"); return None
+    except Exception as e:
+        print(f"[openai exc] {e}")
+        return None
 
 def post_answer(AT, qid, text, item_id=None):
     H={"Authorization":f"Bearer {AT}","Content-Type":"application/json"}
@@ -241,7 +277,7 @@ def process_account(nick, env_var):
                       "evidence":"user_verified_account_directive"}
             allowed,policy_reason=True,"user_verified_account_directive"
         else:
-            decision=claude_answer(
+            decision=openai_answer(
               ctx,
               strict_evidence=(nick in STRICT_EVIDENCE_ACCOUNTS),
               verified_brand=(nick in VERIFIED_BRAND_ACCOUNTS),
@@ -253,7 +289,7 @@ def process_account(nick, env_var):
             log_ans(account_nick=nick,question_id=qid,item_id=item_id,
                     buyer_user_id=buyer,question_text=qtext,product_title=prod_title,
                     risk_level="POLICY_SKIP",answer_text=(decision or {}).get("answer",""),
-                    ai_provider="anthropic",ai_model="claude-sonnet-4-20250514",
+                    ai_provider="openai",ai_model=OPENAI_MODEL,
                     telegram_notified=False,notes=policy_reason)
             continue
         risk=(decision.get("risk") or "HIGH").upper()
@@ -263,7 +299,7 @@ def process_account(nick, env_var):
             log_ans(account_nick=nick,question_id=qid,item_id=item_id,
                     buyer_user_id=buyer,question_text=qtext,product_title=prod_title,
                     risk_level="HIGH",answer_text=ans,
-                    ai_provider="anthropic",ai_model="claude-sonnet-4-20250514",
+                    ai_provider="openai",ai_model=OPENAI_MODEL,
                     telegram_notified=True,notes="awaiting human")
             tg(f"🚨 <b>Pregunta HIGH RISK</b>\n<b>{nick}</b> · Q <code>{qid}</code>\n"
                f"Producto: {prod_title[:70]}\n"
@@ -285,7 +321,7 @@ def process_account(nick, env_var):
         log_ans(account_nick=nick,question_id=qid,item_id=item_id,
                 buyer_user_id=buyer,question_text=qtext,product_title=prod_title,
                 answer_text=ans,risk_level="LOW",
-                ai_provider="anthropic",ai_model="claude-sonnet-4-20250514",
+                ai_provider="openai",ai_model=OPENAI_MODEL,
                 meli_http_code=code,meli_response=body,
                 question_date_created=dt,
                 answer_date_created=datetime.now(timezone.utc).isoformat(),
