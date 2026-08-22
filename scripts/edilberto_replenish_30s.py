@@ -5,6 +5,7 @@ Validado para ejecución continua cada 30 segundos y prueba inicial controlada.
 import os
 import time
 import requests
+from stock_policy import item_stock_action
 
 API = "https://api.mercadolibre.com"
 SELLER_ID = 3616975257
@@ -33,6 +34,7 @@ PRICE_CEILINGS = {
 }
 PRICE_FLOOR = 499
 PRICE_STEP = 10
+ENABLE_PRICE_WAR = os.environ.get("ENABLE_PRICE_WAR","").strip().lower() == "true"
 WIN_STREAK_REQUIRED = 4
 WIN_STREAKS = {}
 SYNC_REPAIR_AT = {}
@@ -117,13 +119,19 @@ def keep_one_user_product(upid, initial=False):
         repaired = []
         for iid in fallback:
             current = requests.get(f"{API}/items/{iid}", headers=H, timeout=15).json()
+            action=item_stock_action(current.get("status"),current.get("sub_status"),current.get("available_quantity"))
+            if action == "skip_non_sellable":
+                print(f"[POLICY-SKIP-FALLBACK] {iid} status={current.get('status')} sub={current.get('sub_status')}",flush=True)
+                continue
             item_body = {"available_quantity": 1}
-            if current.get("status") == "paused":
+            if action == "replenish_out_of_stock":
                 item_body["status"] = "active"
             ri = requests.put(f"{API}/items/{iid}", headers=HJ, json=item_body, timeout=15)
             if ri.status_code not in (200, 201):
                 raise RuntimeError(f"{upid}/{iid}: fallback PUT {ri.status_code} {ri.text[:300]}")
             repaired.append(iid)
+        if not repaired:
+            return
         verify, _, _ = get_stock(upid)
         new_total = sum(int(x.get("quantity") or 0) for x in (verify.get("locations") or []) if x.get("type") != "meli_facility")
         if new_total != 1:
@@ -161,11 +169,14 @@ def keep_one_item(item_id, initial=False):
         stock, _, raw = get_stock(upid)
         if stock is not None and any(x.get("type") != "meli_facility" for x in (stock.get("locations") or [])):
             keep_one_user_product(upid, initial=initial)
-            if item.get("status") == "paused":
+            action=item_stock_action(item.get("status"),item.get("sub_status"),item.get("available_quantity"))
+            if action == "replenish_out_of_stock":
                 u = requests.put(f"{API}/items/{item_id}", headers=HJ, json={"status": "active"}, timeout=15)
                 if u.status_code not in (200, 201):
                     raise RuntimeError(f"{item_id}: reactivar {u.status_code} {u.text[:250]}")
-                print(f"[REACTIVATED] {item_id}", flush=True)
+                print(f"[REACTIVATED-OUT-OF-STOCK] {item_id}", flush=True)
+            elif action == "skip_non_sellable":
+                print(f"[POLICY-SKIP] {item_id} status={item.get('status')} sub={item.get('sub_status')}",flush=True)
             return
     if item.get("inventory_id"):
         raise RuntimeError(f"{item_id}: publicación Full; MELI controla sus existencias")
@@ -173,12 +184,17 @@ def keep_one_item(item_id, initial=False):
         raise RuntimeError(f"{item_id}: tiene variaciones; requiere configuración individual")
     qty = int(item.get("available_quantity") or 0)
     status = item.get("status")
-    if qty == 1 and status == "active":
+    action=item_stock_action(status,item.get("sub_status"),qty)
+    if action == "noop":
         if initial:
             print(f"[OK] {item_id} active qty=1 title={item.get('title','')}", flush=True)
         return
+    if action == "skip_non_sellable":
+        if initial:
+            print(f"[POLICY-SKIP] {item_id} status={status} sub={item.get('sub_status')} qty={qty}",flush=True)
+        return
     body = {"available_quantity": 1}
-    if status == "paused":
+    if action == "replenish_out_of_stock":
         body["status"] = "active"
     u = requests.put(f"{API}/items/{item_id}", headers=HJ, json=body, timeout=15)
     if u.status_code not in (200, 201):
@@ -400,9 +416,9 @@ print("=== EDILBERTO: validación inicial de publicaciones autorizadas ===", flu
 for target in TARGETS:
     check(target, initial=True)
 
-print("=== EDILBERTO: catálogo y Buy Box ===", flush=True)
+print(f"=== EDILBERTO: catálogo y Buy Box enabled={ENABLE_PRICE_WAR} ===", flush=True)
 WAR_CATALOG_ITEMS = {}
-for source_item_id in WAR_SOURCE_ITEMS:
+for source_item_id in (WAR_SOURCE_ITEMS if ENABLE_PRICE_WAR else []):
     try:
         catalog_item_id = ensure_catalog_item(source_item_id)
         WAR_CATALOG_ITEMS[source_item_id] = catalog_item_id
