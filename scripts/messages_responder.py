@@ -121,6 +121,45 @@ def get_order_info(AT, order_id):
     except: pass
     return None
 
+def get_products_context(AT, order):
+    """Carga titulo, atributos y descripcion real de cada producto del pedido."""
+    if not order: return []
+    H={"Authorization":f"Bearer {AT}"}
+    products=[]
+    for row in (order.get("order_items") or [])[:6]:
+        base=row.get("item") or {}
+        iid=base.get("id")
+        detail=base
+        description=""
+        if iid:
+            try:
+                ir=requests.get(f"{API}/items/{iid}",headers=H,timeout=10)
+                if ir.status_code==200: detail=ir.json()
+            except: pass
+            try:
+                dr=requests.get(f"{API}/items/{iid}/description",headers=H,timeout=10)
+                if dr.status_code==200:
+                    description=(dr.json().get("plain_text") or "")[:8000]
+            except: pass
+        attrs={a.get("id"):a.get("value_name") for a in (detail.get("attributes") or []) if a.get("id")}
+        products.append({
+          "item_id":iid,"title":detail.get("title") or base.get("title") or "",
+          "quantity":row.get("quantity"),"attributes":attrs,"description":description,
+        })
+    return products
+
+def _is_technical_message(text):
+    t=(text or "").lower()
+    keys=("compatible","compatibilidad","medida","tamano","tamaño","color","material",
+          "incluye","contenido","bateria","duracion","potencia","watts","resistente",
+          "impermeable","bluetooth","funciona","modelo","version","voltaje","cargador")
+    return any(k in t for k in keys)
+
+def _evidence_is_grounded(evidence, products):
+    norm=lambda s:" ".join(str(s or "").lower().split())
+    ev=norm(evidence)
+    return len(ev)>=3 and ev in norm(json.dumps(products,ensure_ascii=False))
+
 def claude_decide(context):
     if not ANTHROPIC_KEY: return None
     sys_prompt = (
@@ -136,7 +175,9 @@ def claude_decide(context):
       "7) Si el comprador exige reembolso, amenaza con reclamo/baja calificación, o reporta daño/falsificación con foto, marca risk='HIGH' y NO inventes excusas débiles. "
       "8) Si solo pregunta info (cuándo llega, factura, instrucciones), risk='LOW' responde directo. "
       "9) Si el ÚLTIMO mensaje es del seller (no del buyer), risk='SKIP' y message vacío. "
-      "Devuelve JSON estricto: {\"risk\":\"LOW\"|\"HIGH\"|\"SKIP\",\"strategy\":\"...\",\"message\":\"...\"}"
+      "10) REGLA ASVA E: antes de contestar sobre especificaciones, compatibilidad, contenido, medidas, color, material o funcionamiento, lee products[].description y products[].attributes. NUNCA inventes ni completes datos por intuicion. Si el dato no aparece, di que no se especifica. "
+      "11) No afirmes que el producto es original ni menciones marcas ajenas si la publicacion es generica o de ASVA Electronics. "
+      "Devuelve JSON estricto: {\"risk\":\"LOW\"|\"HIGH\"|\"SKIP\",\"strategy\":\"...\",\"message\":\"...\",\"evidence\":\"fragmento literal de descripcion/atributos que respalda cualquier dato tecnico\"}"
     )
     user_prompt=f"Contexto:\n{json.dumps(context, ensure_ascii=False, indent=2)}\n\nDevuelve solo JSON, sin markdown."
     try:
@@ -197,13 +238,11 @@ def process_account(nick, env_var):
         if isinstance(p,dict): oid=p.get("order_id") or p.get("id")
         if not oid: oid=pid
         order=get_order_info(AT, oid)
-        product=""
-        if order:
-            items=order.get("order_items",[])
-            if items: product=items[0]["item"]["title"]
+        products=get_products_context(AT,order)
+        product=products[0]["title"] if products else ""
         ctx={
           "pack_id":pid,"order_id":str(oid),"account":nick,
-          "product":product,"buyer_id":buyer_id,
+          "product":product,"products":products,"order_status":(order or {}).get("status"),"buyer_id":buyer_id,
           "last_buyer_message":last_text,
           "conversation":[{"from":m.get("from",{}).get("user_id"),"text":parse_text(m)[:300]} for m in msgs_sorted[-6:]],
         }
@@ -218,6 +257,13 @@ def process_account(nick, env_var):
         if risk=="SKIP":
             skipped+=1; continue
         msg=(decision.get("message") or "").strip()
+        evidence=(decision.get("evidence") or "").strip()
+        if risk=="LOW" and _is_technical_message(last_text):
+            if not evidence or not _evidence_is_grounded(evidence,products):
+                print(f"  [grounding fallback] pack={pid} technical answer without valid evidence")
+                msg=("Hola, esa informacion no se especifica en la descripcion ni en la ficha tecnica "
+                     "de la publicacion. Para evitar darte un dato incorrecto, no podemos confirmarlo. "
+                     "Saludos cordiales — Elite Market.")
         if not msg: continue
         if len(msg)>700: msg=msg[:690]+"..."
         if risk=="LOW":
