@@ -103,9 +103,9 @@ def claude_answer(context, strict_evidence=False, verified_brand=False):
     try:
         r=requests.post("https://api.anthropic.com/v1/messages",
           headers={"x-api-key":ANTHROPIC_KEY,"anthropic-version":"2023-06-01","content-type":"application/json"},
-          json={"model":"claude-sonnet-4-5","max_tokens":1000,"system":sys_prompt,
+          json={"model":"claude-sonnet-4-20250514","max_tokens":1000,"system":sys_prompt,
                 "messages":[{"role":"user","content":user_prompt}]},timeout=40)
-        if r.status_code>=300: print(f"[claude {r.status_code}]"); return None
+        if r.status_code>=300:\n            print(f"[claude {r.status_code}] {r.text[:300]}")\n            return None
         text="".join(b.get("text","") for b in r.json().get("content",[]) if b.get("type")=="text").strip()
         if text.startswith("```"):
             text=text.split("```")[1]
@@ -245,7 +245,7 @@ def process_account(nick, env_var):
             log_ans(account_nick=nick,question_id=qid,item_id=item_id,
                     buyer_user_id=buyer,question_text=qtext,product_title=prod_title,
                     risk_level="HIGH",answer_text=ans,
-                    ai_provider="anthropic",ai_model="claude-sonnet-4-5",
+                    ai_provider="anthropic",ai_model="claude-sonnet-4-20250514",
                     telegram_notified=True,notes="awaiting human")
             tg(f"🚨 <b>Pregunta HIGH RISK</b>\n<b>{nick}</b> · Q <code>{qid}</code>\n"
                f"Producto: {prod_title[:70]}\n"
@@ -264,7 +264,7 @@ def process_account(nick, env_var):
         log_ans(account_nick=nick,question_id=qid,item_id=item_id,
                 buyer_user_id=buyer,question_text=qtext,product_title=prod_title,
                 answer_text=ans,risk_level="LOW",
-                ai_provider="anthropic",ai_model="claude-sonnet-4-5",
+                ai_provider="anthropic",ai_model="claude-sonnet-4-20250514",
                 meli_http_code=code,meli_response=body,
                 question_date_created=dt,
                 answer_date_created=datetime.now(timezone.utc).isoformat(),
