@@ -20,11 +20,14 @@ TG_CHAT=os.environ.get("TELEGRAM_CHAT_ID")
 
 ACCOUNTS=[
   ("ASVA","MELI_REFRESH_TOKEN_ASVA"),
+  ("LUISED","MELI_REFRESH_TOKEN_LUISED"),
+  ("EDILBERTO","MELI_REFRESH_TOKEN_EDILBERTO"),
   # ("MAYRELY","MELI_REFRESH_TOKEN_MAYRELY"),  # DEACTIVATED 2026-07-28 (user pidió solo ASVA)
   # ("YERALDIN","MELI_REFRESH_TOKEN_YERALDIN"),  # DEACTIVATED 2026-07-28 (user pidió solo ASVA)
   # ("LUPITA","MELI_REFRESH_TOKEN_LUPITA"),  # DEACTIVATED 2026-07-28 (user pidió solo ASVA)
 ]
-STRICT_EVIDENCE_ACCOUNTS={"ASVA"}
+STRICT_EVIDENCE_ACCOUNTS={"ASVA","LUISED","EDILBERTO"}
+VERIFIED_BRAND_ACCOUNTS={"LUISED","EDILBERTO"}
 SAFE_NO_DATA_ANSWER=(
   "Buen dia, esa informacion no se especifica en la descripcion ni en la ficha tecnica "
   "de esta publicacion. Saludos cordiales — Elite Market."
@@ -62,7 +65,7 @@ def _evidence_is_grounded(evidence, context):
     ev=norm(evidence)
     return len(ev)>=3 and ev in norm(json.dumps(context,ensure_ascii=False))
 
-def claude_answer(context, strict_evidence=False):
+def claude_answer(context, strict_evidence=False, verified_brand=False):
     if not ANTHROPIC_KEY: return None
     sys_prompt = (
       "Eres el agente de servicio al cliente de Elite Market, tienda mexicana en Mercado Libre. "
@@ -83,9 +86,18 @@ def claude_answer(context, strict_evidence=False):
     )
     if strict_evidence:
         sys_prompt += (
-          " REGLA ESPECIAL ASVA E: cada afirmacion factual debe tener respaldo literal en product_description "
+          " REGLA DE EVIDENCIA: cada afirmacion factual debe tener respaldo literal en product_description "
           "o product_attributes. Copia en evidence el fragmento exacto que respalda la respuesta. "
           "Si el dato no existe, responde que no se especifica y deja evidence vacio."
+        )
+    if verified_brand:
+        sys_prompt += (
+          " REGLA ESPECIAL LUIS EDUARDO / EDILBERTO: no bloquees automaticamente preguntas "
+          "de marca, originalidad o compatibilidad con una app. Si TITULO, product_description "
+          "o product_attributes confirman literalmente que el producto es original, responde que "
+          "si es original. Si confirman literalmente que es compatible con la aplicacion indicada, "
+          "responde que si es compatible. Incluye en evidence el fragmento literal que lo demuestra. "
+          "Si la ficha no confirma el dato preguntado, di que no se especifica; nunca lo inventes."
         )
     user_prompt = f"Contexto:\n{json.dumps(context, ensure_ascii=False, indent=2)}\n\nDevuelve solo JSON, sin markdown."
     try:
@@ -194,8 +206,10 @@ def process_account(nick, env_var):
         except Exception as e:
             print(f"  [description err] {item_id}: {e}")
         attrs={a.get("id"):a.get("value_name") for a in (item.get("attributes") or []) if a.get("id")}
-        # BRAND BLACKLIST: no responder preguntas sobre marca/autenticidad
-        if is_brand_question(qtext):
+        # Luis Eduardo y Edilberto pueden responder preguntas de marca,
+        # originalidad y app, pero solo con evidencia literal de su propia ficha.
+        # Las demas cuentas conservan el blacklist historico.
+        if is_brand_question(qtext) and nick not in VERIFIED_BRAND_ACCOUNTS:
             high+=1
             log_ans(account_nick=nick,question_id=qid,item_id=item_id,
                     buyer_user_id=buyer,question_text=qtext,product_title=prod_title,
@@ -217,7 +231,11 @@ def process_account(nick, env_var):
           "product_attributes":attrs,"product_description":description,
           "question_text":qtext,"date_created":dt,
         }
-        decision=claude_answer(ctx,strict_evidence=(nick in STRICT_EVIDENCE_ACCOUNTS))
+        decision=claude_answer(
+          ctx,
+          strict_evidence=(nick in STRICT_EVIDENCE_ACCOUNTS),
+          verified_brand=(nick in VERIFIED_BRAND_ACCOUNTS),
+        )
         if not decision:
             decision={"risk":"LOW","answer":SAFE_NO_DATA_ANSWER,"evidence":""}
         risk=(decision.get("risk") or "HIGH").upper()
