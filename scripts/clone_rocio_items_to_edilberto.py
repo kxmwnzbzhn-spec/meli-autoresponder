@@ -109,6 +109,7 @@ def clone_one(source):
     base = {
         "site_id": "MLM",
         "title": (source.get("title") or "Producto")[:60],
+        "family_name": (source.get("family_name") or source.get("title") or "Producto")[:60],
         "category_id": source.get("category_id"),
         "price": source.get("price"),
         "currency_id": source.get("currency_id") or "MXN",
