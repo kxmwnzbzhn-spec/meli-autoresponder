@@ -21,6 +21,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: pip install requests -q
+      - name: Safety tests
+        run: |
+          python3 -m unittest tests/test_stock_policy.py -v
+          python3 -m py_compile scripts/stock_policy.py scripts/luised_replenish_30s.py
       - name: Monitor four authorized LuisEd listings
         env:
           MELI_APP_ID_NEW: ${{ secrets.MELI_APP_ID_NEW }}
