@@ -21,6 +21,11 @@ class StockPolicyTests(unittest.TestCase):
         for status in ("closed","under_review","inactive"):
             self.assertEqual(item_stock_action(status,[],0),"skip_non_sellable")
 
+    def test_one_bad_listing_does_not_change_policy_for_others(self):
+        states=[("closed",["deleted"],0),("active",[],0),("active",[],1)]
+        self.assertEqual([item_stock_action(*state) for state in states],
+                         ["skip_non_sellable","set_quantity","noop"])
+
 
 if __name__ == "__main__":
     unittest.main()
