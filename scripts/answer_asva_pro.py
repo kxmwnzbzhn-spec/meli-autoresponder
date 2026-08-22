@@ -17,6 +17,8 @@ ACCOUNTS = {
     "KARIME": os.environ.get("MELI_REFRESH_TOKEN_KARIME"),
     "LIGIA":  os.environ.get("MELI_REFRESH_TOKEN_LIGIA"),
 }
+# ASVA E debe contestar solamente con hechos verificables de la publicacion.
+STRICT_EVIDENCE_ACCOUNTS = {"ASVA"}
 GEMINI_KEY = os.environ.get("GEMINI_API_KEY")
 TG_BOT     = os.environ.get("TELEGRAM_BOT_TOKEN")
 TG_CHAT    = os.environ.get("TELEGRAM_CHAT_ID")
@@ -101,7 +103,9 @@ def fetch_item(iid, H):
         "category_id": i.get("category_id", ""),
         "attributes": attrs,
         "variations": variations,
-        "description": desc[:1500],
+        # No truncar agresivamente: muchas fichas dejan medidas, compatibilidad
+        # y contenido de la caja despues de los primeros 1,500 caracteres.
+        "description": desc[:8000],
     }
 
 def template_answer(q_text, item):
@@ -130,7 +134,14 @@ def template_answer(q_text, item):
                 return "Buen dia, si, es producto 100 por ciento original y autentico, con la calidad garantizada por la marca. Gracias."
     return None
 
-def gemini_answer(q_text, item):
+def _evidence_is_grounded(evidence, context):
+    """Acepta evidencia solo si aparece literalmente en la ficha enviada al modelo."""
+    if not evidence: return False
+    norm = lambda s: re.sub(r"\s+", " ", str(s or "")).strip().lower()
+    ev = norm(evidence)
+    return len(ev) >= 3 and ev in norm(context)
+
+def gemini_answer(q_text, item, strict_evidence=False):
     if not GEMINI_KEY:
         return None
     if not item:
@@ -164,7 +175,16 @@ def gemini_answer(q_text, item):
         ctx_lines.append(f"DESCRIPCION:\n{item['description']}")
     ctx = "\n".join(ctx_lines)
 
-    user_prompt = f"{ctx}\n\nPREGUNTA DEL COMPRADOR:\n{q_text}\n\nResponde."
+    if strict_evidence:
+        user_prompt = (
+            f"{ctx}\n\nPREGUNTA DEL COMPRADOR:\n{q_text}\n\n"
+            "Responde SOLO con datos presentes en TITULO, ATRIBUTOS, VARIACIONES o DESCRIPCION. "
+            "No conviertas ausencia de informacion en un si. Devuelve JSON estricto con "
+            "{\"answer\":\"respuesta breve\",\"evidence\":\"fragmento literal del contexto que respalda el dato\"}. "
+            "Si la ficha no contiene el dato, answer debe decir que no se especifica y evidence debe quedar vacio."
+        )
+    else:
+        user_prompt = f"{ctx}\n\nPREGUNTA DEL COMPRADOR:\n{q_text}\n\nResponde."
     body = {
         "system_instruction": {"parts": [{"text": SYSTEM_PROMPT}]},
         "contents": [{"role": "user", "parts": [{"text": user_prompt}]}],
@@ -175,6 +195,8 @@ def gemini_answer(q_text, item):
             "thinkingConfig": {"thinkingBudget": 0},
         }
     }
+    if strict_evidence:
+        body["generationConfig"]["responseMimeType"] = "application/json"
     j = None
     for attempt in range(4):
         try:
@@ -192,10 +214,27 @@ def gemini_answer(q_text, item):
     if not j:
         return None
     try:
-        ans = j["candidates"][0]["content"]["parts"][0]["text"].strip()
+        raw = j["candidates"][0]["content"]["parts"][0]["text"].strip()
     except Exception:
         print(f"    gemini parse fail: {json.dumps(j)[:300]}")
         return None
+    if strict_evidence:
+        try:
+            parsed = json.loads(raw)
+            ans = (parsed.get("answer") or "").strip()
+            evidence = (parsed.get("evidence") or "").strip()
+        except Exception:
+            print("    strict grounding: JSON invalido")
+            return None
+        if evidence:
+            if not _evidence_is_grounded(evidence, ctx):
+                print(f"    strict grounding: evidencia no encontrada: {evidence[:100]}")
+                return None
+        elif "no se especifica" not in ans.lower() and "no esta" not in ans.lower():
+            print("    strict grounding: respuesta sin evidencia")
+            return None
+    else:
+        ans = raw
     # Sanity cap a 480 chars (limite MELI 2000 - queremos brevedad)
     ans = re.sub(r"\s+", " ", ans).strip()
     if len(ans) > 480:
@@ -273,12 +312,16 @@ def answer_original_template(text: str, item: dict) -> str:
     return ("Buen dia, si es 100% original, nuevo en caja sellada, con garantia del vendedor. Gracias.")
 # ================================================================
 
-def craft(q_text, item):
-    a = template_answer(q_text, item)
+def craft(q_text, item, strict_evidence=False):
+    # Los templates operativos contienen politicas generales. En ASVA E no se
+    # usan para evitar afirmar envio, garantia o factura sin respaldo de la ficha.
+    a = None if strict_evidence else template_answer(q_text, item)
     if a: return ("template", a)
-    a = gemini_answer(q_text, item)
+    a = gemini_answer(q_text, item, strict_evidence=strict_evidence)
     if a: return ("gemini", a)
     # Fallback ultra seguro
+    if strict_evidence:
+        return ("fallback", "Buen dia, esa informacion no se especifica en la descripcion ni en la ficha tecnica de esta publicacion. Gracias.")
     return ("fallback", "Buen dia, gracias por tu pregunta. Toda la informacion del producto se encuentra detallada en la descripcion de la publicacion. Si hay algo especifico que necesites, con gusto te apoyamos. Gracias.")
 
 def process_account(label, refresh_tok):
@@ -358,7 +401,7 @@ def process_account(label, refresh_tok):
             print(f"  [BRAND_SKIP] {iid} '{title_short}' Q: '{text[:100]}'")
             telegram(f"⚠️ Pregunta MARCA sin responder\nItem: {iid}\nTitulo: {title_short}\nQ: {text[:200]}\nBuyer: {ques.get('from',{}).get('id','?')}\nPerfil: https://www.mercadolibre.com.mx/perfil/{ques.get('from',{}).get('id','')}\n→ En MELI: Denunciar / Bloquear junto a la pregunta")
             continue
-        kind, ans = craft(text, item)
+        kind, ans = craft(text, item, strict_evidence=(label in STRICT_EVIDENCE_ACCOUNTS))
         print(f"  [{kind}] {iid} '{title_short}'")
         print(f"    Q: '{text[:100]}'")
         print(f"    A: '{ans}'")
@@ -399,4 +442,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
