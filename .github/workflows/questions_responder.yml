@@ -1,5 +1,14 @@
 name: questions-responder
 on:
+  schedule:
+    - cron: '*/5 * * * *'
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/questions_responder.py'
+      - 'scripts/question_policy.py'
+      - 'tests/**'
+      - '.github/workflows/questions_responder.yml'
   workflow_dispatch:
     inputs:
       send_answers:
@@ -34,7 +43,7 @@ jobs:
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           OPENAI_MODEL: gpt-5-mini
-          SEND_ANSWERS: ${{ inputs.send_answers }}
+          SEND_ANSWERS: ${{ github.event_name == 'schedule' || inputs.send_answers }}
           MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
           MELI_REFRESH_TOKEN_CLARIBEL: ${{ secrets.MELI_REFRESH_TOKEN_CLARIBEL }}
           MELI_REFRESH_TOKEN_ASVA: ${{ secrets.MELI_REFRESH_TOKEN_ASVA }}
