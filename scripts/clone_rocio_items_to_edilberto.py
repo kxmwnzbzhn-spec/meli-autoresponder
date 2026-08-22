@@ -70,6 +70,11 @@ def existing_target(catalog_product_id):
         params={"seller_id": TARGET_SELLER, "limit": 50},
         timeout=TIMEOUT,
     )
+    # El buscador público puede devolver 403 aun con token válido. Eso no impide
+    # publicar; simplemente desactiva la detección previa de duplicados.
+    if response.status_code == 403:
+        print("TARGET_SEARCH_SKIPPED=403")
+        return None
     response.raise_for_status()
     for result in response.json().get("results") or []:
         if result.get("catalog_product_id") != catalog_product_id:
