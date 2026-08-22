@@ -22,7 +22,7 @@ jobs:
       - run: pip install requests pynacl -q
       - name: safety tests
         run: |
-          python3 -m unittest tests/test_question_policy.py -v
+          python3 -m unittest discover -s tests -v
           python3 -m py_compile scripts/question_policy.py scripts/questions_responder.py
       - name: run responder
         env:
@@ -32,7 +32,8 @@ jobs:
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_MODEL: gpt-5-mini
           SEND_ANSWERS: ${{ inputs.send_answers }}
           MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN }}
           MELI_REFRESH_TOKEN_CLARIBEL: ${{ secrets.MELI_REFRESH_TOKEN_CLARIBEL }}
