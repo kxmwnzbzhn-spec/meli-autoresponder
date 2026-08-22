@@ -61,37 +61,72 @@ def get_item(item_id, headers, expected_seller):
     return item
 
 
-def existing_target(catalog_product_id):
+def existing_target(catalog_product_id, desired_condition):
     if not catalog_product_id:
         return None
     response = requests.get(
-        f"{API}/sites/MLM/search",
+        f"{API}/users/{TARGET_SELLER}/items/search",
         headers=HT,
-        params={"seller_id": TARGET_SELLER, "limit": 50},
+        params={"status": "active", "limit": 100},
         timeout=TIMEOUT,
     )
-    # El buscador público puede devolver 403 aun con token válido. Eso no impide
-    # publicar; simplemente desactiva la detección previa de duplicados.
-    if response.status_code == 403:
-        print("TARGET_SEARCH_SKIPPED=403")
-        return None
     response.raise_for_status()
-    for result in response.json().get("results") or []:
-        if result.get("catalog_product_id") != catalog_product_id:
+    for item_id in response.json().get("results") or []:
+        try:
+            item = get_item(item_id, HT, TARGET_SELLER)
+        except Exception:
             continue
-        item_id = result.get("id")
-        if not item_id:
-            continue
-        item = get_item(item_id, HT, TARGET_SELLER)
-        if item.get("status") != "closed" and not item.get("deleted"):
+        if (
+            item.get("catalog_product_id") == catalog_product_id
+            and item.get("condition") == desired_condition
+            and not item.get("deleted")
+        ):
             return item_id
     return None
 
 
+def gtin_for(source):
+    for attribute in source.get("attributes") or []:
+        if attribute.get("id") in {"GTIN", "EAN", "UPC"} and attribute.get("value_name"):
+            return str(attribute["value_name"])
+    product_id = source.get("catalog_product_id")
+    if product_id:
+        response = requests.get(
+            f"{API}/products/{product_id}", headers=HT, timeout=TIMEOUT
+        )
+        if response.status_code == 200:
+            for attribute in response.json().get("attributes") or []:
+                if attribute.get("id") in {"GTIN", "EAN", "UPC"} and attribute.get("value_name"):
+                    return str(attribute["value_name"])
+    return "No aplica"
+
+
+def condition_spec(source_id):
+    if source_id == "MLM5992405574":
+        return {
+            "condition": "used",
+            "item_condition": "Usado",
+            "family_name": "Marshall Willen II Bocina Bluetooth Caja Abierta",
+            "description": (
+                "Marshall Willen II en condición caja abierta. El empaque fue abierto. "
+                "Producto disponible con las características indicadas en la ficha técnica "
+                "y una unidad visible."
+            ),
+        }
+    return {
+        "condition": "new",
+        "item_condition": "Nuevo",
+        "family_name": None,
+        "description": None,
+    }
 def clone_one(source):
     source_id = source["id"]
     catalog_product_id = source.get("catalog_product_id")
-    found = existing_target(catalog_product_id)
+    if not catalog_product_id:
+        raise RuntimeError(f"{source_id}: no tiene catalog_product_id; no se publicará fuera de catálogo")
+
+    spec = condition_spec(source_id)
+    found = existing_target(catalog_product_id, spec["condition"])
     if found:
         response = requests.put(
             f"{API}/items/{found}",
@@ -104,91 +139,64 @@ def clone_one(source):
                 f"{found}: no se pudo normalizar {response.status_code} {response.text[:500]}"
             )
         print(f"REUSED {source_id}->{found}")
-        return found, "reused"
+        return found, "reused", spec
 
-    base = {
+    family_name = spec["family_name"] or source.get("family_name") or source.get("title") or "Producto"
+    payload = {
         "site_id": "MLM",
-        "family_name": (source.get("family_name") or source.get("title") or "Producto")[:60],
+        "family_name": family_name[:60],
         "category_id": source.get("category_id"),
         "price": source.get("price"),
         "currency_id": source.get("currency_id") or "MXN",
         "available_quantity": 1,
         "buying_mode": source.get("buying_mode") or "buy_it_now",
         "listing_type_id": source.get("listing_type_id") or "gold_special",
-        "condition": source.get("condition") or "new",
+        "condition": spec["condition"],
+        "catalog_product_id": catalog_product_id,
+        "catalog_listing": True,
+        "attributes": [
+            {"id": "GTIN", "value_name": gtin_for(source)},
+            {"id": "ITEM_CONDITION", "value_name": spec["item_condition"]},
+        ],
+        "shipping": {
+            "mode": "me2",
+            "local_pick_up": False,
+            "free_shipping": bool((source.get("shipping") or {}).get("free_shipping")),
+        },
     }
-    if catalog_product_id:
-        payload = {
-            **base,
-            "catalog_product_id": catalog_product_id,
-            "catalog_listing": True,
-            "shipping": {
-                "mode": "me2",
-                "free_shipping": bool((source.get("shipping") or {}).get("free_shipping")),
-            },
-        }
-        response = requests.post(f"{API}/items", headers=HTJ, json=payload, timeout=40)
-    else:
-        response = requests.Response()
-        response.status_code = 400
-        response._content = b'{"message":"traditional_fallback"}'
-
-    if response.status_code not in (200, 201):
-        attributes = []
-        skip = {
-            "SELLER_SKU", "HAZMAT_TRANSPORTABILITY", "ITEM_CONDITION",
-            "PACKAGE_LENGTH", "PACKAGE_WEIGHT", "PACKAGE_WIDTH", "PACKAGE_HEIGHT",
-            "SHIPMENT_PACKING", "PRODUCT_FEATURES",
-        }
-        for attribute in source.get("attributes") or []:
-            attribute_id = attribute.get("id")
-            if not attribute_id or attribute_id in skip:
-                continue
-            if attribute.get("value_id"):
-                attributes.append({"id": attribute_id, "value_id": attribute["value_id"]})
-            elif attribute.get("value_name"):
-                attributes.append({"id": attribute_id, "value_name": attribute["value_name"]})
-        fallback = {
-            **base,
-            "pictures": [
-                {"source": picture.get("secure_url") or picture.get("url")}
-                for picture in source.get("pictures") or []
-                if picture.get("secure_url") or picture.get("url")
-            ][:10],
-            "attributes": attributes,
-            "sale_terms": source.get("sale_terms") or [],
-            "shipping": {
-                "mode": "me2",
-                "local_pick_up": False,
-                "free_shipping": bool((source.get("shipping") or {}).get("free_shipping")),
-            },
-        }
-        response = requests.post(f"{API}/items", headers=HTJ, json=fallback, timeout=45)
-
+    response = requests.post(f"{API}/items", headers=HTJ, json=payload, timeout=45)
+    print(f"CATALOG_POST {source_id} HTTP={response.status_code} BODY={response.text[:900]}")
     if response.status_code not in (200, 201):
         raise RuntimeError(
-            f"{source_id}: clone POST {response.status_code} {response.text[:1200]}"
+            f"{source_id}: publicación de catálogo falló {response.status_code} "
+            f"{response.text[:1200]}"
         )
     target_id = response.json().get("id")
     if not target_id:
         raise RuntimeError(f"{source_id}: respuesta sin id")
 
-    description_response = requests.get(
-        f"{API}/items/{source_id}/description", headers=HS, timeout=TIMEOUT
+    description = spec["description"]
+    if description is None:
+        description_response = requests.get(
+            f"{API}/items/{source_id}/description", headers=HS, timeout=TIMEOUT
+        )
+        description = (
+            description_response.json().get("plain_text")
+            if description_response.status_code == 200
+            else ""
+        )
+    if description:
+        requests.post(
+            f"{API}/items/{target_id}/description",
+            headers=HTJ,
+            json={"plain_text": description[:5000]},
+            timeout=TIMEOUT,
+        )
+    print(
+        f"CREATED {source_id}->{target_id} condition={spec['condition']} "
+        f"catalog_product_id={catalog_product_id}"
     )
-    if description_response.status_code == 200:
-        description = description_response.json().get("plain_text") or ""
-        if description:
-            requests.post(
-                f"{API}/items/{target_id}/description",
-                headers=HTJ,
-                json={"plain_text": description[:5000]},
-                timeout=TIMEOUT,
-            )
-    print(f"CREATED {source_id}->{target_id}")
-    return target_id, "created"
-
-
+    return target_id, "created", spec
 def verify_and_register(source, target_id):
     target = get_item(target_id, HT, TARGET_SELLER)
     if target.get("status") != "active" or int(target.get("available_quantity") or 0) != 1:
@@ -248,12 +256,17 @@ for source_id in SOURCE_IDS:
         f"SOURCE {source_id} status={source.get('status')} price={source.get('price')} "
         f"catalog={source.get('catalog_product_id')} title={source.get('title')}"
     )
-    target_id, action = clone_one(source)
+    target_id, action, spec = clone_one(source)
     target = verify_and_register(source, target_id)
+    if target.get("condition") != spec["condition"]:
+        raise RuntimeError(
+            f"{target_id}: condition={target.get('condition')} esperado={spec['condition']}"
+        )
     results.append({
         "source_id": source_id,
         "target_id": target_id,
         "action": action,
+        "condition": target.get("condition"),
         "status": target.get("status"),
         "quantity": target.get("available_quantity"),
         "price": target.get("price"),
