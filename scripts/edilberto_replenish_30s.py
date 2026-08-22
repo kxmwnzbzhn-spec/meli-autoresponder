@@ -414,7 +414,10 @@ def manage_catalog_price(item_id, ceiling, initial=False):
 
 print("=== EDILBERTO: validación inicial de publicaciones autorizadas ===", flush=True)
 for target in TARGETS:
-    check(target, initial=True)
+    try:
+        check(target, initial=True)
+    except Exception as exc:
+        print(f"[ERROR] {target}: {exc}", flush=True)
 
 print(f"=== EDILBERTO: catálogo y Buy Box enabled={ENABLE_PRICE_WAR} ===", flush=True)
 WAR_CATALOG_ITEMS = {}
