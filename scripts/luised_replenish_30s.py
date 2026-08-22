@@ -4,6 +4,7 @@ import json
 import os
 import time
 import requests
+from stock_policy import item_stock_action
 
 API = "https://api.mercadolibre.com"
 ACCOUNT = "LUISED"
@@ -48,10 +49,14 @@ def inspect_and_replenish(item_id, initial=False):
     qty = int(item.get("available_quantity") or 0)
     status = item.get("status")
     title = item.get("title", "")
-    needs = qty != 1 or status != "active"
-    if needs:
+    action=item_stock_action(status,item.get("sub_status"),qty)
+    if action == "skip_non_sellable":
+        if initial:
+            print(f"[POLICY-SKIP] {item_id} status={status} sub={item.get('sub_status')} qty={qty} title={title}",flush=True)
+        return
+    if action in ("set_quantity","replenish_out_of_stock"):
         body = {"available_quantity": 1}
-        if status == "paused":
+        if action == "replenish_out_of_stock":
             body["status"] = "active"
         u = requests.put(f"{API}/items/{item_id}", headers=HJ, json=body, timeout=15)
         if u.status_code not in (200, 201):
