@@ -79,7 +79,15 @@ def get_access_token(account):
     """access_token por nombre de cuenta (MAYUS). Worker para las 7; local para el resto."""
     account = (account or "").upper()
     if account in WORKER_ACCOUNTS:
-        return _endpoint_token(account)
+        try:
+            return _endpoint_token(account)
+        except requests.RequestException:
+            # El Worker ya no expone /token/ASVA (404). ASVA E rota su refresh
+            # token desde los workflows, por lo que el fallback local es seguro.
+            if account == "ASVA":
+                j = _local_refresh(os.environ.get("MELI_REFRESH_TOKEN_ASVA", ""))
+                return j["access_token"]
+            raise
     # cuenta fuera del Worker: refresh local por su env var
     env = next((e for e, a in ENV_TO_ACCOUNT.items() if a == account), f"MELI_REFRESH_TOKEN_{account}")
     j = _local_refresh(os.environ.get(env, ""))
@@ -101,5 +109,10 @@ def refresh(refresh_token_value):
     pertenece a una de las 7 cuentas; si no, refresh local."""
     acct = _account_for_value(refresh_token_value)
     if acct in WORKER_ACCOUNTS:
-        return TokenResp(access_token=_endpoint_token(acct), refresh_token=refresh_token_value)
+        try:
+            return TokenResp(access_token=_endpoint_token(acct), refresh_token=refresh_token_value)
+        except requests.RequestException:
+            if acct == "ASVA":
+                return TokenResp(_local_refresh(refresh_token_value))
+            raise
     return TokenResp(_local_refresh(refresh_token_value))
