@@ -164,6 +164,23 @@ def clone_one(source):
             "free_shipping": bool((source.get("shipping") or {}).get("free_shipping")),
         },
     }
+    if spec["condition"] == "refurbished":
+        payload["attributes"].append({
+            "id": "GRADING",
+            "value_id": "40108830",
+            "value_name": "Excelente",
+        })
+        payload["sale_terms"] = [
+            {
+                "id": "WARRANTY_TYPE",
+                "value_id": "2230280",
+                "value_name": "Garantía del vendedor",
+            },
+            {
+                "id": "WARRANTY_TIME",
+                "value_name": "90 días",
+            },
+        ]
     response = requests.post(f"{API}/items", headers=HTJ, json=payload, timeout=45)
     print(f"CATALOG_POST {source_id} HTTP={response.status_code} BODY={response.text[:900]}")
     if response.status_code not in (200, 201):
