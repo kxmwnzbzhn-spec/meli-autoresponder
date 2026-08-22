@@ -1,0 +1,59 @@
+name: migrate-luised-item-to-edilberto
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'clone crea/verifica destino; finalize elimina fuente'
+        required: true
+        type: choice
+        options: [clone, finalize]
+        default: clone
+      target_item_id:
+        description: 'ID destino requerido en finalize'
+        required: false
+        default: ''
+
+concurrency:
+  group: migrate-luised-item-to-edilberto
+  cancel-in-progress: false
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    permissions:
+      actions: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install requests -q
+      - name: Validate migration script
+        run: python3 -m py_compile scripts/migrate_luised_item_to_edilberto.py
+      - name: Run controlled migration phase
+        env:
+          MELI_APP_ID_NEW: ${{ secrets.MELI_APP_ID_NEW }}
+          MELI_APP_SECRET_NEW: ${{ secrets.MELI_APP_SECRET_NEW }}
+          MELI_REFRESH_TOKEN_LUISED: ${{ secrets.MELI_REFRESH_TOKEN_LUISED }}
+          MELI_REFRESH_TOKEN_EDILBERTO: ${{ secrets.MELI_REFRESH_TOKEN_EDILBERTO }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          MIGRATION_MODE: ${{ inputs.mode }}
+          TARGET_ITEM_ID: ${{ inputs.target_item_id }}
+        run: python3 scripts/migrate_luised_item_to_edilberto.py
+      - name: Save rotated refresh tokens
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN_FOR_SECRETS }}
+        run: |
+          if [ -s /tmp/luised_rotated_token ]; then
+            gh secret set MELI_REFRESH_TOKEN_LUISED --repo kxmwnzbzhn-spec/meli-autoresponder < /tmp/luised_rotated_token
+          fi
+          if [ -s /tmp/edilberto_rotated_token ]; then
+            gh secret set MELI_REFRESH_TOKEN_EDILBERTO --repo kxmwnzbzhn-spec/meli-autoresponder < /tmp/edilberto_rotated_token
+          fi
+      - name: Migration result
+        if: always()
+        run: |
+          if [ -s /tmp/new_item_id ]; then
+            echo "NEW_ITEM_ID=$(cat /tmp/new_item_id)"
+          fi
