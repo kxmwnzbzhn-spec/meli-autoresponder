@@ -21,6 +21,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: pip install requests -q
+      - name: Safety tests
+        run: |
+          python3 -m unittest tests/test_stock_policy.py -v
+          python3 -m py_compile scripts/stock_policy.py scripts/edilberto_replenish_30s.py
       - name: Monitor authorized Edilberto listings and catalog position
         env:
           MELI_APP_ID_NEW: ${{ secrets.MELI_APP_ID_NEW }}
@@ -37,7 +41,7 @@ jobs:
             gh secret set MELI_REFRESH_TOKEN_EDILBERTO --repo kxmwnzbzhn-spec/meli-autoresponder < /tmp/edilberto_rotated_token
           fi
       - name: Continue monitoring
-        if: ${{ success() }}
+        if: ${{ success() && inputs.duration_sec == '19800' }}
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN_FOR_SECRETS }}
         run: gh workflow run edilberto_replenish_30s.yml --repo kxmwnzbzhn-spec/meli-autoresponder -f duration_sec=19800
