@@ -18,7 +18,7 @@ jobs:
       - run: pip install requests -q
       - name: Validate batch clone
         run: python3 -m py_compile scripts/clone_luised_batch_to_edilberto.py
-      - name: Clone and verify three listings
+      - name: Clone and verify four listings
         env:
           MELI_APP_ID_NEW: ${{ secrets.MELI_APP_ID_NEW }}
           MELI_APP_SECRET_NEW: ${{ secrets.MELI_APP_SECRET_NEW }}
