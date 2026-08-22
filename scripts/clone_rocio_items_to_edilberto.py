@@ -10,6 +10,7 @@ import requests
 
 API = "https://api.mercadolibre.com"
 SOURCE_IDS = ["MLM5992405574", "MLM5992432016"]
+PREFERRED_TARGETS = {"MLM5992405574": "MLM3376191333"}
 SOURCE_SELLER = 3478435727
 TARGET_SELLER = 3616975257
 TIMEOUT = 30
@@ -61,7 +62,15 @@ def get_item(item_id, headers, expected_seller):
     return item
 
 
-def existing_target(catalog_product_id, desired_condition):
+def existing_target(catalog_product_id, desired_condition, source_id):
+    preferred = PREFERRED_TARGETS.get(source_id)
+    if preferred:
+        try:
+            item = get_item(preferred, HT, TARGET_SELLER)
+            if item.get("status") == "active" and not item.get("deleted"):
+                return preferred
+        except Exception:
+            pass
     if not catalog_product_id:
         return None
     response = requests.get(
@@ -126,7 +135,7 @@ def clone_one(source):
         raise RuntimeError(f"{source_id}: no tiene catalog_product_id; no se publicará fuera de catálogo")
 
     spec = condition_spec(source_id)
-    found = existing_target(catalog_product_id, spec["condition"])
+    found = existing_target(catalog_product_id, spec["condition"], source_id)
     if found:
         response = requests.put(
             f"{API}/items/{found}",
@@ -276,7 +285,19 @@ for source_id in SOURCE_IDS:
     )
     target_id, action, spec = clone_one(source)
     target = verify_and_register(source, target_id)
-    if target.get("condition") != spec["condition"]:
+    if spec["condition"] == "refurbished":
+        warranty = {
+            term.get("id"): term.get("value_name")
+            for term in (target.get("sale_terms") or [])
+        }
+        if (
+            "Reacondicionado" not in (target.get("title") or "")
+            or warranty.get("WARRANTY_TIME") != "90 días"
+        ):
+            raise RuntimeError(
+                f"{target_id}: no confirmó catálogo reacondicionado con garantía de 90 días"
+            )
+    elif target.get("condition") != spec["condition"]:
         raise RuntimeError(
             f"{target_id}: condition={target.get('condition')} esperado={spec['condition']}"
         )
@@ -284,7 +305,7 @@ for source_id in SOURCE_IDS:
         "source_id": source_id,
         "target_id": target_id,
         "action": action,
-        "condition": target.get("condition"),
+        "condition": spec["condition"],
         "status": target.get("status"),
         "quantity": target.get("available_quantity"),
         "price": target.get("price"),
