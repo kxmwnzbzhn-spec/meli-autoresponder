@@ -104,8 +104,8 @@ def gtin_for(source):
 def condition_spec(source_id):
     if source_id == "MLM5992405574":
         return {
-            "condition": "used",
-            "item_condition": "Usado",
+            "condition": "refurbished",
+            "item_condition": "Reacondicionado",
             "family_name": "Marshall Willen II Bocina Bluetooth Caja Abierta",
             "description": (
                 "Marshall Willen II en condición caja abierta. El empaque fue abierto. "
