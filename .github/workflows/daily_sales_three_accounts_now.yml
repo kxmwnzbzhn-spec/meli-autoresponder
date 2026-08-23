@@ -1,0 +1,40 @@
+name: daily-sales-three-accounts-now
+on:
+  workflow_dispatch:
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    permissions:
+      actions: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install requests -q
+      - name: Validate report
+        run: python3 -m py_compile scripts/daily_sales_three_accounts_now.py
+      - name: Query LuisEd Edilberto and ASVA E
+        env:
+          MELI_APP_ID_NEW: ${{ secrets.MELI_APP_ID_NEW }}
+          MELI_APP_SECRET_NEW: ${{ secrets.MELI_APP_SECRET_NEW }}
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_LUISED: ${{ secrets.MELI_REFRESH_TOKEN_LUISED }}
+          MELI_REFRESH_TOKEN_EDILBERTO: ${{ secrets.MELI_REFRESH_TOKEN_EDILBERTO }}
+          MELI_REFRESH_TOKEN_ASVA: ${{ secrets.MELI_REFRESH_TOKEN_ASVA }}
+        run: python3 scripts/daily_sales_three_accounts_now.py
+      - name: Save rotated tokens
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN_FOR_SECRETS }}
+        run: |
+          if [ -s /tmp/luised_rotated_token ]; then
+            gh secret set MELI_REFRESH_TOKEN_LUISED --repo kxmwnzbzhn-spec/meli-autoresponder < /tmp/luised_rotated_token
+          fi
+          if [ -s /tmp/edilberto_rotated_token ]; then
+            gh secret set MELI_REFRESH_TOKEN_EDILBERTO --repo kxmwnzbzhn-spec/meli-autoresponder < /tmp/edilberto_rotated_token
+          fi
+          if [ -s /tmp/asva_rotated_token ]; then
+            gh secret set MELI_REFRESH_TOKEN_ASVA --repo kxmwnzbzhn-spec/meli-autoresponder < /tmp/asva_rotated_token
+          fi
