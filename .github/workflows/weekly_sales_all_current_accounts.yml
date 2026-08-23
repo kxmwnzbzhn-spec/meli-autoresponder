@@ -1,0 +1,34 @@
+name: weekly-sales-all-current-accounts
+on:
+  workflow_dispatch:
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install requests -q
+      - run: python3 -m py_compile scripts/weekly_sales_all_current_accounts.py
+      - name: Weekly cutoff all current accounts
+        env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_APP_ID_NEW: ${{ secrets.MELI_APP_ID_NEW }}
+          MELI_APP_SECRET_NEW: ${{ secrets.MELI_APP_SECRET_NEW }}
+          MELI_REFRESH_TOKEN_ROCIOANGEL: ${{ secrets.MELI_REFRESH_TOKEN_ROCIOANGEL }}
+          MELI_REFRESH_TOKEN_LUISED: ${{ secrets.MELI_REFRESH_TOKEN_LUISED }}
+          MELI_REFRESH_TOKEN_EDILBERTO: ${{ secrets.MELI_REFRESH_TOKEN_EDILBERTO }}
+          MELI_REFRESH_TOKEN_ASVA: ${{ secrets.MELI_REFRESH_TOKEN_ASVA }}
+          MELI_REFRESH_TOKEN_ALE: ${{ secrets.MELI_REFRESH_TOKEN_ALE }}
+        run: python3 scripts/weekly_sales_all_current_accounts.py
+      - name: Save rotated tokens
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN_FOR_SECRETS }}
+        run: |
+          for name in ROCIOANGEL LUISED EDILBERTO ASVA ALE; do
+            file="/tmp/weekly_rotated_MELI_REFRESH_TOKEN_$name"
+            if [ -s "$file" ]; then gh secret set "MELI_REFRESH_TOKEN_$name" --repo kxmwnzbzhn-spec/meli-autoresponder < "$file"; fi
+          done
