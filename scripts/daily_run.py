@@ -43,7 +43,7 @@ ACCOUNTS = [
     {"name":"LuisEd","rt_env":"MELI_REFRESH_TOKEN_LUISED","expected_uid":3584846108,"expected_nick":"LG20260801171031460",
      "app_pair":"new", "exclude_models":set(), "exclude_titles":set()},
 ]
-ALLOWED_SUBS = {"ready_to_print"}
+EXCLUDED_SUBS = {"picked_up"}
 
 
 # ============ HELPERS DE COLOR/MODELO/CONDICIÓN ============
@@ -271,7 +271,7 @@ def collect_shipments(at, account):
         try:
             sh = requests.get(f"https://api.mercadolibre.com/shipments/{sid}", headers=H, timeout=10).json()
             st = sh.get("status"); sub = sh.get("substatus")
-            if st != "ready_to_ship" or sub not in ALLOWED_SUBS: continue
+            if st != "ready_to_ship" or sub in EXCLUDED_SUBS: continue
             comp=[]; used=False; skip=False
             for ord_o in ord_list:
                 for it in ord_o.get("order_items", []):
