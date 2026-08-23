@@ -43,7 +43,7 @@ jobs:
             gh secret set MELI_REFRESH_TOKEN_EDILBERTO --repo kxmwnzbzhn-spec/meli-autoresponder < /tmp/edilberto_rotated_token
           fi
       - name: Continue monitoring
-        if: ${{ success() && inputs.duration_sec == '19800' }}
+        if: ${{ success() && (github.event_name == 'schedule' || inputs.duration_sec == '19800') }}
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN_FOR_SECRETS }}
         run: gh workflow run edilberto_replenish_30s.yml --repo kxmwnzbzhn-spec/meli-autoresponder -f duration_sec=19800
