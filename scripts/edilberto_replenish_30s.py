@@ -59,6 +59,10 @@ FALLBACK_ITEMS = {
     "MLMU4878694228": ["MLM6042920630"],
     "MLMU4878703120": ["MLM6042920954"],
     "MLMU4848196489": ["MLM6042921184"],
+    # User-product IDs de las cuatro clonaciones nuevas de LuisEd.
+    "MLMU4913863678": ["MLM6061793358"],
+    "MLMU4913863698": ["MLM6061856108"],
+    "MLMU4913876972": ["MLM6061793370"],
 }
 TICK = 30
 DURATION = int(os.environ.get("RUN_DURATION_SEC", str(5 * 3600 + 30 * 60)))
