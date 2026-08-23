@@ -60,7 +60,7 @@ def report(row,date_from,date_to):
    pid=stub.get("id")
    if not pid or pid in seen: continue
    seen.add(pid)
-   r=requests.get(f"{API}/v1/payments/{pid}",headers=headers,timeout=TIMEOUT)
+   r=requests.get(f"https://api.mercadopago.com/v1/payments/{pid}",headers=headers,timeout=TIMEOUT)
    if r.status_code!=200:
     payment_errors.append({"payment_id":pid,"status":r.status_code}); continue
    p=r.json(); payment_count+=1
