@@ -1,0 +1,26 @@
+name: verify-edilberto-stock-now
+on:
+  workflow_dispatch:
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install requests -q
+      - name: Verify Edilberto listings
+        env:
+          MELI_APP_ID_NEW: ${{ secrets.MELI_APP_ID_NEW }}
+          MELI_APP_SECRET_NEW: ${{ secrets.MELI_APP_SECRET_NEW }}
+          MELI_REFRESH_TOKEN_EDILBERTO: ${{ secrets.MELI_REFRESH_TOKEN_EDILBERTO }}
+        run: python3 scripts/verify_edilberto_stock_now.py
+      - name: Save rotated token
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN_FOR_SECRETS }}
+        run: |
+          if [ -s /tmp/edilberto_verify_rotated_token ]; then
+            gh secret set MELI_REFRESH_TOKEN_EDILBERTO --repo kxmwnzbzhn-spec/meli-autoresponder < /tmp/edilberto_verify_rotated_token
+          fi
