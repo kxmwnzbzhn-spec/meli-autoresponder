@@ -11,7 +11,24 @@ on:
         default: ''
 
 jobs:
+  sunday-guard:
+    runs-on: ubuntu-latest
+    outputs:
+      run: ${{ steps.check.outputs.run }}
+    steps:
+      - id: check
+        name: Permitir solo lunes a sábado CDMX
+        run: |
+          if [ "$(TZ=America/Mexico_City date +%u)" = "7" ]; then
+            echo "run=false" >> "$GITHUB_OUTPUT"
+            echo "Domingo: daily-pro omitido"
+          else
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          fi
+
   build-claribel:
+    needs: sunday-guard
+    if: needs.sunday-guard.outputs.run == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
@@ -36,6 +53,8 @@ jobs:
           retention-days: 7
 
   build-asva:
+    needs: sunday-guard
+    if: needs.sunday-guard.outputs.run == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
@@ -60,6 +79,8 @@ jobs:
           retention-days: 7
 
   build-adrian:
+    needs: sunday-guard
+    if: needs.sunday-guard.outputs.run == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
@@ -84,6 +105,8 @@ jobs:
           retention-days: 7
 
   build-mc:
+    needs: sunday-guard
+    if: needs.sunday-guard.outputs.run == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
@@ -110,6 +133,8 @@ jobs:
           retention-days: 7
 
   build-lupita:
+    needs: sunday-guard
+    if: needs.sunday-guard.outputs.run == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
@@ -136,6 +161,8 @@ jobs:
           retention-days: 7
 
   build-karime:
+    needs: sunday-guard
+    if: needs.sunday-guard.outputs.run == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
@@ -162,6 +189,8 @@ jobs:
           retention-days: 7
 
   build-ligia:
+    needs: sunday-guard
+    if: needs.sunday-guard.outputs.run == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
