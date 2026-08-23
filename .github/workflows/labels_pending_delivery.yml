@@ -2,7 +2,7 @@ name: labels-pending-delivery
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 12 * * 1-6'  # 06:00 CDMX, lunes a sábado
+    - cron: '45 13 * * 1-6'  # 07:45 CDMX, lunes a sábado
 permissions: { contents: write }
 concurrency:
   group: labels-pending
