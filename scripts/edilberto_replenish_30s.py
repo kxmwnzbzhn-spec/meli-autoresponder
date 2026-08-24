@@ -24,6 +24,7 @@ TARGETS = [
     "MLM6061856108",
     "MLM6061793370",
     "MLM6065919740",
+    "MLM3380987973",
 ]
 # Límites físicos por publicación; se llenan al validar las nuevas clonaciones.
 REAL_STOCK_LIMITS = {
