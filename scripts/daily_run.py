@@ -688,8 +688,32 @@ def main():
         any_error = True
     else:
         try:
-            # Crea subcarpeta del día (anti-empleados: cada día su propia carpeta)
-            day_folder_id = drive_find_or_create_day_folder(svc, DRIVE_FOLDER_ID, TODAY)
+            # Reconstruye cliente Drive: el socket original puede llevar 10-20 min
+            # inactivo mientras se recolectan shipments de MELI y muere con SSL EOF.
+            def _fresh_svc():
+                for _att in range(1, 4):
+                    try:
+                        return drive_service()
+                    except Exception as _e:
+                        print(f"[drive] rebuild attempt {_att} fail: {type(_e).__name__}: {str(_e)[:120]}")
+                        import time as _t; _t.sleep(3*_att)
+                return drive_service()  # last try, propaga si truena
+            svc = _fresh_svc()
+
+            # Retry SSL EOF en find/create day folder
+            import ssl as _ssl
+            day_folder_id = None
+            for _att in range(1, 5):
+                try:
+                    day_folder_id = drive_find_or_create_day_folder(svc, DRIVE_FOLDER_ID, TODAY)
+                    break
+                except (_ssl.SSLEOFError, _ssl.SSLError, ConnectionError, OSError) as _e:
+                    print(f"[drive] day_folder attempt {_att} SSL/net fail: {type(_e).__name__}: {str(_e)[:120]}")
+                    import time as _t; _t.sleep(2*_att)
+                    svc = _fresh_svc()
+            if day_folder_id is None:
+                raise RuntimeError("drive_find_or_create_day_folder falló tras 4 reintentos")
+
             up = drive_upload_pdf(svc, out_local, out_local, day_folder_id)
             file_link = up.get("webViewLink", "")
 
@@ -765,3 +789,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
