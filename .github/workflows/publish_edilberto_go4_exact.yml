@@ -1,0 +1,48 @@
+name: publish-edilberto-go4-exact
+on:
+  workflow_dispatch:
+    inputs:
+      apply:
+        description: Publicar después de validar coincidencias exactas
+        required: true
+        default: "false"
+        type: choice
+        options: ["false", "true"]
+      price:
+        description: Precio inicial MXN
+        required: true
+        default: "520"
+permissions:
+  contents: read
+jobs:
+  validate-and-publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install requests -q
+      - name: Validate exact catalogs and publish only when authorized
+        env:
+          MELI_APP_ID_NEW: ${{ secrets.MELI_APP_ID_NEW }}
+          MELI_APP_SECRET_NEW: ${{ secrets.MELI_APP_SECRET_NEW }}
+          MELI_REFRESH_TOKEN_EDILBERTO: ${{ secrets.MELI_REFRESH_TOKEN_EDILBERTO }}
+          APPLY: ${{ inputs.apply }}
+          PRICE: ${{ inputs.price }}
+        run: python3 scripts/publish_edilberto_go4_exact.py
+      - name: Save rotated refresh token
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN_FOR_SECRETS }}
+        run: |
+          if [ -s /tmp/edilberto_rotated_token ]; then
+            gh secret set MELI_REFRESH_TOKEN_EDILBERTO --repo kxmwnzbzhn-spec/meli-autoresponder < /tmp/edilberto_rotated_token
+          fi
+      - name: Show results
+        if: always()
+        run: |
+          if [ -s /tmp/edilberto_go4_results.json ]; then
+            cat /tmp/edilberto_go4_results.json
+          fi
