@@ -201,6 +201,29 @@ def keep_one_user_product(upid, initial=False):
         if initial:
             print(f"[OK-UP] {upid} editable_qty=1 types={kinds}", flush=True)
         return
+    fallback_items = FALLBACK_ITEMS.get(upid) or []
+    if fallback_items:
+        fallback_ready = True
+        for iid in fallback_items:
+            state_response = requests.get(f"{API}/items/{iid}", headers=H, timeout=15)
+            if state_response.status_code != 200:
+                fallback_ready = False
+                break
+            state = state_response.json()
+            if item_stock_action(
+                state.get("status"),
+                state.get("sub_status"),
+                state.get("available_quantity"),
+            ) != "noop":
+                fallback_ready = False
+                break
+        if fallback_ready:
+            if initial:
+                print(
+                    f"[OK-ITEM-FALLBACK] {upid} items={fallback_items} qty=1 active",
+                    flush=True,
+                )
+            return
     if len(kinds) != 1:
         raise RuntimeError(f"{upid}: tipos editables mixtos {kinds}")
     kind = kinds[0]
@@ -245,11 +268,31 @@ def keep_one_user_product(upid, initial=False):
             repaired.append(iid)
         if not repaired:
             return
-        verify, _, _ = get_stock(upid)
-        new_total = sum(int(x.get("quantity") or 0) for x in (verify.get("locations") or []) if x.get("type") != "meli_facility")
-        if new_total != 1:
-            raise RuntimeError(f"{upid}: fallback ejecutado pero qty verificada={new_total}")
-        print(f"[REPLENISHED-ITEM-FALLBACK] {upid} editable_qty {total}->1 items={repaired}", flush=True)
+        verified = []
+        for iid in repaired:
+            state_response = requests.get(f"{API}/items/{iid}", headers=H, timeout=15)
+            if state_response.status_code != 200:
+                raise RuntimeError(
+                    f"{upid}/{iid}: verify GET {state_response.status_code} "
+                    f"{state_response.text[:250]}"
+                )
+            state = state_response.json()
+            action = item_stock_action(
+                state.get("status"),
+                state.get("sub_status"),
+                state.get("available_quantity"),
+            )
+            if action != "noop":
+                raise RuntimeError(
+                    f"{upid}/{iid}: fallback sin confirmar "
+                    f"status={state.get('status')} sub={state.get('sub_status')} "
+                    f"qty={state.get('available_quantity')}"
+                )
+            verified.append(iid)
+        print(
+            f"[REPLENISHED-ITEM-FALLBACK] {upid} items={verified} qty=1 active",
+            flush=True,
+        )
         return
     print(f"[REPLENISHED-UP] {upid} editable_qty {total}->1 type={kind}", flush=True)
 
