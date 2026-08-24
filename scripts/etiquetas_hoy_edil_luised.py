@@ -77,15 +77,15 @@ def collect_only_today(at, account):
         try:
             sh = requests.get(f"https://api.mercadolibre.com/shipments/{sid}", headers=H, timeout=10).json()
             st = sh.get("status"); sub = sh.get("substatus")
-            # DEBUG: contar (status, substatus) para entender qué hay
             _key = f"{st}/{sub}"
             _substatus_counter[_key] = _substatus_counter.get(_key, 0) + 1
-            if st != "ready_to_ship":
+            # Solo ready_to_ship/printed (label lista, pendiente handoff) — es lo que MELI muestra en "Listas para enviar"
+            if st != "ready_to_ship" or sub != "printed":
                 skipped_status += 1; continue
-            # INCLUIR: todo ready_to_ship excepto los ya en tránsito o recolectados
-            if sub in ("picked_up", "in_hub", "returning_to_sender", "in_return", "shipped"):
-                skipped_status += 1; continue
-            _ = is_today_limit(sh)
+            # Filtro por fecha límite <= HOY (incluye HOY + DEMORADAS)
+            ld = extract_limit_date(sh)
+            if not ld or ld > TODAY:
+                skipped_notoday += 1; continue
             comp = []; used = False; skip = False
             for ord_o in ord_list:
                 for it in ord_o.get("order_items", []):
