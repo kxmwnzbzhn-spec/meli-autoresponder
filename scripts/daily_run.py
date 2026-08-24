@@ -26,6 +26,7 @@ APP_SECRET_NEW = os.environ.get("MELI_APP_SECRET_NEW", "")
 TG_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "")
 TG_CHAT  = os.environ.get("TELEGRAM_CHAT_ID", "")
 DRIVE_FOLDER_ID = os.environ.get("DRIVE_FOLDER_ID", "1aIDN3iq6zwCacL57iamptvQCPoSDyRbL")
+LEDGER_NAME = "printed_shipments_ALL.json"
 TZ = timezone(timedelta(hours=-6))
 TODAY = datetime.now(TZ).strftime("%Y-%m-%d")
 PAGE_W = 4*72; PAGE_H = 6*72
@@ -440,13 +441,20 @@ def drive_load_or_bootstrap_emitted(svc, output_prefix):
     de los PDFs de días anteriores. Nunca toma PDFs del día actual, para poder
     reemplazar de forma segura un archivo incorrecto con FORCE_REGEN=1.
     """
-    ledger_name = f"printed_shipments_{output_prefix}.json"
-    data, fid = drive_load_json(svc, ledger_name)
+    data, fid = drive_load_json(svc, LEDGER_NAME)
     if fid:
         data.setdefault("shipments", {})
         return data, fid, 0
 
+    # Migra los dos registros anteriores al registro global antes del primer
+    # consolidado unificado. Así ninguna cuenta pierde su historial.
     shipments = {}
+    for legacy_name in (
+        "printed_shipments_ETIQUETAS.json",
+        "printed_shipments_ETIQUETAS_EDILBERTO_LUISED.json",
+    ):
+        legacy, _ = drive_load_json(svc, legacy_name)
+        shipments.update((legacy or {}).get("shipments", {}))
     q = (f"mimeType='application/vnd.google-apps.folder' and "
          f"'{DRIVE_FOLDER_ID}' in parents and trashed=false")
     res = svc.files().list(
@@ -456,30 +464,31 @@ def drive_load_or_bootstrap_emitted(svc, output_prefix):
         day = folder.get("name", "")
         if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", day) or day >= TODAY:
             continue
-        pdf_name = f"{output_prefix}_{day}.pdf"
-        safe_pdf = pdf_name.replace("'", "\\'")
-        found = svc.files().list(
-            q=f"name='{safe_pdf}' and '{folder['id']}' in parents and trashed=false",
-            fields="files(id,name)", pageSize=10,
-            supportsAllDrives=True, includeItemsFromAllDrives=True).execute()
-        for pdf_file in found.get("files", [])[:1]:
-            try:
-                raw = svc.files().get_media(
-                    fileId=pdf_file["id"], supportsAllDrives=True).execute()
-                reader = PdfReader(io.BytesIO(raw))
-                for page in reader.pages:
-                    text_ = page.extract_text() or ""
-                    match = re.search(r"Ship:\s*(\d+)", text_)
-                    if match:
-                        shipments[match.group(1)] = {
-                            "date": day, "source_file_id": pdf_file["id"]
-                        }
-            except Exception as e:
-                print(f"  bootstrap omitió {pdf_name}: {type(e).__name__}: {str(e)[:100]}")
+        for prefix in ("ETIQUETAS", "ETIQUETAS_EDILBERTO_LUISED", "ETIQUETAS_UNIFICADAS"):
+            pdf_name = f"{prefix}_{day}.pdf"
+            safe_pdf = pdf_name.replace("'", "\\'")
+            found = svc.files().list(
+                q=f"name='{safe_pdf}' and '{folder['id']}' in parents and trashed=false",
+                fields="files(id,name)", pageSize=10,
+                supportsAllDrives=True, includeItemsFromAllDrives=True).execute()
+            for pdf_file in found.get("files", [])[:1]:
+                try:
+                    raw = svc.files().get_media(
+                        fileId=pdf_file["id"], supportsAllDrives=True).execute()
+                    reader = PdfReader(io.BytesIO(raw))
+                    for page in reader.pages:
+                        text_ = page.extract_text() or ""
+                        match = re.search(r"Ship:\s*(\d+)", text_)
+                        if match:
+                            shipments[match.group(1)] = {
+                                "date": day, "source_file_id": pdf_file["id"]
+                            }
+                except Exception as e:
+                    print(f"  bootstrap omitió {pdf_name}: {type(e).__name__}: {str(e)[:100]}")
 
     data = {"shipments": shipments, "bootstrapped_at": TODAY,
-            "output_prefix": output_prefix}
-    fid = drive_save_json(svc, ledger_name, data)
+            "output_prefix": "ALL"}
+    fid = drive_save_json(svc, LEDGER_NAME, data)
     print(f"[dedupe] historial inicial: {len(shipments)} guías previas")
     return data, fid, len(shipments)
 
@@ -576,8 +585,7 @@ def main():
             emitted_shipments.pop(sid, None)
         if today_ids:
             emitted["updated_at"] = datetime.now(TZ).isoformat()
-            drive_save_json(svc, f"printed_shipments_{output_prefix}.json",
-                            emitted, emitted_fid)
+            drive_save_json(svc, LEDGER_NAME, emitted, emitted_fid)
             print(f"[force] liberé {len(today_ids)} guías emitidas hoy")
 
     # Guard: si el PDF de hoy ya existe, salir limpio (idempotencia para multi-cron)
@@ -698,14 +706,32 @@ def main():
                     }
             emitted["updated_at"] = datetime.now(TZ).isoformat()
             try:
-                drive_save_json(svc, f"printed_shipments_{output_prefix}.json",
-                                emitted, emitted_fid)
+                drive_save_json(svc, LEDGER_NAME, emitted, emitted_fid)
             except Exception as ledger_error:
                 try:
                     svc.files().delete(fileId=up["id"], supportsAllDrives=True).execute()
                 except Exception:
                     pass
                 raise RuntimeError(f"No se pudo guardar control anti-repetidos: {ledger_error}")
+
+            # En el flujo unificado, los PDFs separados del mismo día se mandan
+            # a la papelera solo después de confirmar el consolidado.
+            if output_prefix == "ETIQUETAS_UNIFICADAS":
+                legacy_names = {
+                    f"ETIQUETAS_{TODAY}.pdf",
+                    f"ETIQUETAS_EDILBERTO_LUISED_{TODAY}.pdf",
+                }
+                for legacy_name in legacy_names:
+                    safe_legacy = legacy_name.replace("'", "\\'")
+                    old_files = svc.files().list(
+                        q=f"name='{safe_legacy}' and '{day_folder_id}' in parents and trashed=false",
+                        fields="files(id,name)", pageSize=100,
+                        supportsAllDrives=True, includeItemsFromAllDrives=True).execute()
+                    for old_file in old_files.get("files", []):
+                        svc.files().update(
+                            fileId=old_file["id"], body={"trashed": True},
+                            supportsAllDrives=True).execute()
+                        print(f"[unified] separado enviado a papelera: {old_file['name']}")
 
             day_folder_link = f"https://drive.google.com/drive/folders/{day_folder_id}"
             report.append(f"✅ <b>PDF combinado</b>: {pages} págs ({total} envíos · {len(fails)} fallidas)")
