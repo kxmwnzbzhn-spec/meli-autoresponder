@@ -7,9 +7,6 @@ on:
         required: false
         type: string
         default: ''
-  schedule:
-    - cron: '45 13 * * 1-6'  # 07:45 CDMX, lunes a sábado
-
 jobs:
   run:
     runs-on: ubuntu-latest
