@@ -10,7 +10,7 @@ Para cada cuenta (Yiriam, Asva):
 
 NUNCA sube un PDF vacío. Si falla una cuenta sigue con la otra y reporta el error.
 """
-import os, io, time, json, sys, traceback, requests
+import os, io, time, json, sys, traceback, re, requests
 from datetime import datetime, timedelta, timezone
 from collections import Counter
 from pypdf import PdfReader, PdfWriter, PageObject, Transformation
@@ -400,6 +400,90 @@ def drive_save_stats(svc, stats, file_id=None):
         svc.files().create(body={"name":"stats.json","parents":[DRIVE_FOLDER_ID]},
                            media_body=media, supportsAllDrives=True).execute()
 
+def drive_load_json(svc, name):
+    """Carga un JSON de control desde la carpeta raíz de Drive."""
+    safe = name.replace("'", "\\'")
+    res = svc.files().list(
+        q=f"name='{safe}' and '{DRIVE_FOLDER_ID}' in parents and trashed=false",
+        fields="files(id,name)", pageSize=10,
+        supportsAllDrives=True, includeItemsFromAllDrives=True).execute()
+    files = res.get("files", [])
+    if not files:
+        return {}, None
+    fid = files[0]["id"]
+    try:
+        content = svc.files().get_media(fileId=fid, supportsAllDrives=True).execute()
+        return json.loads(content.decode("utf-8") if isinstance(content, bytes) else content), fid
+    except Exception as e:
+        raise RuntimeError(f"No se pudo leer {name}: {e}")
+
+
+def drive_save_json(svc, name, data, file_id=None):
+    """Guarda de forma atómica el registro de guías ya emitidas."""
+    from googleapiclient.http import MediaInMemoryUpload
+    body = json.dumps(data, indent=2, ensure_ascii=False).encode("utf-8")
+    media = MediaInMemoryUpload(body, mimetype="application/json")
+    if file_id:
+        svc.files().update(fileId=file_id, media_body=media,
+                           supportsAllDrives=True).execute()
+        return file_id
+    created = svc.files().create(
+        body={"name":name, "parents":[DRIVE_FOLDER_ID]},
+        media_body=media, fields="id", supportsAllDrives=True).execute()
+    return created["id"]
+
+
+def drive_load_or_bootstrap_emitted(svc, output_prefix):
+    """Carga el historial de shipment IDs.
+
+    En la primera ejecución reconstruye el historial leyendo los encabezados Ship:
+    de los PDFs de días anteriores. Nunca toma PDFs del día actual, para poder
+    reemplazar de forma segura un archivo incorrecto con FORCE_REGEN=1.
+    """
+    ledger_name = f"printed_shipments_{output_prefix}.json"
+    data, fid = drive_load_json(svc, ledger_name)
+    if fid:
+        data.setdefault("shipments", {})
+        return data, fid, 0
+
+    shipments = {}
+    q = (f"mimeType='application/vnd.google-apps.folder' and "
+         f"'{DRIVE_FOLDER_ID}' in parents and trashed=false")
+    res = svc.files().list(
+        q=q, fields="files(id,name)", pageSize=1000,
+        supportsAllDrives=True, includeItemsFromAllDrives=True).execute()
+    for folder in res.get("files", []):
+        day = folder.get("name", "")
+        if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", day) or day >= TODAY:
+            continue
+        pdf_name = f"{output_prefix}_{day}.pdf"
+        safe_pdf = pdf_name.replace("'", "\\'")
+        found = svc.files().list(
+            q=f"name='{safe_pdf}' and '{folder['id']}' in parents and trashed=false",
+            fields="files(id,name)", pageSize=10,
+            supportsAllDrives=True, includeItemsFromAllDrives=True).execute()
+        for pdf_file in found.get("files", [])[:1]:
+            try:
+                raw = svc.files().get_media(
+                    fileId=pdf_file["id"], supportsAllDrives=True).execute()
+                reader = PdfReader(io.BytesIO(raw))
+                for page in reader.pages:
+                    text_ = page.extract_text() or ""
+                    match = re.search(r"Ship:\s*(\d+)", text_)
+                    if match:
+                        shipments[match.group(1)] = {
+                            "date": day, "source_file_id": pdf_file["id"]
+                        }
+            except Exception as e:
+                print(f"  bootstrap omitió {pdf_name}: {type(e).__name__}: {str(e)[:100]}")
+
+    data = {"shipments": shipments, "bootstrapped_at": TODAY,
+            "output_prefix": output_prefix}
+    fid = drive_save_json(svc, ledger_name, data)
+    print(f"[dedupe] historial inicial: {len(shipments)} guías previas")
+    return data, fid, len(shipments)
+
+
 def drive_find_or_create_day_folder(svc, parent_id, day_name):
     """Devuelve el folder_id de la subcarpeta '<day_name>' dentro de parent_id.
     Si no existe, la crea. Anti-empleados: cada día tiene su propia carpeta."""
@@ -478,9 +562,27 @@ def already_done_today(svc):
 
 def main():
     svc = drive_service()
+    output_prefix = os.environ.get("OUTPUT_PREFIX", "ETIQUETAS")
+    force_regen = os.environ.get("FORCE_REGEN") == "1"
+    emitted, emitted_fid, _ = drive_load_or_bootstrap_emitted(svc, output_prefix)
+    emitted_shipments = emitted.setdefault("shipments", {})
+
+    # FORCE_REGEN permite rehacer solo el día actual, nunca vuelve a habilitar
+    # shipment IDs que ya aparecieron en PDFs de días anteriores.
+    if force_regen:
+        today_ids = [sid for sid, meta in emitted_shipments.items()
+                     if (meta or {}).get("date") == TODAY]
+        for sid in today_ids:
+            emitted_shipments.pop(sid, None)
+        if today_ids:
+            emitted["updated_at"] = datetime.now(TZ).isoformat()
+            drive_save_json(svc, f"printed_shipments_{output_prefix}.json",
+                            emitted, emitted_fid)
+            print(f"[force] liberé {len(today_ids)} guías emitidas hoy")
+
     # Guard: si el PDF de hoy ya existe, salir limpio (idempotencia para multi-cron)
     # Override con FORCE_REGEN=1: borra el viejo y regenera
-    if os.environ.get("FORCE_REGEN") == "1":
+    if force_regen:
         existing = already_done_today(svc)
         if existing:
             try:
@@ -519,9 +621,12 @@ def main():
                 report.append(msg); print(msg); any_error = True
                 per_account_counts[nm] = 0; continue
             ships = collect_shipments(at, account)
+            scanned_n = len(ships)
+            ships = [s for s in ships if str(s["sid"]) not in emitted_shipments]
             n = len(ships)
+            skipped_n = scanned_n - n
             per_account_counts[nm] = n
-            print(f"  shipments seleccionados: {n}")
+            print(f"  shipments listos: {scanned_n} | ya emitidos omitidos: {skipped_n} | nuevos: {n}")
             prev = stats.get(nm, {}).get("last_count")
             anomaly = ""
             if prev is not None and prev > 5:
@@ -553,7 +658,14 @@ def main():
         if any_error: sys.exit(1)
         return
 
-    # 2) Orden global: cuenta → USADO primero → por producto
+    # 2) Dedupe defensivo global por shipment ID y orden del PDF.
+    unique_ships = {}
+    for ship in all_ships:
+        unique_ships.setdefault(str(ship["sid"]), ship)
+    duplicated_in_run = len(all_ships) - len(unique_ships)
+    if duplicated_in_run:
+        print(f"[dedupe] {duplicated_in_run} shipment IDs repetidos omitidos dentro de la ejecución")
+    all_ships = list(unique_ships.values())
     all_ships.sort(key=lambda s: (s["account"], 0 if s["has_used"] else 1,
                                   "/".join(s["comp_lines"]), s["sid"]))
 
@@ -561,7 +673,6 @@ def main():
     total = len(all_ships)
     breakdown = " + ".join(f"{nm}:{n}" for nm,n in per_account_counts.items())
     print(f"\n========== PDF combinado: {total} envíos ({breakdown}) ==========")
-    output_prefix = os.environ.get("OUTPUT_PREFIX", "ETIQUETAS")
     out_local = f"{output_prefix}_{TODAY}.pdf"
     pages, fails = build_pdf(all_ships, out_local)
     if pages == 0:
@@ -573,8 +684,32 @@ def main():
             day_folder_id = drive_find_or_create_day_folder(svc, DRIVE_FOLDER_ID, TODAY)
             up = drive_upload_pdf(svc, out_local, out_local, day_folder_id)
             file_link = up.get("webViewLink", "")
+
+            # El registro se confirma únicamente después de que Drive recibió el PDF.
+            # Si guardar el registro falla, se elimina el PDF para evitar que mañana
+            # esas mismas guías se vuelvan a imprimir sin control.
+            failed_ids = {str(sid) for sid in fails}
+            for ship in all_ships:
+                sid = str(ship["sid"])
+                if sid not in failed_ids:
+                    emitted_shipments[sid] = {
+                        "date": TODAY, "account": ship["account"],
+                        "source_file_id": up["id"]
+                    }
+            emitted["updated_at"] = datetime.now(TZ).isoformat()
+            try:
+                drive_save_json(svc, f"printed_shipments_{output_prefix}.json",
+                                emitted, emitted_fid)
+            except Exception as ledger_error:
+                try:
+                    svc.files().delete(fileId=up["id"], supportsAllDrives=True).execute()
+                except Exception:
+                    pass
+                raise RuntimeError(f"No se pudo guardar control anti-repetidos: {ledger_error}")
+
             day_folder_link = f"https://drive.google.com/drive/folders/{day_folder_id}"
             report.append(f"✅ <b>PDF combinado</b>: {pages} págs ({total} envíos · {len(fails)} fallidas)")
+            report.append(f"🔒 Control anti-repetidos actualizado: {len(emitted_shipments)} guías registradas")
             for nm, n in per_account_counts.items():
                 report.append(f"   • {nm}: {n}")
             report.append(f"\n📂 <a href=\"{day_folder_link}\">Carpeta {TODAY}</a>")
