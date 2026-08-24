@@ -45,6 +45,32 @@ ACCOUNTS = [
      "app_pair":"new", "exclude_models":set(), "exclude_titles":set()},
 ]
 EXCLUDED_SUBS = {"picked_up"}
+# Solo estos substatuses son "listas para acción del vendedor":
+# - ready_to_print / printing_error: pendientes de imprimir
+# - printed: impresas listas para entregar en agencia
+# - invoice_pending: esperando factura pero contable
+INCLUDED_SUBS = {"ready_to_print", "printing_error", "printed", "invoice_pending"}
+TOMORROW = (datetime.now(TZ) + timedelta(days=1)).strftime("%Y-%m-%d")
+
+def extract_limit_date_str(sh):
+    """Devuelve YYYY-MM-DD CDMX del handling_limit del shipment, o None."""
+    dh = sh.get("date_handling") or {}
+    ehl = dh.get("estimated_handling_limit") or {}
+    dstr = ehl.get("date") or ""
+    if not dstr:
+        so = sh.get("shipping_option") or {}
+        ehl2 = so.get("estimated_handling_limit") or {}
+        dstr = ehl2.get("date") or ""
+    if not dstr:
+        sh_hist = sh.get("status_history") or {}
+        dstr = sh_hist.get("date_handling") or ""
+    if not dstr: return None
+    try:
+        s = re.sub(r"\.\d+", "", dstr)
+        dt = datetime.fromisoformat(s)
+        return dt.astimezone(TZ).strftime("%Y-%m-%d")
+    except Exception:
+        return None
 
 
 # ============ HELPERS DE COLOR/MODELO/CONDICIÓN ============
@@ -272,7 +298,12 @@ def collect_shipments(at, account):
         try:
             sh = requests.get(f"https://api.mercadolibre.com/shipments/{sid}", headers=H, timeout=10).json()
             st = sh.get("status"); sub = sh.get("substatus")
-            if st != "ready_to_ship" or sub in EXCLUDED_SUBS: continue
+            # Filtro estricto: solo shipments accionables por el vendedor
+            if st != "ready_to_ship": continue
+            if sub not in INCLUDED_SUBS: continue  # skip picked_up y otros no accionables
+            # Filtro fecha: incluye HOY + DEMORADAS + MAÑANA (todo lo que puede entregarse hoy o mañana)
+            ld = extract_limit_date_str(sh)
+            if ld is not None and ld > TOMORROW: continue  # descarta si límite pasa mañana
             comp=[]; used=False; skip=False
             for ord_o in ord_list:
                 for it in ord_o.get("order_items", []):
@@ -789,4 +820,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
