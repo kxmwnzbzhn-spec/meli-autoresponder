@@ -19,6 +19,7 @@ print(f"[hoy] TODAY (CDMX)={TODAY}")
 print(f"[hoy] cuentas: {[a['name'] for a in accounts]}")
 
 _dbg_samples = []
+_substatus_counter = {}
 def extract_limit_date(sh):
     """Devuelve la fecha CDMX (YYYY-MM-DD) del handling limit del shipment, o None."""
     # 1) date_handling.estimated_handling_limit.date
@@ -76,12 +77,15 @@ def collect_only_today(at, account):
         try:
             sh = requests.get(f"https://api.mercadolibre.com/shipments/{sid}", headers=H, timeout=10).json()
             st = sh.get("status"); sub = sh.get("substatus")
-            # ESTRICTO: solo lo que la UI muestra en "Listas para enviar"
-            # substatus válidos: ready_to_print (pendiente impresión) + printing_error
-            if st != "ready_to_ship" or sub not in ("ready_to_print", "printing_error"):
+            # DEBUG: contar (status, substatus) para entender qué hay
+            _key = f"{st}/{sub}"
+            _substatus_counter[_key] = _substatus_counter.get(_key, 0) + 1
+            if st != "ready_to_ship":
                 skipped_status += 1; continue
-            # NO filtrar por fecha — el user quiere HOY + DEMORADAS (todas las que la UI muestra listas)
-            _ = is_today_limit(sh)  # sigue alimentando el debug samples
+            # INCLUIR: todo ready_to_ship excepto los ya en tránsito o recolectados
+            if sub in ("picked_up", "in_hub", "returning_to_sender", "in_return", "shipped"):
+                skipped_status += 1; continue
+            _ = is_today_limit(sh)
             comp = []; used = False; skip = False
             for ord_o in ord_list:
                 for it in ord_o.get("order_items", []):
@@ -106,6 +110,8 @@ def collect_only_today(at, account):
         except Exception as e:
             print(f"  err shipment {sid}: {str(e)[:80]}")
     print(f"  [{account['name']}] scaneados={len(obs)} status_off={skipped_status} no_hoy={skipped_notoday} incluidos={len(ships)}")
+    print(f"    [substatus counts] {_substatus_counter}")
+    _substatus_counter.clear()
     if _dbg_samples:
         # Contar por fecha
         from collections import Counter
