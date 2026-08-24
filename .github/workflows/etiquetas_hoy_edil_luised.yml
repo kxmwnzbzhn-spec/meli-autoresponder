@@ -1,0 +1,31 @@
+name: etiquetas-hoy-edil-luised
+on:
+  workflow_dispatch:
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - name: Install poppler
+        run: sudo apt-get update && sudo apt-get install -y poppler-utils
+      - name: Install Python deps
+        run: pip install requests pypdf reportlab pdf2image Pillow google-api-python-client google-auth google-auth-oauthlib -q
+      - name: Run
+        env:
+          MELI_APP_ID:                  ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET:              ${{ secrets.MELI_APP_SECRET }}
+          MELI_APP_ID_NEW:              ${{ secrets.MELI_APP_ID_NEW }}
+          MELI_APP_SECRET_NEW:          ${{ secrets.MELI_APP_SECRET_NEW }}
+          MELI_REFRESH_TOKEN_EDILBERTO: ${{ secrets.MELI_REFRESH_TOKEN_EDILBERTO }}
+          MELI_REFRESH_TOKEN_LUISED:    ${{ secrets.MELI_REFRESH_TOKEN_LUISED }}
+          GOOGLE_SERVICE_ACCOUNT_JSON:  ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+          GOOGLE_OAUTH_CLIENT_ID:       ${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}
+          GOOGLE_OAUTH_CLIENT_SECRET:   ${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}
+          GOOGLE_OAUTH_REFRESH_TOKEN:   ${{ secrets.GOOGLE_OAUTH_REFRESH_TOKEN }}
+          TELEGRAM_BOT_TOKEN:           ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID:             ${{ secrets.TELEGRAM_CHAT_ID }}
+          DRIVE_FOLDER_ID:              '1aIDN3iq6zwCacL57iamptvQCPoSDyRbL'
+        run: python scripts/etiquetas_hoy_edil_luised.py
