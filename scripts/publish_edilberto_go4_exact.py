@@ -11,6 +11,11 @@ API = "https://api.mercadolibre.com"
 SELLER_ID = 3616975257
 APPLY = os.environ.get("APPLY", "false").lower() == "true"
 PRICE = float(os.environ.get("PRICE", "520"))
+SOURCE_ITEMS = {
+    "FE238": "MLM5915258614",
+    "FE240": "MLM5915333620",
+    "FE244": "MLM5915335252",
+}
 
 REQUESTS = [
     ("FE238", "Jbl Go Jbl Go 4 Go4 Negro"),
@@ -79,8 +84,11 @@ def validate_product(product):
     issues = []
     if "jbl" not in brand:
         issues.append(f"brand={attrs.get('BRAND')}")
-    if "go4" not in model:
-        issues.append(f"model={attrs.get('MODEL')}")
+    title_key = norm(name).replace(" ", "")
+    if "jbl" not in title_key or "go4" not in title_key:
+        issues.append(f"title={name}")
+    if any(other in title_key for other in ("go3", "clip5", "flip", "charge")):
+        issues.append(f"otro_modelo={name}")
     if not any(word in color for word in ("negro", "negra", "black")):
         issues.append(f"color={attrs.get('COLOR')}")
     return issues, attrs
@@ -110,45 +118,88 @@ selected = []
 used_cpids = set()
 unmatched = []
 for invoice, requested_title in REQUESTS:
-    response = api_get("/products/search", {
-        "site_id": "MLM", "status": "active", "q": requested_title, "limit": 50,
-    })
-    response.raise_for_status()
     candidates = []
-    for row in response.json().get("results") or []:
-        cpid = row.get("id")
-        if not cpid or cpid.startswith("MLMU"):
-            continue
-        detail_response = api_get(f"/products/{cpid}")
-        if detail_response.status_code != 200:
-            continue
-        detail = detail_response.json()
-        if norm(detail.get("name")) != norm(requested_title):
-            continue
-        issues, attrs = validate_product(detail)
-        if issues:
-            print(f"[REJECT] {invoice} {cpid} title={detail.get('name')!r} issues={issues}", flush=True)
-            continue
-        candidates.append((cpid, detail, attrs))
-        time.sleep(0.15)
+    source_item = SOURCE_ITEMS.get(invoice)
+    if source_item:
+        source_response = api_get(f"/items/{source_item}")
+        if source_response.status_code != 200:
+            print(f"[SOURCE-ERROR] {invoice} {source_item} GET={source_response.status_code}", flush=True)
+        else:
+            source = source_response.json()
+            cpid = source.get("catalog_product_id")
+            if not cpid:
+                print(f"[SOURCE-ERROR] {invoice} {source_item} no tiene catalog_product_id", flush=True)
+            else:
+                detail_response = api_get(f"/products/{cpid}")
+                if detail_response.status_code == 200:
+                    detail = detail_response.json()
+                    issues, attrs = validate_product(detail)
+                    if issues:
+                        print(f"[REJECT-SOURCE] {invoice} {source_item} {cpid} issues={issues}", flush=True)
+                    else:
+                        candidates.append((cpid, detail, attrs))
+                        print(
+                            f"[SOURCE-MATCH] {invoice} {source_item} -> {cpid} "
+                            f"catalog_title={detail.get('name')!r}",
+                            flush=True,
+                        )
+    else:
+        response = api_get("/products/search", {
+            "site_id": "MLM", "status": "active", "q": requested_title, "limit": 50,
+        })
+        response.raise_for_status()
+        for row in response.json().get("results") or []:
+            cpid = row.get("id")
+            if not cpid or cpid.startswith("MLMU"):
+                continue
+            detail_response = api_get(f"/products/{cpid}")
+            if detail_response.status_code != 200:
+                continue
+            detail = detail_response.json()
+            if norm(detail.get("name")) != norm(requested_title):
+                continue
+            issues, attrs = validate_product(detail)
+            if issues:
+                print(f"[REJECT] {invoice} {cpid} title={detail.get('name')!r} issues={issues}", flush=True)
+                continue
+            candidates.append((cpid, detail, attrs))
+            time.sleep(0.15)
 
-    # La misma factura/título puede corresponder a catálogos duplicados; no reutilizar CPID.
-    available = [c for c in candidates if c[0] not in used_cpids and c[0] not in existing_cpids]
-    if not available:
-        already = [c for c in candidates if c[0] in existing_cpids]
-        if already:
-            cpid, detail, attrs = already[0]
-            print(f"[ALREADY] {invoice} {cpid} items={existing_cpids[cpid]} title={detail.get('name')!r}", flush=True)
-            used_cpids.add(cpid)
-            selected.append({"invoice": invoice, "cpid": cpid, "title": detail.get("name"), "already": True})
-            continue
-        print(f"[NO-EXACT-MATCH] {invoice} requested={requested_title!r} exact_candidates={[c[0] for c in candidates]}", flush=True)
-        unmatched.append({"invoice": invoice, "title": requested_title, "candidates": [c[0] for c in candidates]})
+    available = [row for row in candidates if row[0] not in used_cpids and row[0] not in existing_cpids]
+    already = [row for row in candidates if row[0] in existing_cpids]
+    duplicate = [row for row in candidates if row[0] in used_cpids]
+    if available:
+        cpid, detail, attrs = available[0]
+        used_cpids.add(cpid)
+        selected.append({
+            "invoice": invoice, "cpid": cpid, "title": detail.get("name"),
+            "already": False, "duplicate": False, "source_item": source_item,
+        })
+        print(
+            f"[MATCH] {invoice} -> {cpid} exact_catalog_title={detail.get('name')!r} "
+            f"color={attrs.get('COLOR')} model={attrs.get('MODEL')}",
+            flush=True,
+        )
         continue
-    cpid, detail, attrs = available[0]
-    used_cpids.add(cpid)
-    selected.append({"invoice": invoice, "cpid": cpid, "title": detail.get("name"), "already": False})
-    print(f"[MATCH] {invoice} -> {cpid} exact_title={detail.get('name')!r} color={attrs.get('COLOR')} model={attrs.get('MODEL')}", flush=True)
+    if already:
+        cpid, detail, attrs = already[0]
+        used_cpids.add(cpid)
+        selected.append({
+            "invoice": invoice, "cpid": cpid, "title": detail.get("name"),
+            "already": True, "duplicate": False, "source_item": source_item,
+        })
+        print(f"[ALREADY] {invoice} {cpid} items={existing_cpids[cpid]} title={detail.get('name')!r}", flush=True)
+        continue
+    if duplicate:
+        cpid, detail, attrs = duplicate[0]
+        selected.append({
+            "invoice": invoice, "cpid": cpid, "title": detail.get("name"),
+            "already": False, "duplicate": True, "source_item": source_item,
+        })
+        print(f"[DUPLICATE-CATALOG] {invoice} -> {cpid} title={detail.get('name')!r}; una sola oferta", flush=True)
+        continue
+    print(f"[NO-EXACT-MATCH] {invoice} requested={requested_title!r}", flush=True)
+    unmatched.append({"invoice": invoice, "title": requested_title})
 
 print(f"[VALIDATION] requested={len(REQUESTS)} matched={len(selected)} unmatched={len(unmatched)}", flush=True)
 if unmatched:
@@ -164,7 +215,7 @@ if not APPLY:
 
 published = []
 for entry in selected:
-    if entry["already"]:
+    if entry["already"] or entry.get("duplicate"):
         continue
     cpid = entry["cpid"]
     product_response = api_get(f"/products/{cpid}")
@@ -218,7 +269,7 @@ for entry in selected:
     exact = (
         verify.get("catalog_product_id") == cpid
         and verify.get("condition") == "new"
-        and norm(verify.get("title")) == norm(exact_title)
+        and verify.get("catalog_listing") is True
         and int(verify.get("available_quantity") or 0) == 1
     )
     if not exact:
