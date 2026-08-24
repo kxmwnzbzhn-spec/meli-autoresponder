@@ -8,7 +8,7 @@ on:
         type: string
         default: ''
   schedule:
-    - cron: '45 13 * * 1-6'  # 07:45 CDMX, lunes a sábado
+    - cron: '45 13 * * 1-6'  # 07:45 CDMX (UTC-6), lunes a sábado. Domingo bloqueado por guardia interna.
 jobs:
   run:
     runs-on: ubuntu-latest
@@ -29,23 +29,21 @@ jobs:
         run: pip install requests pypdf reportlab pdf2image Pillow google-api-python-client google-auth google-auth-oauthlib -q
       - name: Run daily etiquetas
         env:
-          FORCE_REGEN:                ${{ inputs.force_regen }}
-          ACCOUNT_FILTER:              'Claribel,Asva,RocioAngel,Edilberto,LuisEd'
-          OUTPUT_PREFIX:               'ETIQUETAS_UNIFICADAS'
-          MELI_APP_ID:                ${{ secrets.MELI_APP_ID }}
-          MELI_APP_SECRET:            ${{ secrets.MELI_APP_SECRET }}
-          MELI_APP_ID_NEW:             ${{ secrets.MELI_APP_ID_NEW }}
-          MELI_APP_SECRET_NEW:         ${{ secrets.MELI_APP_SECRET_NEW }}
-          MELI_REFRESH_TOKEN_CLARIBEL: ${{ secrets.MELI_REFRESH_TOKEN_CLARIBEL }}
-          MELI_REFRESH_TOKEN_ASVA:    ${{ secrets.MELI_REFRESH_TOKEN_ASVA }}
-          MELI_REFRESH_TOKEN_ROCIOANGEL: ${{ secrets.MELI_REFRESH_TOKEN_ROCIOANGEL }}
+          FORCE_REGEN:                  ${{ inputs.force_regen }}
+          ACCOUNT_FILTER:                'Asva,Edilberto,LuisEd'
+          OUTPUT_PREFIX:                 'ETIQUETAS_UNIFICADAS'
+          MELI_APP_ID:                  ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET:              ${{ secrets.MELI_APP_SECRET }}
+          MELI_APP_ID_NEW:              ${{ secrets.MELI_APP_ID_NEW }}
+          MELI_APP_SECRET_NEW:          ${{ secrets.MELI_APP_SECRET_NEW }}
+          MELI_REFRESH_TOKEN_ASVA:      ${{ secrets.MELI_REFRESH_TOKEN_ASVA }}
           MELI_REFRESH_TOKEN_EDILBERTO: ${{ secrets.MELI_REFRESH_TOKEN_EDILBERTO }}
           MELI_REFRESH_TOKEN_LUISED:    ${{ secrets.MELI_REFRESH_TOKEN_LUISED }}
-          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
-          GOOGLE_OAUTH_CLIENT_ID:     ${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}
-          GOOGLE_OAUTH_CLIENT_SECRET: ${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}
-          GOOGLE_OAUTH_REFRESH_TOKEN: ${{ secrets.GOOGLE_OAUTH_REFRESH_TOKEN }}
-          TELEGRAM_BOT_TOKEN:         ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID:           ${{ secrets.TELEGRAM_CHAT_ID }}
-          DRIVE_FOLDER_ID:            '1aIDN3iq6zwCacL57iamptvQCPoSDyRbL'
+          GOOGLE_SERVICE_ACCOUNT_JSON:  ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+          GOOGLE_OAUTH_CLIENT_ID:       ${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}
+          GOOGLE_OAUTH_CLIENT_SECRET:   ${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}
+          GOOGLE_OAUTH_REFRESH_TOKEN:   ${{ secrets.GOOGLE_OAUTH_REFRESH_TOKEN }}
+          TELEGRAM_BOT_TOKEN:           ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID:             ${{ secrets.TELEGRAM_CHAT_ID }}
+          DRIVE_FOLDER_ID:              '1aIDN3iq6zwCacL57iamptvQCPoSDyRbL'
         run: python scripts/daily_run.py
