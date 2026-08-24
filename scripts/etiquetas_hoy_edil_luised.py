@@ -18,23 +18,36 @@ accounts = [a for a in d.ACCOUNTS if a["name"] in ONLY]
 print(f"[hoy] TODAY (CDMX)={TODAY}")
 print(f"[hoy] cuentas: {[a['name'] for a in accounts]}")
 
-def is_today_limit(sh):
-    """True si el shipment tiene estimated_handling_limit.date == HOY CDMX."""
+_dbg_samples = []
+def extract_limit_date(sh):
+    """Devuelve la fecha CDMX (YYYY-MM-DD) del handling limit del shipment, o None."""
+    # 1) date_handling.estimated_handling_limit.date
     dh = sh.get("date_handling") or {}
     ehl = dh.get("estimated_handling_limit") or {}
     dstr = ehl.get("date") or ""
-    # dstr formato ISO con offset (ej 2026-08-24T22:59:59.000-06:00). Convertir a CDMX date.
-    if not dstr: return False
+    # 2) shipping_option.estimated_handling_limit.date (a veces está aquí)
+    if not dstr:
+        so = sh.get("shipping_option") or {}
+        ehl2 = so.get("estimated_handling_limit") or {}
+        dstr = ehl2.get("date") or ""
+    # 3) status_history.date_ready_to_ship o handling
+    if not dstr:
+        sh_hist = sh.get("status_history") or {}
+        dstr = sh_hist.get("date_handling") or ""
+    if not dstr: return None
     try:
-        # Parse
-        # strip fractional seconds
         s = re.sub(r"\.\d+", "", dstr)
-        # dateutil not installed by default; usar fromisoformat con soporte offset
         dt = datetime.fromisoformat(s)
         local = dt.astimezone(TZ)
-        return local.strftime("%Y-%m-%d") == TODAY
-    except Exception as e:
-        return False
+        return local.strftime("%Y-%m-%d")
+    except Exception:
+        return None
+
+def is_today_limit(sh):
+    ld = extract_limit_date(sh)
+    if len(_dbg_samples) < 20:
+        _dbg_samples.append((sh.get("id"), ld, sh.get("status"), sh.get("substatus")))
+    return ld == TODAY
 
 def collect_only_today(at, account):
     """Copia de collect_shipments pero con filtro estricto por fecha límite = HOY."""
@@ -91,6 +104,12 @@ def collect_only_today(at, account):
         except Exception as e:
             print(f"  err shipment {sid}: {str(e)[:80]}")
     print(f"  [{account['name']}] scaneados={len(obs)} status_off={skipped_status} no_hoy={skipped_notoday} incluidos={len(ships)}")
+    if _dbg_samples:
+        # Contar por fecha
+        from collections import Counter
+        cnt = Counter(x[1] for x in _dbg_samples if x[2]=="ready_to_ship")
+        print(f"    [dbg samples fechas límite ready_to_ship] {dict(cnt)}")
+        _dbg_samples.clear()
     ships.sort(key=lambda s: (0 if s["has_used"] else 1, "/".join(s["comp_lines"]), s["sid"]))
     return ships
 
