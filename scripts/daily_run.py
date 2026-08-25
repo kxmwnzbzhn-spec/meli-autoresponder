@@ -661,11 +661,13 @@ def main():
                 per_account_counts[nm] = 0; continue
             ships = collect_shipments(at, account)
             scanned_n = len(ships)
-            ships = [s for s in ships if str(s["sid"]) not in emitted_shipments]
+            # SIN dedupe global: incluir TODAS las accionables cada día.
+            # Mientras el vendedor no haya entregado el paquete en agencia (substatus != picked_up),
+            # la guía debe reaparecer todos los días. El ledger sigue registrando para auditoría.
             n = len(ships)
-            skipped_n = scanned_n - n
+            skipped_n = 0
             per_account_counts[nm] = n
-            print(f"  shipments listos: {scanned_n} | ya emitidos omitidos: {skipped_n} | nuevos: {n}")
+            print(f"  shipments accionables: {scanned_n} (todas incluidas — sin dedupe global)")
             prev = stats.get(nm, {}).get("last_count")
             anomaly = ""
             if prev is not None and prev > 5:
