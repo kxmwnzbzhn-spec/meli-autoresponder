@@ -1,0 +1,21 @@
+name: list_drive_folder
+on:
+  workflow_dispatch:
+    inputs:
+      folder_id:
+        required: true
+jobs:
+  v:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install google-api-python-client google-auth google-auth-oauthlib -q
+      - env:
+          FOLDER_ID:                  ${{ inputs.folder_id }}
+          GOOGLE_OAUTH_CLIENT_ID:     ${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}
+          GOOGLE_OAUTH_CLIENT_SECRET: ${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}
+          GOOGLE_OAUTH_REFRESH_TOKEN: ${{ secrets.GOOGLE_OAUTH_REFRESH_TOKEN }}
+        run: python scripts/list_drive_folder.py
