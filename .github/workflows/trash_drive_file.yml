@@ -1,0 +1,20 @@
+name: trash_drive_file
+on:
+  workflow_dispatch:
+    inputs:
+      file_id: {required: true}
+jobs:
+  t:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install google-api-python-client google-auth google-auth-oauthlib -q
+      - env:
+          FILE_ID:                    ${{ inputs.file_id }}
+          GOOGLE_OAUTH_CLIENT_ID:     ${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}
+          GOOGLE_OAUTH_CLIENT_SECRET: ${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}
+          GOOGLE_OAUTH_REFRESH_TOKEN: ${{ secrets.GOOGLE_OAUTH_REFRESH_TOKEN }}
+        run: python scripts/trash_drive_file.py
