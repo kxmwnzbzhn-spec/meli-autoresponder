@@ -8,7 +8,7 @@ on:
         type: string
         default: ''
   schedule:
-    - cron: '45 13 * * 1-6'  # 07:45 CDMX (UTC-6), lunes a sábado. Domingo bloqueado por guardia interna.
+    - cron: '0 13 * * 1-6'  # 07:00 CDMX (UTC-6), lunes a sábado. Domingo bloqueado por guardia interna.
 jobs:
   run:
     runs-on: ubuntu-latest
