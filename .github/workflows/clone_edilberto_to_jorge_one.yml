@@ -1,0 +1,50 @@
+name: clone-edilberto-to-jorge-one
+on:
+  workflow_dispatch:
+    inputs:
+      item_id:
+        description: "ID de publicación de Edilberto"
+        required: true
+        type: string
+
+concurrency:
+  group: clone-edilberto-to-jorge-one
+  cancel-in-progress: false
+
+jobs:
+  clone:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    permissions:
+      actions: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install requests -q
+      - name: Validate safe single-item clone
+        run: python3 -m py_compile scripts/clone_edilberto_to_jorge_one.py
+      - name: Clone one catalog item as new and verify
+        env:
+          SOURCE_ITEM_ID: ${{ inputs.item_id }}
+          MELI_APP_ID_NEW: ${{ secrets.MELI_APP_ID_NEW }}
+          MELI_APP_SECRET_NEW: ${{ secrets.MELI_APP_SECRET_NEW }}
+          MELI_REFRESH_TOKEN_EDILBERTO: ${{ secrets.MELI_REFRESH_TOKEN_EDILBERTO }}
+          MELI_REFRESH_TOKEN_JORGE_LUIS: ${{ secrets.MELI_REFRESH_TOKEN_JORGE_LUIS }}
+        run: python3 scripts/clone_edilberto_to_jorge_one.py
+      - name: Save rotated refresh tokens
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN_FOR_SECRETS }}
+        run: |
+          if [ -s /tmp/edilberto_rotated_token ]; then
+            gh secret set MELI_REFRESH_TOKEN_EDILBERTO --repo kxmwnzbzhn-spec/meli-autoresponder < /tmp/edilberto_rotated_token
+          fi
+          if [ -s /tmp/jorge_luis_rotated_token ]; then
+            gh secret set MELI_REFRESH_TOKEN_JORGE_LUIS --repo kxmwnzbzhn-spec/meli-autoresponder < /tmp/jorge_luis_rotated_token
+          fi
+      - name: Result
+        if: always()
+        run: |
+          if [ -s /tmp/edilberto_to_jorge_result.json ]; then
+            cat /tmp/edilberto_to_jorge_result.json
+          fi
