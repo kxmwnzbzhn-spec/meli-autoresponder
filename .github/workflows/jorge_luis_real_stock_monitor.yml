@@ -1,0 +1,49 @@
+name: jorge-luis-real-stock-monitor
+on:
+  workflow_dispatch:
+    inputs:
+      duration_sec:
+        description: "Duración del monitor en segundos"
+        required: false
+        default: "19800"
+  schedule:
+    - cron: "41 6 * * *"
+
+concurrency:
+  group: jorge-luis-real-stock-monitor
+  cancel-in-progress: true
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 345
+    permissions:
+      actions: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install requests -q
+      - name: Safety validation
+        run: |
+          python3 -m unittest tests/test_stock_policy.py -v
+          python3 -m py_compile scripts/stock_policy.py scripts/jorge_luis_real_stock_monitor.py
+      - name: Monitor Jorge Luis real stock
+        env:
+          MELI_APP_ID_NEW: ${{ secrets.MELI_APP_ID_NEW }}
+          MELI_APP_SECRET_NEW: ${{ secrets.MELI_APP_SECRET_NEW }}
+          MELI_REFRESH_TOKEN_JORGE_LUIS: ${{ secrets.MELI_REFRESH_TOKEN_JORGE_LUIS }}
+          RUN_DURATION_SEC: ${{ inputs.duration_sec || '19800' }}
+        run: python3 scripts/jorge_luis_real_stock_monitor.py
+      - name: Save rotated refresh token
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN_FOR_SECRETS }}
+        run: |
+          if [ -s /tmp/jorge_luis_rotated_token ]; then
+            gh secret set MELI_REFRESH_TOKEN_JORGE_LUIS --repo kxmwnzbzhn-spec/meli-autoresponder < /tmp/jorge_luis_rotated_token
+          fi
+      - name: Continue monitoring
+        if: ${{ success() && (github.event_name == 'schedule' || inputs.duration_sec == '19800') }}
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN_FOR_SECRETS }}
+        run: gh workflow run jorge_luis_real_stock_monitor.yml --repo kxmwnzbzhn-spec/meli-autoresponder -f duration_sec=19800
