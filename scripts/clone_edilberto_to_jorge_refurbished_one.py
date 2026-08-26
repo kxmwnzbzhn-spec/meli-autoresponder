@@ -154,14 +154,20 @@ else:
     if gtin:
         attributes.insert(0, {"id": "GTIN", "value_name": gtin})
 
-    sale_terms = source.get("sale_terms") or [
-        {
+    sale_terms = list(source.get("sale_terms") or [])
+    sale_terms = [
+        term for term in sale_terms
+        if term.get("id") != "WARRANTY_TIME" or term.get("value_name")
+    ]
+    term_ids = {term.get("id") for term in sale_terms}
+    if "WARRANTY_TYPE" not in term_ids:
+        sale_terms.append({
             "id": "WARRANTY_TYPE",
             "value_id": "2230280",
             "value_name": "Garantía del vendedor",
-        },
-        {"id": "WARRANTY_TIME", "value_name": "90 días"},
-    ]
+        })
+    if "WARRANTY_TIME" not in term_ids:
+        sale_terms.append({"id": "WARRANTY_TIME", "value_name": "90 días"})
     payload = {
         "site_id": "MLM",
         "family_name": (
