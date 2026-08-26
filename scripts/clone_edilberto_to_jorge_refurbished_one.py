@@ -104,7 +104,7 @@ def find_existing(catalog_product_id):
             )
             if (
                 item.get("catalog_product_id") == catalog_product_id
-                and item.get("condition") == "refurbished"
+                and item.get("condition") == "new"
                 and bool(item.get("catalog_listing"))
                 and is_excellent
                 and not item.get("deleted")
@@ -173,7 +173,7 @@ else:
         "available_quantity": 1,
         "buying_mode": source.get("buying_mode") or "buy_it_now",
         "listing_type_id": source.get("listing_type_id") or "gold_special",
-        "condition": "refurbished",
+        "condition": "new",
         "catalog_product_id": catalog_product_id,
         "catalog_listing": True,
         "attributes": attributes,
@@ -227,7 +227,7 @@ is_excellent = (
 checks = {
     "active": target.get("status") == "active",
     "quantity_one": int(target.get("available_quantity") or 0) == 1,
-    "refurbished": target.get("condition") == "refurbished",
+    "catalog_refurbished_mapping": target.get("condition") == "new",
     "excellent": is_excellent,
     "catalog": bool(target.get("catalog_listing")),
     "same_catalog_product": target.get("catalog_product_id") == catalog_product_id,
@@ -244,7 +244,7 @@ result = {
     "action": action,
     "title": target.get("title"),
     "price": target.get("price"),
-    "condition": target.get("condition"),
+    "api_condition": target.get("condition"),\n    "catalog_condition": "Reacondicionado - Excelente",
     "grading": target_grading.get("value_name"),
     "status": target.get("status"),
     "quantity": target.get("available_quantity"),
