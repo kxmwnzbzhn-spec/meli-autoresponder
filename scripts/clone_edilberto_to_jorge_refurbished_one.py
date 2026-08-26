@@ -90,7 +90,7 @@ def target_items(status):
         offset += 100
 
 
-def find_existing(catalog_product_id):
+def find_existing(source):\n    catalog_product_id = source.get("catalog_product_id")\n    family_id = source.get("family_id")
     for status in ("active", "paused"):
         for item_id in target_items(status):
             try:
@@ -103,7 +103,10 @@ def find_existing(catalog_product_id):
                 or str(item_grading.get("value_name") or "").lower() == "excelente"
             )
             if (
-                item.get("catalog_product_id") == catalog_product_id
+                (
+                    item.get("catalog_product_id") == catalog_product_id
+                    or (family_id and item.get("family_id") == family_id)
+                )
                 and item.get("condition") == "new"
                 and bool(item.get("catalog_listing"))
                 and is_excellent
@@ -128,7 +131,7 @@ print(
     flush=True,
 )
 
-target_id = find_existing(catalog_product_id)
+target_id = find_existing(source)
 action = "reused"
 if target_id:
     response = requests.put(
@@ -236,7 +239,17 @@ checks = {
     "catalog_refurbished_mapping": target.get("condition") == "new",
     "excellent": is_excellent,
     "catalog": bool(target.get("catalog_listing")),
-    "same_catalog_product": target.get("catalog_product_id") == catalog_product_id,
+    "same_product_family": (
+        target.get("catalog_product_id") == catalog_product_id
+        or (
+            source.get("family_id")
+            and target.get("family_id") == source.get("family_id")
+        )
+    ),
+    "official_refurbished_title": (
+        "reacondicionado" in str(target.get("title") or "").lower()
+        and "excelente" in str(target.get("title") or "").lower()
+    ),
 }
 if not all(checks.values()):
     raise RuntimeError(
