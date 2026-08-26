@@ -39,24 +39,36 @@ duplicate = get(DUPLICATE_ID)
 if keep.get("user_product_id") != duplicate.get("user_product_id"):
     raise RuntimeError("Los IDs no corresponden al mismo producto; corrección abortada")
 
-if keep.get("status") != "active":
-    response = requests.put(
-        f"{API}/items/{KEEP_ID}", headers=HJ,
-        json={"status": "active", "available_quantity": 1}, timeout=TIMEOUT
-    )
-    response.raise_for_status()
-
-if duplicate.get("status") == "active":
+items = {KEEP_ID: keep, DUPLICATE_ID: duplicate}
+active_ids = [item_id for item_id, item in items.items() if item.get("status") == "active"]
+if not active_ids:
     response = requests.put(
         f"{API}/items/{DUPLICATE_ID}", headers=HJ,
+        json={"available_quantity": 1}, timeout=TIMEOUT
+    )
+    if response.status_code not in (200, 201):
+        raise RuntimeError(
+            f"No se pudo activar la oferta: {response.status_code} {response.text[:500]}"
+        )
+    active_ids = [DUPLICATE_ID]
+
+kept_id = active_ids[0]
+for item_id in active_ids[1:]:
+    response = requests.put(
+        f"{API}/items/{item_id}", headers=HJ,
         json={"status": "paused"}, timeout=TIMEOUT
     )
     response.raise_for_status()
 
-keep_after = get(KEEP_ID)
-duplicate_after = get(DUPLICATE_ID)
-if keep_after.get("status") != "active" or duplicate_after.get("status") == "active":
-    raise RuntimeError("No se confirmó la corrección reversible")
+after = {item_id: get(item_id) for item_id in (KEEP_ID, DUPLICATE_ID)}
+active_after = [
+    item_id for item_id, item in after.items() if item.get("status") == "active"
+]
+if len(active_after) != 1:
+    raise RuntimeError(f"Se esperaba una sola oferta activa; activas={active_after}")
+
+kept_id = active_after[0]
+paused_id = DUPLICATE_ID if kept_id == KEEP_ID else KEEP_ID
 
 print("PAUSE_DUPLICATE_RESULT=" + json.dumps({
     "kept": KEEP_ID,
