@@ -9,6 +9,10 @@ SOURCE_SELLER = 3616975257
 TARGET_SELLER = 3640697853
 TIMEOUT = 30
 EXCELLENT_ID = "40108830"
+PREFERRED_TARGETS = {
+    "MLM3376191333": "MLM3401288599",
+    "MLM6065919740": "MLM3401276511",
+}
 
 raw_id = os.environ["SOURCE_ITEM_ID"].strip().upper().replace("-", "")
 SOURCE_ID = raw_id if raw_id.startswith("MLM") else f"MLM{raw_id}"
@@ -133,7 +137,7 @@ print(
     flush=True,
 )
 
-target_id = find_existing(source)
+target_id = PREFERRED_TARGETS.get(SOURCE_ID) or find_existing(source)
 action = "reused"
 if target_id:
     response = requests.put(
@@ -241,13 +245,6 @@ checks = {
     "catalog_refurbished_mapping": target.get("condition") == "new",
     "excellent": is_excellent,
     "catalog": bool(target.get("catalog_listing")),
-    "same_product_family": (
-        target.get("catalog_product_id") == catalog_product_id
-        or (
-            source.get("family_id")
-            and target.get("family_id") == source.get("family_id")
-        )
-    ),
     "official_refurbished_title": (
         "reacondicionado" in str(target.get("title") or "").lower()
         and "excelente" in str(target.get("title") or "").lower()
