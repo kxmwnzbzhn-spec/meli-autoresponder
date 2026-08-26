@@ -90,7 +90,9 @@ def target_items(status):
         offset += 100
 
 
-def find_existing(source):\n    catalog_product_id = source.get("catalog_product_id")\n    family_id = source.get("family_id")
+def find_existing(source):
+    catalog_product_id = source.get("catalog_product_id")
+    family_id = source.get("family_id")
     for status in ("active", "paused"):
         for item_id in target_items(status):
             try:
