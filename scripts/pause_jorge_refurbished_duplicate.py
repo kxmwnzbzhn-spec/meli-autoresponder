@@ -42,15 +42,52 @@ if keep.get("user_product_id") != duplicate.get("user_product_id"):
 items = {KEEP_ID: keep, DUPLICATE_ID: duplicate}
 active_ids = [item_id for item_id, item in items.items() if item.get("status") == "active"]
 if not active_ids:
-    response = requests.put(
-        f"{API}/items/{DUPLICATE_ID}", headers=HJ,
-        json={"available_quantity": 1}, timeout=TIMEOUT
+    upid = duplicate.get("user_product_id")
+    stock_response = requests.get(
+        f"{API}/user-products/{upid}/stock", headers=H, timeout=TIMEOUT
     )
-    if response.status_code not in (200, 201):
+    stock_response.raise_for_status()
+    stock = stock_response.json()
+    locations = [
+        row for row in (stock.get("locations") or [])
+        if row.get("type") != "meli_facility"
+    ]
+    if not locations:
+        raise RuntimeError(f"{upid}: no hay ubicación editable de inventario")
+    kinds = {row.get("type") for row in locations}
+    if len(kinds) != 1:
+        raise RuntimeError(f"{upid}: inventario mixto no seguro {sorted(kinds)}")
+    kind = next(iter(kinds))
+    stock_headers = dict(HJ)
+    if stock_response.headers.get("x-version"):
+        stock_headers["x-version"] = stock_response.headers["x-version"]
+    if kind == "selling_address":
+        stock_body = {"quantity": 1}
+    elif kind == "seller_warehouse":
+        stock_body = {"locations": []}
+        first = True
+        for row in locations:
+            target = {"quantity": 1 if first else 0}
+            first = False
+            if row.get("store_id") is not None:
+                target["store_id"] = row.get("store_id")
+            if row.get("network_node_id") is not None:
+                target["network_node_id"] = row.get("network_node_id")
+            stock_body["locations"].append(target)
+    else:
+        raise RuntimeError(f"{upid}: tipo de inventario no soportado {kind}")
+    response = requests.put(
+        f"{API}/user-products/{upid}/stock/type/{kind}",
+        headers=stock_headers, json=stock_body, timeout=TIMEOUT
+    )
+    if response.status_code not in (200, 201, 204):
         raise RuntimeError(
-            f"No se pudo activar la oferta: {response.status_code} {response.text[:500]}"
+            f"{upid}: stock 1 falló {response.status_code} {response.text[:500]}"
         )
-    active_ids = [DUPLICATE_ID]
+    items = {KEEP_ID: get(KEEP_ID), DUPLICATE_ID: get(DUPLICATE_ID)}
+    active_ids = [
+        item_id for item_id, item in items.items() if item.get("status") == "active"
+    ]
 
 kept_id = active_ids[0]
 for item_id in active_ids[1:]:
