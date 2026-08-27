@@ -34,6 +34,11 @@ REAL_STOCK_LIMITS = {
 # Explicitly authorized for continuous one-visible-unit replenishment
 # without a physical inventory ceiling.
 UNCAPPED_ITEMS = {
+    "MLM6100171026",
+    "MLM6100158830",
+    "MLM3403250729",
+    "MLM3403240547",
+    "MLM3403241131",
     "MLM6097042780",
     "MLM3401279297",
     "MLM6097051040",
