@@ -50,6 +50,14 @@ UNCAPPED_ITEMS = {
     "MLM3401303117",
 }
 
+FORCE_ACTIVE_ITEMS = {
+    "MLM6100171026",
+    "MLM6100158830",
+    "MLM3403250729",
+    "MLM3403240547",
+    "MLM3403241131",
+}
+
 ALL_MONITORED_ITEMS = tuple(REAL_STOCK_LIMITS) + tuple(UNCAPPED_ITEMS)
 
 r = requests.post(
@@ -126,6 +134,32 @@ def enforce(item_id, initial=False):
     sold = paid_units(item_id) if limit is not None else None
     remaining = max(0, limit - sold) if limit is not None else None
     item = get_item(item_id)
+
+    if item_id in FORCE_ACTIVE_ITEMS:
+        if item.get("status") == "active" and int(item.get("available_quantity") or 0) == 1:
+            if initial:
+                print(f"[FORCE-ACTIVE-OK] {item_id} qty=1", flush=True)
+            return
+        response = requests.put(
+            f"{API}/items/{item_id}",
+            headers=HJ,
+            json={"available_quantity": 1, "status": "active"},
+            timeout=TIMEOUT,
+        )
+        if response.status_code not in (200, 201):
+            raise RuntimeError(
+                f"{item_id}: force-active {response.status_code} "
+                f"{response.text[:500]}"
+            )
+        final = get_item(item_id)
+        if final.get("status") != "active" or int(final.get("available_quantity") or 0) != 1:
+            raise RuntimeError(
+                f"{item_id}: force-active verification "
+                f"status={final.get('status')} qty={final.get('available_quantity')}"
+            )
+        print(f"[FORCE-ACTIVATED] {item_id} qty=1", flush=True)
+        return
+
     action = item_stock_action(
         item.get("status"),
         item.get("sub_status"),
