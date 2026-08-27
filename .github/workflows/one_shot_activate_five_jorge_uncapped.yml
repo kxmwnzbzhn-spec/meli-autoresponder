@@ -30,3 +30,5 @@ jobs:
           if [ -s /tmp/jorge_luis_rotated_token ]; then
             gh secret set MELI_REFRESH_TOKEN_JORGE_LUIS --repo kxmwnzbzhn-spec/meli-autoresponder < /tmp/jorge_luis_rotated_token
           fi
+
+# rerun-after-force-active-guard
