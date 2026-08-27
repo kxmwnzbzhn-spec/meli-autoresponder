@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import json
 import os
+import time
 import requests
 
 API = "https://api.mercadolibre.com"
@@ -76,6 +77,23 @@ for item_id in ITEMS:
         "title": final.get("title"),
         "permalink": final.get("permalink"),
     })
+
+time.sleep(45)
+for row in results:
+    final_response = requests.get(
+        f"{API}/items/{row['item_id']}", headers=H, timeout=TIMEOUT
+    )
+    final_response.raise_for_status()
+    final = final_response.json()
+    row["listing_status"] = final.get("status")
+    row["quantity"] = final.get("available_quantity")
+    row["status"] = (
+        "verified"
+        if final.get("status") == "active"
+        and int(final.get("available_quantity") or 0) == 1
+        else "failed_delayed_verification"
+    )
+    row["delayed_verification_seconds"] = 45
 
 with open("/tmp/jorge_activate_uncapped_five.json", "w") as handle:
     json.dump(results, handle, ensure_ascii=False, indent=2)
