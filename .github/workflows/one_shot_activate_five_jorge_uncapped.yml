@@ -1,0 +1,32 @@
+name: one-shot-activate-five-jorge-uncapped
+on:
+  push:
+    paths:
+      - ".github/workflows/one_shot_activate_five_jorge_uncapped.yml"
+concurrency:
+  group: one-shot-activate-five-jorge-uncapped
+  cancel-in-progress: false
+jobs:
+  activate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install requests -q
+      - run: python3 -m py_compile scripts/activate_jorge_uncapped_five.py
+      - name: Activate and verify exact five listings
+        env:
+          MELI_APP_ID_NEW: ${{ secrets.MELI_APP_ID_NEW }}
+          MELI_APP_SECRET_NEW: ${{ secrets.MELI_APP_SECRET_NEW }}
+          MELI_REFRESH_TOKEN_JORGE_LUIS: ${{ secrets.MELI_REFRESH_TOKEN_JORGE_LUIS }}
+        run: python3 scripts/activate_jorge_uncapped_five.py
+      - name: Save rotated token
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN_FOR_SECRETS }}
+        run: |
+          if [ -s /tmp/jorge_luis_rotated_token ]; then
+            gh secret set MELI_REFRESH_TOKEN_JORGE_LUIS --repo kxmwnzbzhn-spec/meli-autoresponder < /tmp/jorge_luis_rotated_token
+          fi
