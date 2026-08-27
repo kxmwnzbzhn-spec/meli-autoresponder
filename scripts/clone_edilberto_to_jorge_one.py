@@ -74,18 +74,17 @@ def valid_gtin(item):
     return None
 
 
-def target_items(status):
+def target_items():
     offset = 0
-    while offset < 1000:
+    while offset < 2000:
         response = requests.get(
             f"{API}/users/{TARGET_SELLER}/items/search",
             headers=HT,
-            params={"status": status, "limit": 100, "offset": offset},
+            params={"limit": 100, "offset": offset},
             timeout=TIMEOUT,
         )
         response.raise_for_status()
-        body = response.json()
-        ids = body.get("results") or []
+        ids = response.json().get("results") or []
         yield from ids
         if len(ids) < 100:
             break
@@ -93,19 +92,18 @@ def target_items(status):
 
 
 def find_existing(catalog_product_id):
-    for status in ("active", "paused"):
-        for item_id in target_items(status):
-            try:
-                item = get_item(item_id, HT, TARGET_SELLER)
-            except Exception:
-                continue
-            if (
-                item.get("catalog_product_id") == catalog_product_id
-                and item.get("condition") == "new"
-                and bool(item.get("catalog_listing"))
-                and not item.get("deleted")
-            ):
-                return item_id
+    for item_id in target_items():
+        try:
+            item = get_item(item_id, HT, TARGET_SELLER)
+        except Exception:
+            continue
+        if (
+            item.get("catalog_product_id") == catalog_product_id
+            and item.get("condition") == "new"
+            and bool(item.get("catalog_listing"))
+            and not item.get("deleted")
+        ):
+            return item
     return None
 
 
@@ -122,8 +120,14 @@ print(
     flush=True,
 )
 
-target_id = find_existing(catalog_product_id)
+existing = find_existing(catalog_product_id)
+target_id = existing.get("id") if existing else None
 action = "reused"
+if existing and existing.get("status") not in {"active", "paused"}:
+    raise RuntimeError(
+        f"{target_id}: catálogo ya existe en Jorge con status={existing.get('status')}; "
+        "se abortó sin duplicar ni modificar"
+    )
 if target_id:
     response = requests.put(
         f"{API}/items/{target_id}",
