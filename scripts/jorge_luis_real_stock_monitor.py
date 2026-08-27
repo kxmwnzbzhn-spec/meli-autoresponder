@@ -118,7 +118,7 @@ def paid_units(item_id):
 
 def enforce(item_id, initial=False):
     limit = REAL_STOCK_LIMITS.get(item_id)
-    sold = paid_units(item_id)
+    sold = paid_units(item_id) if limit is not None else None
     remaining = max(0, limit - sold) if limit is not None else None
     item = get_item(item_id)
     action = item_stock_action(
