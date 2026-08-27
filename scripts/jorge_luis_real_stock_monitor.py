@@ -16,8 +16,6 @@ REAL_STOCK_LIMITS = {
     "MLM6098727716": 6,
     # Source MLM6061793358: 28 initial - 10 paid before migration.
     "MLM3402386723": 18,
-    # Sources MLM6075579250 (1) + MLM3386065727 (0), same catalog.
-    "MLM3402363017": 1,
     # Source MLM6061831150: 28 initial - 3 paid before migration.
     "MLM3402390259": 25,
     # Source MLM6075598700: one verified editable unit at migration.
@@ -34,6 +32,7 @@ REAL_STOCK_LIMITS = {
 # Explicitly authorized for continuous one-visible-unit replenishment
 # without a physical inventory ceiling.
 UNCAPPED_ITEMS = {
+    "MLM3402363017",
     "MLM6100171026",
     "MLM6100158830",
     "MLM3403250729",
@@ -51,6 +50,7 @@ UNCAPPED_ITEMS = {
 }
 
 FORCE_ACTIVE_ITEMS = {
+    "MLM3402363017",
     "MLM6100171026",
     "MLM6100158830",
     "MLM3403250729",
