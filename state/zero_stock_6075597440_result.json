@@ -1,0 +1,4 @@
+{
+  "status": "failed",
+  "log": "Traceback (most recent call last):\n  File \"/home/runner/work/meli-autoresponder/meli-autoresponder/scripts/clone_zero_stock_edilberto_to_jorge.py\", line 185, in <module>\n    raise RuntimeError(\nRuntimeError: MLM3403241131: creado pero no pausado 500 {\"cause\":[],\"message\":\"Oops! Something went wrong...\",\"error\":\"internal_error\",\"status\":500}\n"
+}
