@@ -1,0 +1,52 @@
+name: one-shot-zero-stock-6075502880
+on:
+  push:
+    paths:
+      - ".github/workflows/one_shot_zero_stock_6075502880.yml"
+concurrency:
+  group: one-shot-zero-stock-6075502880
+  cancel-in-progress: false
+jobs:
+  process:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install requests -q
+      - name: Process one exact zero-stock catalog
+        env:
+          SOURCE_ITEM_ID: "6075502880"
+          MELI_APP_ID_NEW: ${{ secrets.MELI_APP_ID_NEW }}
+          MELI_APP_SECRET_NEW: ${{ secrets.MELI_APP_SECRET_NEW }}
+          MELI_REFRESH_TOKEN_EDILBERTO: ${{ secrets.MELI_REFRESH_TOKEN_EDILBERTO }}
+          MELI_REFRESH_TOKEN_JORGE_LUIS: ${{ secrets.MELI_REFRESH_TOKEN_JORGE_LUIS }}
+        run: |
+          python3 scripts/clone_zero_stock_edilberto_to_jorge.py 2>&1 | tee /tmp/one.log
+          exit ${PIPESTATUS[0]}
+      - name: Save rotated tokens
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN_FOR_SECRETS }}
+        run: |
+          if [ -s /tmp/edilberto_rotated_token ]; then
+            gh secret set MELI_REFRESH_TOKEN_EDILBERTO --repo kxmwnzbzhn-spec/meli-autoresponder < /tmp/edilberto_rotated_token
+          fi
+          if [ -s /tmp/jorge_luis_rotated_token ]; then
+            gh secret set MELI_REFRESH_TOKEN_JORGE_LUIS --repo kxmwnzbzhn-spec/meli-autoresponder < /tmp/jorge_luis_rotated_token
+          fi
+      - name: Persist exact result
+        if: always()
+        run: |
+          mkdir -p state
+          if [ -s /tmp/jorge_zero_stock_batch.json ]; then
+            cp /tmp/jorge_zero_stock_batch.json state/zero_stock_6075502880_result.json
+          else
+            jq -Rs '{status:"failed",log:.}' /tmp/one.log > state/zero_stock_6075502880_result.json
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add state/zero_stock_6075502880_result.json
+          git commit -m "Record exact zero-stock result for 6075502880" || exit 0
+          git push
