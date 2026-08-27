@@ -1,0 +1,46 @@
+name: one-shot-clone-rocio-to-jorge-exact-two
+on:
+  push:
+    paths:
+      - ".github/workflows/one_shot_clone_rocio_to_jorge_exact_two.yml"
+
+concurrency:
+  group: one-shot-clone-rocio-to-jorge-exact-two
+  cancel-in-progress: false
+
+jobs:
+  clone:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install requests -q
+      - name: Validate exact clone
+        run: python3 -m py_compile scripts/clone_rocio_to_jorge_exact_two.py
+      - name: Clone and verify both listings
+        env:
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_ROCIOANGEL: ${{ secrets.MELI_REFRESH_TOKEN_ROCIOANGEL }}
+          MELI_APP_ID_NEW: ${{ secrets.MELI_APP_ID_NEW }}
+          MELI_APP_SECRET_NEW: ${{ secrets.MELI_APP_SECRET_NEW }}
+          MELI_REFRESH_TOKEN_JORGE_LUIS: ${{ secrets.MELI_REFRESH_TOKEN_JORGE_LUIS }}
+        run: python3 scripts/clone_rocio_to_jorge_exact_two.py
+      - name: Save rotated refresh tokens
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN_FOR_SECRETS }}
+        run: |
+          if [ -s /tmp/rocioangel_rotated_token ]; then
+            gh secret set MELI_REFRESH_TOKEN_ROCIOANGEL --repo kxmwnzbzhn-spec/meli-autoresponder < /tmp/rocioangel_rotated_token
+          fi
+          if [ -s /tmp/jorge_luis_rotated_token ]; then
+            gh secret set MELI_REFRESH_TOKEN_JORGE_LUIS --repo kxmwnzbzhn-spec/meli-autoresponder < /tmp/jorge_luis_rotated_token
+          fi
+      - name: Result
+        if: always()
+        run: |
+          if [ -s /tmp/rocio_to_jorge_exact_results.json ]; then
+            cat /tmp/rocio_to_jorge_exact_results.json
+          fi
