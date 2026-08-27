@@ -20,6 +20,8 @@ REAL_STOCK_LIMITS = {
     "MLM3402363017": 1,
     # Source MLM6061831150: 28 initial - 3 paid before migration.
     "MLM3402390259": 25,
+    # Source MLM6075598700: one verified editable unit at migration.
+    "MLM6099889822": 1,
 }
 
 r = requests.post(
