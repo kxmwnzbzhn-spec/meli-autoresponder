@@ -1,0 +1,35 @@
+name: one-shot-set-jorge-ten-prices-499
+on:
+  push:
+    paths:
+      - ".github/workflows/one_shot_set_jorge_ten_prices_499.yml"
+jobs:
+  set-prices:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install requests -q
+      - run: python3 -m py_compile scripts/set_jorge_ten_prices_499.py
+      - name: Set and verify ten prices
+        env:
+          MELI_APP_ID_NEW: ${{ secrets.MELI_APP_ID_NEW }}
+          MELI_APP_SECRET_NEW: ${{ secrets.MELI_APP_SECRET_NEW }}
+          MELI_REFRESH_TOKEN_JORGE_LUIS: ${{ secrets.MELI_REFRESH_TOKEN_JORGE_LUIS }}
+        run: python3 scripts/set_jorge_ten_prices_499.py
+      - name: Save rotated token
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN_FOR_SECRETS }}
+        run: |
+          if [ -s /tmp/jorge_luis_rotated_token ]; then
+            gh secret set MELI_REFRESH_TOKEN_JORGE_LUIS --repo kxmwnzbzhn-spec/meli-autoresponder < /tmp/jorge_luis_rotated_token
+          fi
+      - name: Result
+        if: always()
+        run: |
+          if [ -s /tmp/jorge_ten_prices_499.json ]; then
+            cat /tmp/jorge_ten_prices_499.json
+          fi
