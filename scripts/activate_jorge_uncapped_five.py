@@ -8,6 +8,7 @@ API = "https://api.mercadolibre.com"
 SELLER_ID = 3640697853
 TIMEOUT = 30
 ITEMS = [
+    "MLM3409049385",
     "MLM3402363017",
     "MLM6100171026",
     "MLM6100158830",
