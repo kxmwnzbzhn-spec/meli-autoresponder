@@ -1,0 +1,27 @@
+name: one-shot-start-jorge-continuous-monitor
+on:
+  push:
+    paths:
+      - ".github/workflows/one_shot_start_jorge_continuous_monitor.yml"
+jobs:
+  start:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+      actions: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Start continuous Jorge monitor
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN_FOR_SECRETS }}
+        run: gh workflow run jorge_luis_real_stock_monitor.yml --repo kxmwnzbzhn-spec/meli-autoresponder -f duration_sec=19800
+      - name: Persist start confirmation
+        run: |
+          mkdir -p state
+          printf '%s\n' '{"monitor":"jorge-luis-real-stock-monitor","duration_sec":19800,"continuous_chain":"started"}' > state/jorge_continuous_monitor_started.json
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add state/jorge_continuous_monitor_started.json
+          git commit -m "Record Jorge continuous monitor start" || exit 0
+          git push
