@@ -22,6 +22,13 @@ REAL_STOCK_LIMITS = {
     "MLM3402390259": 25,
     # Source MLM6075598700: one verified editable unit at migration.
     "MLM6099889822": 1,
+    # Exhausted sources cloned as paused/under-review catalog listings.
+    "MLM6100157520": 0,  # Source MLM6075595766
+    "MLM6100158830": 0,  # Source MLM3387189275
+    "MLM6100171026": 0,  # Source MLM6075580366
+    "MLM3403250729": 0,  # Source MLM6075497680
+    "MLM3403240547": 0,  # Source MLM6075502880
+    "MLM3403241131": 0,  # Source MLM6075597440
 }
 
 r = requests.post(
