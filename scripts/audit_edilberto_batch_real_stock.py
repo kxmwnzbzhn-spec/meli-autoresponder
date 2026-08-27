@@ -85,26 +85,25 @@ def paid_units(item_id):
 
 def target_items():
     found = []
-    for status in ("active", "paused"):
-        offset = 0
-        while offset < 2000:
-            response = requests.get(
-                f"{API}/users/{TARGET_SELLER}/items/search",
-                headers=HT,
-                params={"status": status, "limit": 100, "offset": offset},
-                timeout=TIMEOUT,
+    offset = 0
+    while offset < 2000:
+        response = requests.get(
+            f"{API}/users/{TARGET_SELLER}/items/search",
+            headers=HT,
+            params={"limit": 100, "offset": offset},
+            timeout=TIMEOUT,
+        )
+        response.raise_for_status()
+        ids = response.json().get("results") or []
+        for target_id in ids:
+            detail = requests.get(
+                f"{API}/items/{target_id}", headers=HT, timeout=TIMEOUT
             )
-            response.raise_for_status()
-            ids = response.json().get("results") or []
-            for target_id in ids:
-                detail = requests.get(
-                    f"{API}/items/{target_id}", headers=HT, timeout=TIMEOUT
-                )
-                if detail.status_code == 200:
-                    found.append(detail.json())
-            if len(ids) < 100:
-                break
-            offset += 100
+            if detail.status_code == 200:
+                found.append(detail.json())
+        if len(ids) < 100:
+            break
+        offset += 100
     return found
 
 
