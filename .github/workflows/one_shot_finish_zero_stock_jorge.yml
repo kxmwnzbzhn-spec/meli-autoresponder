@@ -21,7 +21,9 @@ jobs:
           MELI_APP_SECRET_NEW: ${{ secrets.MELI_APP_SECRET_NEW }}
           MELI_REFRESH_TOKEN_EDILBERTO: ${{ secrets.MELI_REFRESH_TOKEN_EDILBERTO }}
           MELI_REFRESH_TOKEN_JORGE_LUIS: ${{ secrets.MELI_REFRESH_TOKEN_JORGE_LUIS }}
-        run: python3 scripts/clone_zero_stock_edilberto_to_jorge.py
+        run: |
+          python3 scripts/clone_zero_stock_edilberto_to_jorge.py 2>&1 | tee /tmp/jorge_zero_stock_batch.log
+          exit ${PIPESTATUS[0]}
       - name: Save rotated tokens
         if: always()
         env:
