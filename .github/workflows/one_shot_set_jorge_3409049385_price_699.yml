@@ -1,0 +1,29 @@
+name: one-shot-set-jorge-3409049385-price-699
+on:
+  push:
+    paths:
+      - ".github/workflows/one_shot_set_jorge_3409049385_price_699.yml"
+jobs:
+  set-price:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install requests -q
+      - run: python3 -m py_compile scripts/set_jorge_3409049385_price_699.py
+      - name: Set and verify price
+        env:
+          MELI_APP_ID_NEW: ${{ secrets.MELI_APP_ID_NEW }}
+          MELI_APP_SECRET_NEW: ${{ secrets.MELI_APP_SECRET_NEW }}
+          MELI_REFRESH_TOKEN_JORGE_LUIS: ${{ secrets.MELI_REFRESH_TOKEN_JORGE_LUIS }}
+        run: python3 scripts/set_jorge_3409049385_price_699.py
+      - name: Save rotated token
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN_FOR_SECRETS }}
+        run: |
+          if [ -s /tmp/jorge_luis_rotated_token ]; then
+            gh secret set MELI_REFRESH_TOKEN_JORGE_LUIS --repo kxmwnzbzhn-spec/meli-autoresponder < /tmp/jorge_luis_rotated_token
+          fi
