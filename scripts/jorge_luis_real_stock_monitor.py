@@ -31,6 +31,22 @@ REAL_STOCK_LIMITS = {
     "MLM3403241131": 0,  # Source MLM6075597440
 }
 
+# Explicitly authorized for continuous one-visible-unit replenishment
+# without a physical inventory ceiling.
+UNCAPPED_ITEMS = {
+    "MLM6097042780",
+    "MLM3401279297",
+    "MLM6097051040",
+    "MLM6097038456",
+    "MLM6097051428",
+    "MLM3401288599",
+    "MLM6097030480",
+    "MLM3401292527",
+    "MLM3401303117",
+}
+
+ALL_MONITORED_ITEMS = tuple(REAL_STOCK_LIMITS) + tuple(UNCAPPED_ITEMS)
+
 r = requests.post(
     f"{API}/oauth/token",
     data={
@@ -101,24 +117,25 @@ def paid_units(item_id):
 
 
 def enforce(item_id, initial=False):
-    limit = REAL_STOCK_LIMITS[item_id]
+    limit = REAL_STOCK_LIMITS.get(item_id)
     sold = paid_units(item_id)
-    remaining = max(0, limit - sold)
+    remaining = max(0, limit - sold) if limit is not None else None
     item = get_item(item_id)
     action = item_stock_action(
         item.get("status"),
         item.get("sub_status"),
         item.get("available_quantity"),
     )
-    if initial or remaining <= 2:
+    if initial or (remaining is not None and remaining <= 2):
+        policy = "real-stock" if limit is not None else "continuous-uncapped"
         print(
-            f"[REAL-STOCK] {item_id} initial={limit} sold={sold} "
+            f"[STOCK] {item_id} policy={policy} initial={limit} sold={sold} "
             f"remaining={remaining} status={item.get('status')} "
             f"qty={item.get('available_quantity')}",
             flush=True,
         )
 
-    if remaining <= 0:
+    if remaining is not None and remaining <= 0:
         if item.get("status") == "active":
             response = requests.put(
                 f"{API}/items/{item_id}",
@@ -165,8 +182,8 @@ def enforce(item_id, initial=False):
     print(f"[REPLENISHED] {item_id} remaining={remaining} qty=1", flush=True)
 
 
-print("=== JORGE_LUIS real stock monitor: initial validation ===", flush=True)
-for item_id in REAL_STOCK_LIMITS:
+print("=== JORGE_LUIS stock monitor: initial validation ===", flush=True)
+for item_id in ALL_MONITORED_ITEMS:
     try:
         enforce(item_id, initial=True)
     except Exception as exc:
@@ -177,7 +194,7 @@ cycles = 0
 while time.time() - started < DURATION:
     cycles += 1
     cycle_start = time.time()
-    for item_id in REAL_STOCK_LIMITS:
+    for item_id in ALL_MONITORED_ITEMS:
         try:
             enforce(item_id)
         except Exception as exc:
