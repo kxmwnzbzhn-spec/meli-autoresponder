@@ -19,7 +19,7 @@ jobs:
       - name: Persist start confirmation
         run: |
           mkdir -p state
-          printf '%s\n' '{"monitor":"jorge-luis-real-stock-monitor","duration_sec":19800,"continuous_chain":"started","uncapped_authorized_ids":9,"cycle_optimized":true,"additional_uncapped_five":true}' > state/jorge_continuous_monitor_started.json
+          printf '%s\n' '{"monitor":"jorge-luis-real-stock-monitor","duration_sec":19800,"continuous_chain":"started","uncapped_authorized_ids":9,"cycle_optimized":true,"additional_uncapped_five":true,"force_active_five":true}' > state/jorge_continuous_monitor_started.json
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add state/jorge_continuous_monitor_started.json
