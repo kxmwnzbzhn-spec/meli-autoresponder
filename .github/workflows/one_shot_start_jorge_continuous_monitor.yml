@@ -25,3 +25,5 @@ jobs:
           git add state/jorge_continuous_monitor_started.json
           git commit -m "Record Jorge continuous monitor start" || exit 0
           git push
+
+# restart-after-uncapped-authorization
