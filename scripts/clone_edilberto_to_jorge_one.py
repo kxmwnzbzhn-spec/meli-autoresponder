@@ -99,7 +99,6 @@ def find_existing(catalog_product_id):
             continue
         if (
             item.get("catalog_product_id") == catalog_product_id
-            and item.get("condition") == "new"
             and bool(item.get("catalog_listing"))
             and not item.get("deleted")
         ):
@@ -123,6 +122,11 @@ print(
 existing = find_existing(catalog_product_id)
 target_id = existing.get("id") if existing else None
 action = "reused"
+if existing and existing.get("condition") != "new":
+    raise RuntimeError(
+        f"{target_id}: catálogo ya existe en Jorge con condition={existing.get('condition')}; "
+        "se abortó sin duplicar ni modificar"
+    )
 if existing and existing.get("status") not in {"active", "paused"}:
     raise RuntimeError(
         f"{target_id}: catálogo ya existe en Jorge con status={existing.get('status')}; "
