@@ -1,4 +1,15 @@
-{
-  "status": "failed",
-  "log": "Traceback (most recent call last):\n  File \"/home/runner/work/meli-autoresponder/meli-autoresponder/scripts/clone_zero_stock_edilberto_to_jorge.py\", line 185, in <module>\n    raise RuntimeError(\nRuntimeError: MLM3403240547: creado pero no pausado 500 {\"cause\":[],\"message\":\"Oops! Something went wrong...\",\"error\":\"internal_error\",\"status\":500}\n"
-}
+[
+  {
+    "source_id": "MLM6075502880",
+    "target_id": "MLM3403240547",
+    "action": "reused_paused",
+    "title": "Bocina Jbl Go4 Portátil Con Bluetooth Waterproof Negra Negro",
+    "price": 490,
+    "condition": "new",
+    "status": "paused",
+    "quantity": 1,
+    "real_stock": 0,
+    "catalog_product_id": "MLM44713972",
+    "permalink": "https://articulo.mercadolibre.com.mx/MLM-3403240547-bocina-jbl-go4-portatil-con-bluetooth-waterproof-negra-negro-_JM"
+  }
+]
