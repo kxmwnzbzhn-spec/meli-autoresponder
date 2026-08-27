@@ -7,7 +7,7 @@ import requests
 API = "https://api.mercadolibre.com"
 SOURCE_SELLER = 3616975257
 TARGET_SELLER = 3640697853
-SOURCE_IDS = [
+DEFAULT_SOURCE_IDS = [
     "MLM6075595766",
     "MLM3387189275",
     "MLM6075580366",
@@ -15,6 +15,12 @@ SOURCE_IDS = [
     "MLM6075502880",
     "MLM6075597440",
 ]
+raw_source = os.environ.get("SOURCE_ITEM_ID", "").strip().upper().replace("-", "")
+SOURCE_IDS = (
+    [raw_source if raw_source.startswith("MLM") else f"MLM{raw_source}"]
+    if raw_source
+    else DEFAULT_SOURCE_IDS
+)
 TIMEOUT = 30
 CID = os.environ["MELI_APP_ID_NEW"]
 CSECRET = os.environ["MELI_APP_SECRET_NEW"]
