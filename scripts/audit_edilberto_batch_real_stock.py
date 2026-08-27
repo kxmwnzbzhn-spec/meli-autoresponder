@@ -4,7 +4,8 @@ import os
 import requests
 
 API = "https://api.mercadolibre.com"
-SELLER_ID = 3616975257
+SOURCE_SELLER = 3616975257
+TARGET_SELLER = 3640697853
 ITEMS = [
     "MLM6075598700",
     "MLM6075595766",
@@ -17,21 +18,27 @@ ITEMS = [
 REGISTERED_INITIAL = {}
 TIMEOUT = 30
 
-r = requests.post(
-    f"{API}/oauth/token",
-    data={
-        "grant_type": "refresh_token",
-        "client_id": os.environ["MELI_APP_ID_NEW"],
-        "client_secret": os.environ["MELI_APP_SECRET_NEW"],
-        "refresh_token": os.environ["MELI_REFRESH_TOKEN_EDILBERTO"],
-    },
-    timeout=TIMEOUT,
-)
-r.raise_for_status()
-data = r.json()
-with open("/tmp/edilberto_rotated_token", "w") as handle:
-    handle.write(data.get("refresh_token", ""))
-H = {"Authorization": f"Bearer {data['access_token']}"}
+
+def refresh(secret_name, output_path):
+    response = requests.post(
+        f"{API}/oauth/token",
+        data={
+            "grant_type": "refresh_token",
+            "client_id": os.environ["MELI_APP_ID_NEW"],
+            "client_secret": os.environ["MELI_APP_SECRET_NEW"],
+            "refresh_token": os.environ[secret_name],
+        },
+        timeout=TIMEOUT,
+    )
+    response.raise_for_status()
+    data = response.json()
+    with open(output_path, "w") as handle:
+        handle.write(data.get("refresh_token", ""))
+    return {"Authorization": f"Bearer {data['access_token']}"}
+
+
+HS = refresh("MELI_REFRESH_TOKEN_EDILBERTO", "/tmp/edilberto_rotated_token")
+HT = refresh("MELI_REFRESH_TOKEN_JORGE_LUIS", "/tmp/jorge_luis_rotated_token")
 
 
 def paid_units(item_id):
@@ -40,9 +47,9 @@ def paid_units(item_id):
     while True:
         response = requests.get(
             f"{API}/orders/search",
-            headers=H,
+            headers=HS,
             params={
-                "seller": SELLER_ID,
+                "seller": SOURCE_SELLER,
                 "q": item_id,
                 "limit": 50,
                 "offset": offset,
@@ -52,8 +59,8 @@ def paid_units(item_id):
         )
         response.raise_for_status()
         body = response.json()
-        rows = body.get("results") or []
-        for order in rows:
+        orders = body.get("results") or []
+        for order in orders:
             if order.get("status") in {"cancelled", "invalid"}:
                 continue
             tags = set(order.get("tags") or [])
@@ -70,18 +77,44 @@ def paid_units(item_id):
             for line in order.get("order_items") or []:
                 if (line.get("item") or {}).get("id") == item_id:
                     total += int(line.get("quantity") or 0)
-        offset += len(rows)
-        if not rows or offset >= int((body.get("paging") or {}).get("total") or 0):
+        offset += len(orders)
+        if not orders or offset >= int((body.get("paging") or {}).get("total") or 0):
             break
     return total
 
 
+def target_items():
+    found = []
+    for status in ("active", "paused"):
+        offset = 0
+        while offset < 2000:
+            response = requests.get(
+                f"{API}/users/{TARGET_SELLER}/items/search",
+                headers=HT,
+                params={"status": status, "limit": 100, "offset": offset},
+                timeout=TIMEOUT,
+            )
+            response.raise_for_status()
+            ids = response.json().get("results") or []
+            for target_id in ids:
+                detail = requests.get(
+                    f"{API}/items/{target_id}", headers=HT, timeout=TIMEOUT
+                )
+                if detail.status_code == 200:
+                    found.append(detail.json())
+            if len(ids) < 100:
+                break
+            offset += 100
+    return found
+
+
+targets = target_items()
 rows = []
 for item_id in ITEMS:
-    response = requests.get(f"{API}/items/{item_id}", headers=H, timeout=TIMEOUT)
+    response = requests.get(f"{API}/items/{item_id}", headers=HS, timeout=TIMEOUT)
     response.raise_for_status()
     item = response.json()
-    if int(item.get("seller_id") or 0) != SELLER_ID:
+    if int(item.get("seller_id") or 0) != SOURCE_SELLER:
         raise RuntimeError(f"{item_id}: seller inesperado {item.get('seller_id')}")
     units = paid_units(item_id)
     initial = REGISTERED_INITIAL.get(item_id)
@@ -90,7 +123,7 @@ for item_id in ITEMS:
     upid = item.get("user_product_id")
     if upid:
         stock_response = requests.get(
-            f"{API}/user-products/{upid}/stock", headers=H, timeout=TIMEOUT
+            f"{API}/user-products/{upid}/stock", headers=HS, timeout=TIMEOUT
         )
         if stock_response.status_code == 200:
             editable = [
@@ -100,13 +133,30 @@ for item_id in ITEMS:
             editable_stock = sum(int(row.get("quantity") or 0) for row in editable)
             stock_type = sorted({row.get("type") for row in editable})
     remaining = max(0, initial - units) if initial is not None else None
+    catalog_id = item.get("catalog_product_id")
+    matches = [
+        {
+            "target_id": target.get("id"),
+            "title": target.get("title"),
+            "status": target.get("status"),
+            "condition": target.get("condition"),
+            "quantity": target.get("available_quantity"),
+            "price": target.get("price"),
+            "permalink": target.get("permalink"),
+        }
+        for target in targets
+        if target.get("catalog_product_id") == catalog_id
+        and target.get("condition") == "new"
+        and bool(target.get("catalog_listing"))
+        and not target.get("deleted")
+    ]
     rows.append({
         "item_id": item_id,
         "title": item.get("title"),
         "status": item.get("status"),
         "sub_status": item.get("sub_status"),
         "condition": item.get("condition"),
-        "catalog_product_id": item.get("catalog_product_id"),
+        "catalog_product_id": catalog_id,
         "catalog_listing": item.get("catalog_listing"),
         "price": item.get("price"),
         "initial_quantity_meli": item.get("initial_quantity"),
@@ -118,5 +168,7 @@ for item_id in ITEMS:
         "editable_stock": editable_stock,
         "stock_type": stock_type,
         "user_product_id": upid,
+        "target_matches_new_catalog": matches,
+        "already_published_in_jorge": bool(matches),
     })
 print("BATCH_STOCK_AUDIT=" + json.dumps(rows, ensure_ascii=False), flush=True)
