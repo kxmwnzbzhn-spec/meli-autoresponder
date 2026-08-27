@@ -167,16 +167,28 @@ for source_id in SOURCE_IDS:
                 f"{created.text[:1000]}"
             )
         target_id = created.json().get("id")
-        paused = requests.put(
-            f"{API}/items/{target_id}",
-            headers=HTJ,
-            json={"status": "paused"},
-            timeout=TIMEOUT,
-        )
-        if paused.status_code not in (200, 201):
+        created_item = item(target_id, HT, TARGET_SELLER)
+        if created_item.get("status") == "active":
+            paused = requests.put(
+                f"{API}/items/{target_id}",
+                headers=HTJ,
+                json={"status": "paused"},
+                timeout=TIMEOUT,
+            )
+            if paused.status_code not in (200, 201):
+                raise RuntimeError(
+                    f"{target_id}: creado pero no pausado {paused.status_code} "
+                    f"{paused.text[:700]}"
+                )
+            action = "created_paused"
+        elif created_item.get("status") == "under_review":
+            action = "created_under_review"
+        elif created_item.get("status") == "paused":
+            action = "created_paused"
+        else:
             raise RuntimeError(
-                f"{target_id}: creado pero no pausado {paused.status_code} "
-                f"{paused.text[:700]}"
+                f"{target_id}: estado inesperado tras crear "
+                f"{created_item.get('status')}"
             )
         description_response = requests.get(
             f"{API}/items/{source_id}/description", headers=HS, timeout=TIMEOUT
@@ -190,11 +202,9 @@ for source_id in SOURCE_IDS:
                     json={"plain_text": description[:5000]},
                     timeout=TIMEOUT,
                 )
-        action = "created_paused"
-
     target = item(target_id, HT, TARGET_SELLER)
     checks = {
-        "paused": target.get("status") == "paused",
+        "not_sellable": target.get("status") in {"paused", "under_review"},
         "new": target.get("condition") == "new",
         "catalog": bool(target.get("catalog_listing")),
         "same_catalog": target.get("catalog_product_id") == catalog,
