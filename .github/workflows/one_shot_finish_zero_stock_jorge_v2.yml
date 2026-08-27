@@ -1,0 +1,51 @@
+name: one-shot-finish-zero-stock-jorge-v2
+on:
+  push:
+    paths:
+      - ".github/workflows/one_shot_finish_zero_stock_jorge_v2.yml"
+
+jobs:
+  finish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install requests -q
+      - name: Validate safe batch
+        run: python3 -m py_compile scripts/clone_zero_stock_edilberto_to_jorge.py
+      - name: Create remaining catalogs paused at zero real stock
+        env:
+          MELI_APP_ID_NEW: ${{ secrets.MELI_APP_ID_NEW }}
+          MELI_APP_SECRET_NEW: ${{ secrets.MELI_APP_SECRET_NEW }}
+          MELI_REFRESH_TOKEN_EDILBERTO: ${{ secrets.MELI_REFRESH_TOKEN_EDILBERTO }}
+          MELI_REFRESH_TOKEN_JORGE_LUIS: ${{ secrets.MELI_REFRESH_TOKEN_JORGE_LUIS }}
+        run: |
+          python3 scripts/clone_zero_stock_edilberto_to_jorge.py 2>&1 | tee /tmp/jorge_zero_stock_batch.log
+          exit ${PIPESTATUS[0]}
+      - name: Save rotated tokens
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN_FOR_SECRETS }}
+        run: |
+          if [ -s /tmp/edilberto_rotated_token ]; then
+            gh secret set MELI_REFRESH_TOKEN_EDILBERTO --repo kxmwnzbzhn-spec/meli-autoresponder < /tmp/edilberto_rotated_token
+          fi
+          if [ -s /tmp/jorge_luis_rotated_token ]; then
+            gh secret set MELI_REFRESH_TOKEN_JORGE_LUIS --repo kxmwnzbzhn-spec/meli-autoresponder < /tmp/jorge_luis_rotated_token
+          fi
+      - name: Persist batch result
+        if: always()
+        run: |
+          mkdir -p state
+          if [ -s /tmp/jorge_zero_stock_batch.json ]; then
+            cp /tmp/jorge_zero_stock_batch.json state/clone_zero_stock_jorge_result.json
+          else
+            printf '%s\n' '{"status":"failed","result":"batch did not produce a complete verified result"}' > state/clone_zero_stock_jorge_result.json
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add state/clone_zero_stock_jorge_result.json
+          git commit -m "Record Jorge zero-stock clone batch result" || exit 0
+          git push
