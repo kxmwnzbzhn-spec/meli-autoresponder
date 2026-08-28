@@ -43,6 +43,8 @@ ACCOUNTS = [
      "app_pair":"new", "exclude_models":set(), "exclude_titles":set()},
     {"name":"LuisEd","rt_env":"MELI_REFRESH_TOKEN_LUISED","expected_uid":3584846108,"expected_nick":"LG20260801171031460",
      "app_pair":"new", "exclude_models":set(), "exclude_titles":set()},
+    {"name":"JorgeLuis","rt_env":"MELI_REFRESH_TOKEN_JORGE_LUIS","expected_uid":3640697853,"expected_nick":None,
+     "app_pair":"new", "exclude_models":set(), "exclude_titles":set()},
 ]
 EXCLUDED_SUBS = {"picked_up"}
 # Solo estos substatuses son "listas para acción del vendedor":
@@ -265,7 +267,7 @@ def validate_account(account):
                       headers={"Authorization":f"Bearer {at}"}, timeout=15).json()
     if me.get("id") != account["expected_uid"]:
         return None, f"UID NO COINCIDE: esperado={account['expected_uid']} recibido={me.get('id')} (token cruzado?)"
-    if me.get("nickname") != account["expected_nick"]:
+    if account.get("expected_nick") and me.get("nickname") != account["expected_nick"]:
         return None, f"Nickname NO COINCIDE: esperado={account['expected_nick']} recibido={me.get('nickname')}"
     return at, None
 
