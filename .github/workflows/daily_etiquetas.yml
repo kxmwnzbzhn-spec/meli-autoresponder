@@ -7,6 +7,11 @@ on:
         required: false
         type: string
         default: ''
+      account_filter:
+        description: 'Cuentas para esta ejecución; vacío conserva las cuentas diarias'
+        required: false
+        type: string
+        default: ''
   schedule:
     - cron: '0 13 * * 1-6'  # 07:00 CDMX (UTC-6), lunes a sábado. Domingo bloqueado por guardia interna.
 jobs:
@@ -30,7 +35,7 @@ jobs:
       - name: Run daily etiquetas
         env:
           FORCE_REGEN:                  ${{ inputs.force_regen }}
-          ACCOUNT_FILTER:                'Asva,Edilberto,LuisEd,JorgeLuis'
+          ACCOUNT_FILTER:                ${{ inputs.account_filter || 'Asva,Edilberto,LuisEd,JorgeLuis' }}
           OUTPUT_PREFIX:                 'ETIQUETAS_UNIFICADAS'
           MELI_APP_ID:                  ${{ secrets.MELI_APP_ID }}
           MELI_APP_SECRET:              ${{ secrets.MELI_APP_SECRET }}
