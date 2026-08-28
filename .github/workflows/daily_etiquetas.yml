@@ -30,7 +30,7 @@ jobs:
       - name: Run daily etiquetas
         env:
           FORCE_REGEN:                  ${{ inputs.force_regen }}
-          ACCOUNT_FILTER:                'Asva,Edilberto,LuisEd'
+          ACCOUNT_FILTER:                'Asva,Edilberto,LuisEd,JorgeLuis'
           OUTPUT_PREFIX:                 'ETIQUETAS_UNIFICADAS'
           MELI_APP_ID:                  ${{ secrets.MELI_APP_ID }}
           MELI_APP_SECRET:              ${{ secrets.MELI_APP_SECRET }}
@@ -39,6 +39,7 @@ jobs:
           MELI_REFRESH_TOKEN_ASVA:      ${{ secrets.MELI_REFRESH_TOKEN_ASVA }}
           MELI_REFRESH_TOKEN_EDILBERTO: ${{ secrets.MELI_REFRESH_TOKEN_EDILBERTO }}
           MELI_REFRESH_TOKEN_LUISED:    ${{ secrets.MELI_REFRESH_TOKEN_LUISED }}
+          MELI_REFRESH_TOKEN_JORGE_LUIS: ${{ secrets.MELI_REFRESH_TOKEN_JORGE_LUIS }}
           GOOGLE_SERVICE_ACCOUNT_JSON:  ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
           GOOGLE_OAUTH_CLIENT_ID:       ${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}
           GOOGLE_OAUTH_CLIENT_SECRET:   ${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}
