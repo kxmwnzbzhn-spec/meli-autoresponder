@@ -343,7 +343,11 @@ def build_pdf(ships, out_path):
             if r.status_code != 200 or not r.headers.get("content-type","").lower().startswith("application/pdf"):
                 fail.append(s["sid"]); continue
             raw = r.content; lp = PdfReader(io.BytesIO(raw))
-            # Mercado Libre puede adjuntar una segunda página de picking list.\n            # La primera página es la etiqueta logística; nunca incluir las demás.\n            if not lp.pages:\n                fail.append(s["sid"]); continue\n            for pi, page in enumerate([lp.pages[0]]):
+            # Mercado Libre puede adjuntar una segunda página de picking list.
+            # La primera página es la etiqueta logística; nunca incluir las demás.
+            if not lp.pages:
+                fail.append(s["sid"]); continue
+            for pi, page in enumerate([lp.pages[0]]):
                 box = page.cropbox if page.cropbox else page.mediabox
                 lx0=float(box.left); ly0=float(box.bottom); lw=float(box.width); lh=float(box.height)
                 bb = detect_bbox(raw, pi)
