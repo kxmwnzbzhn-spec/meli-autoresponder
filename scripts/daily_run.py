@@ -43,7 +43,7 @@ ACCOUNTS = [
      "app_pair":"new", "exclude_models":set(), "exclude_titles":set()},
     {"name":"LuisEd","rt_env":"MELI_REFRESH_TOKEN_LUISED","expected_uid":3584846108,"expected_nick":"LG20260801171031460",
      "app_pair":"new", "exclude_models":set(), "exclude_titles":set()},
-    {"name":"JorgeLuis","rt_env":"MELI_REFRESH_TOKEN_JORGE_LUIS","expected_uid":3640697853,"expected_nick":None,
+    {"name":"JorgeLuis","rt_env":"MELI_REFRESH_TOKEN_JORGE_LUIS","expected_uid":3640697853,"expected_nick":"JK20260825202348110",
      "app_pair":"new", "exclude_models":set(), "exclude_titles":set()},
 ]
 EXCLUDED_SUBS = {"picked_up"}
@@ -267,7 +267,7 @@ def validate_account(account):
                       headers={"Authorization":f"Bearer {at}"}, timeout=15).json()
     if me.get("id") != account["expected_uid"]:
         return None, f"UID NO COINCIDE: esperado={account['expected_uid']} recibido={me.get('id')} (token cruzado?)"
-    if account.get("expected_nick") and me.get("nickname") != account["expected_nick"]:
+    if me.get("nickname") != account["expected_nick"]:
         return None, f"Nickname NO COINCIDE: esperado={account['expected_nick']} recibido={me.get('nickname')}"
     return at, None
 
@@ -343,11 +343,7 @@ def build_pdf(ships, out_path):
             if r.status_code != 200 or not r.headers.get("content-type","").lower().startswith("application/pdf"):
                 fail.append(s["sid"]); continue
             raw = r.content; lp = PdfReader(io.BytesIO(raw))
-            # Mercado Libre puede adjuntar una segunda página de picking list.
-            # La primera página es la etiqueta logística; nunca incluir las demás.
-            if not lp.pages:
-                fail.append(s["sid"]); continue
-            for pi, page in enumerate([lp.pages[0]]):
+            for pi, page in enumerate(lp.pages):
                 box = page.cropbox if page.cropbox else page.mediabox
                 lx0=float(box.left); ly0=float(box.bottom); lw=float(box.width); lh=float(box.height)
                 bb = detect_bbox(raw, pi)
