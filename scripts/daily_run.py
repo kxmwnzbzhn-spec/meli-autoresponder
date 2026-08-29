@@ -44,7 +44,8 @@ ACCOUNTS = [
     {"name":"LuisEd","rt_env":"MELI_REFRESH_TOKEN_LUISED","expected_uid":3584846108,"expected_nick":"LG20260801171031460",
      "app_pair":"new", "exclude_models":set(), "exclude_titles":set()},
     {"name":"JorgeLuis","rt_env":"MELI_REFRESH_TOKEN_JORGE_LUIS","expected_uid":3640697853,"expected_nick":"JK20260825202348110",
-     "app_pair":"new", "exclude_models":set(), "exclude_titles":set()},
+     "app_pair":"new", "exclude_models":set(), "exclude_titles":set(),
+     "sub_filter":{"ready_to_print"}},  # Solo etiquetas por imprimir — no incluir impresas ni otras
 ]
 EXCLUDED_SUBS = {"picked_up"}
 # Solo estos substatuses son "listas para acción del vendedor":
@@ -302,7 +303,9 @@ def collect_shipments(at, account):
             st = sh.get("status"); sub = sh.get("substatus")
             # Filtro estricto: solo shipments accionables por el vendedor
             if st != "ready_to_ship": continue
-            if sub not in INCLUDED_SUBS: continue  # skip picked_up y otros no accionables
+            # Filtro por cuenta: si account tiene sub_filter, usarlo; sino, whitelist global
+            _subs = account.get("sub_filter") or INCLUDED_SUBS
+            if sub not in _subs: continue
             # Filtro fecha: incluye HOY + DEMORADAS + MAÑANA (todo lo que puede entregarse hoy o mañana)
             ld = extract_limit_date_str(sh)
             if ld is not None and ld > TOMORROW: continue  # descarta si límite pasa mañana
