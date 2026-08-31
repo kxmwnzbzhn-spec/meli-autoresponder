@@ -17,8 +17,6 @@ REAL_STOCK_LIMITS = {
     "MLM3402386723": 18,
     # Source MLM6061831150: 28 initial - 3 paid before migration.
     "MLM3402390259": 25,
-    # Source MLM6075598700: one verified editable unit at migration.
-    "MLM6099889822": 1,
     # Exhausted sources cloned as paused/under-review catalog listings.
     "MLM6100158830": 0,  # Source MLM3387189275
     "MLM6100171026": 0,  # Source MLM6075580366
@@ -30,6 +28,7 @@ REAL_STOCK_LIMITS = {
 # Explicitly authorized for continuous one-visible-unit replenishment
 # without a physical inventory ceiling.
 UNCAPPED_ITEMS = {
+    "MLM6099889822",
     "MLM6100157520",
     "MLM6098727716",
     "MLM6130882372",
@@ -56,6 +55,7 @@ UNCAPPED_ITEMS = {
 }
 
 FORCE_ACTIVE_ITEMS = {
+    "MLM6099889822",
     "MLM6100157520",
     "MLM6098727716",
     "MLM3409086281",
@@ -68,7 +68,7 @@ FORCE_ACTIVE_ITEMS = {
     "MLM3403241131",
 }
 
-PRIORITY_ITEMS = ("MLM6098727716", "MLM6100157520")
+PRIORITY_ITEMS = ("MLM6098727716", "MLM6100157520", "MLM6099889822")
 ALL_MONITORED_ITEMS = PRIORITY_ITEMS + tuple(
     sorted((set(REAL_STOCK_LIMITS) | UNCAPPED_ITEMS) - set(PRIORITY_ITEMS))
 )
