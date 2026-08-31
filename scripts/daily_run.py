@@ -349,6 +349,10 @@ def build_pdf(ships, out_path):
             for pi, page in enumerate(lp.pages):
                 box = page.cropbox if page.cropbox else page.mediabox
                 lx0=float(box.left); ly0=float(box.bottom); lw=float(box.width); lh=float(box.height)
+                # FILTRO PICKING LIST: la etiqueta de envío es 4x6" (min side ~288pt).
+                # Un picking list es Letter/A4 (~612×792). Si la página es grande, es picking → skip.
+                if min(lw, lh) > 500:
+                    continue
                 bb = detect_bbox(raw, pi)
                 if bb:
                     cx0,cy0,cw,ch = bb
