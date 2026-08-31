@@ -1,0 +1,35 @@
+name: set-jorge-6100157520-6098727716-uncapped
+
+on:
+  push:
+    paths:
+      - ".github/workflows/set_jorge_6100157520_6098727716_uncapped.yml"
+  workflow_dispatch:
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install requests -q
+      - name: Validate scripts
+        run: |
+          python3 -m py_compile scripts/set_jorge_6100157520_6098727716_uncapped.py
+          python3 -m py_compile scripts/jorge_luis_real_stock_monitor.py scripts/stock_policy.py
+      - name: Activate both listings and set price
+        env:
+          MELI_APP_ID_NEW: ${{ secrets.MELI_APP_ID_NEW }}
+          MELI_APP_SECRET_NEW: ${{ secrets.MELI_APP_SECRET_NEW }}
+          MELI_REFRESH_TOKEN_JORGE_LUIS: ${{ secrets.MELI_REFRESH_TOKEN_JORGE_LUIS }}
+        run: python3 scripts/set_jorge_6100157520_6098727716_uncapped.py
+      - name: Save rotated refresh token
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN_FOR_SECRETS }}
+        run: |
+          if [ -s /tmp/jorge_luis_rotated_token ]; then
+            gh secret set MELI_REFRESH_TOKEN_JORGE_LUIS --repo kxmwnzbzhn-spec/meli-autoresponder < /tmp/jorge_luis_rotated_token
+          fi
