@@ -1,6 +1,11 @@
 name: etiquetas-jorgeluis
 on:
   workflow_dispatch:
+    inputs:
+      output_name:
+        description: 'Prefijo del PDF (ej VENTAS_EXTRA_JORGE)'
+        required: false
+        default: 'ETIQUETAS_JORGELUIS'
 jobs:
   r:
     runs-on: ubuntu-latest
@@ -14,6 +19,7 @@ jobs:
       - name: Install Python deps
         run: pip install requests pypdf reportlab pdf2image Pillow google-api-python-client google-auth google-auth-oauthlib -q
       - env:
+          OUTPUT_NAME:                    ${{ inputs.output_name }}
           MELI_APP_ID:                    ${{ secrets.MELI_APP_ID }}
           MELI_APP_SECRET:                ${{ secrets.MELI_APP_SECRET }}
           MELI_APP_ID_NEW:                ${{ secrets.MELI_APP_ID_NEW }}
