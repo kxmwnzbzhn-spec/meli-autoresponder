@@ -38,3 +38,5 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN_FOR_SECRETS }}
         run: gh workflow run jorge_luis_real_stock_monitor.yml --repo kxmwnzbzhn-spec/meli-autoresponder -f duration_sec=19800
+
+# restart-marker: prioritize-6098727716
