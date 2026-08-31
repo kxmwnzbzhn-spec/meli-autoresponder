@@ -68,7 +68,10 @@ FORCE_ACTIVE_ITEMS = {
     "MLM3403241131",
 }
 
-ALL_MONITORED_ITEMS = tuple(REAL_STOCK_LIMITS) + tuple(UNCAPPED_ITEMS)
+PRIORITY_ITEMS = ("MLM6098727716", "MLM6100157520")
+ALL_MONITORED_ITEMS = PRIORITY_ITEMS + tuple(
+    sorted((set(REAL_STOCK_LIMITS) | UNCAPPED_ITEMS) - set(PRIORITY_ITEMS))
+)
 
 r = requests.post(
     f"{API}/oauth/token",
@@ -140,12 +143,15 @@ def paid_units(item_id):
 
 
 def enforce(item_id, initial=False):
-    limit = REAL_STOCK_LIMITS.get(item_id)
+    force_active = item_id in FORCE_ACTIVE_ITEMS
+    # Force-active listings are uncapped by policy. Never run historical
+    # order scans for them; those scans caused duplicate traffic and 429s.
+    limit = None if force_active else REAL_STOCK_LIMITS.get(item_id)
     sold = paid_units(item_id) if limit is not None else None
     remaining = max(0, limit - sold) if limit is not None else None
     item = get_item(item_id)
 
-    if item_id in FORCE_ACTIVE_ITEMS:
+    if force_active:
         if item.get("status") == "active" and int(item.get("available_quantity") or 0) == 1:
             if initial:
                 print(f"[FORCE-ACTIVE-OK] {item_id} qty=1", flush=True)
