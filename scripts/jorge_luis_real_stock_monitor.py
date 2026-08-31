@@ -13,7 +13,6 @@ DURATION = int(os.environ.get("RUN_DURATION_SEC", "19800"))
 
 REAL_STOCK_LIMITS = {
     # Source MLM6061793370: 16 initial - 10 paid before migration.
-    "MLM6098727716": 6,
     # Source MLM6061793358: 28 initial - 10 paid before migration.
     "MLM3402386723": 18,
     # Source MLM6061831150: 28 initial - 3 paid before migration.
@@ -21,7 +20,6 @@ REAL_STOCK_LIMITS = {
     # Source MLM6075598700: one verified editable unit at migration.
     "MLM6099889822": 1,
     # Exhausted sources cloned as paused/under-review catalog listings.
-    "MLM6100157520": 0,  # Source MLM6075595766
     "MLM6100158830": 0,  # Source MLM3387189275
     "MLM6100171026": 0,  # Source MLM6075580366
     "MLM3403250729": 0,  # Source MLM6075497680
@@ -32,6 +30,8 @@ REAL_STOCK_LIMITS = {
 # Explicitly authorized for continuous one-visible-unit replenishment
 # without a physical inventory ceiling.
 UNCAPPED_ITEMS = {
+    "MLM6100157520",
+    "MLM6098727716",
     "MLM6130882372",
     "MLM3422645551",
     "MLM3422525901",
@@ -56,6 +56,8 @@ UNCAPPED_ITEMS = {
 }
 
 FORCE_ACTIVE_ITEMS = {
+    "MLM6100157520",
+    "MLM6098727716",
     "MLM3409086281",
     "MLM3409049385",
     "MLM3402363017",
