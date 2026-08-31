@@ -33,3 +33,8 @@ jobs:
           if [ -s /tmp/jorge_luis_rotated_token ]; then
             gh secret set MELI_REFRESH_TOKEN_JORGE_LUIS --repo kxmwnzbzhn-spec/meli-autoresponder < /tmp/jorge_luis_rotated_token
           fi
+      - name: Restart continuous Jorge monitor with updated policy
+        if: success()
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN_FOR_SECRETS }}
+        run: gh workflow run jorge_luis_real_stock_monitor.yml --repo kxmwnzbzhn-spec/meli-autoresponder -f duration_sec=19800
