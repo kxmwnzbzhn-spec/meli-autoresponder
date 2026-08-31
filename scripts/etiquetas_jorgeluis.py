@@ -90,7 +90,8 @@ if not ships:
     sys.exit(0)
 
 ships.sort(key=lambda s:(0 if s["has_used"] else 1,"/".join(s["comp_lines"]),s["sid"]))
-out_local = f"ETIQUETAS_JORGELUIS_{TODAY}.pdf"
+OUTPUT_NAME = os.environ.get("OUTPUT_NAME") or "ETIQUETAS_JORGELUIS"
+out_local = f"{OUTPUT_NAME}_{TODAY}.pdf"
 pages, fails = d.build_pdf(ships, out_local)
 print(f"[pdf] pages={pages} fallidas={len(fails)}")
 if pages == 0: sys.exit(1)
