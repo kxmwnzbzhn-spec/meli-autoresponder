@@ -347,21 +347,10 @@ def build_pdf(ships, out_path):
                 fail.append(s["sid"]); continue
             raw = r.content; lp = PdfReader(io.BytesIO(raw))
             for pi, page in enumerate(lp.pages):
+                # SOLO PÁGINA 1: la etiqueta viene primera; el resto son picking list.
+                if pi > 0: break
                 box = page.cropbox if page.cropbox else page.mediabox
                 lx0=float(box.left); ly0=float(box.bottom); lw=float(box.width); lh=float(box.height)
-                # FILTRO PICKING LIST 1: por tamaño (letter/A4)
-                if min(lw, lh) > 500:
-                    continue
-                # FILTRO PICKING LIST 2: por contenido de texto
-                # Un picking list tiene "Preparación", "Producto:", "Cant.", "Nota de venta", "SKU"
-                try:
-                    _txt = (page.extract_text() or "").lower()
-                    if any(k in _txt for k in ("preparación", "preparacion", "nota de venta",
-                                                "picking", "producto:", "sku:",
-                                                "prepara tu venta", "cant.")):
-                        continue
-                except Exception:
-                    pass
                 bb = detect_bbox(raw, pi)
                 if bb:
                     cx0,cy0,cw,ch = bb
