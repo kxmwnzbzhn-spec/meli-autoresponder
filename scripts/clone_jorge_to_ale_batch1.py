@@ -8,21 +8,26 @@ SOURCE_SELLER = 3640697853
 TARGET_SELLER = 3629038896
 TIMEOUT = 30
 
-r = requests.post(f"{API}/oauth/token", data={
-    "grant_type": "refresh_token",
-    "client_id": os.environ["MELI_APP_ID_NEW"],
-    "client_secret": os.environ["MELI_APP_SECRET_NEW"],
-    "refresh_token": os.environ["MELI_REFRESH_TOKEN_ALE"],
-}, timeout=TIMEOUT)
-r.raise_for_status()
-tokens = r.json()
-access = tokens["access_token"]
-open("/tmp/ale_rotated_token", "w").write(tokens["refresh_token"])
-H = {"Authorization": f"Bearer {access}"}
-HJ = {**H, "Content-Type": "application/json"}
+def refresh(secret_name, output_path):
+    r = requests.post(f"{API}/oauth/token", data={
+        "grant_type": "refresh_token",
+        "client_id": os.environ["MELI_APP_ID_NEW"],
+        "client_secret": os.environ["MELI_APP_SECRET_NEW"],
+        "refresh_token": os.environ[secret_name],
+    }, timeout=TIMEOUT)
+    r.raise_for_status()
+    data = r.json()
+    open(output_path, "w").write(data["refresh_token"])
+    return data["access_token"]
 
-def get_item(item_id, seller_id):
-    rr = requests.get(f"{API}/items/{item_id}", headers=H, timeout=TIMEOUT)
+source_access = refresh("MELI_REFRESH_TOKEN_JORGE_LUIS", "/tmp/jorge_luis_rotated_token")
+target_access = refresh("MELI_REFRESH_TOKEN_ALE", "/tmp/ale_rotated_token")
+HS = {"Authorization": f"Bearer {source_access}"}
+HT = {"Authorization": f"Bearer {target_access}"}
+HTJ = {**HT, "Content-Type": "application/json"}
+
+def get_item(item_id, seller_id, headers):
+    rr = requests.get(f"{API}/items/{item_id}", headers=headers, timeout=TIMEOUT)
     rr.raise_for_status()
     item = rr.json()
     if int(item.get("seller_id") or 0) != seller_id:
@@ -32,7 +37,7 @@ def get_item(item_id, seller_id):
 def target_ids():
     offset = 0
     while True:
-        rr = requests.get(f"{API}/users/{TARGET_SELLER}/items/search", headers=H,
+        rr = requests.get(f"{API}/users/{TARGET_SELLER}/items/search", headers=HT,
                           params={"limit": 100, "offset": offset}, timeout=TIMEOUT)
         rr.raise_for_status()
         batch = rr.json().get("results") or []
@@ -46,7 +51,7 @@ def existing_for(source):
     condition = source.get("condition")
     for item_id in target_ids():
         try:
-            item = get_item(item_id, TARGET_SELLER)
+            item = get_item(item_id, TARGET_SELLER, HT)
         except Exception:
             continue
         if (item.get("catalog_product_id") == catalog and
@@ -88,7 +93,7 @@ def clone(source):
         raise RuntimeError(f"{source['id']}: condición inválida {source.get('condition')}")
     existing = existing_for(source)
     if existing:
-        rr = requests.put(f"{API}/items/{existing['id']}", headers=HJ, json={
+        rr = requests.put(f"{API}/items/{existing['id']}", headers=HTJ, json={
             "price": source["price"], "available_quantity": 1, "status": "active"
         }, timeout=TIMEOUT)
         if rr.status_code not in (200, 201):
@@ -123,7 +128,7 @@ def clone(source):
             terms.append(x)
     if terms:
         payload["sale_terms"] = terms
-    rr = requests.post(f"{API}/items", headers=HJ, json=payload, timeout=45)
+    rr = requests.post(f"{API}/items", headers=HTJ, json=payload, timeout=45)
     print(f"POST source={source['id']} HTTP={rr.status_code} BODY={rr.text[:1200]}", flush=True)
     if rr.status_code not in (200, 201):
         raise RuntimeError(f"{source['id']}: publish failed {rr.status_code} {rr.text[:1600]}")
@@ -131,9 +136,9 @@ def clone(source):
 
 results = []
 for source_id in SOURCE_IDS:
-    source = get_item(source_id, SOURCE_SELLER)
+    source = get_item(source_id, SOURCE_SELLER, HS)
     target_id, action = clone(source)
-    target = get_item(target_id, TARGET_SELLER)
+    target = get_item(target_id, TARGET_SELLER, HT)
     checks = {
         "active": target.get("status") == "active",
         "quantity_one": int(target.get("available_quantity") or 0) == 1,
