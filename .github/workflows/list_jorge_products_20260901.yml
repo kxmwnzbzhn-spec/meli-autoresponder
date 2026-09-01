@@ -1,0 +1,44 @@
+name: list-jorge-products-20260901
+
+on:
+  push:
+    paths:
+      - ".github/workflows/list_jorge_products_20260901.yml"
+  workflow_dispatch:
+
+jobs:
+  list:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - name: Query all Jorge listings and print exact titles
+        run: |
+          python3 - <<'PY'
+          import json, urllib.parse, urllib.request
+          seller = "3640697853"
+          offset = 0
+          ids = []
+          while True:
+              qs = urllib.parse.urlencode({"limit": 100, "offset": offset})
+              url = f"https://api.mercadolibre.com/users/{seller}/items/search?{qs}"
+              with urllib.request.urlopen(url, timeout=30) as r:
+                  data = json.load(r)
+              batch = data.get("results", [])
+              ids.extend(batch)
+              offset += len(batch)
+              if not batch or offset >= data.get("paging", {}).get("total", 0):
+                  break
+          rows = []
+          for start in range(0, len(ids), 20):
+              query = urllib.parse.urlencode({"ids": ",".join(ids[start:start+20]), "attributes": "id,title,status"})
+              with urllib.request.urlopen("https://api.mercadolibre.com/items?" + query, timeout=30) as r:
+                  payload = json.load(r)
+              for entry in payload:
+                  body = entry.get("body") or {}
+                  rows.append({"id": body.get("id"), "title": body.get("title"), "status": body.get("status")})
+          rows.sort(key=lambda x: x["id"] or "")
+          print("JORGE_ALL_PRODUCTS=" + json.dumps(rows, ensure_ascii=False))
+          print("JORGE_TOTAL=" + str(len(rows)))
+          PY
