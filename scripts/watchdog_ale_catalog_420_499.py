@@ -40,7 +40,7 @@ for cp,own_ids in groups.items():
  bbw_seller=int(bbw.get("seller_id") or 0); bbw_price=bbw.get("price")
  if current>CEILING: target=CEILING; reason="clamp_ceiling"
  elif current<FLOOR: target=FLOOR; reason="clamp_floor"
- elif bbw_seller==SELLER:
+ elif bbw_seller==SELLER or (bbw_seller==0 and (external_min is None or current<external_min)):
   desired=CEILING if external_min is None else min(CEILING,max(FLOOR,int(external_min)-1))
   target=min(desired,int(current)+STEP) if desired>current else max(desired,int(current)-STEP)
   reason="winning_raise_safely" if target>current else "winning_hold_or_match"
