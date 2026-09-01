@@ -20,8 +20,27 @@ jobs:
           MELI_APP_ID_NEW: ${{ secrets.MELI_APP_ID_NEW }}
           MELI_APP_SECRET_NEW: ${{ secrets.MELI_APP_SECRET_NEW }}
           MELI_REFRESH_TOKEN_ALE: ${{ secrets.MELI_REFRESH_TOKEN_ALE }}
+          MELI_REFRESH_TOKEN_JORGE_LUIS: ${{ secrets.MELI_REFRESH_TOKEN_JORGE_LUIS }}
         run: python3 scripts/clone_jorge_to_ale_batch1.py
-      - name: Save rotated Alejandra token
+      - name: Save rotated Jorge and Alejandra tokens
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN_FOR_SECRETS }}
+        run: |
+          if [ -s /tmp/jorge_luis_rotated_token ]; then
+            gh secret set MELI_REFRESH_TOKEN_JORGE_LUIS --repo kxmwnzbzhn-spec/meli-autoresponder < /tmp/jorge_luis_rotated_token
+          fi
+          if [ -s /tmp/ale_rotated_token ]; then
+            gh secret set MELI_REFRESH_TOKEN_ALE --repo kxmwnzbzhn-spec/meli-autoresponder < /tmp/ale_rotated_token
+          fi
+      - name: Restart Jorge monitor with current token
+        if: success()
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN_FOR_SECRETS }}
+        run: gh workflow run jorge_luis_real_stock_monitor.yml --repo kxmwnzbzhn-spec/meli-autoresponder -f duration_sec=19800
+      - name: Legacy placeholder
+        if: false()
+
         if: always()
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN_FOR_SECRETS }}
