@@ -9,22 +9,41 @@ on:
 jobs:
   list:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     permissions:
       contents: read
     steps:
+      - run: pip install requests -q
       - name: Query all Jorge listings and print exact titles
+        env:
+          MELI_APP_ID_NEW: ${{ secrets.MELI_APP_ID_NEW }}
+          MELI_APP_SECRET_NEW: ${{ secrets.MELI_APP_SECRET_NEW }}
+          MELI_REFRESH_TOKEN_JORGE_LUIS: ${{ secrets.MELI_REFRESH_TOKEN_JORGE_LUIS }}
         run: |
           python3 - <<'PY'
-          import json, urllib.parse, urllib.request
+          import json, os, requests
+          auth = requests.post("https://api.mercadolibre.com/oauth/token", data={
+              "grant_type": "refresh_token",
+              "client_id": os.environ["MELI_APP_ID_NEW"],
+              "client_secret": os.environ["MELI_APP_SECRET_NEW"],
+              "refresh_token": os.environ["MELI_REFRESH_TOKEN_JORGE_LUIS"],
+          }, timeout=30)
+          auth.raise_for_status()
+          tokens = auth.json()
+          access = tokens["access_token"]
+          rotated = tokens.get("refresh_token")
+          if not rotated:
+              raise RuntimeError("Mercado Libre did not return a rotated refresh token")
+          open("/tmp/jorge_luis_rotated_token", "w").write(rotated)
+          headers = {"Authorization": f"Bearer {access}"}
           seller = "3640697853"
           offset = 0
           ids = []
           while True:
-              qs = urllib.parse.urlencode({"limit": 100, "offset": offset})
-              url = f"https://api.mercadolibre.com/users/{seller}/items/search?{qs}"
-              with urllib.request.urlopen(url, timeout=30) as r:
-                  data = json.load(r)
+              r = requests.get(f"https://api.mercadolibre.com/users/{seller}/items/search",
+                               headers=headers, params={"limit": 100, "offset": offset}, timeout=30)
+              r.raise_for_status()
+              data = r.json()
               batch = data.get("results", [])
               ids.extend(batch)
               offset += len(batch)
@@ -32,13 +51,19 @@ jobs:
                   break
           rows = []
           for start in range(0, len(ids), 20):
-              query = urllib.parse.urlencode({"ids": ",".join(ids[start:start+20]), "attributes": "id,title,status"})
-              with urllib.request.urlopen("https://api.mercadolibre.com/items?" + query, timeout=30) as r:
-                  payload = json.load(r)
-              for entry in payload:
+              r = requests.get("https://api.mercadolibre.com/items",
+                               headers=headers,
+                               params={"ids": ",".join(ids[start:start+20]), "attributes": "id,title,status"},
+                               timeout=30)
+              r.raise_for_status()
+              for entry in r.json():
                   body = entry.get("body") or {}
                   rows.append({"id": body.get("id"), "title": body.get("title"), "status": body.get("status")})
-          rows.sort(key=lambda x: x["id"] or "")
+          rows.sort(key=lambda x: int((x["id"] or "MLM0").replace("MLM","")))
           print("JORGE_ALL_PRODUCTS=" + json.dumps(rows, ensure_ascii=False))
           print("JORGE_TOTAL=" + str(len(rows)))
           PY
+      - name: Save rotated Jorge token
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN_FOR_SECRETS }}
+        run: gh secret set MELI_REFRESH_TOKEN_JORGE_LUIS --repo kxmwnzbzhn-spec/meli-autoresponder < /tmp/jorge_luis_rotated_token
