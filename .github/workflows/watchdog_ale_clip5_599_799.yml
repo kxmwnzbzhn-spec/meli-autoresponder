@@ -1,0 +1,37 @@
+name: Watchdog Alejandra Clip 5 599-799
+on:
+  push:
+    paths:
+      - '.github/workflows/watchdog_ale_clip5_599_799.yml'
+  workflow_dispatch:
+  schedule:
+    - cron: '*/5 * * * *'
+concurrency:
+  group: watchdog-ale-clip5-599-799
+  cancel-in-progress: false
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests -q
+      - name: Revisar catálogos Clip 5 y ajustar precios
+        env:
+          MELI_APP_ID_NEW: ${{ secrets.MELI_APP_ID_NEW }}
+          MELI_APP_SECRET_NEW: ${{ secrets.MELI_APP_SECRET_NEW }}
+          MELI_REFRESH_TOKEN_ALE: ${{ secrets.MELI_REFRESH_TOKEN_ALE }}
+        run: python scripts/watchdog_ale_clip5_599_799.py
+      - name: Guardar token rotado
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN_FOR_SECRETS }}
+        run: |
+          if [ -s /tmp/ale_rotated_token ]; then
+            gh secret set MELI_REFRESH_TOKEN_ALE --repo "${{ github.repository }}" < /tmp/ale_rotated_token
+          fi
