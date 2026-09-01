@@ -6,8 +6,8 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import daily_run as d
 
 TZ = d.TZ; TODAY = d.TODAY; DRIVE_FOLDER_ID = d.DRIVE_FOLDER_ID
-# Substatus accionables: incluir todas menos las ya recogidas
-INCL = {"ready_to_print","printing_error","printed","invoice_pending"}
+# Solo ready_to_print (etiquetas por imprimir)
+INCL = {"ready_to_print"}
 
 ACCS = [a for a in d.ACCOUNTS if a["name"] in ("Asva","JorgeLuis")]
 print(f"[cfg] cuentas: {[a['name'] for a in ACCS]}  TODAY={TODAY}")
@@ -39,7 +39,7 @@ if total == 0:
     print("Sin envíos. No genero PDF."); sys.exit(0)
 
 all_ships.sort(key=lambda s:(0 if s["has_used"] else 1, s["account"], "/".join(s["comp_lines"]), s["sid"]))
-out_local = f"ETIQUETAS_JORGE_ASVA_{TODAY}.pdf"
+out_local = f"ETIQUETAS_READY_TO_PRINT_JORGE_ASVA_{TODAY}.pdf"
 pages, fails = d.build_pdf(all_ships, out_local)
 print(f"[pdf] pages={pages} fallidas={len(fails)}")
 if pages == 0: sys.exit(1)
