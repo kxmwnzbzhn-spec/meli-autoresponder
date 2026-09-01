@@ -1,0 +1,19 @@
+name: list_jorge_printed
+on:
+  workflow_dispatch:
+jobs:
+  l:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests -q
+      - env:
+          MELI_APP_ID:                    ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET:                ${{ secrets.MELI_APP_SECRET }}
+          MELI_APP_ID_NEW:                ${{ secrets.MELI_APP_ID_NEW }}
+          MELI_APP_SECRET_NEW:            ${{ secrets.MELI_APP_SECRET_NEW }}
+          MELI_REFRESH_TOKEN_JORGE_LUIS:  ${{ secrets.MELI_REFRESH_TOKEN_JORGE_LUIS }}
+        run: python scripts/list_jorge_printed.py
