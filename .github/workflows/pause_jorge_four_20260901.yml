@@ -1,0 +1,35 @@
+name: pause-jorge-four-20260901
+
+on:
+  push:
+    paths:
+      - ".github/workflows/pause_jorge_four_20260901.yml"
+  workflow_dispatch:
+
+jobs:
+  pause:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install requests -q
+      - name: Pause only the four authorized Jorge listings
+        env:
+          MELI_APP_ID_NEW: ${{ secrets.MELI_APP_ID_NEW }}
+          MELI_APP_SECRET_NEW: ${{ secrets.MELI_APP_SECRET_NEW }}
+          MELI_REFRESH_TOKEN_JORGE_LUIS: ${{ secrets.MELI_REFRESH_TOKEN_JORGE_LUIS }}
+        run: python3 scripts/pause_jorge_four_20260901.py
+      - name: Update Jorge rotated token in this repository
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN_FOR_SECRETS }}
+        run: gh secret set MELI_REFRESH_TOKEN_JORGE_LUIS --repo kxmwnzbzhn-spec/meli-autoresponder < /tmp/jorge_luis_rotated_token
+      - name: Restart corrected Jorge monitor
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN_FOR_SECRETS }}
+        run: gh workflow run jorge_luis_real_stock_monitor.yml --repo kxmwnzbzhn-spec/meli-autoresponder -f duration_sec=19800
+      - name: Verify and enforce paused status after monitor replacement
+        run: |
+          sleep 55
+          MELI_ACCESS_TOKEN="$(cat /tmp/jorge_luis_access_token)" python3 scripts/pause_jorge_four_20260901.py
