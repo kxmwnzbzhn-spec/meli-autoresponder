@@ -38,13 +38,3 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN_FOR_SECRETS }}
         run: gh workflow run jorge_luis_real_stock_monitor.yml --repo kxmwnzbzhn-spec/meli-autoresponder -f duration_sec=19800
-      - name: Legacy placeholder
-        if: false()
-
-        if: always()
-        env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN_FOR_SECRETS }}
-        run: |
-          if [ -s /tmp/ale_rotated_token ]; then
-            gh secret set MELI_REFRESH_TOKEN_ALE --repo kxmwnzbzhn-spec/meli-autoresponder < /tmp/ale_rotated_token
-          fi
