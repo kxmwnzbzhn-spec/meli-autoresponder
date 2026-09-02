@@ -20,14 +20,28 @@ def active_ids():
   if not ids or offset>=int((b.get("paging") or {}).get("total",0)): break
   time.sleep(.4)
  return list(dict.fromkeys(out))
-before=active_ids(); paused=[]; failed=[]
-for i,item_id in enumerate(before,1):
- rr=s.put(f"{API}/items/{item_id}",headers=HJ,json={"status":"paused"},timeout=T)
- if rr.status_code in (200,201): paused.append(item_id)
- else: failed.append({"id":item_id,"status":rr.status_code,"body":rr.text[:180]})
- if i%25==0: print(f"paused={i}/{len(before)}",flush=True)
- time.sleep(.25)
-time.sleep(2); remaining=active_ids()
-result={"account":"Alejandra","uid":UID,"active_before":len(before),"paused_ok":len(paused),"failed":failed,"active_remaining":len(remaining),"remaining_ids":remaining}
+def direct_active(ids):
+ out=[]
+ for item_id in ids:
+  q=s.get(f"{API}/items/{item_id}",headers=H,params={"attributes":"status,seller_id"},timeout=T)
+  if q.status_code==200:
+   j=q.json()
+   if int(j.get("seller_id",0))==UID and j.get("status")=="active": out.append(item_id)
+  time.sleep(.12)
+ return out
+before=active_ids(); candidates=list(before); paused=[]; failed=[]
+for attempt in range(3):
+ current=direct_active(candidates)
+ if not current: break
+ for item_id in current:
+  rr=s.put(f"{API}/items/{item_id}",headers=HJ,json={"status":"paused"},timeout=T)
+  if rr.status_code in (200,201): paused.append(item_id)
+  else: failed.append({"id":item_id,"status":rr.status_code,"body":rr.text[:180]})
+  time.sleep(.3)
+ time.sleep(3)
+ fresh=active_ids()
+ candidates=list(dict.fromkeys(candidates+fresh))
+remaining=direct_active(candidates)
+result={"account":"Alejandra","uid":UID,"active_before":len(before),"pause_updates":len(paused),"failed":failed,"direct_active_remaining":len(remaining),"remaining_ids":remaining}
 print("ALE_PAUSE_ALL="+json.dumps(result,ensure_ascii=False),flush=True)
 if failed or remaining: raise RuntimeError("No quedaron todas pausadas")
