@@ -1,0 +1,46 @@
+name: Migrar todas las publicaciones de Alejandra
+on:
+  push:
+    paths:
+      - '.github/workflows/migrate_all_ale_listings_20260902.yml'
+  workflow_dispatch:
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+      actions: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests -q
+      - name: Detener monitores antiguos
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN_FOR_SECRETS }}
+        run: |
+          gh workflow disable autostock_ale_unlimited_28.yml --repo "${{ github.repository }}" || true
+          gh workflow disable watchdog_ale_catalog_420_499.yml --repo "${{ github.repository }}" || true
+          gh workflow disable watchdog_ale_clip5_599_799.yml --repo "${{ github.repository }}" || true
+          for wf in autostock_ale_unlimited_28.yml watchdog_ale_catalog_420_499.yml watchdog_ale_clip5_599_799.yml; do
+            gh api "repos/${{ github.repository }}/actions/workflows/$wf/runs?status=in_progress&per_page=100" --jq '.workflow_runs[].id' | while read run_id; do
+              [ -n "$run_id" ] && gh api --method POST "repos/${{ github.repository }}/actions/runs/$run_id/cancel" || true
+            done
+          done
+      - name: Clonar, verificar, migrar autostock y retirar antiguas
+        env:
+          MELI_APP_ID_NEW: ${{ secrets.MELI_APP_ID_NEW }}
+          MELI_APP_SECRET_NEW: ${{ secrets.MELI_APP_SECRET_NEW }}
+          MELI_REFRESH_TOKEN_ALE: ${{ secrets.MELI_REFRESH_TOKEN_ALE }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN_FOR_SECRETS }}
+        run: python scripts/migrate_all_ale_listings_20260902.py
+      - name: Guardar token rotado
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN_FOR_SECRETS }}
+        run: |
+          if [ -s /tmp/ale_rotated_token ]; then
+            gh secret set MELI_REFRESH_TOKEN_ALE --repo "${{ github.repository }}" < /tmp/ale_rotated_token
+          fi
