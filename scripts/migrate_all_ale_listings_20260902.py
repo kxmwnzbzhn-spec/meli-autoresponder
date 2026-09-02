@@ -111,14 +111,24 @@ for oid in OLD_IDS:
   if not candidates:
    candidates=current.get(("classic",s.get("title"),s.get("condition"),float(s.get("price") or 0)),[])
   n=candidates[0] if candidates else None
-  nid=n["id"] if n else create(s)
-  if not n: created.append(nid)
+  try:
+   nid=n["id"] if n else create(s)
+   if not n: created.append(nid)
+  except Exception as e:
+   pending.append({"old_id":oid,"clone_id":None,"clone_status":"creation_pending","error":str(e)[:400]})
+   mapping[oid]=oid
+   print(f"PENDING_CREATE {oid}: {str(e)[:400]}",flush=True)
+   continue
  n=get(nid)
  if not (n.get("status")=="active" and int(n.get("available_quantity") or 0)==1 and float(n.get("price") or 0)==float(s.get("price") or 0)):
   u=requests.put(f"{API}/items/{nid}",headers=HJ,json={"price":s["price"],"available_quantity":1,"status":"active"},timeout=T)
   if u.status_code not in (200,201):
    close=requests.put(f"{API}/items/{oid}",headers=HJ,json={"status":"closed"},timeout=T)
-   if close.status_code not in (200,201): raise RuntimeError(f"{oid} could not close for clone activation")
+   if close.status_code not in (200,201):
+    pending.append({"old_id":oid,"clone_id":nid,"clone_status":get(nid).get("status"),"close_http":close.status_code})
+    mapping[oid]=oid
+    print(f"PENDING_CLOSE {oid}->{nid} HTTP={close.status_code}",flush=True)
+    continue
    u=requests.put(f"{API}/items/{nid}",headers=HJ,json={"price":s["price"],"available_quantity":1,"status":"active"},timeout=T)
    print(f"ACTIVATE_AFTER_CLOSE {oid}->{nid} HTTP={u.status_code} {u.text[:500]}",flush=True)
    if u.status_code not in (200,201):
