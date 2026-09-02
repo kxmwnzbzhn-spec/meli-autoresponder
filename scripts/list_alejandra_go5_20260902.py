@@ -6,21 +6,20 @@ r.raise_for_status(); tok=r.json(); open("/tmp/ale_rotated_token","w").write(tok
 H={"Authorization":f"Bearer {tok['access_token']}"}
 me=requests.get(f"{API}/users/me",headers=H,timeout=T); me.raise_for_status()
 if int(me.json().get("id",0))!=UID: raise RuntimeError("Token no corresponde a Alejandra")
-ids=[]
-for status in ("active","paused","closed","under_review","inactive"):
- off=0
- while True:
-  q=requests.get(f"{API}/users/{UID}/items/search",headers=H,params={"status":status,"limit":100,"offset":off},timeout=T); q.raise_for_status()
-  b=q.json(); batch=[str(x) for x in b.get("results",[])]; ids.extend(batch); off+=len(batch)
-  if not batch or off>=int((b.get("paging") or {}).get("total",0)): break
+ids=[]; off=0
+while True:
+ q=requests.get(f"{API}/users/{UID}/items/search",headers=H,params={"limit":100,"offset":off},timeout=T); q.raise_for_status()
+ b=q.json(); batch=[str(x) for x in b.get("results",[])]; ids.extend(batch); off+=len(batch)
+ if not batch or off>=int((b.get("paging") or {}).get("total",0)): break
 ids=list(dict.fromkeys(ids)); rows=[]
 for p in range(0,len(ids),20):
  batch=ids[p:p+20]
  q=requests.get(f"{API}/items",headers=H,params={"ids":",".join(batch)},timeout=T); q.raise_for_status()
  for wrap in q.json():
   item=wrap.get("body") or {}; title=item.get("title") or ""
-  if re.search(r"(?i)(?:\bgo\s*5\b|\bgo5\b)",title):
+  attrs=" ".join(str(a.get("value_name") or "") for a in item.get("attributes") or [])
+  if re.search(r"(?i)(?:\bgo\s*5\b|\bgo5\b)",title+" "+attrs):
    rows.append({"id":item.get("id"),"title":title,"status":item.get("status"),"price":item.get("price"),"catalog_listing":item.get("catalog_listing"),"permalink":item.get("permalink")})
  time.sleep(.3)
 rows.sort(key=lambda x:(x["title"],x["id"]))
-print("ALE_GO5="+json.dumps({"count":len(rows),"items":rows},ensure_ascii=False),flush=True)
+print("ALE_GO5="+json.dumps({"scanned":len(ids),"count":len(rows),"items":rows},ensure_ascii=False),flush=True)
