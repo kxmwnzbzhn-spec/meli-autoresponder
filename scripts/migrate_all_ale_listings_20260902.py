@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import base64, json, os, requests
+import base64, json, os, time, requests
 API="https://api.mercadolibre.com"; SELLER=3629038896; T=35
 OLD_IDS=[
 "MLM6154086230","MLM6154085738","MLM6154084238","MLM6154084098","MLM6154083792","MLM6154083626",
@@ -73,8 +73,11 @@ def create(s):
    if term.get("value_name"): x["value_name"]=term["value_name"]
    terms.append(x)
  if terms:p["sale_terms"]=terms
- r=requests.post(f"{API}/items",headers=HJ,json=p,timeout=50)
- print(f"CREATE {s['id']} HTTP={r.status_code} {r.text[:500]}",flush=True)
+ for attempt in range(1,4):
+  r=requests.post(f"{API}/items",headers=HJ,json=p,timeout=50)
+  print(f"CREATE {s['id']} attempt={attempt} HTTP={r.status_code} {r.text[:500]}",flush=True)
+  if r.status_code<500: break
+  time.sleep(attempt*2)
  if r.status_code in (200,201): return r.json()["id"]
  if r.status_code==400 and "seller.optin.fake" in r.text:
   close=requests.put(f"{API}/items/{s['id']}",headers=HJ,json={"status":"closed"},timeout=T)
