@@ -1,0 +1,29 @@
+name: Duplicar Alejandra 3438301245
+on:
+  push:
+    paths:
+      - '.github/workflows/duplicate_ale_3438301245_20260902.yml'
+  workflow_dispatch:
+jobs:
+  duplicate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests -q
+      - name: Crear y verificar duplicado
+        env:
+          MELI_APP_ID_NEW: ${{ secrets.MELI_APP_ID_NEW }}
+          MELI_APP_SECRET_NEW: ${{ secrets.MELI_APP_SECRET_NEW }}
+          MELI_REFRESH_TOKEN_ALE: ${{ secrets.MELI_REFRESH_TOKEN_ALE }}
+        run: python scripts/duplicate_ale_3438301245_20260902.py
+      - name: Guardar token rotado
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN_FOR_SECRETS }}
+        run: |
+          if [ -s /tmp/ale_rotated_token ]; then
+            gh secret set MELI_REFRESH_TOKEN_ALE --repo "${{ github.repository }}" < /tmp/ale_rotated_token
+          fi
