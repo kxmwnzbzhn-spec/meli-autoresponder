@@ -11,7 +11,7 @@ while True:
  q=requests.get(f"{API}/users/{UID}/items/search",headers=H,params={"limit":100,"offset":off},timeout=T); q.raise_for_status()
  b=q.json(); batch=[str(x) for x in b.get("results",[])]; ids.extend(batch); off+=len(batch)
  if not batch or off>=int((b.get("paging") or {}).get("total",0)): break
-ids=list(dict.fromkeys(ids)); rows=[]
+ids=list(dict.fromkeys(ids)); rows=[]; all_rows=[]
 for p in range(0,len(ids),20):
  batch=ids[p:p+20]
  q=requests.get(f"{API}/items",headers=H,params={"ids":",".join(batch)},timeout=T); q.raise_for_status()
@@ -22,4 +22,4 @@ for p in range(0,len(ids),20):
    rows.append({"id":item.get("id"),"title":title,"status":item.get("status"),"price":item.get("price"),"catalog_listing":item.get("catalog_listing"),"permalink":item.get("permalink")})
  time.sleep(.3)
 rows.sort(key=lambda x:(x["title"],x["id"]))
-print("ALE_GO5="+json.dumps({"scanned":len(ids),"count":len(rows),"items":rows},ensure_ascii=False),flush=True)
+print("ALE_GO5="+json.dumps({"scanned":len(ids),"count":len(rows),"items":rows,"all":all_rows},ensure_ascii=False),flush=True)
