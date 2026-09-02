@@ -4,8 +4,6 @@ on:
     paths:
       - '.github/workflows/watchdog_ale_clip5_599_799.yml'
   workflow_dispatch:
-  schedule:
-    - cron: '*/5 * * * *'
 concurrency:
   group: watchdog-ale-clip5-599-799
   cancel-in-progress: false
