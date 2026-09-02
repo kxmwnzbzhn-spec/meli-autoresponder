@@ -13,7 +13,7 @@ jobs:
       - run: pip install requests -q
       - name: Consultar Go 5
         env:
-          MELI_APP_ID_NEW: ${{ secrets.MELI_APP_ID_NEW_ID_NEW || secrets.MELI_APP_ID_NEW }}
+          MELI_APP_ID_NEW: ${{ secrets.MELI_APP_ID_NEW }}
           MELI_APP_SECRET_NEW: ${{ secrets.MELI_APP_SECRET_NEW }}
           MELI_REFRESH_TOKEN_ALE: ${{ secrets.MELI_REFRESH_TOKEN_ALE }}
         run: python scripts/list_alejandra_go5_20260902.py
