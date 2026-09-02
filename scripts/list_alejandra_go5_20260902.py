@@ -7,7 +7,7 @@ H={"Authorization":f"Bearer {tok['access_token']}"}
 me=requests.get(f"{API}/users/me",headers=H,timeout=T); me.raise_for_status()
 if int(me.json().get("id",0))!=UID: raise RuntimeError("Token no corresponde a Alejandra")
 ids=[]
-for status in ("active","paused"):
+for status in ("active","paused","closed","under_review","inactive"):
  off=0
  while True:
   q=requests.get(f"{API}/users/{UID}/items/search",headers=H,params={"status":status,"limit":100,"offset":off},timeout=T); q.raise_for_status()
