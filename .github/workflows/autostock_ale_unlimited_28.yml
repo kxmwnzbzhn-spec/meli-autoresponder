@@ -1,4 +1,4 @@
-name: Autostock Alejandra infinito 28
+name: Autostock Alejandra infinito activo
 on:
   push:
     paths:
@@ -7,7 +7,7 @@ on:
   schedule:
     - cron: '17 8 * * *'
 concurrency:
-  group: autostock-ale-unlimited-28
+  group: autostock-ale-unlimited-active
   cancel-in-progress: false
 jobs:
   monitor:
