@@ -1,0 +1,82 @@
+name: Publicar 5 Go5 en DIDER
+on:
+  workflow_dispatch:
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install requests -q
+      - name: Publicar y verificar
+        env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_DIDER: ${{ secrets.MELI_REFRESH_TOKEN_DIDER }}
+        run: |
+          python - <<'PY'
+          import os, json, requests, sys
+          sys.path.insert(0, "scripts")
+          import meli_token
+
+          API = "https://api.mercadolibre.com"
+          token = meli_token.get_access_token("DIDER")
+          H = {"Authorization": f"Bearer {token}"}
+          HJ = {**H, "Content-Type": "application/json"}
+
+          me = requests.get(f"{API}/users/me", headers=H, timeout=20)
+          me.raise_for_status()
+          account = me.json()
+          print("DIDER_ACCOUNT=" + json.dumps({"id": account.get("id"), "nickname": account.get("nickname")}, ensure_ascii=False))
+
+          targets = [
+            {"source":"MLM3438313975","catalog_product_id":"MLM68914218","title":"Jbl Go 5 Azul Oscuro","price":580},
+            {"source":"MLM3438302377","catalog_product_id":"MLM68445612","title":"Jbl Go 5 Rosa","price":599},
+            {"source":"MLM3438302291","catalog_product_id":"MLM69323525","title":"Jbl Go 5 Rojo","price":591},
+            {"source":"MLM3438301787","catalog_product_id":"MLM67717618","title":"Jbl Go 5 Azul Marino","price":580},
+            {"source":"MLM3438301603","catalog_product_id":"MLM72153939","title":"Jbl Go 5 Jblgo5blkbr Azul","price":580},
+          ]
+
+          results=[]
+          for t in targets:
+              src=requests.get(f"{API}/items/{t['source']}", headers=H, timeout=20)
+              if src.status_code != 200:
+                  raise RuntimeError(f"No pude leer fuente {t['source']}: HTTP {src.status_code} {src.text[:300]}")
+              d=src.json()
+              payload={
+                  "site_id":"MLM",
+                  "title":d.get("title") or t["title"],
+                  "category_id":d.get("category_id") or "MLM59800",
+                  "catalog_product_id":t["catalog_product_id"],
+                  "catalog_listing":True,
+                  "price":t["price"],
+                  "currency_id":"MXN",
+                  "available_quantity":1,
+                  "buying_mode":"buy_it_now",
+                  "listing_type_id":d.get("listing_type_id") or "gold_pro",
+                  "condition":"new",
+                  "shipping":{"mode":"me2","free_shipping":True},
+              }
+              r=requests.post(f"{API}/items",headers=HJ,json=payload,timeout=30)
+              print(f"CREATE {t['source']} HTTP={r.status_code} {r.text[:1200]}")
+              if r.status_code not in (200,201):
+                  results.append({"source":t["source"],"ok":False,"error":r.text[:500]})
+                  continue
+              item=r.json()
+              iid=item["id"]
+              check=requests.get(f"{API}/items/{iid}",headers=H,timeout=20).json()
+              results.append({
+                  "source":t["source"],"ok":True,"id":iid,
+                  "title":check.get("title"),"status":check.get("status"),
+                  "sub_status":check.get("sub_status"),"price":check.get("price"),
+                  "qty":check.get("available_quantity"),
+                  "catalog_product_id":check.get("catalog_product_id"),
+                  "permalink":check.get("permalink"),
+              })
+          print("DIDER_GO5_RESULT="+json.dumps(results,ensure_ascii=False))
+          if not all(x.get("ok") for x in results):
+              raise SystemExit("Una o más publicaciones fallaron")
+          PY
