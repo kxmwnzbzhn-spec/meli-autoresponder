@@ -40,6 +40,16 @@ def attrs(s):
  if "ITEM_CONDITION" not in seen:
   out.append({"id":"ITEM_CONDITION","value_name":{"new":"Nuevo","used":"Usado","refurbished":"Reacondicionado"}[s["condition"]]})
  return out
+def full_attrs(s):
+ out=[]
+ for a in s.get("attributes") or []:
+  if not a.get("id") or (not a.get("value_id") and not a.get("value_name")): continue
+  x={"id":a["id"]}
+  if a.get("value_id"): x["value_id"]=a["value_id"]
+  if a.get("value_name"): x["value_name"]=a["value_name"]
+  out.append(x)
+ return out
+
 def create(s):
  ship=s.get("shipping") or {}
  p={"site_id":"MLM","family_name":(s.get("family_name") or s.get("title") or "Producto")[:60],"category_id":s["category_id"],
@@ -107,7 +117,7 @@ for oid in OLD_IDS:
    ship=s.get("shipping") or {}
    classic={"site_id":"MLM","family_name":(s.get("family_name") or s.get("title") or "Producto")[:60],"category_id":s["category_id"],"price":s["price"],
     "currency_id":s.get("currency_id") or "MXN","available_quantity":1,"buying_mode":s.get("buying_mode") or "buy_it_now",
-    "listing_type_id":s.get("listing_type_id") or "gold_special","condition":s["condition"],"attributes":attrs(s),
+    "listing_type_id":s.get("listing_type_id") or "gold_special","condition":s["condition"],"attributes":full_attrs(s),
     "pictures":[{"source":x.get("secure_url") or x.get("url")} for x in (s.get("pictures") or []) if x.get("secure_url") or x.get("url")],
     "shipping":{"mode":"me2","local_pick_up":bool(ship.get("local_pick_up")),"free_shipping":bool(ship.get("free_shipping"))}}
    rr=requests.post(f"{API}/items",headers=HJ,json=classic,timeout=50)
