@@ -59,7 +59,7 @@ def create(s):
  if r.status_code in (200,201): return r.json()["id"]
  if r.status_code==400 and "seller.optin.fake" in r.text:
   classic=dict(p)
-  classic.pop("catalog_product_id",None); classic.pop("catalog_listing",None); classic.pop("family_name",None)
+  classic.pop("catalog_product_id",None); classic.pop("catalog_listing",None)
   classic["title"]=(s.get("title") or "Producto")[:60]
   classic["pictures"]=[{"source":x.get("secure_url") or x.get("url")} for x in (s.get("pictures") or []) if x.get("secure_url") or x.get("url")]
   full=[]
@@ -105,7 +105,7 @@ for oid in OLD_IDS:
   u=requests.put(f"{API}/items/{nid}",headers=HJ,json={"price":s["price"],"available_quantity":1,"status":"active"},timeout=T)
   if u.status_code not in (200,201):
    ship=s.get("shipping") or {}
-   classic={"site_id":"MLM","title":(s.get("title") or "Producto")[:60],"category_id":s["category_id"],"price":s["price"],
+   classic={"site_id":"MLM","title":(s.get("title") or "Producto")[:60],"family_name":(s.get("family_name") or s.get("title") or "Producto")[:60],"category_id":s["category_id"],"price":s["price"],
     "currency_id":s.get("currency_id") or "MXN","available_quantity":1,"buying_mode":s.get("buying_mode") or "buy_it_now",
     "listing_type_id":s.get("listing_type_id") or "gold_special","condition":s["condition"],"attributes":attrs(s),
     "pictures":[{"source":x.get("secure_url") or x.get("url")} for x in (s.get("pictures") or []) if x.get("secure_url") or x.get("url")],
