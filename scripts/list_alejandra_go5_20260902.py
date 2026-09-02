@@ -12,14 +12,16 @@ while True:
  b=q.json(); batch=[str(x) for x in b.get("results",[])]; ids.extend(batch); off+=len(batch)
  if not batch or off>=int((b.get("paging") or {}).get("total",0)): break
 ids=list(dict.fromkeys(ids)); rows=[]; all_rows=[]
-for p in range(0,len(ids),20):
- batch=ids[p:p+20]
- q=requests.get(f"{API}/items",headers=H,params={"ids":",".join(batch)},timeout=T); q.raise_for_status()
- for wrap in q.json():
-  item=wrap.get("body") or {}; title=item.get("title") or ""
-  attrs=" ".join(str(a.get("value_name") or "") for a in item.get("attributes") or [])
-  if re.search(r"(?i)(?:\bgo\s*5\b|\bgo5\b)",title+" "+attrs):
-   rows.append({"id":item.get("id"),"title":title,"status":item.get("status"),"price":item.get("price"),"catalog_listing":item.get("catalog_listing"),"permalink":item.get("permalink")})
- time.sleep(.3)
+for item_id in ids:
+ endpoint=f"{API}/user-products/{itemitem_id0}" if item_id.startswith("MLMU") else f"{API}/items/{item_id}"
+ q=requests.get(endpoint,headers=H,timeout=T)
+ if q.status_code!=200:
+  all_rows.append({"id":item_id,"http":q.status_code}); continue
+ item=q.json(); title=item.get("title") or item.get("name") or item.get("family_name") or ""
+ attrs=" ".join(str(a.get("value_name") or a.get("value") or "") for a in item.get("attributes") or [])
+ row={"id":item_id,"title":title,"status":item.get("status"),"price":item.get("price"),"catalog_product_id":item.get("catalog_product_id"),"permalink":item.get("permalink")}
+ all_rows.append(row)
+ if re.search(r"(?i)(?:\\bgo\\s*5\\b|\\bgo5\\b)",title+" "+attrs): rows.append(row)
+ time.sleep(.2)
 rows.sort(key=lambda x:(x["title"],x["id"]))
 print("ALE_GO5="+json.dumps({"scanned":len(ids),"count":len(rows),"items":rows,"all":all_rows},ensure_ascii=False),flush=True)
