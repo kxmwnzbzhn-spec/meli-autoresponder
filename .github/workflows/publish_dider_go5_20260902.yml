@@ -42,21 +42,17 @@ jobs:
 
           results=[]
           for t in targets:
-              src=requests.get(f"{API}/items/{t['source']}", timeout=20)
-              if src.status_code != 200:
-                  raise RuntimeError(f"No pude leer fuente {t['source']}: HTTP {src.status_code} {src.text[:300]}")
-              d=src.json()
               payload={
                   "site_id":"MLM",
-                  "title":d.get("title") or t["title"],
-                  "category_id":d.get("category_id") or "MLM59800",
+                  "title":t["title"],
+                  "category_id":"MLM59800",
                   "catalog_product_id":t["catalog_product_id"],
                   "catalog_listing":True,
                   "price":t["price"],
                   "currency_id":"MXN",
                   "available_quantity":1,
                   "buying_mode":"buy_it_now",
-                  "listing_type_id":d.get("listing_type_id") or "gold_pro",
+                  "listing_type_id":"gold_pro",
                   "condition":"new",
                   "shipping":{"mode":"me2","free_shipping":True},
               }
