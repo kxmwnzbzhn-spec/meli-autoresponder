@@ -96,7 +96,7 @@ for iid in all_ids():
   current.setdefault(("classic",x.get("title"),x.get("condition"),float(x.get("price") or 0)),[]).append(x)
  except Exception: pass
 
-mapping={}; created=[]
+mapping={}; created=[]; pending=[]
 for oid in OLD_IDS:
  s=sources[oid]
  if not s.get("catalog_product_id") or not s.get("catalog_listing"): raise RuntimeError(f"{oid} no es catálogo")
@@ -119,8 +119,11 @@ for oid in OLD_IDS:
    u=requests.put(f"{API}/items/{nid}",headers=HJ,json={"price":s["price"],"available_quantity":1,"status":"active"},timeout=T)
    print(f"ACTIVATE_AFTER_CLOSE {oid}->{nid} HTTP={u.status_code} {u.text[:500]}",flush=True)
    if u.status_code not in (200,201):
-    requests.put(f"{API}/items/{oid}",headers=HJ,json={"status":s.get("status") or "active","available_quantity":max(1,int(s.get("available_quantity") or 1))},timeout=T)
-    raise RuntimeError(f"{nid} activation failed after safe source close {u.status_code} {u.text[:900]}")
+    requests.put(f"{API}/items/{oid}",headers=HJ,json={"status":"active","available_quantity":1},timeout=T)
+    pending.append({"old_id":oid,"clone_id":nid,"clone_status":get(nid).get("status"),"http":u.status_code})
+    mapping[oid]=oid
+    print(f"PENDING_REVIEW {oid}->{nid}",flush=True)
+    continue
   n=get(nid)
  checks=[nid not in OLD_IDS,int(n.get("seller_id") or 0)==SELLER,n.get("status")=="active",int(n.get("available_quantity") or 0)==1,(n.get("catalog_product_id")==s.get("catalog_product_id") or (not n.get("catalog_listing") and n.get("category_id")==s.get("category_id"))),n.get("condition")==s.get("condition")]
  if not all(checks): raise RuntimeError(f"{oid}->{nid} verify failed {checks}")
@@ -138,6 +141,9 @@ body=json.dumps(new_ids,ensure_ascii=False,indent=2)+"\n"
 g=requests.put(url,headers=GH,json={"message":"Switch Alejandra autostock to cloned listings","content":base64.b64encode(body.encode()).decode(),"sha":sha},timeout=T)
 g.raise_for_status()
 print("AUTOSTOCK_CONFIG_COMMIT="+g.json()["commit"]["sha"],flush=True)
+if pending:
+ print("ALE_MIGRATION_PENDING="+json.dumps({"pending":pending,"configured_ids":new_ids},ensure_ascii=False),flush=True)
+ raise SystemExit(0)
 
 retired=[]
 for oid in OLD_IDS:
