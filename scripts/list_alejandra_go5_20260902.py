@@ -13,7 +13,7 @@ while True:
  if not batch or off>=int((b.get("paging") or {}).get("total",0)): break
 ids=list(dict.fromkeys(ids)); rows=[]; all_rows=[]
 for item_id in ids:
- endpoint=f"{API}/user-products/{itemitem_id0}" if item_id.startswith("MLMU") else f"{API}/items/{item_id}"
+ endpoint=f"{API}/user-products/{item_id}" if item_id.startswith("MLMU") else f"{API}/items/{item_id}"
  q=requests.get(endpoint,headers=H,timeout=T)
  if q.status_code!=200:
   all_rows.append({"id":item_id,"http":q.status_code}); continue
