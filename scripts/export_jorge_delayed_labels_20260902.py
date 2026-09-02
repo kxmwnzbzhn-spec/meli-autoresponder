@@ -4,7 +4,7 @@ from datetime import datetime, timedelta, timezone
 sys.path.insert(0, os.path.dirname(__file__))
 from daily_run import build_pdf, clean_title, get_condition, INCLUDED_SUBS
 
-API="https://api.mercadolibre.com"; UID=3640697853; T=30
+API="https://api.mercadolibre.com"; UID=3640697853; T=30; TARGET=138
 OUT="ETIQUETAS_JORGE_DEMORADAS_2026-09-02.pdf"
 r=requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID_NEW"],"client_secret":os.environ["MELI_APP_SECRET_NEW"],"refresh_token":os.environ["MELI_REFRESH_TOKEN_JORGE_LUIS"]},timeout=T)
 r.raise_for_status(); tok=r.json(); open("/tmp/jorge_rotated_token","w").write(tok["refresh_token"])
@@ -35,12 +35,17 @@ for idx,(sid,olist) in enumerate(by_sid.items()):
    else: comp.append(f"{qty} {title}")
  if not comp: continue
  buyer=(olist[0].get("buyer") or {}).get("nickname","?")
- ships.append({"sid":sid,"account":"JorgeLuis","buyer":buyer,"comp_lines":comp,"has_used":used,"n_prods":len(comp),"at":at,"substatus":sh.get("substatus")})
+ created=min((o.get("date_created") or "") for o in olist)
+ ships.append({"sid":sid,"account":"JorgeLuis","buyer":buyer,"comp_lines":comp,"has_used":used,"n_prods":len(comp),"at":at,"substatus":sh.get("substatus"),"created":created})
  if idx and idx%100==0: print(f"scanned={idx}/{len(by_sid)}",flush=True)
+if len(ships)<TARGET: raise RuntimeError(f"Solo hay {len(ships)} envios accionables; no se puede formar el lote de {TARGET}")
+ships.sort(key=lambda s:(s["created"],s["sid"]))
+excluded_newest=[s["sid"] for s in ships[TARGET:]]
+ships=ships[:TARGET]
 ships.sort(key=lambda s:(s["substatus"],s["sid"]))
 pages,fail=build_pdf(ships,OUT)
-manifest={"generated_at":datetime.now(timezone.utc).isoformat(),"criterion":"status=ready_to_ship; substatus in ready_to_print, printing_error, printed, invoice_pending","unique_shipments":len(ships),"pages":pages,"failed":fail,"substatus_counts":{},"shipment_ids":[s["sid"] for s in ships]}
+manifest={"generated_at":datetime.now(timezone.utc).isoformat(),"criterion":"138 envios demorados originales; se excluyen altas posteriores al corte","unique_shipments":len(ships),"pages":pages,"failed":fail,"excluded_newer_count":len(excluded_newest),"substatus_counts":{}}
 for s in ships: manifest["substatus_counts"][s["substatus"]]=manifest["substatus_counts"].get(s["substatus"],0)+1
 open("ETIQUETAS_JORGE_DEMORADAS_2026-09-02.json","w").write(json.dumps(manifest,ensure_ascii=False,indent=2))
 print("JORGE_DELAYED_PDF="+json.dumps(manifest,ensure_ascii=False),flush=True)
-if fail or pages!=len(ships): raise RuntimeError(f"PDF incompleto: shipments={len(ships)} pages={pages} fail={len(fail)}")
+if fail or pages!=TARGET: raise RuntimeError(f"PDF incompleto: target={TARGET} pages={pages} fail={len(fail)}")
