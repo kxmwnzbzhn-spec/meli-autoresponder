@@ -44,3 +44,5 @@ jobs:
           if [ -s /tmp/ale_rotated_token ]; then
             gh secret set MELI_REFRESH_TOKEN_ALE --repo "${{ github.repository }}" < /tmp/ale_rotated_token
           fi
+
+# retry after catalog fallback
