@@ -101,9 +101,10 @@ for oid in OLD_IDS:
   nid=n["id"] if n else create(s)
   if not n: created.append(nid)
  n=get(nid)
- u=requests.put(f"{API}/items/{nid}",headers=HJ,json={"price":s["price"],"available_quantity":1,"status":"active"},timeout=T)
- if u.status_code not in (200,201): raise RuntimeError(f"{nid} activation failed {u.status_code} {u.text[:500]}")
- n=get(nid)
+ if not (n.get("status")=="active" and int(n.get("available_quantity") or 0)==1 and float(n.get("price") or 0)==float(s.get("price") or 0)):
+  u=requests.put(f"{API}/items/{nid}",headers=HJ,json={"price":s["price"],"available_quantity":1,"status":"active"},timeout=T)
+  if u.status_code not in (200,201): raise RuntimeError(f"{nid} activation failed {u.status_code} {u.text[:500]}")
+  n=get(nid)
  checks=[nid not in OLD_IDS,int(n.get("seller_id") or 0)==SELLER,n.get("status")=="active",int(n.get("available_quantity") or 0)==1,(n.get("catalog_product_id")==s.get("catalog_product_id") or (not n.get("catalog_listing") and n.get("title")==s.get("title"))),n.get("condition")==s.get("condition")]
  if not all(checks): raise RuntimeError(f"{oid}->{nid} verify failed {checks}")
  mapping[oid]=nid
