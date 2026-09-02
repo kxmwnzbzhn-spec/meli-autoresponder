@@ -41,13 +41,22 @@ def attrs(s):
   out.append({"id":"ITEM_CONDITION","value_name":{"new":"Nuevo","used":"Usado","refurbished":"Reacondicionado"}[s["condition"]]})
  return out
 def full_attrs(s):
- out=[]
- for a in s.get("attributes") or []:
-  if not a.get("id") or (not a.get("value_id") and not a.get("value_name")): continue
-  x={"id":a["id"]}
+ merged=list(s.get("attributes") or [])
+ present={a.get("id") for a in merged}
+ needed={"BRAND","MODEL","GTIN"}-present
+ if needed and s.get("catalog_product_id"):
+  pr=requests.get(f"{API}/products/{s['catalog_product_id']}",headers=H,timeout=T)
+  if pr.status_code==200:
+   for a in pr.json().get("attributes") or []:
+    if a.get("id") in needed: merged.append(a)
+ out=[]; seen=set()
+ for a in merged:
+  aid=a.get("id")
+  if not aid or aid in seen or (not a.get("value_id") and not a.get("value_name")): continue
+  x={"id":aid}
   if a.get("value_id"): x["value_id"]=a["value_id"]
   if a.get("value_name"): x["value_name"]=a["value_name"]
-  out.append(x)
+  out.append(x); seen.add(aid)
  return out
 
 def create(s):
