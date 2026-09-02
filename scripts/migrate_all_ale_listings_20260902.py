@@ -103,9 +103,19 @@ for oid in OLD_IDS:
  n=get(nid)
  if not (n.get("status")=="active" and int(n.get("available_quantity") or 0)==1 and float(n.get("price") or 0)==float(s.get("price") or 0)):
   u=requests.put(f"{API}/items/{nid}",headers=HJ,json={"price":s["price"],"available_quantity":1,"status":"active"},timeout=T)
-  if u.status_code not in (200,201): raise RuntimeError(f"{nid} activation failed {u.status_code} {u.text[:500]}")
+  if u.status_code not in (200,201):
+   ship=s.get("shipping") or {}
+   classic={"site_id":"MLM","title":(s.get("title") or "Producto")[:60],"category_id":s["category_id"],"price":s["price"],
+    "currency_id":s.get("currency_id") or "MXN","available_quantity":1,"buying_mode":s.get("buying_mode") or "buy_it_now",
+    "listing_type_id":s.get("listing_type_id") or "gold_special","condition":s["condition"],"attributes":attrs(s),
+    "pictures":[{"source":x.get("secure_url") or x.get("url")} for x in (s.get("pictures") or []) if x.get("secure_url") or x.get("url")],
+    "shipping":{"mode":"me2","local_pick_up":bool(ship.get("local_pick_up")),"free_shipping":bool(ship.get("free_shipping"))}}
+   rr=requests.post(f"{API}/items",headers=HJ,json=classic,timeout=50)
+   print(f"REPLACE_WITH_CLASSIC {s['id']} HTTP={rr.status_code} {rr.text[:500]}",flush=True)
+   if rr.status_code not in (200,201): raise RuntimeError(f"{nid} activation failed and classic fallback failed {rr.status_code} {rr.text[:900]}")
+   nid=rr.json()["id"]; created.append(nid)
   n=get(nid)
- checks=[nid not in OLD_IDS,int(n.get("seller_id") or 0)==SELLER,n.get("status")=="active",int(n.get("available_quantity") or 0)==1,(n.get("catalog_product_id")==s.get("catalog_product_id") or (not n.get("catalog_listing") and n.get("title")==s.get("title"))),n.get("condition")==s.get("condition")]
+ checks=[nid not in OLD_IDS,int(n.get("seller_id") or 0)==SELLER,n.get("status")=="active",int(n.get("available_quantity") or 0)==1,(n.get("catalog_product_id")==s.get("catalog_product_id") or (not n.get("catalog_listing") and n.get("category_id")==s.get("category_id"))),n.get("condition")==s.get("condition")]
  if not all(checks): raise RuntimeError(f"{oid}->{nid} verify failed {checks}")
  mapping[oid]=nid
  print(f"MAPPED {oid}->{nid}",flush=True)
