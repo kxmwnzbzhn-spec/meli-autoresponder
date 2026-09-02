@@ -1,11 +1,16 @@
 #!/usr/bin/env python3
-import json, os, requests, sys
+import json, os, requests, sys, time
 from datetime import datetime, timedelta, timezone
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 sys.path.insert(0, os.path.dirname(__file__))
 from daily_run import build_pdf, clean_title, get_condition, INCLUDED_SUBS
 
 API="https://api.mercadolibre.com"; UID=3640697853; T=30; TARGET=138
 OUT="ETIQUETAS_JORGE_DEMORADAS_2026-09-02.pdf"
+session=requests.Session()
+session.mount("https://",HTTPAdapter(max_retries=Retry(total=10,backoff_factor=2,status_forcelist=[429,500,502,503,504],allowed_methods=["GET"],respect_retry_after_header=True)))
+requests.get=session.get
 r=requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID_NEW"],"client_secret":os.environ["MELI_APP_SECRET_NEW"],"refresh_token":os.environ["MELI_REFRESH_TOKEN_JORGE_LUIS"]},timeout=T)
 r.raise_for_status(); tok=r.json(); open("/tmp/jorge_rotated_token","w").write(tok["refresh_token"])
 at=tok["access_token"]; H={"Authorization":f"Bearer {at}"}
@@ -16,7 +21,7 @@ while True:
  q=requests.get(f"{API}/orders/search",headers=H,params={"seller":UID,"order.status":"paid","order.date_created.from":start.strftime("%Y-%m-%dT%H:%M:%S.000Z"),"order.date_created.to":now.strftime("%Y-%m-%dT%H:%M:%S.000Z"),"limit":50,"offset":off},timeout=T); q.raise_for_status()
  b=q.json().get("results") or []; orders+=b
  if not b or off+len(b)>=q.json().get("paging",{}).get("total",0): break
- off+=len(b)
+ off+=len(b); time.sleep(0.7)
 by_sid={}
 for o in orders:
  sid=(o.get("shipping") or {}).get("id")
@@ -38,6 +43,7 @@ for idx,(sid,olist) in enumerate(by_sid.items()):
  created=min((o.get("date_created") or "") for o in olist)
  ships.append({"sid":sid,"account":"JorgeLuis","buyer":buyer,"comp_lines":comp,"has_used":used,"n_prods":len(comp),"at":at,"substatus":sh.get("substatus"),"created":created})
  if idx and idx%100==0: print(f"scanned={idx}/{len(by_sid)}",flush=True)
+ time.sleep(0.18)
 if len(ships)<TARGET: raise RuntimeError(f"Solo hay {len(ships)} envios accionables; no se puede formar el lote de {TARGET}")
 ships.sort(key=lambda s:(s["created"],s["sid"]))
 excluded_newest=[s["sid"] for s in ships[TARGET:]]
