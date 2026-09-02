@@ -44,7 +44,6 @@ jobs:
           for t in targets:
               payload={
                   "site_id":"MLM",
-                  "title":t["title"],
                   "category_id":"MLM59800",
                   "catalog_product_id":t["catalog_product_id"],
                   "catalog_listing":True,
