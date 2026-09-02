@@ -1,0 +1,15 @@
+name: Detener monitor Alejandra obsoleto
+on:
+  push:
+    paths:
+      - '.github/workflows/stop_old_ale_autostock_33628639558.yml'
+  workflow_dispatch:
+jobs:
+  stop:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cancelar ejecución antigua
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN_FOR_SECRETS }}
+        run: |
+          gh api --method POST repos/kxmwnzbzhn-spec/meli-autoresponder/actions/runs/33628639558/cancel || true
