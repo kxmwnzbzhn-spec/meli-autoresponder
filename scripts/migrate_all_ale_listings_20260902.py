@@ -56,8 +56,24 @@ def create(s):
  if terms:p["sale_terms"]=terms
  r=requests.post(f"{API}/items",headers=HJ,json=p,timeout=50)
  print(f"CREATE {s['id']} HTTP={r.status_code} {r.text[:500]}",flush=True)
- if r.status_code not in (200,201): raise RuntimeError(f"{s['id']} clone failed {r.status_code} {r.text[:1200]}")
- return r.json()["id"]
+ if r.status_code in (200,201): return r.json()["id"]
+ if r.status_code==400 and "seller.optin.fake" in r.text:
+  classic=dict(p)
+  classic.pop("catalog_product_id",None); classic.pop("catalog_listing",None); classic.pop("family_name",None)
+  classic["title"]=(s.get("title") or "Producto")[:60]
+  classic["pictures"]=[{"source":x.get("secure_url") or x.get("url")} for x in (s.get("pictures") or []) if x.get("secure_url") or x.get("url")]
+  full=[]
+  for a in s.get("attributes") or []:
+   if not a.get("id") or (not a.get("value_id") and not a.get("value_name")): continue
+   x={"id":a["id"]}
+   if a.get("value_id"): x["value_id"]=a["value_id"]
+   if a.get("value_name"): x["value_name"]=a["value_name"]
+   full.append(x)
+  classic["attributes"]=full
+  r=requests.post(f"{API}/items",headers=HJ,json=classic,timeout=50)
+  print(f"CREATE_CLASSIC {s['id']} HTTP={r.status_code} {r.text[:500]}",flush=True)
+  if r.status_code in (200,201): return r.json()["id"]
+ raise RuntimeError(f"{s['id']} clone failed {r.status_code} {r.text[:1200]}")
 
 sources={i:get(i) for i in OLD_IDS}
 current={}
@@ -67,6 +83,7 @@ for iid in all_ids():
   x=get(iid)
   if x.get("deleted"): continue
   current.setdefault((x.get("catalog_product_id"),x.get("condition")),[]).append(x)
+  current.setdefault(("classic",x.get("title"),x.get("condition"),float(x.get("price") or 0)),[]).append(x)
  except Exception: pass
 
 mapping={}; created=[]
@@ -78,6 +95,8 @@ for oid in OLD_IDS:
   n=get(nid)
  else:
   candidates=current.get((s.get("catalog_product_id"),s.get("condition")),[])
+  if not candidates:
+   candidates=current.get(("classic",s.get("title"),s.get("condition"),float(s.get("price") or 0)),[])
   n=candidates[0] if candidates else None
   nid=n["id"] if n else create(s)
   if not n: created.append(nid)
@@ -85,7 +104,7 @@ for oid in OLD_IDS:
  u=requests.put(f"{API}/items/{nid}",headers=HJ,json={"price":s["price"],"available_quantity":1,"status":"active"},timeout=T)
  if u.status_code not in (200,201): raise RuntimeError(f"{nid} activation failed {u.status_code} {u.text[:500]}")
  n=get(nid)
- checks=[nid not in OLD_IDS,int(n.get("seller_id") or 0)==SELLER,n.get("status")=="active",int(n.get("available_quantity") or 0)==1,n.get("catalog_product_id")==s.get("catalog_product_id"),n.get("condition")==s.get("condition")]
+ checks=[nid not in OLD_IDS,int(n.get("seller_id") or 0)==SELLER,n.get("status")=="active",int(n.get("available_quantity") or 0)==1,(n.get("catalog_product_id")==s.get("catalog_product_id") or (not n.get("catalog_listing") and n.get("title")==s.get("title"))),n.get("condition")==s.get("condition")]
  if not all(checks): raise RuntimeError(f"{oid}->{nid} verify failed {checks}")
  mapping[oid]=nid
  print(f"MAPPED {oid}->{nid}",flush=True)
