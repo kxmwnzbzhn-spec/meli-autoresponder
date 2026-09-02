@@ -77,21 +77,12 @@ def create(s):
  print(f"CREATE {s['id']} HTTP={r.status_code} {r.text[:500]}",flush=True)
  if r.status_code in (200,201): return r.json()["id"]
  if r.status_code==400 and "seller.optin.fake" in r.text:
-  classic=dict(p)
-  classic.pop("catalog_product_id",None); classic.pop("catalog_listing",None)
-  classic["title"]=(s.get("title") or "Producto")[:60]
-  classic["pictures"]=[{"source":x.get("secure_url") or x.get("url")} for x in (s.get("pictures") or []) if x.get("secure_url") or x.get("url")]
-  full=[]
-  for a in s.get("attributes") or []:
-   if not a.get("id") or (not a.get("value_id") and not a.get("value_name")): continue
-   x={"id":a["id"]}
-   if a.get("value_id"): x["value_id"]=a["value_id"]
-   if a.get("value_name"): x["value_name"]=a["value_name"]
-   full.append(x)
-  classic["attributes"]=full
-  r=requests.post(f"{API}/items",headers=HJ,json=classic,timeout=50)
-  print(f"CREATE_CLASSIC {s['id']} HTTP={r.status_code} {r.text[:500]}",flush=True)
+  close=requests.put(f"{API}/items/{s['id']}",headers=HJ,json={"status":"closed"},timeout=T)
+  if close.status_code not in (200,201): raise RuntimeError(f"{s['id']} could not close for replacement")
+  r=requests.post(f"{API}/items",headers=HJ,json=p,timeout=50)
+  print(f"CREATE_AFTER_CLOSE {s['id']} HTTP={r.status_code} {r.text[:500]}",flush=True)
   if r.status_code in (200,201): return r.json()["id"]
+  requests.put(f"{API}/items/{s['id']}",headers=HJ,json={"status":s.get("status") or "active","available_quantity":max(1,int(s.get("available_quantity") or 1))},timeout=T)
  raise RuntimeError(f"{s['id']} clone failed {r.status_code} {r.text[:1200]}")
 
 sources={i:get(i) for i in OLD_IDS}
@@ -123,16 +114,13 @@ for oid in OLD_IDS:
  if not (n.get("status")=="active" and int(n.get("available_quantity") or 0)==1 and float(n.get("price") or 0)==float(s.get("price") or 0)):
   u=requests.put(f"{API}/items/{nid}",headers=HJ,json={"price":s["price"],"available_quantity":1,"status":"active"},timeout=T)
   if u.status_code not in (200,201):
-   ship=s.get("shipping") or {}
-   classic={"site_id":"MLM","family_name":(s.get("family_name") or s.get("title") or "Producto")[:60],"category_id":s["category_id"],"price":s["price"],
-    "currency_id":s.get("currency_id") or "MXN","available_quantity":1,"buying_mode":s.get("buying_mode") or "buy_it_now",
-    "listing_type_id":s.get("listing_type_id") or "gold_special","condition":s["condition"],"attributes":full_attrs(s),
-    "pictures":[{"source":x.get("secure_url") or x.get("url")} for x in (s.get("pictures") or []) if x.get("secure_url") or x.get("url")],
-    "shipping":{"mode":"me2","local_pick_up":bool(ship.get("local_pick_up")),"free_shipping":bool(ship.get("free_shipping"))}}
-   rr=requests.post(f"{API}/items",headers=HJ,json=classic,timeout=50)
-   print(f"REPLACE_WITH_CLASSIC {s['id']} HTTP={rr.status_code} {rr.text[:500]}",flush=True)
-   if rr.status_code not in (200,201): raise RuntimeError(f"{nid} activation failed and classic fallback failed {rr.status_code} {rr.text[:900]}")
-   nid=rr.json()["id"]; created.append(nid)
+   close=requests.put(f"{API}/items/{oid}",headers=HJ,json={"status":"closed"},timeout=T)
+   if close.status_code not in (200,201): raise RuntimeError(f"{oid} could not close for clone activation")
+   u=requests.put(f"{API}/items/{nid}",headers=HJ,json={"price":s["price"],"available_quantity":1,"status":"active"},timeout=T)
+   print(f"ACTIVATE_AFTER_CLOSE {oid}->{nid} HTTP={u.status_code} {u.text[:500]}",flush=True)
+   if u.status_code not in (200,201):
+    requests.put(f"{API}/items/{oid}",headers=HJ,json={"status":s.get("status") or "active","available_quantity":max(1,int(s.get("available_quantity") or 1))},timeout=T)
+    raise RuntimeError(f"{nid} activation failed after safe source close {u.status_code} {u.text[:900]}")
   n=get(nid)
  checks=[nid not in OLD_IDS,int(n.get("seller_id") or 0)==SELLER,n.get("status")=="active",int(n.get("available_quantity") or 0)==1,(n.get("catalog_product_id")==s.get("catalog_product_id") or (not n.get("catalog_listing") and n.get("category_id")==s.get("category_id"))),n.get("condition")==s.get("condition")]
  if not all(checks): raise RuntimeError(f"{oid}->{nid} verify failed {checks}")
