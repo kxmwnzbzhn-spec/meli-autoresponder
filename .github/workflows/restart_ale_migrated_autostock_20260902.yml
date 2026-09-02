@@ -1,0 +1,17 @@
+name: Reiniciar autostock Alejandra con IDs nuevos
+on:
+  push:
+    paths:
+      - '.github/workflows/restart_ale_migrated_autostock_20260902.yml'
+  workflow_dispatch:
+jobs:
+  restart:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+      contents: read
+    steps:
+      - name: Detener monitor con lista anterior
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN_FOR_SECRETS }}
+        run: gh api --method POST "repos/${{ github.repository }}/actions/runs/33633079232/cancel" || true
