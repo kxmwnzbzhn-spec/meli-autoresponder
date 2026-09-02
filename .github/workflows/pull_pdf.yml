@@ -1,0 +1,35 @@
+name: pull-pdf-oneoff
+on:
+  workflow_dispatch:
+    inputs:
+      file_id: { required: true }
+      name:    { required: true }
+jobs:
+  r:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - run: pip install google-api-python-client google-auth -q
+      - env:
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+          FID: ${{ inputs.file_id }}
+          FN:  ${{ inputs.name }}
+        run: |
+          python - <<'PY'
+          import os, json
+          from google.oauth2 import service_account
+          from googleapiclient.discovery import build
+          from googleapiclient.http import MediaIoBaseDownload
+          import io
+          sa=json.loads(os.environ['GOOGLE_SERVICE_ACCOUNT_JSON'])
+          creds=service_account.Credentials.from_service_account_info(sa, scopes=['https://www.googleapis.com/auth/drive.readonly'])
+          svc=build('drive','v3',credentials=creds)
+          req=svc.files().get_media(fileId=os.environ['FID'])
+          fh=io.FileIO(os.environ['FN'],'wb')
+          d=MediaIoBaseDownload(fh, req, chunksize=1024*1024)
+          done=False
+          while not done: _,done=d.next_chunk()
+          print('ok', os.path.getsize(os.environ['FN']))
+          PY
+      - uses: actions/upload-artifact@v4
+        with: { name: pdf, path: "${{ inputs.name }}" }
