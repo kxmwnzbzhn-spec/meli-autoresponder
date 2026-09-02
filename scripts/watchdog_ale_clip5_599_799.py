@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import os,requests,json,time
 API="https://api.mercadolibre.com"; SELLER=3629038896
-IDS=["MLM3438304095","MLM3438303611","MLM3438315613","MLM6154085738"]
+IDS=[]
 FLOOR=599; CEILING=799; STEP=10; T=30
 r=requests.post(f"{API}/oauth/token",data={"grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID_NEW"],"client_secret":os.environ["MELI_APP_SECRET_NEW"],"refresh_token":os.environ["MELI_REFRESH_TOKEN_ALE"]},timeout=T)
 r.raise_for_status(); a=r.json(); open("/tmp/ale_rotated_token","w").write(a["refresh_token"])
