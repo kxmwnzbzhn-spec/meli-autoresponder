@@ -1,0 +1,38 @@
+name: Exportar etiquetas demoradas Jorge
+on:
+  workflow_dispatch:
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests pypdf reportlab pdf2image pillow -q
+      - name: Generar PDF de 138 etiquetas
+        env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID_NEW }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET_NEW }}
+          MELI_APP_ID_NEW: ${{ secrets.MELI_APP_ID_NEW }}
+          MELI_APP_SECRET_NEW: ${{ secrets.MELI_APP_SECRET_NEW }}
+          MELI_REFRESH_TOKEN_JORGE_LUIS: ${{ secrets.MELI_REFRESH_TOKEN_JORGE_LUIS }}
+        run: python scripts/export_jorge_delayed_labels_20260902.py
+      - name: Guardar token rotado
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN_FOR_SECRETS }}
+        run: |
+          if [ -s /tmp/jorge_rotated_token ]; then
+            gh secret set MELI_REFRESH_TOKEN_JORGE_LUIS --repo "${{ github.repository }}" < /tmp/jorge_rotated_token
+          fi
+      - name: Publicar PDF privado temporal
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: etiquetas-jorge-demoradas-2026-09-02
+          path: ETIQUETAS_JORGE_DEMORADAS_2026-09-02.pdf
+          if-no-files-found: error
+          retention-days: 7
