@@ -26,7 +26,6 @@ jobs:
           if me.json()["id"] != 3658456705: raise RuntimeError("La credencial no corresponde a Alejandra Dayana")
           body={
             "site_id":"MLM",
-            "title":"Bocina Bluetooth Portátil Asva electronics Flipi7 35w Ip67 Resistente Al Agua Bajos Potentes Inalámbrica Negra",
             "category_id":"MLM59800",
             "price":99,"currency_id":"MXN","available_quantity":1,
             "buying_mode":"buy_it_now","listing_type_id":"gold_special","condition":"new",
