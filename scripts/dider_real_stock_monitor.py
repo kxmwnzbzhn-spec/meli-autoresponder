@@ -54,7 +54,16 @@ def price(iid):
    for x in q.json().get("results") or []:
     if x.get("item_id") not in own_linked and x.get("status","active")=="active" and x.get("price") is not None:
      external.append(float(x["price"]))
- target=min(ceiling,max(floor,(min(external)-10 if external else ceiling)))
+ step=float(b.get("step") or 10)
+ raw=(min(external)-step if external else ceiling)
+ if b.get("force_price_to_win"):
+  w=requests.get(f"{API}/items/{iid}/price_to_win",headers=H,params={"version":"v2"},timeout=TIMEOUT)
+  if w.status_code==200:
+   wd=w.json(); ptw=wd.get("price_to_win")
+   if ptw is not None:
+    raw=float(ptw)-step
+    print(f"[PRICE-TO-WIN] {iid} status={wd.get('status')} ptw={ptw} target_raw={raw}",flush=True)
+ target=min(ceiling,max(floor,raw))
  target=round(target,2)
  if abs(current-target)<1: return
  u=requests.put(f"{API}/items/{iid}",headers=HJ,json={"price":target},timeout=TIMEOUT)
