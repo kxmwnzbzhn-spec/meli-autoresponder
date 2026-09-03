@@ -97,9 +97,11 @@
   "MLM6164209210": {
     "floor": 599,
     "ceiling": 799,
-    "source": "ale-clip5",
+    "source": "user-aggressive-buybox-2026-09-03",
     "source_item": "MLM3445690073",
-    "catalog_product_id": "MLM66701777"
+    "catalog_product_id": "MLM66701777",
+    "force_price_to_win": true,
+    "step": 10
   },
   "MLM6164196426": {
     "floor": 599,
@@ -111,16 +113,20 @@
   "MLM6164209212": {
     "floor": 599,
     "ceiling": 799,
-    "source": "ale-clip5",
+    "source": "user-aggressive-buybox-2026-09-03",
     "source_item": "MLM3445652319",
-    "catalog_product_id": "MLM44714150"
+    "catalog_product_id": "MLM44714150",
+    "force_price_to_win": true,
+    "step": 10
   },
   "MLM6164209214": {
     "floor": 599,
     "ceiling": 799,
-    "source": "ale-clip5",
+    "source": "user-aggressive-buybox-2026-09-03",
     "source_item": "MLM3445703035",
-    "catalog_product_id": "MLM44714337"
+    "catalog_product_id": "MLM44714337",
+    "force_price_to_win": true,
+    "step": 10
   },
   "MLM6164209220": {
     "floor": 599,
