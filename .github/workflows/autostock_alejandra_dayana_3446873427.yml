@@ -1,0 +1,61 @@
+name: Autostock Alejandra Dayana MLM3446873427
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 */5 * * *'
+
+concurrency:
+  group: alejandra-dayana-autostock-3446873427
+  cancel-in-progress: true
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    steps:
+      - name: Mantener 1 visible y 10 reales
+        env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN_ALEJANDRA_DAYANA }}
+        run: |
+          python - <<'PY'
+          import os, time, requests
+          API="https://api.mercadolibre.com"; ITEM="MLM3446873427"
+          INITIAL_REAL=10; BASELINE_SOLD=0; TICK=25; END=time.time()+17900
+          t=requests.post(API+"/oauth/token",data={
+            "grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],
+            "client_secret":os.environ["MELI_APP_SECRET"],"refresh_token":os.environ["MELI_REFRESH_TOKEN"]
+          },timeout=30); t.raise_for_status(); tj=t.json()
+          open("/tmp/alejandra_dayana_rotated","w").write(tj.get("refresh_token",""))
+          H={"Authorization":"Bearer "+tj["access_token"]}; HJ={**H,"Content-Type":"application/json"}
+          me=requests.get(API+"/users/me",headers=H,timeout=30); me.raise_for_status()
+          if me.json()["id"] != 3658456705: raise RuntimeError("Token de cuenta incorrecta")
+          while time.time() < END:
+            g=requests.get(API+"/items/"+ITEM,headers=H,timeout=30); g.raise_for_status(); d=g.json()
+            sold=max(0,int(d.get("sold_quantity",0))-BASELINE_SOLD); remaining=max(0,INITIAL_REAL-sold)
+            qty=int(d.get("available_quantity",0) or 0); status=d.get("status"); sub=d.get("sub_status") or []
+            if remaining == 0:
+              if qty != 0 or status == "active":
+                r=requests.put(API+"/items/"+ITEM,headers=HJ,json={"available_quantity":0},timeout=30)
+                print("AGOTADO",r.status_code,r.text[:300],flush=True)
+            elif not any(x in sub for x in ("forbidden","suspended","under_review")):
+              if qty != 1 or status == "paused":
+                body={"available_quantity":1}
+                if status == "paused": body["status"]="active"
+                r=requests.put(API+"/items/"+ITEM,headers=HJ,json=body,timeout=30)
+                print("REPOSICION",r.status_code,"vendidas",sold,"restantes",remaining,r.text[:300],flush=True)
+              else:
+                print("OK visible=1 vendidas",sold,"restantes",remaining,flush=True)
+            else:
+              print("BLOQUEO_MELI",status,sub,"restantes",remaining,flush=True)
+            time.sleep(TICK)
+          PY
+      - name: Guardar token rotado
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN_FOR_SECRETS }}
+        run: |
+          if [ -s /tmp/alejandra_dayana_rotated ]; then
+            gh secret set MELI_REFRESH_TOKEN_ALEJANDRA_DAYANA --repo kxmwnzbzhn-spec/meli-autoresponder < /tmp/alejandra_dayana_rotated
+          fi
