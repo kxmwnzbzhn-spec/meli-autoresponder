@@ -1,0 +1,48 @@
+name: Clonar 23 Alejandra a DIDER con autostock y precios
+on:
+  workflow_dispatch:
+
+jobs:
+  clone:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      actions: write
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests -q
+      - name: Detener monitor DIDER y guardar su token
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN_FOR_SECRETS }}
+        run: |
+          ids=$(gh api "repos/${{ github.repository }}/actions/workflows/dider_real_stock_monitor.yml/runs?status=in_progress&per_page=20" --jq '.workflow_runs[].id')
+          for id in $ids; do gh run cancel "$id" --repo "${{ github.repository }}" || true; done
+          sleep 20
+      - name: Clonar, validar y guardar configuración
+        env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_APP_ID_NEW: ${{ secrets.MELI_APP_ID_NEW }}
+          MELI_APP_SECRET_NEW: ${{ secrets.MELI_APP_SECRET_NEW }}
+          MELI_REFRESH_TOKEN_ALE: ${{ secrets.MELI_REFRESH_TOKEN_ALE }}
+          MELI_REFRESH_TOKEN_DIDER: ${{ secrets.MELI_REFRESH_TOKEN_DIDER }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN_FOR_SECRETS }}
+        run: python3 scripts/clone_ale_to_dider_23_20260903.py
+      - name: Guardar tokens rotados
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN_FOR_SECRETS }}
+        run: |
+          if [ -s /tmp/ale_rotated_token ]; then gh secret set MELI_REFRESH_TOKEN_ALE --repo "${{ github.repository }}" < /tmp/ale_rotated_token; fi
+          if [ -s /tmp/dider_rotated_token ]; then gh secret set MELI_REFRESH_TOKEN_DIDER --repo "${{ github.repository }}" < /tmp/dider_rotated_token; fi
+      - name: Iniciar monitor unificado DIDER
+        if: success()
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN_FOR_SECRETS }}
+        run: gh workflow run dider_real_stock_monitor.yml --repo "${{ github.repository }}" -f duration_sec=19800
