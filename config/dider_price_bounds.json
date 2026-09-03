@@ -1,1 +1,163 @@
-{}
+{
+  "MLM6164208944": {
+    "floor": 420.0,
+    "ceiling": 499.0,
+    "source": "ale-catalog",
+    "source_item": "MLM3445690083",
+    "catalog_product_id": "MLM44713972"
+  },
+  "MLM6164196390": {
+    "floor": 420.0,
+    "ceiling": 499.0,
+    "source": "ale-catalog",
+    "source_item": "MLM3445690103",
+    "catalog_product_id": "MLM50967958"
+  },
+  "MLM6164196114": {
+    "floor": 420.0,
+    "ceiling": 499.0,
+    "source": "ale-catalog",
+    "source_item": "MLM3445703067",
+    "catalog_product_id": "MLM37926169"
+  },
+  "MLM6164209186": {
+    "floor": 420.0,
+    "ceiling": 499.0,
+    "source": "ale-catalog",
+    "source_item": "MLM3445690081",
+    "catalog_product_id": "MLM2021083930"
+  },
+  "MLM6164171554": {
+    "floor": 420.0,
+    "ceiling": 499.0,
+    "source": "ale-catalog",
+    "source_item": "MLM3445703061",
+    "catalog_product_id": "MLM44710421"
+  },
+  "MLM6164171564": {
+    "floor": 420.0,
+    "ceiling": 499.0,
+    "source": "ale-catalog",
+    "source_item": "MLM3445690101",
+    "catalog_product_id": "MLM44710367"
+  },
+  "MLM6164196408": {
+    "floor": 420.0,
+    "ceiling": 499.0,
+    "source": "ale-catalog",
+    "source_item": "MLM3445703045",
+    "catalog_product_id": "MLM68783078"
+  },
+  "MLM6164209192": {
+    "floor": 420.0,
+    "ceiling": 499.0,
+    "source": "ale-catalog",
+    "source_item": "MLM3445652295",
+    "catalog_product_id": "MLM44710240"
+  },
+  "MLM6164171572": {
+    "floor": 420.0,
+    "ceiling": 499.0,
+    "source": "ale-catalog",
+    "source_item": "MLM3445652291",
+    "catalog_product_id": "MLM44710313"
+  },
+  "MLM6164171582": {
+    "floor": 420.0,
+    "ceiling": 499.0,
+    "source": "ale-catalog",
+    "source_item": "MLM3445703069",
+    "catalog_product_id": "MLM46998439"
+  },
+  "MLM6164209200": {
+    "floor": 420.0,
+    "ceiling": 499.0,
+    "source": "ale-catalog",
+    "source_item": "MLM3445703049",
+    "catalog_product_id": "MLM2021121410"
+  },
+  "MLM6164209204": {
+    "floor": 420.0,
+    "ceiling": 499.0,
+    "source": "ale-catalog",
+    "source_item": "MLM3445652297",
+    "catalog_product_id": "MLM2021493918"
+  },
+  "MLM6164209208": {
+    "floor": 420.0,
+    "ceiling": 499.0,
+    "source": "ale-catalog",
+    "source_item": "MLM3445703043",
+    "catalog_product_id": "MLM2021495500"
+  },
+  "MLM6164209210": {
+    "floor": 599.0,
+    "ceiling": 799.0,
+    "source": "ale-clip5",
+    "source_item": "MLM3445690073",
+    "catalog_product_id": "MLM66701777"
+  },
+  "MLM6164196426": {
+    "floor": 599.0,
+    "ceiling": 799.0,
+    "source": "ale-clip5",
+    "source_item": "MLM3445652303",
+    "catalog_product_id": "MLM37110751"
+  },
+  "MLM6164209212": {
+    "floor": 599.0,
+    "ceiling": 799.0,
+    "source": "ale-clip5",
+    "source_item": "MLM3445652319",
+    "catalog_product_id": "MLM44714150"
+  },
+  "MLM6164209214": {
+    "floor": 599.0,
+    "ceiling": 799.0,
+    "source": "ale-clip5",
+    "source_item": "MLM3445703035",
+    "catalog_product_id": "MLM44714337"
+  },
+  "MLM6164209220": {
+    "floor": 599.0,
+    "ceiling": 799.0,
+    "source": "ale-clip5",
+    "source_item": "MLM3445690105",
+    "catalog_product_id": "MLM35713227"
+  },
+  "MLM6164196438": {
+    "floor": 420.0,
+    "ceiling": 499.0,
+    "source": "ale-catalog",
+    "source_item": "MLM3445690091",
+    "catalog_product_id": "MLM2020384319"
+  },
+  "MLM6164209224": {
+    "floor": 420.0,
+    "ceiling": 499.0,
+    "source": "ale-catalog",
+    "source_item": "MLM3445652289",
+    "catalog_product_id": "MLM63880644"
+  },
+  "MLM6164209230": {
+    "floor": 420.0,
+    "ceiling": 499.0,
+    "source": "ale-catalog",
+    "source_item": "MLM3445690115",
+    "catalog_product_id": "MLM65836568"
+  },
+  "MLM6164209234": {
+    "floor": 420.0,
+    "ceiling": 499.0,
+    "source": "ale-catalog",
+    "source_item": "MLM3445690077",
+    "catalog_product_id": "MLM54696427"
+  },
+  "MLM6164196446": {
+    "floor": 420.0,
+    "ceiling": 499.0,
+    "source": "ale-catalog",
+    "source_item": "MLM3445703037",
+    "catalog_product_id": "MLM25912333"
+  }
+}
