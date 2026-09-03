@@ -1,0 +1,50 @@
+name: Activar publicación individual de Alejandra
+on:
+  workflow_dispatch:
+    inputs:
+      item_id:
+        description: "ID de publicación"
+        required: true
+        default: "MLM3445703067"
+jobs:
+  activate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Activar y verificar
+        env:
+          MELI_APP_ID_NEW: ${{ secrets.MELI_APP_ID_NEW }}
+          MELI_APP_SECRET_NEW: ${{ secrets.MELI_APP_SECRET_NEW }}
+          MELI_REFRESH_TOKEN_ALE: ${{ secrets.MELI_REFRESH_TOKEN_ALE }}
+          ITEM_ID: ${{ inputs.item_id }}
+        run: |
+          python3 - <<'PY'
+          import json, os, urllib.parse, urllib.request
+          API="https://api.mercadolibre.com"; SELLER=3629038896; iid=os.environ["ITEM_ID"].strip().upper()
+          if not iid.startswith("MLM"): iid="MLM"+iid
+          data=urllib.parse.urlencode({"grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID_NEW"],"client_secret":os.environ["MELI_APP_SECRET_NEW"],"refresh_token":os.environ["MELI_REFRESH_TOKEN_ALE"]}).encode()
+          req=urllib.request.Request(API+"/oauth/token",data=data,method="POST")
+          with urllib.request.urlopen(req,timeout=30) as r: tok=json.load(r)
+          open("/tmp/ale_rotated_token","w").write(tok["refresh_token"])
+          H={"Authorization":"Bearer "+tok["access_token"]}; HJ={**H,"Content-Type":"application/json"}
+          def get(url):
+            with urllib.request.urlopen(urllib.request.Request(url,headers=H),timeout=30) as r:return json.load(r)
+          me=get(API+"/users/me")
+          if int(me["id"])!=SELLER: raise RuntimeError("Token no corresponde a Alejandra")
+          before=get(API+"/items/"+iid)
+          if int(before.get("seller_id") or 0)!=SELLER: raise RuntimeError("La publicación no pertenece a Alejandra")
+          if before.get("deleted") or before.get("status")=="closed": raise RuntimeError("La publicación está cerrada/eliminada y no se puede reactivar")
+          body=json.dumps({"status":"active","available_quantity":1}).encode()
+          req=urllib.request.Request(API+"/items/"+iid,data=body,headers=HJ,method="PUT")
+          with urllib.request.urlopen(req,timeout=30) as r: result=json.load(r)
+          after=get(API+"/items/"+iid)
+          print("ALE_ACTIVATE_RESULT="+json.dumps({"id":iid,"before":before.get("status"),"after":after.get("status"),"qty":after.get("available_quantity"),"title":after.get("title")},ensure_ascii=False))
+          if after.get("status")!="active" or int(after.get("available_quantity") or 0)!=1: raise RuntimeError("No quedó activa con una pieza")
+          PY
+      - name: Guardar token rotado
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN_FOR_SECRETS }}
+        run: |
+          if [ -s /tmp/ale_rotated_token ]; then gh secret set MELI_REFRESH_TOKEN_ALE --repo "${{ github.repository }}" < /tmp/ale_rotated_token; fi
