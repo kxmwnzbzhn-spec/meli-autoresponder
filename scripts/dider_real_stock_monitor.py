@@ -50,8 +50,9 @@ def price(iid):
  if cpid:
   q=requests.get(f"{API}/products/{cpid}/items",headers=H,params={"limit":50},timeout=TIMEOUT)
   if q.status_code==200:
+   own_linked=set(ITEM_IDS)|{str(v.get("source_item")) for v in PRICE_BOUNDS.values() if v.get("source_item")}
    for x in q.json().get("results") or []:
-    if x.get("item_id") not in ITEM_IDS and x.get("status","active")=="active" and x.get("price") is not None:
+    if x.get("item_id") not in own_linked and x.get("status","active")=="active" and x.get("price") is not None:
      external.append(float(x["price"]))
  target=min(ceiling,max(floor,(min(external)-10 if external else ceiling)))
  target=round(target,2)
