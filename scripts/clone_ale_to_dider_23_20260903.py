@@ -78,6 +78,14 @@ for oid in SOURCES:
      "buying_mode":"buy_it_now","listing_type_id":s.get("listing_type_id") or "gold_special","condition":s["condition"],
      "catalog_product_id":s["catalog_product_id"],"catalog_listing":True,"attributes":attrs(s),
      "shipping":{"mode":"me2","local_pick_up":bool(ship.get("local_pick_up")),"free_shipping":bool(ship.get("free_shipping"))}}
+  terms=[]
+  for term in s.get("sale_terms") or []:
+   if term.get("id") in {"WARRANTY_TYPE","WARRANTY_TIME"}:
+    x={"id":term["id"]}
+    if term.get("value_id"): x["value_id"]=term["value_id"]
+    if term.get("value_name"): x["value_name"]=term["value_name"]
+    terms.append(x)
+  if terms: p["sale_terms"]=terms
   r=requests.post(f"{API}/items",headers=DJ,json=p,timeout=60)
   print(f"CREATE {oid} HTTP={r.status_code} {r.text[:600]}",flush=True)
   if r.status_code not in (200,201):raise RuntimeError(f"{oid}: create failed {r.status_code} {r.text[:1200]}")
