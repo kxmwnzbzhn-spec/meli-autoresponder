@@ -1,0 +1,70 @@
+name: Publicar catálogo Alejandra Dayana MLM75427969
+on:
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Publicar catálogo
+        env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN_ALEJANDRA_DAYANA }}
+        run: |
+          python - <<'PY'
+          import json, os, requests
+          api = "https://api.mercadolibre.com"
+          token = requests.post(api + "/oauth/token", data={
+              "grant_type": "refresh_token",
+              "client_id": os.environ["MELI_APP_ID"],
+              "client_secret": os.environ["MELI_APP_SECRET"],
+              "refresh_token": os.environ["MELI_REFRESH_TOKEN"],
+          }, timeout=30)
+          token.raise_for_status()
+          tj = token.json()
+          access = tj["access_token"]
+          open("/tmp/alejandra_dayana_rotated", "w").write(tj.get("refresh_token", ""))
+          h = {"Authorization": "Bearer " + access}
+          me = requests.get(api + "/users/me", headers=h, timeout=30)
+          me.raise_for_status()
+          seller = me.json()["id"]
+          expected_seller = 3658456705
+          if seller != expected_seller:
+              raise RuntimeError(f"Cuenta incorrecta: {seller}, esperada {expected_seller}")
+          search = requests.get(api + "/sites/MLM/search", headers=h,
+              params={"catalog_product_id":"MLM75427969", "limit":10}, timeout=30)
+          search.raise_for_status()
+          results = search.json().get("results", [])
+          if not results:
+              raise RuntimeError("No se encontró una ficha publicable para MLM75427969")
+          src = results[0]
+          body = {
+              "site_id":"MLM",
+              "title": src.get("title") or "Bocina Bluetooth Portátil Asva electronics Flipi7 35w Ip67 Resistente Al Agua Bajos Potentes Inalámbrica Negra",
+              "category_id": src.get("category_id") or "MLM59800",
+              "price": 99,
+              "currency_id":"MXN",
+              "available_quantity":1,
+              "buying_mode":"buy_it_now",
+              "listing_type_id":"gold_special",
+              "condition":"new",
+              "catalog_product_id":"MLM75427969",
+              "catalog_listing":True,
+              "shipping":{"mode":"me2"},
+              "attributes":[{"id":"SELLER_SKU","value_name":"AD-FLIPI7-NEGRO"}],
+          }
+          r = requests.post(api + "/items", headers={**h,"Content-Type":"application/json"}, json=body, timeout=30)
+          if r.status_code not in (200,201):
+              raise RuntimeError(f"Publicación rechazada HTTP {r.status_code}: {r.text[:1000]}")
+          item = r.json()
+          print(json.dumps({"id":item.get("id"),"status":item.get("status"),"price":item.get("price"),"quantity":item.get("available_quantity"),"catalog_product_id":item.get("catalog_product_id"),"permalink":item.get("permalink")}, ensure_ascii=False))
+          PY
+      - name: Guardar token rotado
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN_FOR_SECRETS }}
+        run: |
+          if [ -s /tmp/alejandra_dayana_rotated ]; then
+            gh secret set MELI_REFRESH_TOKEN_ALEJANDRA_DAYANA --repo kxmwnzbzhn-spec/meli-autoresponder < /tmp/alejandra_dayana_rotated
+          fi
