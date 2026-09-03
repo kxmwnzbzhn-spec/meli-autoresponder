@@ -1,0 +1,23 @@
+name: dider-fix-price
+on: { workflow_dispatch: {} }
+jobs:
+  r:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests -q
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_DIDER: ${{ secrets.MELI_REFRESH_TOKEN_DIDER }}
+        run: python scripts/dider_fix.py
+      - name: rot
+        if: always()
+        env: { GH_TOKEN: "${{ secrets.GH_TOKEN_FOR_SECRETS }}" }
+        run: |
+          if [ -s /tmp/dider_rot ]; then
+            gh secret set MELI_REFRESH_TOKEN_DIDER --repo kxmwnzbzhn-spec/meli-autoresponder < /tmp/dider_rot
+          fi
