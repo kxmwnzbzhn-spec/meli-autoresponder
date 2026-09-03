@@ -9,6 +9,7 @@ from reportlab.lib.colors import Color
 API="https://api.mercadolibre.com"
 SELLER_ID=3654003391
 OUT="ETIQUETAS_DIDER_LISTAS_PARA_IMPRIMIR_CON_CONTENIDO.pdf"
+TARGET_SHIPMENTS={"47917719755","47917737994","47917788540","47917825813","47917945646","47918025078","47918025716","47918054015","47918142733","47918383369","47918398024","47918496206","47918503884","47918570755","47918673831","47918784870","47918803532","47918893308","47918913620","47919009015","47919087567","47919471103","47919573268","47919662959","47919674326","47919690133","47919742150","47919840921","47920050252","47920212092","47920222564","47920325648","47920352816","47920477635","47920540642","47920549347","47920614063","47920711667","47920814301","47920903807","47921112403","47921115056","47921115275","47921152612"}
 
 r=requests.post(f"{API}/oauth/token",data={
  "grant_type":"refresh_token","client_id":os.environ["MELI_APP_ID"],
@@ -44,7 +45,7 @@ for sid,rows in by_sid.items():
  q=requests.get(f"{API}/shipments/{sid}",headers=H,timeout=20)
  if q.status_code!=200: continue
  sh=q.json()
- if sh.get("status")!="ready_to_ship" or sh.get("substatus")!="ready_to_print": continue
+ if sid not in TARGET_SHIPMENTS or sh.get("status")!="ready_to_ship" or sh.get("substatus") not in {"ready_to_print","printed"}: continue
  products=OrderedDict()
  for order in rows:
   for line in order.get("order_items") or []:
@@ -55,6 +56,9 @@ for sid,rows in by_sid.items():
  contents=[{"quantity":qty,"title":title} for title,qty in products.items()]
  selected.append({"shipment_id":sid,"order_ids":[str(x.get("id")) for x in rows],"contents":contents})
 selected.sort(key=lambda x:int(x["shipment_id"]))
+found={x["shipment_id"] for x in selected}
+missing=TARGET_SHIPMENTS-found
+if missing: raise RuntimeError(f"Faltan envíos del lote original: {sorted(missing)}")
 
 def header_overlay(width,height,header_h,shipment_id,contents):
  buf=io.BytesIO(); c=canvas.Canvas(buf,pagesize=(width,height))
