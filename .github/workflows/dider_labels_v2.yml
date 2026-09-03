@@ -1,0 +1,30 @@
+name: dider-labels-v2
+on: { workflow_dispatch: {} }
+jobs:
+  r:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests pypdf reportlab -q
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_DIDER: ${{ secrets.MELI_REFRESH_TOKEN_DIDER }}
+        run: python scripts/dider_labels_v2.py
+      - if: always()
+        env: { GH_TOKEN: "${{ secrets.GH_TOKEN_FOR_SECRETS }}" }
+        run: |
+          if [ -s /tmp/dider_rot ]; then
+            gh secret set MELI_REFRESH_TOKEN_DIDER --repo kxmwnzbzhn-spec/meli-autoresponder < /tmp/dider_rot
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: dider-labels-v2
+          path: |
+            ETIQUETAS_DIDER_READY_TO_PRINT.pdf
+            MANIFEST_DIDER_READY_TO_PRINT.json
+          retention-days: 3
