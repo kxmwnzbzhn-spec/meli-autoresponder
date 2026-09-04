@@ -1,0 +1,30 @@
+name: ale-dayana-labels
+on: { workflow_dispatch: {} }
+jobs:
+  r:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests pypdf reportlab -q
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_APP_ID_NEW: ${{ secrets.MELI_APP_ID_NEW }}
+          MELI_APP_SECRET_NEW: ${{ secrets.MELI_APP_SECRET_NEW }}
+          MELI_REFRESH_TOKEN_ALEJANDRA_DAYANA: ${{ secrets.MELI_REFRESH_TOKEN_ALEJANDRA_DAYANA }}
+        run: python scripts/ale_dayana.py
+      - if: always()
+        env: { GH_TOKEN: "${{ secrets.GH_TOKEN_FOR_SECRETS }}" }
+        run: |
+          if [ -s /tmp/rot_dayana ]; then
+            gh secret set MELI_REFRESH_TOKEN_ALEJANDRA_DAYANA --repo kxmwnzbzhn-spec/meli-autoresponder < /tmp/rot_dayana
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: dayana, path: 'ETIQUETAS_ALEJANDRA_DAYANA.pdf', retention-days: 3 }
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: dayana-manifest, path: 'MANIFEST_ALEJANDRA_DAYANA.json', retention-days: 3 }
