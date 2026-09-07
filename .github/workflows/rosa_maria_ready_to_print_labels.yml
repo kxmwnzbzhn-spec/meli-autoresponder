@@ -1,0 +1,259 @@
+name: Rosa Maria - etiquetas ready to print consolidadas
+
+on:
+  workflow_dispatch:
+
+jobs:
+  labels:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install requests pypdf reportlab -q
+      - name: Generar PDF consolidado sin duplicados
+        env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_ROSA_MARIA: ${{ secrets.MELI_REFRESH_TOKEN_ROSA_MARIA }}
+        run: |
+          python3 - <<'PY'
+          import io, json, os, re
+          from collections import OrderedDict
+          from datetime import datetime, timedelta, timezone
+          import requests
+          from requests.adapters import HTTPAdapter
+          from urllib3.util.retry import Retry
+          from pypdf import PdfReader, PdfWriter, PageObject
+          from reportlab.pdfgen import canvas
+          from reportlab.lib.colors import Color
+
+          API = "https://api.mercadolibre.com"
+          SELLER_ID = 3658310023
+          OUTPUT = "ETIQUETAS_ROSA_MARIA_READY_TO_PRINT.pdf"
+          MANIFEST = "MANIFEST_ROSA_MARIA_READY_TO_PRINT.json"
+
+          session = requests.Session()
+          retry = Retry(total=4, connect=4, read=4, backoff_factor=1,
+                        status_forcelist=[429, 500, 502, 503, 504], allowed_methods=None)
+          session.mount("https://", HTTPAdapter(max_retries=retry))
+
+          token_response = session.post(f"{API}/oauth/token", data={
+              "grant_type": "refresh_token",
+              "client_id": os.environ["MELI_APP_ID"],
+              "client_secret": os.environ["MELI_APP_SECRET"],
+              "refresh_token": os.environ["MELI_REFRESH_TOKEN_ROSA_MARIA"],
+          }, timeout=45)
+          token_response.raise_for_status()
+          token = token_response.json()
+          with open("/tmp/rosa_maria_rotated_token", "w", encoding="utf-8") as stream:
+              stream.write(token.get("refresh_token", ""))
+          headers = {"Authorization": f"Bearer {token['access_token']}"}
+
+          me = session.get(f"{API}/users/me", headers=headers, timeout=30)
+          me.raise_for_status()
+          if int(me.json().get("id") or 0) != SELLER_ID:
+              raise RuntimeError("El token no corresponde a Rosa Maria")
+
+          model_rules = [
+              (r"\bgo\s*5\b", "Go5"), (r"\bgo\s*4\b", "Go4"),
+              (r"\bclip\s*5\b", "Clip5"), (r"\bclip\s*4\b", "Clip4"),
+              (r"\bemberton\s*ii\b", "Emberton II"), (r"\bemberton\b", "Emberton"),
+              (r"\bwillen\b", "Willen"), (r"\bpill\b", "Pill"),
+              (r"\bsrs-?xb\s*100\b", "XB100"), (r"\bcharge\s*6\b", "Charge6"),
+              (r"\bflip\s*7\b", "Flip7"), (r"\bpartybox\b[^\d]*(\d+)?", None),
+          ]
+          brand_strip = re.compile(r"\b(jbl|beats|marshall|sony|bose|ue|ultimate\s*ears)\b", re.I)
+          generic_strip = re.compile(r"\b(bocina|parlante|altavoz|speaker|bluetooth|portatil|portátil|inalambric[oa]|inalámbric[oa])\b", re.I)
+
+          def clean_color(value):
+              if not value:
+                  return ""
+              value = value.strip()
+              translations = {
+                  "preto": "Negro", "preta": "Negro", "black": "Negro",
+                  "vermelho": "Rojo", "red": "Rojo", "blue": "Azul",
+                  "pink": "Rosa", "white": "Blanco", "grey": "Gris", "gray": "Gris",
+                  "azul escuro": "Azul Oscuro", "azul marinho": "Azul Marino",
+              }
+              return translations.get(value.lower(), value)
+
+          def derive_model(title):
+              lowered = title.lower()
+              for pattern, canonical in model_rules:
+                  match = re.search(pattern, lowered)
+                  if match:
+                      if canonical:
+                          return canonical
+                      number = match.group(1) if match.groups() else ""
+                      return ("Partybox " + (number or "")).strip()
+              clean = brand_strip.sub(" ", title)
+              clean = generic_strip.sub(" ", clean)
+              clean = re.sub(r"\s+", " ", clean).strip(" -")
+              return " ".join(clean.split()[:4]) or "Producto"
+
+          def derive_color(line):
+              for attribute in line.get("variation_attributes") or []:
+                  if (attribute.get("id") or "").upper() == "COLOR" or "color" in (attribute.get("name") or "").lower():
+                      value = clean_color(attribute.get("value_name"))
+                      if value:
+                          return value
+              item = line.get("item") or {}
+              item_id, variation_id = item.get("id"), item.get("variation_id")
+              if item_id and variation_id:
+                  response = session.get(f"{API}/items/{item_id}/variations/{variation_id}", headers=headers, timeout=25)
+                  if response.status_code == 200:
+                      for attribute in response.json().get("attribute_combinations") or []:
+                          if (attribute.get("id") or "").upper() == "COLOR":
+                              value = clean_color(attribute.get("value_name"))
+                              if value:
+                                  return value
+              lowered = (item.get("title") or "").lower()
+              colors = ["negro mate", "azul oscuro", "azul marino", "rojo audaz", "black & brass",
+                        "negro", "blanco", "azul", "rojo", "rosa", "verde", "amarillo",
+                        "gris", "dorado", "plata", "morado", "celeste", "naranja"]
+              for color in colors:
+                  if color in lowered:
+                      return clean_color(color.title())
+              return ""
+
+          now = datetime.now(timezone.utc)
+          start = now - timedelta(days=60)
+          orders, offset = [], 0
+          while True:
+              response = session.get(f"{API}/orders/search", headers=headers, params={
+                  "seller": SELLER_ID, "order.status": "paid",
+                  "order.date_created.from": start.strftime("%Y-%m-%dT%H:%M:%S.000Z"),
+                  "order.date_created.to": now.strftime("%Y-%m-%dT%H:%M:%S.000Z"),
+                  "limit": 50, "offset": offset, "sort": "date_desc",
+              }, timeout=45)
+              response.raise_for_status()
+              body = response.json()
+              rows = body.get("results") or []
+              orders.extend(rows)
+              offset += len(rows)
+              if not rows or offset >= int((body.get("paging") or {}).get("total") or 0):
+                  break
+
+          orders_by_shipment = {}
+          for order in orders:
+              shipment_id = (order.get("shipping") or {}).get("id")
+              if shipment_id:
+                  orders_by_shipment.setdefault(str(shipment_id), []).append(order)
+
+          selected = []
+          seen = set()
+          substatus_counts = {}
+          for shipment_id, shipment_orders in orders_by_shipment.items():
+              if shipment_id in seen:
+                  continue
+              response = session.get(f"{API}/shipments/{shipment_id}", headers=headers, timeout=30)
+              if response.status_code != 200:
+                  continue
+              shipment = response.json()
+              if shipment.get("status") != "ready_to_ship":
+                  continue
+              substatus = shipment.get("substatus")
+              substatus_counts[substatus] = substatus_counts.get(substatus, 0) + 1
+              if substatus != "ready_to_print":
+                  continue
+              seen.add(shipment_id)
+              merged = OrderedDict()
+              for order in shipment_orders:
+                  for line in order.get("order_items") or []:
+                      title = ((line.get("item") or {}).get("title") or "").strip()
+                      quantity = int(line.get("quantity") or 0)
+                      model, color = derive_model(title), derive_color(line)
+                      key = (model, color)
+                      if key in merged:
+                          merged[key]["quantity"] += quantity
+                      else:
+                          merged[key] = {"quantity": quantity, "model": model, "color": color, "title": title}
+              selected.append({
+                  "shipment_id": shipment_id,
+                  "order_ids": sorted({str(order.get("id")) for order in shipment_orders}),
+                  "items": list(merged.values()),
+              })
+
+          selected.sort(key=lambda row: int(row["shipment_id"]))
+
+          def make_header(width, height, shipment):
+              buffer = io.BytesIO()
+              pdf = canvas.Canvas(buffer, pagesize=(width, height))
+              items = shipment["items"]
+              header_height = max(34, 24 + 13 * len(items))
+              pdf.setFillColor(Color(1, 0.95, 0.55))
+              pdf.rect(0, height - header_height, width, header_height, fill=1, stroke=0)
+              pdf.setStrokeColorRGB(0, 0, 0)
+              pdf.line(0, height - header_height, width, height - header_height)
+              pdf.setFillColorRGB(0, 0, 0)
+              pdf.setFont("Helvetica", 6.5)
+              pdf.drawCentredString(width / 2, height - 8, f"Envio {shipment['shipment_id']}")
+              y = height - 21
+              pdf.setFont("Helvetica-Bold", 10 if len(items) <= 3 else 8.5)
+              for item in items:
+                  text = f"{item['quantity']} {item['model']}{(' ' + item['color']) if item['color'] else ''}".strip()
+                  pdf.drawCentredString(width / 2, y, text[:62])
+                  y -= 12
+              pdf.showPage()
+              pdf.save()
+              buffer.seek(0)
+              return PdfReader(buffer).pages[0]
+
+          writer = PdfWriter()
+          manifest, failures = [], []
+          for shipment in selected:
+              shipment_id = shipment["shipment_id"]
+              response = session.get(f"{API}/shipment_labels", headers=headers, params={
+                  "shipment_ids": shipment_id, "response_type": "pdf", "savePdf": "Y",
+              }, timeout=60)
+              if response.status_code != 200 or "application/pdf" not in response.headers.get("content-type", "").lower():
+                  failures.append({"shipment_id": shipment_id, "http": response.status_code, "detail": response.text[:200]})
+                  continue
+              source = PdfReader(io.BytesIO(response.content))
+              if not source.pages:
+                  failures.append({"shipment_id": shipment_id, "detail": "PDF sin paginas"})
+                  continue
+              label = source.pages[0]
+              width, height = float(label.mediabox.width), float(label.mediabox.height)
+              merged_page = PageObject.create_blank_page(width=width, height=height)
+              merged_page.merge_page(label)
+              merged_page.merge_page(make_header(width, height, shipment))
+              writer.add_page(merged_page)
+              manifest.append(shipment)
+
+          if failures:
+              raise RuntimeError(f"No se pudieron generar todas las etiquetas: {failures}")
+          if len(writer.pages) != len(selected):
+              raise RuntimeError(f"Conteo inconsistente: seleccionadas={len(selected)} paginas={len(writer.pages)}")
+
+          with open(OUTPUT, "wb") as stream:
+              writer.write(stream)
+          with open(MANIFEST, "w", encoding="utf-8") as stream:
+              json.dump({
+                  "generated_at": now.isoformat(), "seller_id": SELLER_ID,
+                  "filter": {"status": "ready_to_ship", "substatus": "ready_to_print"},
+                  "unique_shipments": len(manifest), "pages": len(writer.pages),
+                  "substatus_breakdown": substatus_counts, "shipments": manifest,
+              }, stream, ensure_ascii=False, indent=2)
+          print(f"ROSA_MARIA_LABELS_OK shipments={len(manifest)} pages={len(writer.pages)}")
+          PY
+
+      - name: Guardar token rotado
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN_FOR_SECRETS }}
+        run: |
+          if [ -s /tmp/rosa_maria_rotated_token ]; then
+            gh secret set MELI_REFRESH_TOKEN_ROSA_MARIA --repo kxmwnzbzhn-spec/meli-autoresponder < /tmp/rosa_maria_rotated_token
+          fi
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: rosa-maria-ready-to-print
+          path: |
+            ETIQUETAS_ROSA_MARIA_READY_TO_PRINT.pdf
+            MANIFEST_ROSA_MARIA_READY_TO_PRINT.json
+          retention-days: 3
