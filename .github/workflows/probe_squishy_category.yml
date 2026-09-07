@@ -1,0 +1,52 @@
+name: Diagnosticar categoria Squishy Elote Alejandra Dayana
+
+on:
+  workflow_dispatch:
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install requests -q
+      - name: Consultar categoria y requisitos
+        env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN_ALEJANDRA_DAYANA }}
+        run: |
+          python - <<'PY'
+          import json, os, requests
+          api='https://api.mercadolibre.com'
+          t=requests.post(api+'/oauth/token',data={
+            'grant_type':'refresh_token','client_id':os.environ['MELI_APP_ID'],
+            'client_secret':os.environ['MELI_APP_SECRET'],'refresh_token':os.environ['MELI_REFRESH_TOKEN']
+          },timeout=30)
+          t.raise_for_status(); tj=t.json(); access=tj['access_token']
+          open('/tmp/alejandra_dayana_rotated','w').write(tj.get('refresh_token',''))
+          h={'Authorization':'Bearer '+access}
+          me=requests.get(api+'/users/me',headers=h,timeout=30); me.raise_for_status()
+          assert int(me.json()['id'])==3658456705, me.text
+          q='Squishy Elote Antiestres Suave Juguete Sensorial 8 Cm'
+          r=requests.get(api+'/sites/MLM/domain_discovery/search',headers=h,params={'q':q,'limit':10},timeout=30)
+          print('DOMAIN_HTTP',r.status_code)
+          print(r.text)
+          r.raise_for_status()
+          for row in r.json():
+            cid=row.get('category_id')
+            if not cid: continue
+            c=requests.get(api+'/categories/'+cid,headers=h,timeout=30)
+            print('CATEGORY',cid,c.status_code,c.text[:5000])
+            a=requests.get(api+'/categories/'+cid+'/attributes',headers=h,timeout=30)
+            print('ATTRIBUTES',cid,a.status_code,a.text[:12000])
+          PY
+      - name: Guardar token rotado
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN_FOR_SECRETS }}
+        run: |
+          if [ -s /tmp/alejandra_dayana_rotated ]; then
+            gh secret set MELI_REFRESH_TOKEN_ALEJANDRA_DAYANA --repo kxmwnzbzhn-spec/meli-autoresponder < /tmp/alejandra_dayana_rotated
+          fi
