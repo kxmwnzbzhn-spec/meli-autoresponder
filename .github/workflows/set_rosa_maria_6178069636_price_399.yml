@@ -1,0 +1,97 @@
+name: Rosa Maria - poner 6178069636 en 399
+
+on:
+  workflow_dispatch:
+
+jobs:
+  update_price:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Actualizar y verificar precio
+        env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_ROSA_MARIA: ${{ secrets.MELI_REFRESH_TOKEN_ROSA_MARIA }}
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          import time
+          import urllib.error
+          import urllib.parse
+          import urllib.request
+
+          API = "https://api.mercadolibre.com"
+          SELLER_ID = 3658310023
+          ITEM_ID = "MLM6178069636"
+          PRICE = 399
+
+          def request(url, method="GET", headers=None, data=None, retries=3):
+              encoded = json.dumps(data).encode() if data is not None else None
+              for attempt in range(retries):
+                  req = urllib.request.Request(url, data=encoded, headers=headers or {}, method=method)
+                  try:
+                      with urllib.request.urlopen(req, timeout=45) as response:
+                          return response.status, json.loads(response.read().decode())
+                  except urllib.error.HTTPError as error:
+                      body = error.read().decode(errors="replace")
+                      try:
+                          body = json.loads(body)
+                      except json.JSONDecodeError:
+                          pass
+                      return error.code, body
+                  except urllib.error.URLError:
+                      if attempt == retries - 1:
+                          raise
+                      time.sleep(2 ** attempt)
+
+          token_data = urllib.parse.urlencode({
+              "grant_type": "refresh_token",
+              "client_id": os.environ["MELI_APP_ID"],
+              "client_secret": os.environ["MELI_APP_SECRET"],
+              "refresh_token": os.environ["MELI_REFRESH_TOKEN_ROSA_MARIA"],
+          }).encode()
+          token_request = urllib.request.Request(f"{API}/oauth/token", data=token_data, method="POST")
+          with urllib.request.urlopen(token_request, timeout=45) as response:
+              token = json.loads(response.read().decode())
+
+          with open("/tmp/rosa_maria_rotated_token", "w", encoding="utf-8") as stream:
+              stream.write(token.get("refresh_token", ""))
+
+          headers = {"Authorization": f"Bearer {token['access_token']}"}
+          json_headers = {**headers, "Content-Type": "application/json"}
+          status, account = request(f"{API}/users/me", headers=headers)
+          if status != 200 or int(account.get("id") or 0) != SELLER_ID:
+              raise RuntimeError(f"Token incorrecto para Rosa Maria: HTTP {status}")
+
+          status, item = request(f"{API}/items/{ITEM_ID}", headers=headers)
+          if status != 200 or int(item.get("seller_id") or 0) != SELLER_ID:
+              raise RuntimeError(f"Publicacion incorrecta o inaccesible: HTTP {status}")
+
+          status, result = request(
+              f"{API}/items/{ITEM_ID}", method="PUT", headers=json_headers, data={"price": PRICE}
+          )
+          if status not in (200, 201):
+              raise RuntimeError(f"No se pudo actualizar: HTTP {status}: {result}")
+
+          status, check = request(f"{API}/items/{ITEM_ID}", headers=headers)
+          if status != 200 or float(check.get("price") or 0) != PRICE:
+              raise RuntimeError(f"Verificacion fallo: HTTP {status}, precio={check.get('price')}")
+          print(json.dumps({
+              "item": ITEM_ID,
+              "title": check.get("title"),
+              "status": check.get("status"),
+              "price": check.get("price"),
+          }, ensure_ascii=False), flush=True)
+          PY
+
+      - name: Guardar token rotado
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN_FOR_SECRETS }}
+        run: |
+          if [ -s /tmp/rosa_maria_rotated_token ]; then
+            gh secret set MELI_REFRESH_TOKEN_ROSA_MARIA --repo kxmwnzbzhn-spec/meli-autoresponder < /tmp/rosa_maria_rotated_token
+          fi
