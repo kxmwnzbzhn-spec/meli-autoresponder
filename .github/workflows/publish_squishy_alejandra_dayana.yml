@@ -1,0 +1,139 @@
+name: Publicar Squishy Elote en Alejandra Dayana
+
+on:
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install requests -q
+      - name: Publicar y verificar
+        env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN_ALEJANDRA_DAYANA }}
+        run: |
+          python - <<'PY'
+          import io, json, os, re, requests
+
+          API='https://api.mercadolibre.com'
+          SELLER=3658456705
+          SKU='AD-SQUISHY-ELOTE'
+          TITLE='Squishy Elote Antiestrés Suave Juguete Sensorial 8 Cm'
+          CATEGORY='MLM433525'
+          PRICE=99
+          QUANTITY=1
+          SHARES=[
+            'https://chatgpt.com/s/m_6a9f32c5520c8191835d28cf095b929b',
+            'https://chatgpt.com/s/m_6a9f331c425c819182c1b8fe588259f9',
+            'https://chatgpt.com/s/m_6a9f3330fa648191a411e9c634dc3f4a',
+            'https://chatgpt.com/s/m_6a9f3340443c81919c1eda5bd1151a84',
+            'https://chatgpt.com/s/m_6a9f3356ab0081919428995f5b99f0ed',
+          ]
+          DESCRIPTION='''Squishy con diseño realista de elote amarillo y hojas verdes.
+
+          CARACTERÍSTICAS
+          - Se deforma al apretarlo y recupera su forma.
+          - Tacto suave, ideal como juguete sensorial y antiestrés.
+          - Diseño compacto y llamativo.
+          - Medidas aproximadas: 8 cm de alto por 6 cm de ancho.
+          - Color: amarillo y verde.
+
+          CONTENIDO
+          - 1 squishy con diseño de elote.
+
+          IMPORTANTE
+          - No es alimento.
+          - Las medidas pueden presentar ligeras variaciones.'''
+
+          session=requests.Session()
+          token=session.post(API+'/oauth/token',data={
+            'grant_type':'refresh_token','client_id':os.environ['MELI_APP_ID'],
+            'client_secret':os.environ['MELI_APP_SECRET'],'refresh_token':os.environ['MELI_REFRESH_TOKEN']
+          },timeout=30)
+          token.raise_for_status(); tj=token.json(); access=tj['access_token']
+          open('/tmp/alejandra_dayana_rotated','w').write(tj.get('refresh_token',''))
+          h={'Authorization':'Bearer '+access}; hj={**h,'Content-Type':'application/json'}
+
+          me=session.get(API+'/users/me',headers=h,timeout=30); me.raise_for_status()
+          if int(me.json().get('id') or 0)!=SELLER:
+            raise RuntimeError('La credencial no corresponde a Alejandra Dayana')
+
+          existing=session.get(API+f'/users/{SELLER}/items/search',headers=h,params={'sku':SKU},timeout=30)
+          existing.raise_for_status(); matches=existing.json().get('results') or []
+          if matches:
+            item_id=matches[0]
+            current=session.get(API+'/items/'+item_id,headers=h,timeout=30); current.raise_for_status()
+            print('EXISTING_ITEM',json.dumps({k:current.json().get(k) for k in ('id','status','title','price','available_quantity','permalink')},ensure_ascii=False))
+            raise SystemExit(0)
+
+          picture_ids=[]
+          pattern=re.compile(r'https://chatgpt\.com/backend-api/estuary/public_content/enc/[A-Za-z0-9_=+-]+')
+          for index,share in enumerate(SHARES,1):
+            page=session.get(share,timeout=60); page.raise_for_status()
+            urls=pattern.findall(page.text)
+            if not urls:
+              raise RuntimeError(f'No se encontró la imagen {index}')
+            image=session.get(urls[0],timeout=60); image.raise_for_status()
+            mime=image.headers.get('content-type','image/jpeg').split(';')[0]
+            upload=session.post(API+'/pictures/items/upload',headers=h,
+              files={'file':(f'squishy-elote-{index}.jpg',io.BytesIO(image.content),mime)},timeout=60)
+            if upload.status_code not in (200,201):
+              raise RuntimeError(f'Falló foto {index}: HTTP {upload.status_code} {upload.text[:800]}')
+            picture_id=upload.json().get('id')
+            if not picture_id:
+              raise RuntimeError(f'Foto {index} sin ID: {upload.text[:800]}')
+            picture_ids.append(picture_id)
+          if len(picture_ids)!=5 or len(set(picture_ids))!=5:
+            raise RuntimeError('No se cargaron cinco fotografías únicas')
+
+          body={
+            'site_id':'MLM','title':TITLE,'category_id':CATEGORY,
+            'price':PRICE,'currency_id':'MXN','available_quantity':QUANTITY,
+            'buying_mode':'buy_it_now','listing_type_id':'gold_special','condition':'new',
+            'pictures':[{'id':x} for x in picture_ids],
+            'shipping':{'mode':'me2','free_shipping':False},
+            'attributes':[
+              {'id':'BRAND','value_name':'Genérica'},
+              {'id':'MODEL','value_name':'Elote'},
+              {'id':'SQUISHIES_SIZE','value_id':'24635202'},
+              {'id':'SALE_FORMAT','value_id':'1359391'},
+              {'id':'UNITS_PER_PACK','value_name':'1'},
+              {'id':'EMPTY_GTIN_REASON','value_id':'17055160'},
+              {'id':'SELLER_SKU','value_name':SKU},
+            ],
+          }
+          created=session.post(API+'/items',headers=hj,json=body,timeout=60)
+          if created.status_code not in (200,201):
+            raise RuntimeError(f'Publicación rechazada HTTP {created.status_code}: {created.text[:4000]}')
+          item=created.json(); item_id=item['id']
+
+          desc=session.post(API+f'/items/{item_id}/description',headers=hj,json={'plain_text':DESCRIPTION},timeout=30)
+          if desc.status_code not in (200,201):
+            raise RuntimeError(f'No se guardó la descripción: HTTP {desc.status_code} {desc.text[:1500]}')
+
+          verified=session.get(API+'/items/'+item_id,headers=h,timeout=30); verified.raise_for_status(); final=verified.json()
+          if float(final.get('price') or 0)!=PRICE or int(final.get('available_quantity') or 0)!=QUANTITY:
+            raise RuntimeError('La verificación de precio o stock no coincide')
+          if len(final.get('pictures') or [])!=5:
+            raise RuntimeError('La verificación no muestra cinco fotografías')
+          print('PUBLISHED_OK',json.dumps({
+            'id':final.get('id'),'status':final.get('status'),'title':final.get('title'),
+            'price':final.get('price'),'available_quantity':final.get('available_quantity'),
+            'category_id':final.get('category_id'),'pictures':len(final.get('pictures') or []),
+            'permalink':final.get('permalink')
+          },ensure_ascii=False))
+          PY
+      - name: Guardar token rotado
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN_FOR_SECRETS }}
+        run: |
+          if [ -s /tmp/alejandra_dayana_rotated ]; then
+            gh secret set MELI_REFRESH_TOKEN_ALEJANDRA_DAYANA --repo kxmwnzbzhn-spec/meli-autoresponder < /tmp/alejandra_dayana_rotated
+          fi
