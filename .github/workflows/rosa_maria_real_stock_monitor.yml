@@ -1,0 +1,47 @@
+name: rosa-maria-real-stock-monitor
+
+on:
+  workflow_dispatch:
+    inputs:
+      duration_sec:
+        description: "Duracion del monitor en segundos"
+        required: false
+        default: "19800"
+  schedule:
+    - cron: "49 6 * * *"
+
+concurrency:
+  group: rosa-maria-real-stock-monitor
+  cancel-in-progress: true
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 345
+    permissions:
+      actions: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install requests -q
+      - run: python3 -m py_compile scripts/rosa_maria_real_stock_monitor.py
+      - name: Monitor ROSA MARIA unlimited stock
+        env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_ROSA_MARIA: ${{ secrets.MELI_REFRESH_TOKEN_ROSA_MARIA }}
+          RUN_DURATION_SEC: ${{ inputs.duration_sec || '19800' }}
+        run: python3 scripts/rosa_maria_real_stock_monitor.py
+      - name: Save rotated refresh token
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN_FOR_SECRETS }}
+        run: |
+          if [ -s /tmp/rosa_maria_rotated_token ]; then
+            gh secret set MELI_REFRESH_TOKEN_ROSA_MARIA --repo kxmwnzbzhn-spec/meli-autoresponder < /tmp/rosa_maria_rotated_token
+          fi
+      - name: Continue monitoring
+        if: ${{ success() && (github.event_name == 'schedule' || inputs.duration_sec == '19800') }}
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN_FOR_SECRETS }}
+        run: gh workflow run rosa_maria_real_stock_monitor.yml --repo kxmwnzbzhn-spec/meli-autoresponder -f duration_sec=19800
