@@ -30,7 +30,7 @@ jobs:
           me=requests.get(api+'/users/me',headers=h,timeout=30); me.raise_for_status()
           assert int(me.json()['id'])==3658456705, me.text
           q='Squishy Elote Antiestres Suave Juguete Sensorial 8 Cm'
-          r=requests.get(api+'/sites/MLM/domain_discovery/search',headers=h,params={'q':q,'limit':10},timeout=30)
+          r=requests.get(api+'/sites/MLM/domain_discovery/search',headers=h,params={'q':q,'limit':8},timeout=30)
           print('DOMAIN_HTTP',r.status_code)
           print(r.text)
           r.raise_for_status()
