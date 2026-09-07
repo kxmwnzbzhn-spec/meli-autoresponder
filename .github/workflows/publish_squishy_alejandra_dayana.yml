@@ -93,7 +93,7 @@ jobs:
             raise RuntimeError('No se cargaron cinco fotografías únicas')
 
           body={
-            'site_id':'MLM','title':TITLE,'category_id':CATEGORY,
+            'site_id':'MLM','title':TITLE,'family_name':TITLE,'category_id':CATEGORY,
             'price':PRICE,'currency_id':'MXN','available_quantity':QUANTITY,
             'buying_mode':'buy_it_now','listing_type_id':'gold_special','condition':'new',
             'pictures':[{'id':x} for x in picture_ids],
