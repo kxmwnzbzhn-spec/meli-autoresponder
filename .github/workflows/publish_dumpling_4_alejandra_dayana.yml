@@ -1,0 +1,157 @@
+name: Publicar 4 Squishy Dumpling en Alejandra Dayana
+
+on:
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install requests -q
+      - name: Publicar cuatro presentaciones y verificar
+        env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN_ALEJANDRA_DAYANA }}
+        run: |
+          python - <<'PY'
+          import io, json, os, re, requests
+
+          API='https://api.mercadolibre.com'
+          SELLER=3658456705
+          CATEGORY='MLM433525'
+          SHARES=[
+            'https://chatgpt.com/s/m_6a9f39180c3081919c216b1ec1a192fb',
+            'https://chatgpt.com/s/m_6a9f392fe6e88191b46a2abacd60bc78',
+            'https://chatgpt.com/s/m_6a9f3938b7dc819191485973f4917ba9',
+            'https://chatgpt.com/s/m_6a9f393f29c88191a2a02ad3a38dfba1',
+            'https://chatgpt.com/s/m_6a9f394585ec8191a69577f3d8a02e31',
+          ]
+          PRODUCTS=[
+            {'units':1, 'price':49,  'sku':'SQ-DUMP-01', 'family':'Squishy Dumpling Antiestrés Diseño Surtido 1 Pieza'},
+            {'units':3, 'price':119, 'sku':'SQ-DUMP-03', 'family':'Squishy Dumpling Antiestrés Diseño Surtido Pack 3 Pzas'},
+            {'units':5, 'price':179, 'sku':'SQ-DUMP-05', 'family':'Squishy Dumpling Antiestrés Diseño Surtido Pack 5 Pzas'},
+            {'units':10,'price':299, 'sku':'SQ-DUMP-10', 'family':'Squishy Dumpling Antiestrés Diseño Surtido Pack 10 Pzas'},
+          ]
+
+          session=requests.Session()
+          token=session.post(API+'/oauth/token',data={
+            'grant_type':'refresh_token','client_id':os.environ['MELI_APP_ID'],
+            'client_secret':os.environ['MELI_APP_SECRET'],'refresh_token':os.environ['MELI_REFRESH_TOKEN']
+          },timeout=30)
+          token.raise_for_status(); tj=token.json(); access=tj['access_token']
+          open('/tmp/alejandra_dayana_rotated','w').write(tj.get('refresh_token',''))
+          h={'Authorization':'Bearer '+access}; hj={**h,'Content-Type':'application/json'}
+
+          me=session.get(API+'/users/me',headers=h,timeout=30); me.raise_for_status()
+          if int(me.json().get('id') or 0)!=SELLER:
+            raise RuntimeError('La credencial no corresponde a Alejandra Dayana')
+
+          picture_ids=[]
+          pattern=re.compile(r'https://chatgpt\.com/backend-api/estuary/public_content/enc/[A-Za-z0-9_=+-]+')
+          for index,share in enumerate(SHARES,1):
+            page=session.get(share,timeout=60); page.raise_for_status()
+            urls=pattern.findall(page.text)
+            if not urls:
+              raise RuntimeError(f'No se encontró la imagen {index}')
+            image=session.get(urls[0],timeout=60); image.raise_for_status()
+            mime=image.headers.get('content-type','image/jpeg').split(';')[0]
+            upload=session.post(API+'/pictures/items/upload',headers=h,
+              files={'file':(f'squishy-dumpling-{index}.jpg',io.BytesIO(image.content),mime)},timeout=60)
+            if upload.status_code not in (200,201):
+              raise RuntimeError(f'Falló foto {index}: HTTP {upload.status_code} {upload.text[:800]}')
+            picture_id=upload.json().get('id')
+            if not picture_id:
+              raise RuntimeError(f'Foto {index} sin ID: {upload.text[:800]}')
+            picture_ids.append(picture_id)
+          if len(picture_ids)!=5 or len(set(picture_ids))!=5:
+            raise RuntimeError('No se cargaron cinco fotografías únicas')
+
+          results=[]
+          for product in PRODUCTS:
+            existing=session.get(API+f'/users/{SELLER}/items/search',headers=h,
+              params={'sku':product['sku']},timeout=30)
+            existing.raise_for_status(); matches=existing.json().get('results') or []
+            if matches:
+              item_id=matches[0]
+              current=session.get(API+'/items/'+item_id,headers=h,timeout=30); current.raise_for_status()
+              cur=current.json()
+              results.append({
+                'id':cur.get('id'),'status':cur.get('status'),'title':cur.get('title'),
+                'price':cur.get('price'),'available_quantity':cur.get('available_quantity'),
+                'sku':product['sku'],'units':product['units'],'pictures':len(cur.get('pictures') or []),
+                'permalink':cur.get('permalink'),'existing':True
+              })
+              continue
+
+            units=product['units']
+            sale_format='Unidad' if units==1 else 'Pack'
+            body={
+              'site_id':'MLM','family_name':product['family'],'category_id':CATEGORY,
+              'price':product['price'],'currency_id':'MXN','available_quantity':1,
+              'buying_mode':'buy_it_now','listing_type_id':'gold_special','condition':'new',
+              'pictures':[{'id':x} for x in picture_ids],
+              'shipping':{'mode':'me2','free_shipping':False,'local_pick_up':False},
+              'attributes':[
+                {'id':'BRAND','value_name':'Genérica'},
+                {'id':'MODEL','value_name':'Dumpling'},
+                {'id':'SQUISHIES_SIZE','value_id':'24635202'},
+                {'id':'SALE_FORMAT','value_name':sale_format},
+                {'id':'UNITS_PER_PACK','value_name':str(units)},
+                {'id':'EMPTY_GTIN_REASON','value_id':'17055160'},
+                {'id':'SELLER_SKU','value_name':product['sku']},
+              ],
+            }
+            created=session.post(API+'/items',headers=hj,json=body,timeout=60)
+            if created.status_code not in (200,201):
+              raise RuntimeError(f"{product['sku']} rechazado HTTP {created.status_code}: {created.text[:4000]}")
+            item_id=created.json()['id']
+            description=f'''SQUISHY DUMPLING DE ESPONJA - PRESENTACIÓN DE {units} {'PIEZA' if units==1 else 'PIEZAS'}
+
+          CARACTERÍSTICAS
+          - Diseños y colores surtidos.
+          - Textura suave tipo esponja.
+          - Se deforma al apretarlo y recupera su forma.
+          - Ideal como juguete sensorial y antiestrés.
+          - Medidas aproximadas por pieza: 6 cm de ancho por 4 cm de alto.
+
+          CONTENIDO
+          - {units} {'squishy Dumpling' if units==1 else 'squishies Dumpling'}.
+
+          IMPORTANTE
+          - Los diseños y colores se envían surtidos de acuerdo con disponibilidad.
+          - No es alimento.
+          - Las medidas pueden presentar ligeras variaciones.'''
+            desc=session.post(API+f'/items/{item_id}/description',headers=hj,
+              json={'plain_text':description},timeout=30)
+            if desc.status_code not in (200,201):
+              raise RuntimeError(f"No se guardó la descripción de {product['sku']}: HTTP {desc.status_code} {desc.text[:1000]}")
+
+            verified=session.get(API+'/items/'+item_id,headers=h,timeout=30); verified.raise_for_status(); final=verified.json()
+            if float(final.get('price') or 0)!=product['price'] or int(final.get('available_quantity') or 0)!=1:
+              raise RuntimeError(f"Verificación incorrecta para {product['sku']}")
+            if len(final.get('pictures') or [])!=5:
+              raise RuntimeError(f"{product['sku']} no muestra cinco fotografías")
+            results.append({
+              'id':final.get('id'),'status':final.get('status'),'title':final.get('title'),
+              'price':final.get('price'),'available_quantity':final.get('available_quantity'),
+              'sku':product['sku'],'units':units,'pictures':len(final.get('pictures') or []),
+              'permalink':final.get('permalink'),'existing':False
+            })
+
+          if len(results)!=4 or len({x['id'] for x in results})!=4:
+            raise RuntimeError('La verificación final no contiene cuatro publicaciones únicas')
+          print('PUBLISHED_FOUR_OK',json.dumps(results,ensure_ascii=False))
+          PY
+      - name: Guardar token rotado
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN_FOR_SECRETS }}
+        run: |
+          if [ -s /tmp/alejandra_dayana_rotated ]; then
+            gh secret set MELI_REFRESH_TOKEN_ALEJANDRA_DAYANA --repo kxmwnzbzhn-spec/meli-autoresponder < /tmp/alejandra_dayana_rotated
+          fi
