@@ -1,0 +1,298 @@
+name: Clonar DIDER a Rosa Maria - 28 catalogos
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  clone:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Instalar dependencia
+        run: pip install requests -q
+
+      - name: Clonar catalogos conservando condicion y precio
+        env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_DIDER: ${{ secrets.MELI_REFRESH_TOKEN_DIDER }}
+          MELI_REFRESH_TOKEN_ROSA_MARIA: ${{ secrets.MELI_REFRESH_TOKEN_ROSA_MARIA }}
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          import requests
+
+          API = "https://api.mercadolibre.com"
+          TIMEOUT = 45
+          DIDER = 3654003391
+          ROSA_MARIA = 3658310023
+          SOURCES = [
+              "MLM3442582695", "MLM3442582711", "MLM3442595743",
+              "MLM3442595765", "MLM3442595771", "MLM6164208944",
+              "MLM6164196390", "MLM6164196114", "MLM6164209186",
+              "MLM6164171554", "MLM6164171564", "MLM6164196408",
+              "MLM6164209192", "MLM6164171572", "MLM6164171582",
+              "MLM6164209200", "MLM6164209204", "MLM6164209208",
+              "MLM6164209210", "MLM6164196426", "MLM6164209212",
+              "MLM6164209214", "MLM6164209220", "MLM6164196438",
+              "MLM6164209224", "MLM6164209230", "MLM6164209234",
+              "MLM6164196446",
+          ]
+
+          def access_token(refresh_token, token_file):
+              response = requests.post(
+                  f"{API}/oauth/token",
+                  data={
+                      "grant_type": "refresh_token",
+                      "client_id": os.environ["MELI_APP_ID"],
+                      "client_secret": os.environ["MELI_APP_SECRET"],
+                      "refresh_token": refresh_token,
+                  },
+                  timeout=TIMEOUT,
+              )
+              response.raise_for_status()
+              data = response.json()
+              with open(token_file, "w") as stream:
+                  stream.write(data.get("refresh_token", ""))
+              return data["access_token"]
+
+          dider_token = access_token(
+              os.environ["MELI_REFRESH_TOKEN_DIDER"], "/tmp/dider_rotated"
+          )
+          rosa_token = access_token(
+              os.environ["MELI_REFRESH_TOKEN_ROSA_MARIA"], "/tmp/rosa_maria_rotated"
+          )
+          source_headers = {"Authorization": f"Bearer {dider_token}"}
+          target_headers = {"Authorization": f"Bearer {rosa_token}"}
+          target_json_headers = {**target_headers, "Content-Type": "application/json"}
+
+          def verify_account(headers, expected_id, name):
+              response = requests.get(f"{API}/users/me", headers=headers, timeout=TIMEOUT)
+              response.raise_for_status()
+              actual = int(response.json().get("id") or 0)
+              if actual != expected_id:
+                  raise RuntimeError(f"Token incorrecto para {name}: {actual}")
+
+          verify_account(source_headers, DIDER, "DIDER")
+          verify_account(target_headers, ROSA_MARIA, "ROSA_MARIA")
+
+          def get_item(item_id, headers):
+              response = requests.get(
+                  f"{API}/items/{item_id}", headers=headers, timeout=TIMEOUT
+              )
+              response.raise_for_status()
+              return response.json()
+
+          def seller_item_ids(seller_id, headers):
+              result = []
+              offset = 0
+              while True:
+                  response = requests.get(
+                      f"{API}/users/{seller_id}/items/search",
+                      headers=headers,
+                      params={"limit": 100, "offset": offset},
+                      timeout=TIMEOUT,
+                  )
+                  response.raise_for_status()
+                  rows = response.json().get("results") or []
+                  result.extend(rows)
+                  if len(rows) < 100:
+                      return result
+                  offset += 100
+
+          def clone_attributes(source):
+              result = []
+              seen = set()
+              for attribute in source.get("attributes") or []:
+                  attribute_id = attribute.get("id")
+                  if attribute_id not in {
+                      "GTIN", "EAN", "UPC", "ITEM_CONDITION", "GRADING"
+                  } or attribute_id in seen:
+                      continue
+                  value_name = str(attribute.get("value_name") or "").strip()
+                  if attribute_id in {"GTIN", "EAN", "UPC"}:
+                      if not (value_name.isdigit() and 8 <= len(value_name) <= 14):
+                          continue
+                      attribute_id = "GTIN"
+                  clone = {"id": attribute_id}
+                  if attribute.get("value_id"):
+                      clone["value_id"] = attribute["value_id"]
+                  if attribute.get("value_name"):
+                      clone["value_name"] = attribute["value_name"]
+                  result.append(clone)
+                  seen.add(attribute_id)
+              if "ITEM_CONDITION" not in seen:
+                  condition_names = {
+                      "new": "Nuevo",
+                      "used": "Usado",
+                      "refurbished": "Reacondicionado",
+                  }
+                  result.append({
+                      "id": "ITEM_CONDITION",
+                      "value_name": condition_names[source["condition"]],
+                  })
+              return result
+
+          def clone_sale_terms(source):
+              result = []
+              for term in source.get("sale_terms") or []:
+                  if term.get("id") not in {"WARRANTY_TYPE", "WARRANTY_TIME"}:
+                      continue
+                  clone = {"id": term["id"]}
+                  if term.get("value_id"):
+                      clone["value_id"] = term["value_id"]
+                  if term.get("value_name"):
+                      clone["value_name"] = term["value_name"]
+                  result.append(clone)
+              return result
+
+          sources = {item_id: get_item(item_id, source_headers) for item_id in SOURCES}
+          validation_errors = []
+          for item_id, source in sources.items():
+              if int(source.get("seller_id") or 0) != DIDER:
+                  validation_errors.append(f"{item_id}: no pertenece a DIDER")
+              if not source.get("catalog_product_id") or not source.get("catalog_listing"):
+                  validation_errors.append(f"{item_id}: no es publicacion de catalogo")
+              if source.get("condition") not in {"new", "used", "refurbished"}:
+                  validation_errors.append(
+                      f"{item_id}: condicion no admitida {source.get('condition')}"
+                  )
+          if validation_errors:
+              raise RuntimeError("Prevalidacion fallida: " + " | ".join(validation_errors))
+
+          existing = {}
+          for item_id in seller_item_ids(ROSA_MARIA, target_headers):
+              try:
+                  item = get_item(item_id, target_headers)
+              except Exception:
+                  continue
+              if item.get("deleted"):
+                  continue
+              key = (item.get("catalog_product_id"), item.get("condition"))
+              existing.setdefault(key, []).append(item)
+
+          mapping = {}
+          created = []
+          reused = []
+          failures = []
+
+          for source_id in SOURCES:
+              source = sources[source_id]
+              key = (source["catalog_product_id"], source["condition"])
+              candidates = existing.get(key) or []
+              target = next(
+                  (item for item in candidates if item.get("status") in {"active", "paused"}),
+                  None,
+              )
+              target_id = target.get("id") if target else None
+              try:
+                  if not target_id:
+                      shipping = source.get("shipping") or {}
+                      payload = {
+                          "site_id": "MLM",
+                          "family_name": (
+                              source.get("family_name") or source.get("title") or "Producto"
+                          )[:60],
+                          "category_id": source["category_id"],
+                          "price": float(source["price"]),
+                          "currency_id": "MXN",
+                          "available_quantity": 1,
+                          "buying_mode": "buy_it_now",
+                          "listing_type_id": source.get("listing_type_id") or "gold_special",
+                          "condition": source["condition"],
+                          "catalog_product_id": source["catalog_product_id"],
+                          "catalog_listing": True,
+                          "attributes": clone_attributes(source),
+                          "shipping": {
+                              "mode": "me2",
+                              "local_pick_up": bool(shipping.get("local_pick_up")),
+                              "free_shipping": bool(shipping.get("free_shipping")),
+                          },
+                      }
+                      sale_terms = clone_sale_terms(source)
+                      if sale_terms:
+                          payload["sale_terms"] = sale_terms
+                      response = requests.post(
+                          f"{API}/items",
+                          headers=target_json_headers,
+                          json=payload,
+                          timeout=60,
+                      )
+                      if response.status_code not in (200, 201):
+                          raise RuntimeError(
+                              f"crear HTTP {response.status_code}: {response.text[:900]}"
+                          )
+                      target_id = response.json()["id"]
+                      created.append(target_id)
+                      existing.setdefault(key, []).append(
+                          get_item(target_id, target_headers)
+                      )
+                  else:
+                      reused.append(target_id)
+
+                  response = requests.put(
+                      f"{API}/items/{target_id}",
+                      headers=target_json_headers,
+                      json={
+                          "status": "active",
+                          "available_quantity": 1,
+                          "price": float(source["price"]),
+                      },
+                      timeout=TIMEOUT,
+                  )
+                  if response.status_code not in (200, 201):
+                      raise RuntimeError(
+                          f"activar HTTP {response.status_code}: {response.text[:900]}"
+                      )
+
+                  check = get_item(target_id, target_headers)
+                  if (
+                      int(check.get("seller_id") or 0) != ROSA_MARIA
+                      or check.get("status") != "active"
+                      or int(check.get("available_quantity") or 0) != 1
+                      or check.get("catalog_product_id") != source.get("catalog_product_id")
+                      or check.get("condition") != source.get("condition")
+                  ):
+                      raise RuntimeError("verificacion posterior no coincide")
+                  mapping[source_id] = target_id
+                  print(
+                      f"OK {source_id}->{target_id} | {source.get('title')} | "
+                      f"{source.get('condition')} | ${source.get('price')}",
+                      flush=True,
+                  )
+              except Exception as error:
+                  failures.append({"source": source_id, "error": str(error)})
+                  print(f"ERROR {source_id}: {error}", flush=True)
+
+          result = {
+              "requested": len(SOURCES),
+              "successful": len(mapping),
+              "created": len(created),
+              "reused": len(reused),
+              "mapping": mapping,
+              "failures": failures,
+          }
+          print("ROSA_MARIA_CLONE_RESULT=" + json.dumps(result, ensure_ascii=False), flush=True)
+          if failures or len(mapping) != len(SOURCES):
+              raise RuntimeError(f"Clonacion incompleta: {len(mapping)}/{len(SOURCES)}")
+          PY
+
+      - name: Guardar tokens rotados
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN_FOR_SECRETS }}
+        run: |
+          if [ -s /tmp/dider_rotated ]; then
+            gh secret set MELI_REFRESH_TOKEN_DIDER --repo kxmwnzbzhn-spec/meli-autoresponder < /tmp/dider_rotated
+          fi
+          if [ -s /tmp/rosa_maria_rotated ]; then
+            gh secret set MELI_REFRESH_TOKEN_ROSA_MARIA --repo kxmwnzbzhn-spec/meli-autoresponder < /tmp/rosa_maria_rotated
+          fi
