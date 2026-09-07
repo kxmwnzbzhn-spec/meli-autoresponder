@@ -1,0 +1,135 @@
+name: Rosa Maria - poner 12 publicaciones en 449
+
+on:
+  workflow_dispatch:
+
+jobs:
+  update_price:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Actualizar y verificar precios
+        env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_ROSA_MARIA: ${{ secrets.MELI_REFRESH_TOKEN_ROSA_MARIA }}
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          import urllib.error
+          import urllib.parse
+          import urllib.request
+
+          API = "https://api.mercadolibre.com"
+          SELLER_ID = 3658310023
+          PRICE = 449
+          ITEM_IDS = [
+              "MLM3457517125",
+              "MLM3457506163",
+              "MLM3457506161",
+              "MLM3457506237",
+              "MLM6178069546",
+              "MLM3457517131",
+              "MLM3457517057",
+              "MLM6178069556",
+              "MLM3457506187",
+              "MLM3457506193",
+              "MLM3457517069",
+              "MLM3457506201",
+          ]
+
+          def request(url, method="GET", headers=None, data=None):
+              encoded = None
+              if data is not None:
+                  encoded = json.dumps(data).encode("utf-8")
+              req = urllib.request.Request(
+                  url,
+                  data=encoded,
+                  headers=headers or {},
+                  method=method,
+              )
+              try:
+                  with urllib.request.urlopen(req, timeout=45) as response:
+                      return response.status, json.loads(response.read().decode("utf-8"))
+              except urllib.error.HTTPError as error:
+                  body = error.read().decode("utf-8", errors="replace")
+                  try:
+                      body = json.loads(body)
+                  except json.JSONDecodeError:
+                      pass
+                  return error.code, body
+
+          token_body = urllib.parse.urlencode({
+              "grant_type": "refresh_token",
+              "client_id": os.environ["MELI_APP_ID"],
+              "client_secret": os.environ["MELI_APP_SECRET"],
+              "refresh_token": os.environ["MELI_REFRESH_TOKEN_ROSA_MARIA"],
+          }).encode("utf-8")
+          token_req = urllib.request.Request(f"{API}/oauth/token", data=token_body, method="POST")
+          with urllib.request.urlopen(token_req, timeout=45) as response:
+              token = json.loads(response.read().decode("utf-8"))
+
+          rotated = token.get("refresh_token", "")
+          with open("/tmp/rosa_maria_rotated_token", "w", encoding="utf-8") as stream:
+              stream.write(rotated)
+
+          headers = {"Authorization": f"Bearer {token['access_token']}"}
+          json_headers = {**headers, "Content-Type": "application/json"}
+          status, account = request(f"{API}/users/me", headers=headers)
+          if status != 200 or int(account.get("id") or 0) != SELLER_ID:
+              raise RuntimeError(f"Token incorrecto para Rosa Maria: HTTP {status}")
+
+          updated = []
+          failures = []
+          for item_id in ITEM_IDS:
+              status, before = request(f"{API}/items/{item_id}", headers=headers)
+              if status != 200:
+                  failures.append({"item": item_id, "error": f"consulta HTTP {status}: {before}"})
+                  continue
+              if int(before.get("seller_id") or 0) != SELLER_ID:
+                  failures.append({"item": item_id, "error": "pertenece a otro vendedor"})
+                  continue
+
+              status, result = request(
+                  f"{API}/items/{item_id}",
+                  method="PUT",
+                  headers=json_headers,
+                  data={"price": PRICE},
+              )
+              if status not in (200, 201):
+                  failures.append({"item": item_id, "error": f"actualizacion HTTP {status}: {result}"})
+                  continue
+
+              status, check = request(f"{API}/items/{item_id}", headers=headers)
+              if status != 200 or float(check.get("price") or 0) != PRICE:
+                  failures.append({"item": item_id, "error": f"verificacion fallo: HTTP {status}, precio={check.get('price')}"})
+                  continue
+              updated.append({
+                  "item": item_id,
+                  "title": check.get("title"),
+                  "status": check.get("status"),
+                  "price": check.get("price"),
+              })
+              print(f"OK {item_id} | {check.get('title')} | {check.get('status')} | $449", flush=True)
+
+          summary = {
+              "requested": len(ITEM_IDS),
+              "updated": len(updated),
+              "failures": failures,
+              "items": updated,
+          }
+          print("ROSA_MARIA_PRICE_RESULT=" + json.dumps(summary, ensure_ascii=False), flush=True)
+          if failures or len(updated) != len(ITEM_IDS):
+              raise RuntimeError(f"Actualizacion incompleta: {len(updated)}/{len(ITEM_IDS)}")
+          PY
+
+      - name: Guardar token rotado
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN_FOR_SECRETS }}
+        run: |
+          if [ -s /tmp/rosa_maria_rotated_token ]; then
+            gh secret set MELI_REFRESH_TOKEN_ROSA_MARIA --repo kxmwnzbzhn-spec/meli-autoresponder < /tmp/rosa_maria_rotated_token
+          fi
