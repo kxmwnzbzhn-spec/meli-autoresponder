@@ -1052,7 +1052,7 @@
       "original_price": 999.0,
       "floor": 549.45,
       "ceiling": 1298.7,
-      "last_change_at": 1786764261,
+      "last_change_at": 1788903102,
       "role": "winner",
       "label": "Perfume The Alchemia Lab Flor De No"
     },
@@ -1084,7 +1084,7 @@
       "original_price": 999.0,
       "floor": 549.45,
       "ceiling": 1298.7,
-      "last_change_at": 1788632677,
+      "last_change_at": 1788903102,
       "role": "winner",
       "label": "Perfume Alma De Tenochtitl\u00e1n The Al"
     },
@@ -1209,6 +1209,6 @@
       "label": "Bocina Port\u00e1til Bluetooth Asva Retr"
     }
   },
-  "last_run": 1788893419,
+  "last_run": 1788903102,
   "winner_account": "RAYMUNDO"
 }
