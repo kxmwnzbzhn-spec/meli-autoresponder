@@ -2,6 +2,15 @@ name: Rosa Maria - etiquetas ready to print consolidadas
 
 on:
   workflow_dispatch:
+    inputs:
+      shipment_substatus:
+        description: Subestado de envíos que se incluirá
+        required: true
+        type: choice
+        default: ready_to_print
+        options:
+          - ready_to_print
+          - printed
 
 jobs:
   labels:
@@ -17,6 +26,7 @@ jobs:
           MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
           MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
           MELI_REFRESH_TOKEN_ROSA_MARIA: ${{ secrets.MELI_REFRESH_TOKEN_ROSA_MARIA }}
+          TARGET_SUBSTATUS: ${{ inputs.shipment_substatus || 'ready_to_print' }}
         run: |
           python3 - <<'PY'
           import io, json, os, re
@@ -31,8 +41,9 @@ jobs:
 
           API = "https://api.mercadolibre.com"
           SELLER_ID = 3658310023
-          OUTPUT = "ETIQUETAS_ROSA_MARIA_READY_TO_PRINT.pdf"
-          MANIFEST = "MANIFEST_ROSA_MARIA_READY_TO_PRINT.json"
+          TARGET_SUBSTATUS = os.environ.get("TARGET_SUBSTATUS", "ready_to_print")
+          OUTPUT = f"ETIQUETAS_ROSA_MARIA_{TARGET_SUBSTATUS.upper()}.pdf"
+          MANIFEST = f"MANIFEST_ROSA_MARIA_{TARGET_SUBSTATUS.upper()}.json"
 
           session = requests.Session()
           retry = Retry(total=4, connect=4, read=4, backoff_factor=1,
@@ -156,7 +167,7 @@ jobs:
                   continue
               substatus = shipment.get("substatus")
               substatus_counts[substatus] = substatus_counts.get(substatus, 0) + 1
-              if substatus != "ready_to_print":
+              if substatus != TARGET_SUBSTATUS:
                   continue
               seen.add(shipment_id)
               merged = OrderedDict()
@@ -233,11 +244,11 @@ jobs:
           with open(MANIFEST, "w", encoding="utf-8") as stream:
               json.dump({
                   "generated_at": now.isoformat(), "seller_id": SELLER_ID,
-                  "filter": {"status": "ready_to_ship", "substatus": "ready_to_print"},
+                  "filter": {"status": "ready_to_ship", "substatus": TARGET_SUBSTATUS},
                   "unique_shipments": len(manifest), "pages": len(writer.pages),
                   "substatus_breakdown": substatus_counts, "shipments": manifest,
               }, stream, ensure_ascii=False, indent=2)
-          print(f"ROSA_MARIA_LABELS_OK shipments={len(manifest)} pages={len(writer.pages)}")
+          print(f"ROSA_MARIA_LABELS_OK substatus={TARGET_SUBSTATUS} shipments={len(manifest)} pages={len(writer.pages)}")
           PY
 
       - name: Guardar token rotado
@@ -252,8 +263,8 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: rosa-maria-ready-to-print
+          name: rosa-maria-${{ inputs.shipment_substatus || 'ready-to-print' }}
           path: |
-            ETIQUETAS_ROSA_MARIA_READY_TO_PRINT.pdf
-            MANIFEST_ROSA_MARIA_READY_TO_PRINT.json
+            ETIQUETAS_ROSA_MARIA_*.pdf
+            MANIFEST_ROSA_MARIA_*.json
           retention-days: 3
