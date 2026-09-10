@@ -1,0 +1,30 @@
+name: rosa-new-only
+on: { workflow_dispatch: {} }
+jobs:
+  r:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests pypdf reportlab -q
+      - env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_ROSA_MARIA: ${{ secrets.MELI_REFRESH_TOKEN_ROSA_MARIA }}
+        run: python scripts/rosa_new_only.py
+      - if: always()
+        env: { GH_TOKEN: "${{ secrets.GH_TOKEN_FOR_SECRETS }}" }
+        run: |
+          if [ -s /tmp/rot ]; then
+            gh secret set MELI_REFRESH_TOKEN_ROSA_MARIA --repo kxmwnzbzhn-spec/meli-autoresponder < /tmp/rot
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: rosa-nuevas
+          path: |
+            ETIQUETAS_ROSA_MARIA_NUEVAS.pdf
+            MANIFEST_ROSA_MARIA_NUEVAS.json
+          retention-days: 3
