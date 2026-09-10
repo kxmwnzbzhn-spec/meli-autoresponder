@@ -98,7 +98,7 @@ for sid,rows in by_sid.items():
    ldt=datetime.fromisoformat(lim_date.replace("Z","+00:00"))
    if ldt < now: is_delayed=True
   except Exception: pass
- is_r2p = sub=="ready_to_print"
+ is_r2p = sub in ('ready_to_print','printed')
  if not (is_r2p or is_delayed): continue
  tag=[]
  if is_delayed: tag.append("DEMORADA"); delayed_count+=1
