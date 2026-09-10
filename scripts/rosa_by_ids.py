@@ -41,22 +41,26 @@ def gc(line, fb):
    if v: return v
  return fb
 
-# construir items por shipment desde /shipments/{id} → order_id → /orders/{id}
+
+# construir items por shipment desde /orders/search?shipping.id={sid}
 selected=[]
 for sid in sorted(TARGET,key=int):
  sh_r=requests.get(f"{API}/shipments/{sid}",headers=H,timeout=20)
  if sh_r.status_code!=200: continue
  sh=sh_r.json()
- # sacar order_ids del shipment
- order_ids=[str(o.get("id")) for o in (sh.get("order_id") and [{"id":sh["order_id"]}] or [])]
- # /shipments/{id}/items → mejor
- sit=requests.get(f"{API}/shipments/{sid}/items",headers=H,timeout=20)
+ # buscar orders de este shipment
+ oq=requests.get(f"{API}/orders/search",headers=H,params={"seller":SELLER,"shipping.id":sid,"limit":50},timeout=30)
+ orders=[]
+ if oq.status_code==200: orders=(oq.json().get("results") or [])
  items_raw=[]
- if sit.status_code==200:
-  for it in (sit.json() if isinstance(sit.json(),list) else []):
-   iid=it.get("id"); qty=int(it.get("quantity") or 0)
-   at=get_attrs(iid) if iid else {"model":"","color":"","condition":"new"}
-   items_raw.append({"qty":qty,"modelo":at["model"],"color":at["color"],"used":at["condition"]=="used","item_id":iid})
+ for order in orders:
+  for line in (order.get("order_items") or []):
+   obj=line.get("item") or {}
+   iid=obj.get("id"); qty=int(line.get("quantity") or 0)
+   if not iid: continue
+   at=get_attrs(iid)
+   color=gc(line, at["color"])
+   items_raw.append({"qty":qty,"modelo":at["model"],"color":color,"used":at["condition"]=="used","item_id":iid})
  merged=OrderedDict()
  for x in items_raw:
   k=(x["modelo"],x["color"],x["used"])
