@@ -129,7 +129,9 @@ for x in selected:
  if q.status_code!=200 or "application/pdf" not in q.headers.get("content-type","").lower():
   failed.append({"shipment_id":sid,"http":q.status_code}); continue
  rdr=PdfReader(io.BytesIO(q.content))
- for p in rdr.pages:
+ pages=list(rdr.pages)
+ if pages:
+  p=pages[0]
   W=float(p.mediabox.width); Hh=float(p.mediabox.height)
   ov=overlay(W,Hh,sid,x["items"],x["used"],x["multi"])
   m=PageObject.create_blank_page(width=W,height=Hh); m.merge_page(p); m.merge_page(ov); writer.add_page(m)
@@ -137,3 +139,4 @@ for x in selected:
 with open(OUT,"wb") as f: writer.write(f)
 with open(MANI,"w") as f: json.dump({"generated_at":now.isoformat(),"unique_shipments":len(manifest),"pages":len(writer.pages),"failed":failed,"shipments":manifest},f,indent=2,ensure_ascii=False)
 print(f"OK {OUT} pages={len(writer.pages)} ship={len(manifest)} failed={len(failed)}")
+
