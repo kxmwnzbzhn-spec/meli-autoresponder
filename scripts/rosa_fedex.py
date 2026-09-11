@@ -42,22 +42,15 @@ def gc(line, fb):
    if v: return v
  return fb
 
-# clasificar por carrier
+# clasificar por carrier via /shipments/{id}/carrier
 selected=[]; carriers_stats={}
+from collections import Counter
+cnt=Counter()
 for sid in IDS:
- q=requests.get(f"{API}/shipments/{sid}",headers=H,timeout=20)
- if q.status_code!=200: continue
- sh=q.json()
- svc_id = ((sh.get("shipping_option") or {}).get("shipping_method") or {}).get("id") or ""
- svc_name = ((sh.get("shipping_option") or {}).get("shipping_method") or {}).get("name") or ""
- carrier_id = ((sh.get("shipping_option") or {}).get("carrier") or {}).get("id") or ""
- carrier_name = ((sh.get("shipping_option") or {}).get("carrier") or {}).get("name") or ""
- # también revisar service_id
- svc = sh.get("service_id") or 0
- lookup = f"{carrier_name} | {svc_name} | svc={svc}".lower()
- carriers_stats[lookup]=carriers_stats.get(lookup,0)+1
- is_fedex = "fedex" in lookup
- if not is_fedex: continue
+ c=requests.get(f"{API}/shipments/{sid}/carrier",headers=H,timeout=15)
+ carrier_name = (c.json().get("name") if c.status_code==200 else "") or ""
+ cnt[carrier_name]+=1
+ if "fedex" not in carrier_name.lower(): continue
  # bajar order items
  oq=requests.get(f"{API}/orders/search",headers=H,params={"seller":SELLER,"shipping.id":sid,"limit":50},timeout=30)
  orders=(oq.json().get("results") or []) if oq.status_code==200 else []
@@ -71,7 +64,7 @@ for sid in IDS:
    items.append({"qty":qty,"modelo":at["model"],"color":color})
  selected.append({"shipment_id":sid,"carrier":carrier_name,"service":svc_name,"items":items})
 
-print(f"[stats] carriers breakdown: {carriers_stats}")
+print(f"[stats] carriers breakdown: {dict(cnt)}"); carriers_stats=dict(cnt)
 print(f"[stats] FedEx seleccionadas: {len(selected)}")
 
 def overlay(W,Hh,ship,items):
