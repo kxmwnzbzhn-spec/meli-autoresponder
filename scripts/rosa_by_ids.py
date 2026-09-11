@@ -99,7 +99,9 @@ for x in selected:
  if q.status_code!=200 or "application/pdf" not in q.headers.get("content-type","").lower():
   failed.append({"shipment_id":sid,"http":q.status_code}); continue
  rdr=PdfReader(io.BytesIO(q.content))
- for p in rdr.pages:
+ pages=list(rdr.pages)
+ if pages:
+  p=pages[0]
   W=float(p.mediabox.width); Hh=float(p.mediabox.height)
   ov=overlay(W,Hh,sid,x["items"],x["used"],x["multi"],x["substatus"] or "")
   m=PageObject.create_blank_page(width=W,height=Hh); m.merge_page(p); m.merge_page(ov); writer.add_page(m)
@@ -107,3 +109,4 @@ for x in selected:
 with open(OUT,"wb") as f: writer.write(f)
 open("MANIFEST_ROSA_MARIA_NUEVAS.json","w").write(json.dumps({"unique":len(mfst),"pages":len(writer.pages),"failed":failed,"shipments":mfst},indent=2,ensure_ascii=False))
 print(f"OK {OUT} pages={len(writer.pages)} ship={len(mfst)} failed={len(failed)}")
+
