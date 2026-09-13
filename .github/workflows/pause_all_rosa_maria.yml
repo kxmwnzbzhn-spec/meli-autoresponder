@@ -20,7 +20,7 @@ jobs:
           MELI_REFRESH_TOKEN_ROSA_MARIA: ${{ secrets.MELI_REFRESH_TOKEN_ROSA_MARIA }}
         run: |
           python3 - <<'PY'
-          import os, requests
+          import os, time, requests
 
           api = "https://api.mercadolibre.com"
           seller_id = 3658310023
@@ -73,17 +73,18 @@ jobs:
               else:
                   failures.append({"item_id": item_id, "http": response.status_code, "detail": response.text[:300]})
 
-          verify = requests.get(
-              f"{api}/users/{seller_id}/items/search",
-              headers=headers,
-              params={"status": "active", "limit": 1, "offset": 0},
-              timeout=45,
-          )
-          verify.raise_for_status()
-          remaining_active = int((verify.json().get("paging") or {}).get("total") or 0)
-          print(f"ROSA_MARIA_PAUSE_ALL total_active={len(active_ids)} paused={len(paused)} remaining_active={remaining_active} failures={len(failures)}")
-          if failures or remaining_active:
-              raise RuntimeError(f"Pausa incompleta failures={failures} remaining_active={remaining_active}")
+          time.sleep(8)
+          still_active = []
+          for item_id in active_ids:
+              response = requests.get(f"{api}/items/{item_id}", headers=headers, timeout=30)
+              response.raise_for_status()
+              item = response.json()
+              if item.get("status") == "active":
+                  still_active.append(item_id)
+
+          print(f"ROSA_MARIA_PAUSE_ALL total_active={len(active_ids)} paused={len(paused)} direct_remaining_active={len(still_active)} failures={len(failures)}")
+          if failures or still_active:
+              raise RuntimeError(f"Pausa incompleta failures={failures} active={still_active}")
           PY
       - name: Guardar token renovado
         if: always()
