@@ -1,0 +1,95 @@
+name: Pausar todas las publicaciones de Rosa Maria
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: rosa-maria-real-stock-monitor
+  cancel-in-progress: true
+
+jobs:
+  pause_all:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+    steps:
+      - name: Pausar publicaciones activas y verificar
+        env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_REFRESH_TOKEN_ROSA_MARIA: ${{ secrets.MELI_REFRESH_TOKEN_ROSA_MARIA }}
+        run: |
+          python3 - <<'PY'
+          import os, requests
+
+          api = "https://api.mercadolibre.com"
+          seller_id = 3658310023
+          token_response = requests.post(
+              f"{api}/oauth/token",
+              data={
+                  "grant_type": "refresh_token",
+                  "client_id": os.environ["MELI_APP_ID"],
+                  "client_secret": os.environ["MELI_APP_SECRET"],
+                  "refresh_token": os.environ["MELI_REFRESH_TOKEN_ROSA_MARIA"],
+              },
+              timeout=45,
+          )
+          token_response.raise_for_status()
+          token = token_response.json()
+          open("/tmp/rosa_maria_rotated_token", "w", encoding="utf-8").write(token.get("refresh_token", ""))
+          headers = {"Authorization": f"Bearer {token['access_token']}", "Content-Type": "application/json"}
+
+          account = requests.get(f"{api}/users/me", headers=headers, timeout=30)
+          account.raise_for_status()
+          if int(account.json().get("id") or 0) != seller_id:
+              raise RuntimeError("El token no corresponde a Rosa Maria")
+
+          active_ids, offset = [], 0
+          while True:
+              response = requests.get(
+                  f"{api}/users/{seller_id}/items/search",
+                  headers=headers,
+                  params={"status": "active", "limit": 100, "offset": offset},
+                  timeout=45,
+              )
+              response.raise_for_status()
+              body = response.json()
+              rows = body.get("results") or []
+              active_ids.extend(rows)
+              offset += len(rows)
+              if not rows or offset >= int((body.get("paging") or {}).get("total") or 0):
+                  break
+
+          paused, failures = [], []
+          for item_id in active_ids:
+              response = requests.put(
+                  f"{api}/items/{item_id}",
+                  headers=headers,
+                  json={"status": "paused"},
+                  timeout=30,
+              )
+              if response.status_code in (200, 201) and response.json().get("status") == "paused":
+                  paused.append(item_id)
+              else:
+                  failures.append({"item_id": item_id, "http": response.status_code, "detail": response.text[:300]})
+
+          verify = requests.get(
+              f"{api}/users/{seller_id}/items/search",
+              headers=headers,
+              params={"status": "active", "limit": 1, "offset": 0},
+              timeout=45,
+          )
+          verify.raise_for_status()
+          remaining_active = int((verify.json().get("paging") or {}).get("total") or 0)
+          print(f"ROSA_MARIA_PAUSE_ALL total_active={len(active_ids)} paused={len(paused)} remaining_active={remaining_active} failures={len(failures)}")
+          if failures or remaining_active:
+              raise RuntimeError(f"Pausa incompleta failures={failures} remaining_active={remaining_active}")
+          PY
+      - name: Guardar token renovado
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN_FOR_SECRETS }}
+        run: |
+          if [ -s /tmp/rosa_maria_rotated_token ]; then
+            gh secret set MELI_REFRESH_TOKEN_ROSA_MARIA --repo kxmwnzbzhn-spec/meli-autoresponder < /tmp/rosa_maria_rotated_token
+          fi
