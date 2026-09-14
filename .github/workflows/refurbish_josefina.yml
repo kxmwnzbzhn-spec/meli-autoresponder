@@ -1,0 +1,71 @@
+name: Publicar catálogo reacondicionado JoseFina
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+      MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+      MELI_APP_ID_NEW: ${{ secrets.MELI_APP_ID_NEW }}
+      MELI_APP_SECRET_NEW: ${{ secrets.MELI_APP_SECRET_NEW }}
+      TOKEN: ${{ secrets.MELI_REFRESH_TOKEN_JOSEFINA }}
+    steps:
+      - run: pip install requests -q
+      - name: Publish unique refurbished catalog listings
+        run: |
+          cat > /tmp/refurb.py <<'PY'
+          import os,requests
+          A="https://api.mercadolibre.com"; TARGET=3682192773
+          R=["MLM6222684088","MLM6222480716","MLM3494917851","MLM3494913051","MLM6222679212","MLM6222480738","MLM6222479914","MLM3494968449","MLM3494917855","MLM3494913057","MLM6222480742","MLM3494913073"]
+          def auth():
+            last=""
+            for i,s in [("MELI_APP_ID_NEW","MELI_APP_SECRET_NEW"),("MELI_APP_ID","MELI_APP_SECRET")]:
+              if not os.getenv(i) or not os.getenv(s): continue
+              r=requests.post(A+"/oauth/token",data={"grant_type":"refresh_token","client_id":os.getenv(i),"client_secret":os.getenv(s),"refresh_token":os.environ["TOKEN"]},timeout=45)
+              if r.ok:return r.json()["access_token"]
+              last=r.text[:180]
+            raise RuntimeError("token: "+last)
+          h={"Authorization":"Bearer "+auth()}; j={**h,"Content-Type":"application/json"}
+          def get(i):
+            r=requests.get(A+"/items/"+i,headers=h,timeout=45);r.raise_for_status();return r.json()
+          me=requests.get(A+"/users/me",headers=h,timeout=45).json()
+          if int(me.get("id",0))!=TARGET:raise RuntimeError("JoseFina token mismatch")
+          allids=[];off=0
+          while True:
+            z=requests.get(A+"/users/"+str(TARGET)+"/items/search",headers=h,params={"limit":100,"offset":off},timeout=45).json().get("results",[])
+            allids+=z
+            if len(z)<100:break
+            off+=100
+          existing=set()
+          for q in allids:
+            try:
+              z=get(q)
+              if z.get("catalog_listing") and z.get("condition")=="refurbished" and z.get("catalog_product_id"):existing.add(z["catalog_product_id"])
+            except:pass
+          for sid in R:
+            try:
+              x=get(sid)
+              if int(x.get("seller_id",0))!=TARGET or not x.get("catalog_product_id"):raise RuntimeError("source validation failed")
+              if x["catalog_product_id"] in existing:
+                print("SKIP_DUPLICATE",sid,x["catalog_product_id"],flush=True);continue
+              attrs=[]
+              for a in x.get("attributes",[]):
+                if a.get("id") in ["GTIN","ITEM_CONDITION","GRADING"] and a.get("value_name"):
+                  row={"id":a["id"],"value_name":a["value_name"]}
+                  if a.get("value_id"):row["value_id"]=a["value_id"]
+                  attrs.append(row)
+              attrs=[a for a in attrs if a["id"] not in ["ITEM_CONDITION","GRADING"]]
+              attrs += [{"id":"ITEM_CONDITION","value_name":"Reacondicionado"},{"id":"GRADING","value_name":"Excelente"}]
+              p={"site_id":"MLM","family_name":(x.get("family_name") or x["title"])[:60],"category_id":x["category_id"],"price":399.0,"currency_id":"MXN","available_quantity":1,"buying_mode":"buy_it_now","listing_type_id":x.get("listing_type_id","gold_special"),"condition":"refurbished","catalog_product_id":x["catalog_product_id"],"catalog_listing":True,"attributes":attrs,"shipping":{"mode":"me2","local_pick_up":bool(x.get("shipping",{}).get("local_pick_up")),"free_shipping":bool(x.get("shipping",{}).get("free_shipping"))},"sale_terms":[{"id":"WARRANTY_TYPE","value_id":"2230280","value_name":"Garantía del vendedor"},{"id":"WARRANTY_TIME","value_name":"90 días"}]}
+              r=requests.post(A+"/items",headers=j,json=p,timeout=60)
+              if not r.ok:print("REFURB_ERROR",sid,r.text[:500],flush=True);continue
+              tid=r.json()["id"];z=get(tid)
+              print("REFURB_VERIFY",sid,tid,z.get("status"),z.get("catalog_listing"),z.get("condition"),z.get("price"),flush=True)
+              if z.get("catalog_listing") and z.get("condition")=="refurbished" and float(z.get("price",0))==399.0:existing.add(x["catalog_product_id"])
+            except Exception as e:print("REFURB_ERROR",sid,str(e),flush=True)
+          PY
+          python3 /tmp/refurb.py
