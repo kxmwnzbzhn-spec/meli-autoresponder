@@ -113,7 +113,7 @@ jobs:
           PY
           python3 /tmp/run.py
       - name: Save refreshed tokens and continue monitor
-        if: always()
+        if: success()
         run: |
           test -s /tmp/josefina_token && gh secret set MELI_REFRESH_TOKEN_JOSEFINA --repo kxmwnzbzhn-spec/meli-autoresponder < /tmp/josefina_token || true
           test -s /tmp/rosa_token && gh secret set MELI_REFRESH_TOKEN_ROSA_MARIA --repo kxmwnzbzhn-spec/meli-autoresponder < /tmp/rosa_token || true
