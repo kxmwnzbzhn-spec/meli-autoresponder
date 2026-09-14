@@ -75,7 +75,7 @@ jobs:
                 p['sale_terms']=[{'id':'WARRANTY_TYPE','value_name':'Garantía del vendedor'},{'id':'WARRANTY_TIME','value_name':'90 días'}] if x['condition']=='refurbished' else p.get('sale_terms',[]);r=requests.post(A+'/items',headers=jjson,json=p,timeout=60)
                 if not r.ok:raise RuntimeError(sid+' create '+r.text[:400])
                 tid=r.json()['id']
-              r=requests.put(A+'/items/'+tid,headers=jjson,json={'status':'active','available_quantity':1,'price':float(x['price'])},timeout=45)
+              r=requests.put(A+'/items/'+tid,headers=jjson,json={'status':'active','available_quantity':1,'price':float(x['price'])},timeout=45) if not y else type('R',(),{'ok':True,'text':''})()
               if not r.ok:raise RuntimeError(sid+' activate '+r.text[:400])
               z=get(tid,jh)
               if z.get('catalog_product_id')!=x['catalog_product_id'] or z.get('condition')!=x['condition'] or z.get('status')!='active' or int(z.get('available_quantity',0))!=1:raise RuntimeError(sid+' final verification failed')
