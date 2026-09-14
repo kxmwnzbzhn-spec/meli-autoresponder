@@ -63,7 +63,7 @@ jobs:
                 row={'id':a['id'],'value_name':a['value_name']}
                 if a.get('value_id'): row['value_id']=a['value_id']
                 attrs.append(row)
-            p={'site_id':'MLM','title':x['title'][:60],'category_id':x['category_id'],'price':float(x['price']),'currency_id':'MXN','available_quantity':1,'buying_mode':'buy_it_now','listing_type_id':x.get('listing_type_id','gold_special'),'condition':x['condition'],'attributes':attrs,'shipping':{'mode':'me2','local_pick_up':bool(x.get('shipping',{}).get('local_pick_up')),'free_shipping':bool(x.get('shipping',{}).get('free_shipping'))}}
+            p={'site_id':'MLM','family_name':(x.get('family_name') or x['title'])[:60],'title':x['title'][:60],'category_id':x['category_id'],'price':float(x['price']),'currency_id':'MXN','available_quantity':1,'buying_mode':'buy_it_now','listing_type_id':x.get('listing_type_id','gold_special'),'condition':x['condition'],'attributes':attrs,'shipping':{'mode':'me2','local_pick_up':bool(x.get('shipping',{}).get('local_pick_up')),'free_shipping':bool(x.get('shipping',{}).get('free_shipping'))}}
             terms=[]
             for t in x.get('sale_terms',[]):
               if t.get('id') in ['WARRANTY_TYPE','WARRANTY_TIME']:
