@@ -3,6 +3,231 @@ on:
   workflow_dispatch:
     inputs:
       mode:
+        description: clone, restock, price, traditional, catalogcopy, or refurbished
+        required: false
+        default: clone
+  schedule:
+    - cron: '17 */6 * * *'
+permissions:
+  actions: write
+  contents: read
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 355
+    env:
+      MODE: ${{ inputs.mode || 'restock' }}
+      MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+      MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+      MELI_APP_ID_NEW: ${{ secrets.MELI_APP_ID_NEW }}
+      MELI_APP_SECRET_NEW: ${{ secrets.MELI_APP_SECRET_NEW }}
+      ROSA_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN_ROSA_MARIA }}
+      JOSEFINA_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN_JOSEFINA }}
+      GH_TOKEN: ${{ secrets.GH_TOKEN_FOR_SECRETS }}
+    steps:
+      - run: pip install requests -q
+      - name: Clone, verify, and keep one visible unit
+        run: |
+          cat > /tmp/run.py <<'PY'
+          import os,time,json,requests
+          A='https://api.mercadolibre.com'; ROSA=3658310023; TARGET=3682192773
+          S=['MLM3457506141','MLM3457517123','MLM3457506237','MLM3457517125','MLM3457506163','MLM3457506161','MLM3457506173','MLM3457506201','MLM3457517069','MLM3457506187','MLM6178069556','MLM3457517057','MLM6178069530','MLM3457506211','MLM6178069580','MLM6178069636','MLM3457517073','MLM6178069536','MLM3457506149','MLM3457506137']
+          def token(refresh,label):
+            last=''
+            for i,s in [('MELI_APP_ID_NEW','MELI_APP_SECRET_NEW'),('MELI_APP_ID','MELI_APP_SECRET')]:
+              if not os.getenv(i) or not os.getenv(s): continue
+              r=requests.post(A+'/oauth/token',data={'grant_type':'refresh_token','client_id':os.getenv(i),'client_secret':os.getenv(s),'refresh_token':refresh},timeout=45)
+              if r.ok:
+                x=r.json();open('/tmp/'+label,'w').write(x['refresh_token']);return x['access_token']
+              last=r.text[:160]
+            raise RuntimeError('token '+label+': '+last)
+          def get(i,h):
+            r=requests.get(A+'/items/'+i,headers=h,timeout=45);r.raise_for_status();return r.json()
+          def seller(uid,h):
+            out=[];off=0
+            while True:
+              r=requests.get(A+'/users/'+str(uid)+'/items/search',headers=h,params={'limit':100,'offset':off},timeout=45);r.raise_for_status();z=r.json().get('results',[]);out+=z
+              if len(z)<100:return out
+              off+=100
+          jt=token(os.environ['JOSEFINA_TOKEN'],'josefina_token'); jh={'Authorization':'Bearer '+jt}; jjson={**jh,'Content-Type':'application/json'}
+          me=requests.get(A+'/users/me',headers=jh,timeout=45).json()
+          if int(me.get('id',0))!=TARGET: raise RuntimeError('JoseFina token mismatch')
+          ids=[]
+          if os.environ.get('MODE')=='refurbished':
+            R=['MLM6222684088','MLM6222480716','MLM3494917851','MLM3494913051','MLM6222679212','MLM6222480738','MLM6222479914','MLM3494968449','MLM3494917855','MLM3494913057','MLM6222480742','MLM3494913073']
+            existing=set()
+            for q in seller(TARGET,jh):
+              try:
+                z=get(q,jh)
+                if z.get('catalog_listing') and z.get('condition')=='refurbished' and z.get('catalog_product_id'): existing.add(z['catalog_product_id'])
+              except: pass
+            for sid in R:
+              try:
+                x=get(sid,jh)
+                if int(x.get('seller_id',0))!=TARGET or not x.get('catalog_product_id'): raise RuntimeError('source validation failed')
+                if x['catalog_product_id'] in existing:
+                  print('SKIP_DUPLICATE',sid,x['catalog_product_id'],flush=True); continue
+                attrs=[]
+                for a in x.get('attributes',[]):
+                  if a.get('id') in ['GTIN','ITEM_CONDITION','GRADING'] and a.get('value_name'):
+                    row={'id':a['id'],'value_name':a['value_name']}
+                    if a.get('value_id'):row['value_id']=a['value_id']
+                    attrs.append(row)
+                attrs=[a for a in attrs if a['id'] not in ['ITEM_CONDITION','GRADING']]
+                attrs.extend([{'id':'ITEM_CONDITION','value_name':'Reacondicionado'},{'id':'GRADING','value_name':'Excelente'}])
+                p={'site_id':'MLM','family_name':(x.get('family_name') or x['title'])[:60],'category_id':x['category_id'],'price':399.0,'currency_id':'MXN','available_quantity':1,'buying_mode':'buy_it_now','listing_type_id':x.get('listing_type_id','gold_special'),'condition':'refurbished','catalog_product_id':x['catalog_product_id'],'catalog_listing':True,'attributes':attrs,'shipping':{'mode':'me2','local_pick_up':bool(x.get('shipping',{}).get('local_pick_up')),'free_shipping':bool(x.get('shipping',{}).get('free_shipping'))},'sale_terms':[{'id':'WARRANTY_TYPE','value_id':'2230280','value_name':'Garantía del vendedor'},{'id':'WARRANTY_TIME','value_name':'90 días'}]}
+                r=requests.post(A+'/items',headers=jjson,json=p,timeout=60)
+                if not r.ok: print('REFURB_ERROR',sid,r.text[:500],flush=True); continue
+                tid=r.json()['id']; z=get(tid,jh)
+                print('REFURB_VERIFY',sid,tid,z.get('status'),z.get('catalog_listing'),z.get('condition'),z.get('price'),flush=True)
+                if z.get('catalog_listing') and z.get('condition')=='refurbished' and float(z.get('price',0))==399.0: ids.append(tid); existing.add(x['catalog_product_id'])
+              except Exception as e: print('REFURB_ERROR',sid,str(e),flush=True)
+          elif os.environ.get('MODE')=='catalogcopy':
+            sid='MLM3494913073'
+            x=get(sid,jh)
+            if int(x.get('seller_id',0))!=TARGET or not x.get('catalog_product_id'): raise RuntimeError('catalog source validation failed')
+            attrs=[]
+            for a in x.get('attributes',[]):
+              if a.get('id') in ['GTIN','ITEM_CONDITION','GRADING'] and a.get('value_name'):
+                row={'id':a['id'],'value_name':a['value_name']}
+                if a.get('value_id'):row['value_id']=a['value_id']
+                attrs.append(row)
+            if not any(a.get('id')=='ITEM_CONDITION' for a in attrs):attrs.append({'id':'ITEM_CONDITION','value_name':'Nuevo'})
+            p={'site_id':'MLM','family_name':(x.get('family_name') or x['title'])[:60],'category_id':x['category_id'],'price':float(x['price']),'currency_id':'MXN','available_quantity':1,'buying_mode':'buy_it_now','listing_type_id':x.get('listing_type_id','gold_special'),'condition':'new','catalog_product_id':x['catalog_product_id'],'catalog_listing':True,'attributes':attrs,'shipping':{'mode':'me2','local_pick_up':bool(x.get('shipping',{}).get('local_pick_up')),'free_shipping':bool(x.get('shipping',{}).get('free_shipping'))}}
+            r=requests.post(A+'/items',headers=jjson,json=p,timeout=60)
+            if not r.ok: raise RuntimeError('catalog create: '+r.text[:500])
+            tid=r.json()['id']; z=get(tid,jh)
+            if not z.get('catalog_listing') or z.get('condition')!='new': raise RuntimeError('catalog verification failed')
+            print('CATALOG_VERIFY',sid,tid,z.get('status'),z.get('catalog_listing'),z.get('condition'),flush=True)
+            ids=[tid]
+          elif os.environ.get('MODE')=='traditional':
+            sid='MLM6224823528'
+            x=get(sid,jh)
+            if int(x.get('seller_id',0))!=TARGET: raise RuntimeError('source seller mismatch')
+            attrs=[]
+            for a in x.get('attributes',[]):
+              if a.get('id') and (a.get('value_name') or a.get('value_id')):
+                row={'id':a['id']}
+                if a.get('value_name'): row['value_name']=a['value_name']
+                if a.get('value_id'): row['value_id']=a['value_id']
+                attrs.append(row)
+            if not any(a.get('id')=='GTIN' for a in attrs) and x.get('catalog_product_id'):
+              try:
+                cp=requests.get(A+'/products/'+str(x['catalog_product_id']),headers=jh,timeout=45).json()
+                for a in cp.get('attributes',[]):
+                  if a.get('id')=='GTIN' and (a.get('value_name') or a.get('value_id')):
+                    row={'id':'GTIN'}
+                    if a.get('value_name'):row['value_name']=a['value_name']
+                    if a.get('value_id'):row['value_id']=a['value_id']
+                    attrs.append(row);break
+              except: pass
+            p={'site_id':'MLM','family_name':(x.get('family_name') or x['title'])[:60],'category_id':x['category_id'],'price':float(x['price']),'currency_id':'MXN','available_quantity':1,'buying_mode':'buy_it_now','listing_type_id':x.get('listing_type_id','gold_special'),'condition':x['condition'],'attributes':attrs,'shipping':{'mode':'me2','local_pick_up':bool(x.get('shipping',{}).get('local_pick_up')),'free_shipping':bool(x.get('shipping',{}).get('free_shipping'))}}
+            terms=[]
+            for t in x.get('sale_terms',[]):
+              if t.get('id') in ['WARRANTY_TYPE','WARRANTY_TIME']:
+                row={'id':t['id']}
+                if t.get('value_id'):row['value_id']=t['value_id']
+                if t.get('value_name'):row['value_name']=t['value_name']
+                terms.append(row)
+            if terms:p['sale_terms']=terms
+            r=requests.post(A+'/items',headers=jjson,json=p,timeout=60)
+            if not r.ok: raise RuntimeError('traditional create: '+r.text[:500])
+            tid=r.json()['id']; z=get(tid,jh)
+            if z.get('catalog_listing'): raise RuntimeError('new listing stayed catalog')
+            print('TRADITIONAL_VERIFY',sid,tid,z.get('status'),z.get('catalog_listing'),z.get('available_quantity'),flush=True)
+            ids=[tid]
+          elif os.environ.get('MODE')=='price':
+            ids=['MLM6223274204','MLM6223236012','MLM6222681740','MLM3495200463','MLM3494976933','MLM3494976831','MLM3494966833','MLM3494966071','MLM3494917833','MLM3494915599']
+            for tid in ids:
+              r=requests.put(A+'/items/'+tid,headers=jjson,json={'price':399.0},timeout=45)
+              if not r.ok:
+                print('PRICE_ERROR',tid,r.text[:400],flush=True); continue
+              z=get(tid,jh)
+              print('PRICE_VERIFY',tid,z.get('price'),z.get('status'),flush=True)
+          elif os.environ.get('MODE')=='clone':
+            rt=token(os.environ['ROSA_TOKEN'],'rosa_token');rh={'Authorization':'Bearer '+rt}
+            if int(requests.get(A+'/users/me',headers=rh,timeout=45).json().get('id',0))!=ROSA:raise RuntimeError('Rosa token mismatch')
+            existing={}
+            for q in seller(TARGET,jh):
+              try:
+                x=get(q,jh); existing.setdefault((x.get('catalog_product_id'),x.get('condition')),x)
+              except:pass
+            for sid in S:
+              x=get(sid,rh)
+              if int(x.get('seller_id',0))!=ROSA or not x.get('catalog_listing') or not x.get('catalog_product_id'):raise RuntimeError(sid+' source validation failed')
+              key=(x['catalog_product_id'],x['condition']); y=existing.get(key); tid=y['id'] if y else None
+              if not tid:
+                attrs=[]
+                for a in x.get('attributes',[]):
+                  if a.get('id') in ['GTIN','ITEM_CONDITION','GRADING'] and a.get('value_name'):
+                    row={'id':a['id'],'value_name':a['value_name']}
+                    if a.get('value_id'):row['value_id']=a['value_id']
+                    attrs.append(row)
+                if not any(a['id']=='ITEM_CONDITION' for a in attrs):attrs.append({'id':'ITEM_CONDITION','value_name':{'new':'Nuevo','used':'Usado','refurbished':'Reacondicionado'}[x['condition']]})
+                p={'site_id':'MLM','family_name':(x.get('family_name') or x['title'])[:60],'category_id':x['category_id'],'price':float(x['price']),'currency_id':'MXN','available_quantity':1,'buying_mode':'buy_it_now','listing_type_id':x.get('listing_type_id','gold_special'),'condition':x['condition'],'catalog_product_id':x['catalog_product_id'],'catalog_listing':True,'attributes':attrs,'shipping':{'mode':'me2','local_pick_up':bool(x.get('shipping',{}).get('local_pick_up')),'free_shipping':bool(x.get('shipping',{}).get('free_shipping'))}}
+                terms=[]
+                for t in x.get('sale_terms',[]):
+                  if t.get('id') in ['WARRANTY_TYPE','WARRANTY_TIME']:
+                    row={'id':t['id']}
+                    if t.get('value_id'):row['value_id']=t['value_id']
+                    if t.get('value_name'):row['value_name']=t['value_name']
+                    terms.append(row)
+                if x['condition']=='refurbished' and not any(t.get('id')=='WARRANTY_TIME' for t in terms):
+                  terms=[t for t in terms if t.get('id')!='WARRANTY_TYPE']
+                  terms.extend([{'id':'WARRANTY_TYPE','value_id':'2230280','value_name':'Garantía del vendedor'},{'id':'WARRANTY_TIME','value_name':'90 días'}])
+                if sid in ['MLM3457506211','MLM3457506173']:terms=[{'id':'WARRANTY_TYPE','value_id':'2230280','value_name':'Garantía del vendedor'},{'id':'WARRANTY_TIME','value_name':'90 días'}]
+                if terms:p['sale_terms']=terms
+                print('SOURCE_TERMS',sid,p.get('sale_terms'),flush=True)
+                r=requests.post(A+'/items',headers=jjson,json=p,timeout=60)
+                if not r.ok:print('SKIP_CREATE',sid,r.text[:400],flush=True);continue
+                tid=r.json()['id']
+              r=requests.put(A+'/items/'+tid,headers=jjson,json={'status':'active','available_quantity':1,'price':float(x['price'])},timeout=45) if not y else requests.put(A+'/items/'+tid,headers=jjson,json={'status':'active'},timeout=45)
+              if not r.ok:print('SKIP_ACTIVATE',sid,r.text[:400],flush=True);continue
+              z=get(tid,jh)
+              print('VERIFY',sid,tid,z.get('status'),z.get('catalog_product_id'),z.get('condition'),flush=True)
+              ids.append(tid);print('CLONED',sid,tid,x['title'],flush=True)
+            open('/tmp/items.json','w').write(json.dumps(ids))
+          else:
+            # Match the approved catalog IDs if this is a continuation.
+            for q in seller(TARGET,jh):
+              try:
+                x=get(q,jh)
+                if x.get('catalog_product_id') in ['MLM75427969'] or x.get('title'):
+                  if x.get('catalog_listing'): ids.append(q)
+              except:pass
+            # Restrict continuation to the original target mapping retained in action log is not safe; only restock exact titles from clone source.
+            sources=[]
+            rt=token(os.environ['ROSA_TOKEN'],'rosa_token');rh={'Authorization':'Bearer '+rt
+            }
+            for sid in S:sources.append(get(sid,rh).get('catalog_product_id'))
+            ids=[]
+            for q in seller(TARGET,jh):
+              try:
+                x=get(q,jh)
+                if x.get('catalog_product_id') in sources:ids.append(q)
+              except:pass
+          print('MAPPED',len(ids),flush=True)
+          for n in range(660):
+            for tid in ids:
+              try:
+                x=get(tid,jh)
+                if x.get('status') in ['active','paused'] and (x.get('status')!='active' or int(x.get('available_quantity',0))!=1):
+                  r=requests.put(A+'/items/'+tid,headers=jjson,json={'status':'active','available_quantity':1},timeout=45)
+                  if not r.ok:print('RESTOCK_ERROR',tid,r.text[:180],flush=True)
+              except Exception as e:print('RESTOCK_ERROR',tid,str(e),flush=True)
+            time.sleep(30)
+          PY
+          python3 /tmp/run.py
+      - name: Save refreshed tokens and continue monitor
+        if: success()
+        run: |
+          test -s /tmp/josefina_token && gh secret set MELI_REFRESH_TOKEN_JOSEFINA --repo kxmwnzbzhn-spec/meli-autoresponder < /tmp/josefina_token || true
+          test -s /tmp/rosa_token && gh secret set MELI_REFRESH_TOKEN_ROSA_MARIA --repo kxmwnzbzhn-spec/meli-autoresponder < /tmp/rosa_token || true
+          gh workflow run clone_rosa_maria_to_josefina.yml --repo kxmwnzbzhn-spec/meli-autoresponder -f mode=restock || truename: Rosa Maria to JoseFina catalog clone and unlimited stock
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
         description: clone, restock, price, traditional, or catalogcopy
         required: false
         default: clone
