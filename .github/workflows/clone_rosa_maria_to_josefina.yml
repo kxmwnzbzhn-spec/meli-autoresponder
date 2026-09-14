@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
     inputs:
       mode:
-        description: clone or restock
+        description: clone, restock, or price
         required: false
         default: clone
   schedule:
@@ -53,7 +53,15 @@ jobs:
           me=requests.get(A+'/users/me',headers=jh,timeout=45).json()
           if int(me.get('id',0))!=TARGET: raise RuntimeError('JoseFina token mismatch')
           ids=[]
-          if os.environ.get('MODE')=='clone':
+          if os.environ.get('MODE')=='price':
+            ids=['MLM6223274204','MLM6223236012','MLM6222681740','MLM3495200463','MLM3494976933','MLM3494976831','MLM3494966833','MLM3494966071','MLM3494917833','MLM3494915599']
+            for tid in ids:
+              r=requests.put(A+'/items/'+tid,headers=jjson,json={'price':399.0},timeout=45)
+              if not r.ok:
+                print('PRICE_ERROR',tid,r.text[:400],flush=True); continue
+              z=get(tid,jh)
+              print('PRICE_VERIFY',tid,z.get('price'),z.get('status'),flush=True)
+          elif os.environ.get('MODE')=='clone':
             rt=token(os.environ['ROSA_TOKEN'],'rosa_token');rh={'Authorization':'Bearer '+rt}
             if int(requests.get(A+'/users/me',headers=rh,timeout=45).json().get('id',0))!=ROSA:raise RuntimeError('Rosa token mismatch')
             existing={}
