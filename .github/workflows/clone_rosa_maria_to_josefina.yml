@@ -84,7 +84,7 @@ jobs:
                 if x['condition']=='refurbished' and not any(t.get('id')=='WARRANTY_TIME' for t in terms):
                   terms=[t for t in terms if t.get('id')!='WARRANTY_TYPE']
                   terms.extend([{'id':'WARRANTY_TYPE','value_id':'2230280','value_name':'Garantía del vendedor'},{'id':'WARRANTY_TIME','value_name':'90 días'}])
-                if sid=='MLM3457506211':terms=[{'id':'WARRANTY_TYPE','value_id':'2230280','value_name':'Garantía del vendedor'},{'id':'WARRANTY_TIME','value_name':'90 días'}]
+                if sid in ['MLM3457506211','MLM3457506173']:terms=[{'id':'WARRANTY_TYPE','value_id':'2230280','value_name':'Garantía del vendedor'},{'id':'WARRANTY_TIME','value_name':'90 días'}]
                 if terms:p['sale_terms']=terms
                 print('SOURCE_TERMS',sid,p.get('sale_terms'),flush=True)
                 r=requests.post(A+'/items',headers=jjson,json=p,timeout=60)
