@@ -59,10 +59,21 @@ jobs:
             if int(x.get('seller_id',0))!=TARGET: raise RuntimeError('source seller mismatch')
             attrs=[]
             for a in x.get('attributes',[]):
-              if a.get('id') and a.get('value_name'):
-                row={'id':a['id'],'value_name':a['value_name']}
+              if a.get('id') and (a.get('value_name') or a.get('value_id')):
+                row={'id':a['id']}
+                if a.get('value_name'): row['value_name']=a['value_name']
                 if a.get('value_id'): row['value_id']=a['value_id']
                 attrs.append(row)
+            if not any(a.get('id')=='GTIN' for a in attrs) and x.get('catalog_product_id'):
+              try:
+                cp=requests.get(A+'/products/'+str(x['catalog_product_id']),headers=jh,timeout=45).json()
+                for a in cp.get('attributes',[]):
+                  if a.get('id')=='GTIN' and (a.get('value_name') or a.get('value_id')):
+                    row={'id':'GTIN'}
+                    if a.get('value_name'):row['value_name']=a['value_name']
+                    if a.get('value_id'):row['value_id']=a['value_id']
+                    attrs.append(row);break
+              except: pass
             p={'site_id':'MLM','family_name':(x.get('family_name') or x['title'])[:60],'category_id':x['category_id'],'price':float(x['price']),'currency_id':'MXN','available_quantity':1,'buying_mode':'buy_it_now','listing_type_id':x.get('listing_type_id','gold_special'),'condition':x['condition'],'attributes':attrs,'shipping':{'mode':'me2','local_pick_up':bool(x.get('shipping',{}).get('local_pick_up')),'free_shipping':bool(x.get('shipping',{}).get('free_shipping'))}}
             terms=[]
             for t in x.get('sale_terms',[]):
