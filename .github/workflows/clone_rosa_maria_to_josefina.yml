@@ -1,25 +1,4 @@
 name: Rosa Maria to JoseFina catalog clone and unlimited stock
-on:
-  workflow_dispatch:
-    inputs:
-      mode:
-        description: clone or restock
-        required: false
-        default: clone
-  schedule:
-    - cron: '17 */6 * * *'
-permissions:
-  actions: write
-  contents: read
-jobs:
-  run:
-    runs-on: ubuntu-latest
-    timeout-minutes: 355
-    env:
-      MODE: ${{ inputs.mode || 'restock' }}
-      MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
-      MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
-      MELI_APP_ID_NEW: ${{ secrets.MELI_APP_ID_NEW }}
       MELI_APP_SECRET_NEW: ${{ secrets.MELI_APP_SECRET_NEW }}
       ROSA_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN_ROSA_MARIA }}
       JOSEFINA_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN_JOSEFINA }}
@@ -68,11 +47,22 @@ jobs:
               if not tid:
                 attrs=[]
                 for a in x.get('attributes',[]):
-                  if a.get('id') in ['GTIN','ITEM_CONDITION'] and a.get('value_name'):
-                    attrs.append({'id':a['id'],'value_name':a['value_name']})
+                  if a.get('id') in ['GTIN','ITEM_CONDITION','GRADING'] and a.get('value_name'):
+                    row={'id':a['id'],'value_name':a['value_name']}
+                    if a.get('value_id'):row['value_id']=a['value_id']
+                    attrs.append(row)
                 if not any(a['id']=='ITEM_CONDITION' for a in attrs):attrs.append({'id':'ITEM_CONDITION','value_name':{'new':'Nuevo','used':'Usado','refurbished':'Reacondicionado'}[x['condition']]})
                 p={'site_id':'MLM','family_name':(x.get('family_name') or x['title'])[:60],'category_id':x['category_id'],'price':float(x['price']),'currency_id':'MXN','available_quantity':1,'buying_mode':'buy_it_now','listing_type_id':x.get('listing_type_id','gold_special'),'condition':x['condition'],'catalog_product_id':x['catalog_product_id'],'catalog_listing':True,'attributes':attrs,'shipping':{'mode':'me2','local_pick_up':bool(x.get('shipping',{}).get('local_pick_up')),'free_shipping':bool(x.get('shipping',{}).get('free_shipping'))}}
-                p['sale_terms']=[{'id':'WARRANTY_TYPE','value_name':'Garantía del vendedor'},{'id':'WARRANTY_TIME','value_name':'90 días'}] if x['condition']=='refurbished' else p.get('sale_terms',[]);r=requests.post(A+'/items',headers=jjson,json=p,timeout=60)
+                terms=[]
+                for t in x.get('sale_terms',[]):
+                  if t.get('id') in ['WARRANTY_TYPE','WARRANTY_TIME']:
+                    row={'id':t['id']}
+                    if t.get('value_id'):row['value_id']=t['value_id']
+                    if t.get('value_name'):row['value_name']=t['value_name']
+                    terms.append(row)
+                if terms:p['sale_terms']=terms
+                print('SOURCE_TERMS',sid,terms,flush=True)
+                r=requests.post(A+'/items',headers=jjson,json=p,timeout=60)
                 if not r.ok:print('SKIP_CREATE',sid,r.text[:400],flush=True);continue
                 tid=r.json()['id']
               r=requests.put(A+'/items/'+tid,headers=jjson,json={'status':'active','available_quantity':1,'price':float(x['price'])},timeout=45) if not y else requests.put(A+'/items/'+tid,headers=jjson,json={'status':'active'},timeout=45)
@@ -97,24 +87,3 @@ jobs:
             ids=[]
             for q in seller(TARGET,jh):
               try:
-                x=get(q,jh)
-                if x.get('catalog_product_id') in sources:ids.append(q)
-              except:pass
-          print('MAPPED',len(ids),flush=True)
-          for n in range(660):
-            for tid in ids:
-              try:
-                x=get(tid,jh)
-                if x.get('status') in ['active','paused'] and (x.get('status')!='active' or int(x.get('available_quantity',0))!=1):
-                  r=requests.put(A+'/items/'+tid,headers=jjson,json={'status':'active','available_quantity':1},timeout=45)
-                  if not r.ok:print('RESTOCK_ERROR',tid,r.text[:180],flush=True)
-              except Exception as e:print('RESTOCK_ERROR',tid,str(e),flush=True)
-            time.sleep(30)
-          PY
-          python3 /tmp/run.py
-      - name: Save refreshed tokens and continue monitor
-        if: success()
-        run: |
-          test -s /tmp/josefina_token && gh secret set MELI_REFRESH_TOKEN_JOSEFINA --repo kxmwnzbzhn-spec/meli-autoresponder < /tmp/josefina_token || true
-          test -s /tmp/rosa_token && gh secret set MELI_REFRESH_TOKEN_ROSA_MARIA --repo kxmwnzbzhn-spec/meli-autoresponder < /tmp/rosa_token || true
-          gh workflow run clone_rosa_maria_to_josefina.yml --repo kxmwnzbzhn-spec/meli-autoresponder -f mode=restock || true
