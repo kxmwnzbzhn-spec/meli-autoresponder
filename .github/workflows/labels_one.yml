@@ -26,6 +26,11 @@ on:
         required: false
         type: string
         default: 'ready_to_print'
+      shipment_ids:
+        description: 'IDs de envío para regenerar un corte exacto, separados por coma'
+        required: false
+        type: string
+        default: ''
 jobs:
   run:
     runs-on: ubuntu-latest
@@ -44,6 +49,7 @@ jobs:
           EXCLUDE_MODELS:           ${{ inputs.exclude_models }}
           EXCLUDE_TITLE_CONTAINS:   ${{ inputs.exclude_title_contains }}
           ALLOWED_SUBSTATUSES:      ${{ inputs.allowed_substatuses }}
+          SHIPMENT_IDS:             ${{ inputs.shipment_ids }}
           MELI_APP_ID:              ${{ secrets.MELI_APP_ID }}
           MELI_APP_SECRET:          ${{ secrets.MELI_APP_SECRET }}
           MELI_REFRESH_TOKEN_WILBERT:  ${{ secrets.MELI_REFRESH_TOKEN_WILBERT }}
