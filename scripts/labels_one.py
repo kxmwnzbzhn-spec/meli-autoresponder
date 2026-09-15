@@ -335,7 +335,7 @@ for sid, ord_list in obs.items():
                     if a.get("id")=="SIZE" or "talla" in (a.get("name","") or "").lower():
                         sz = (a.get("value_name") or "").strip()
                         if sz: break
-                code = to_code(model, col, sz, io_obj.get("title",""))
+                code = f"MODELO: {model} | COLOR: {col or 'Sin dato en Meli'}"
                 if cond=="used":
                     used=True; comp.append(f"USADO {qty} {code}")
                 else:
