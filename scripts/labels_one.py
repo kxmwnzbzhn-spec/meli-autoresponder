@@ -276,14 +276,14 @@ def render_header(s, header_h):
     c.setFillColorRGB(0,0,0); c.setFont("Helvetica-Bold",7.5)
     c.drawCentredString(cx,yt-11,f"[{s['account'].upper()}] {s['buyer'][:30]} | Ship:{s['sid']}")
     big=s["comp_lines"][:6]; n=len(big)
-    fs,lh=(14,16) if n<=2 else (12,14) if n<=4 else (10,12)
+    fs,lh=(7,8) if n<=2 else (6.5,8) if n<=4 else (6,7)
     bt=yt-18; bb=PAGE_H-total_h+4
     bh=bt-bb; th=n*lh
     fy=bt-(bh-th)/2.0-fs*0.8
     c.setFont("Helvetica-Bold",fs)
     y=fy
     for line in big:
-        c.drawCentredString(cx,y,line[:34]); y-=lh
+        c.drawCentredString(cx,y,line[:72]); y-=lh
     c.showPage(); c.save()
     buf.seek(0)
     return PdfReader(buf).pages[0]
