@@ -119,6 +119,25 @@ def get_variant_color(item_obj, H):
                         vn=ac.get("value_name") or ""
                         return _parse_color_map(vn) or _norm(vn)
         except: pass
+    # Si el pedido no expone variante, se consulta la publicación real.
+    if iid:
+        try:
+            r=requests.get(f"https://api.mercadolibre.com/items/{iid}",headers=H,timeout=8)
+            if r.status_code==200:
+                real_item=r.json()
+                for a in (real_item.get("attributes") or []):
+                    if a.get("id")=="COLOR" or "color" in (a.get("name","") or "").lower():
+                        vn=a.get("value_name") or ""
+                        if vn: return _parse_color_map(vn) or _norm(vn)
+                for v in (real_item.get("variations") or []):
+                    if not vid or str(v.get("id"))==str(vid):
+                        for a in (v.get("attribute_combinations") or []):
+                            if a.get("id")=="COLOR" or "color" in (a.get("name","") or "").lower():
+                                vn=a.get("value_name") or ""
+                                if vn: return _parse_color_map(vn) or _norm(vn)
+                title_color=_parse_color_map(real_item.get("title", ""))
+                if title_color: return title_color
+        except: pass
     return None
 
 def get_model(title):
@@ -329,7 +348,7 @@ for sid, ord_list in obs.items():
                 qty=it.get("quantity",1); iid=io_obj.get("id") or ""
                 cond=get_condition(io_obj,H)
                 # ANTI-ROBO: usar código en lugar de nombre legible
-                col = get_variant_color(io_obj, H)
+                col = get_variant_color(io_obj, H) or _parse_color_map(io_obj.get("title", ""))
                 sz = None
                 for a in (io_obj.get("variation_attributes") or []):
                     if a.get("id")=="SIZE" or "talla" in (a.get("name","") or "").lower():
