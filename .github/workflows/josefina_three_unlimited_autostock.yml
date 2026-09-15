@@ -29,7 +29,7 @@ jobs:
           import os,time,requests
           from pathlib import Path
           API='https://api.mercadolibre.com'; SELLER=3682192773
-          IDS=['MLM6225996112','MLM3496356565','MLM3494976831', 'MLM3499726141']
+          IDS=['MLM6225996112','MLM3496356565','MLM3494976831','MLM3499726141','MLM3494976933','MLM3499725875']
           duration=int(os.getenv('RUN_DURATION_SEC','19800'))
           def access():
             last=''
