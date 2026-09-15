@@ -127,13 +127,13 @@ def get_model(title):
               "JBL ","jbl ","Jbl ","Sony ","SONY ","Bose ","BOSE "]:
         t=t.replace(w,"")
     tl=t.lower()
-    if "go 4" in tl or "go4" in tl: return "Go4"
-    if "go 3" in tl or "go3" in tl: return "Go3"
-    if "clip 5" in tl or "clip5" in tl: return "Clip5"
+    if "go 4" in tl or "go4" in tl: return "JBL Go 4"
+    if "go 3" in tl or "go3" in tl: return "JBL Go 3"
+    if "clip 5" in tl or "clip5" in tl: return "JBL Clip 5"
     if "charge 6" in tl or "charge6" in tl: return "Charge6"
     if "flip 7" in tl or "flip7" in tl: return "Flip7"
     if "grip" in tl: return "Grip"
-    if "xb100" in tl: return "XB100"
+    if "xb100" in tl: return "Sony SRS-XB100"
     if "soundlink" in tl: return "SoundLink"
     if "modelo padrão" in tl_full or "modelo padrao" in tl_full or "padrão" in tl_full:
         return "JBL Impermeable"
