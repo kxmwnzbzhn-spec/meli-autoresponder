@@ -1,0 +1,73 @@
+name: josefina-three-unlimited-autostock
+on:
+  workflow_dispatch:
+    inputs:
+      duration_sec:
+        required: false
+        default: '19800'
+  schedule:
+    - cron: '23 */6 * * *'
+permissions:
+  actions: write
+  contents: read
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 345
+    steps:
+      - run: pip install requests -q
+      - name: Keep approved JoseFina listings active with one visible unit
+        env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_APP_ID_NEW: ${{ secrets.MELI_APP_ID_NEW }}
+          MELI_APP_SECRET_NEW: ${{ secrets.MELI_APP_SECRET_NEW }}
+          MELI_REFRESH_TOKEN_JOSEFINA: ${{ secrets.MELI_REFRESH_TOKEN_JOSEFINA }}
+          RUN_DURATION_SEC: ${{ inputs.duration_sec || '19800' }}
+        run: |
+          cat > /tmp/monitor.py <<'PY'
+          import os,time,requests
+          from pathlib import Path
+          API='https://api.mercadolibre.com'; SELLER=3682192773
+          IDS=['MLM6225996112','MLM3496356565','MLM3494976831']
+          duration=int(os.getenv('RUN_DURATION_SEC','19800'))
+          def access():
+            last=''
+            for ik,sk in [('MELI_APP_ID_NEW','MELI_APP_SECRET_NEW'),('MELI_APP_ID','MELI_APP_SECRET')]:
+              if not os.getenv(ik) or not os.getenv(sk): continue
+              r=requests.post(API+'/oauth/token',data={'grant_type':'refresh_token','client_id':os.getenv(ik),'client_secret':os.getenv(sk),'refresh_token':os.environ['MELI_REFRESH_TOKEN_JOSEFINA']},timeout=45)
+              if r.ok:
+                d=r.json();Path('/tmp/josefina_refresh').write_text(d['refresh_token']);return d['access_token']
+              last=r.text[:180]
+            raise RuntimeError('token: '+last)
+          h={'Authorization':'Bearer '+access()}; hj={**h,'Content-Type':'application/json'}
+          me=requests.get(API+'/users/me',headers=h,timeout=45);me.raise_for_status()
+          if int(me.json().get('id',0))!=SELLER: raise RuntimeError('JoseFina token mismatch')
+          def cycle(first=False):
+            for item in IDS:
+              try:
+                r=requests.get(API+'/items/'+item,headers=h,timeout=45);r.raise_for_status();x=r.json()
+                if int(x.get('seller_id',0))!=SELLER: raise RuntimeError('seller mismatch')
+                state=x.get('status'); qty=int(x.get('available_quantity') or 0)
+                if first: print('INITIAL',item,state,qty,flush=True)
+                if state in ('active','paused') and (state!='active' or qty!=1):
+                  u=requests.put(API+'/items/'+item,headers=hj,json={'status':'active','available_quantity':1},timeout=45);u.raise_for_status()
+                  z=requests.get(API+'/items/'+item,headers=h,timeout=45).json()
+                  if z.get('status')!='active' or int(z.get('available_quantity') or 0)!=1: raise RuntimeError('verification failed')
+                  print('RESTOCKED',item,flush=True)
+              except Exception as e: print('ERROR',item,str(e)[:300],flush=True)
+          cycle(True); start=time.time()
+          while time.time()-start<duration:
+            time.sleep(30);cycle()
+          PY
+          python3 /tmp/monitor.py
+      - name: Save refreshed JoseFina token
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN_FOR_SECRETS }}
+        run: test ! -s /tmp/josefina_refresh || gh secret set MELI_REFRESH_TOKEN_JOSEFINA --repo kxmwnzbzhn-spec/meli-autoresponder < /tmp/josefina_refresh
+      - name: Continue monitor
+        if: ${{ success() && (github.event_name == 'schedule' || inputs.duration_sec == '19800') }}
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN_FOR_SECRETS }}
+        run: gh workflow run josefina_three_unlimited_autostock.yml --repo kxmwnzbzhn-spec/meli-autoresponder -f duration_sec=19800
