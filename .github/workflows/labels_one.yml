@@ -3,26 +3,26 @@ on:
   workflow_dispatch:
     inputs:
       account:
-        description: 'Cuenta (Wilbert, Yiriam, Asva, Juan, Raymundo, Claribel, Bren, Angel, Asgari, Rmaychi, Ah, Mc)'
+        description: 'Cuenta'
         required: true
         type: string
       rt_secret_name:
-        description: 'Override del nombre del secret (opcional, default MELI_REFRESH_TOKEN_{ACCOUNT}). Para Yiriam usar MELI_REFRESH_TOKEN_YC_NEW.'
+        description: 'Nombre del secret de token'
         required: false
         type: string
         default: ''
       exclude_models:
-        description: 'Modelos a excluir, separados por coma (ej: Grip)'
+        description: 'Modelos a excluir'
         required: false
         type: string
         default: ''
       exclude_title_contains:
-        description: 'Substrings a excluir del título o color, separados por coma (ej: mandarin,aqua)'
+        description: 'Substrings a excluir'
         required: false
         type: string
         default: ''
       allowed_substatuses:
-        description: 'Substatuses a incluir, separados por coma (default: ready_to_print)'
+        description: 'Substatuses a incluir'
         required: false
         type: string
         default: 'ready_to_print'
@@ -62,6 +62,7 @@ jobs:
           MELI_REFRESH_TOKEN_LUPITA:   ${{ secrets.MELI_REFRESH_TOKEN_LUPITA }}
           MELI_REFRESH_TOKEN_KARIME:   ${{ secrets.MELI_REFRESH_TOKEN_KARIME }}
           MELI_REFRESH_TOKEN_LIGIA:    ${{ secrets.MELI_REFRESH_TOKEN_LIGIA }}
+          MELI_REFRESH_TOKEN_JOSEFINA: ${{ secrets.MELI_REFRESH_TOKEN_JOSEFINA }}
         run: python scripts/labels_one.py
       - uses: actions/upload-artifact@v4
         if: always()
