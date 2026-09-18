@@ -32,7 +32,7 @@ jobs:
           import os,time,requests
           from pathlib import Path
           A='https://api.mercadolibre.com'; SELLER=3686581136
-          IDS=['MLM6249034526','MLM6248996876','MLM6249065470','MLM6249244762','MLM6249039666','MLM6249244772','MLM6249244774','MLM6249065488','MLM6249244780','MLM6249065498','MLM6249244788','MLM6249065504','MLM6249039696','MLM6249244802','MLM6249039700','MLM3516050833','MLM6249039874','MLM6249244818','MLM6249244820','MLM3516050853','MLM6249039712']
+          IDS=[]
           def access():
             for ak,sk in [('MELI_APP_ID_NEW','MELI_APP_SECRET_NEW'),('MELI_APP_ID','MELI_APP_SECRET')]:
               if os.getenv(ak) and os.getenv(sk):
@@ -40,7 +40,7 @@ jobs:
                 if r.ok:
                   d=r.json(); Path('/tmp/natanael_refresh').write_text(d['refresh_token']); return d['access_token']
             raise RuntimeError('OAuth refresh failed')
-          h={'Authorization':'Bearer '+access()}; hj={**h,'Content-Type':'application/json'}
+          h={'Authorization':'Bearer '+access()}; hj={**h,'Content-Type':'application/json'}; IDS=sum([requests.get(A+f'/users/{SELLER}/items/search',headers=h,params={'limit':100,'offset':o},timeout=45).json().get('results',[]) for o in range(0,1000,100)],[]); print('TARGET_LISTINGS',len(IDS),flush=True)
           me=requests.get(A+'/users/me',headers=h,timeout=45).json(); print('TARGET',me.get('id'),me.get('nickname'))
           if int(me.get('id') or 0)!=SELLER: raise RuntimeError('Natanael token mismatch')
           def cycle(first=False):
