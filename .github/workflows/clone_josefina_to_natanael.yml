@@ -47,7 +47,7 @@ jobs:
           print('SOURCE_USER',js.get('id'),js.get('nickname')); print('TARGET_USER',ns.get('id'),ns.get('nickname'))
           if int(js.get('id') or 0)!=3682192773: raise RuntimeError('Josefina token mismatch')
           source_ids=[]
-          for st in ('active','paused','under_review'):
+          for st in ('active','paused','under_review','closed'):
             off=0
             while True:
               r=requests.get(f"{A}/users/{js['id']}/items/search",headers=jh,params={'status':st,'limit':100,'offset':off},timeout=TIMEOUT); r.raise_for_status(); z=r.json().get('results',[]); source_ids += z
