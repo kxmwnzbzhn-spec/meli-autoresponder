@@ -56,7 +56,7 @@ jobs:
                   if z.get('status')!='active' or int(z.get('available_quantity') or 0)!=1: raise RuntimeError('verification failed')
                   print('RESTOCKED',item,flush=True)
               except Exception as e: print('ERROR',item,str(e)[:220],flush=True)
-          cycle(True); start=time.time(); duration=int(os.getenv('RUN_DURATION_SEC','19800'))
+          cycle(True); start=time.time(); duration=int(os.getenv('RUN_DURATION_SEC') or '19800')
           while time.time()-start<duration:
             time.sleep(30); cycle()
           PY
