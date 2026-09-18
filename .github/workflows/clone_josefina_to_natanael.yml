@@ -1,0 +1,100 @@
+name: Clonar Josefina a Natanael
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  clone:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+      MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+      MELI_APP_ID_NEW: ${{ secrets.MELI_APP_ID_NEW }}
+      MELI_APP_SECRET_NEW: ${{ secrets.MELI_APP_SECRET_NEW }}
+      JOSEFINA_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN_JOSEFINA }}
+      NATANAEL_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN_NATANAEL }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - run: pip install requests -q
+      - name: Clone catalog preserving condition
+        run: |
+          python3 - <<'PY'
+          import os, requests, json
+          A='https://api.mercadolibre.com'; TIMEOUT=45
+          def token(rt):
+            last=''
+            for aid,sec in [(os.getenv('MELI_APP_ID_NEW'),os.getenv('MELI_APP_SECRET_NEW')),(os.getenv('MELI_APP_ID'),os.getenv('MELI_APP_SECRET'))]:
+              if not aid or not sec: continue
+              r=requests.post(A+'/oauth/token',data={'grant_type':'refresh_token','client_id':aid,'client_secret':sec,'refresh_token':rt},timeout=TIMEOUT)
+              if r.ok:return r.json()['access_token']
+              last=r.text[:200]
+            raise RuntimeError('OAuth refresh failed '+last)
+          def get(i,h):
+            r=requests.get(A+'/items/'+i,headers=h,timeout=TIMEOUT); r.raise_for_status(); return r.json()
+          def seller(uid,h):
+            out=[]; off=0
+            while True:
+              r=requests.get(f'{A}/users/{uid}/items/search',headers=h,params={'limit':100,'offset':off},timeout=TIMEOUT); r.raise_for_status()
+              z=r.json().get('results',[]); out += z
+              if len(z)<100: return out
+              off += 100
+          jh={'Authorization':'Bearer '+token(os.environ['JOSEFINA_TOKEN'])}
+          nh={'Authorization':'Bearer '+token(os.environ['NATANAEL_TOKEN']),'Content-Type':'application/json'}
+          js=requests.get(A+'/users/me',headers=jh,timeout=TIMEOUT).json(); ns=requests.get(A+'/users/me',headers=nh,timeout=TIMEOUT).json()
+          print('SOURCE_USER',js.get('id'),js.get('nickname')); print('TARGET_USER',ns.get('id'),ns.get('nickname'))
+          if int(js.get('id') or 0)!=3682192773: raise RuntimeError('Josefina token mismatch')
+          source_ids=[]
+          for st in ('active','paused','under_review'):
+            off=0
+            while True:
+              r=requests.get(f"{A}/users/{js['id']}/items/search",headers=jh,params={'status':st,'limit':100,'offset':off},timeout=TIMEOUT); r.raise_for_status(); z=r.json().get('results',[]); source_ids += z
+              if len(z)<100: break
+              off += 100
+          source_ids=list(dict.fromkeys(source_ids)); print('SOURCE_LISTINGS',len(source_ids))
+          existing={}
+          for tid in seller(ns['id'],nh):
+            try:
+              x=get(tid,nh); cp=x.get('catalog_product_id'); cond=x.get('condition')
+              if cp and cond: existing.setdefault((cp,cond),x)
+            except Exception as e: print('TARGET_READ_ERROR',tid,str(e))
+          created=updated=skipped=errors=0
+          for sid in source_ids:
+            try:
+              x=get(sid,jh); cp=x.get('catalog_product_id'); cond=x.get('condition')
+              if not cp or cond not in ('new','used','refurbished'):
+                print('SKIP_NONCATALOG',sid,x.get('status'),cond,x.get('title','')[:80]); skipped+=1; continue
+              key=(cp,cond); y=existing.get(key)
+              terms=[t for t in (x.get('sale_terms') or []) if t.get('id') not in ('WARRANTY_TYPE','WARRANTY_TIME')]
+              terms += [{'id':'WARRANTY_TYPE','value_id':'2230280','value_name':'Garantía del vendedor'},{'id':'WARRANTY_TIME','value_name':'90 días'}]
+              attrs=[]
+              for a in x.get('attributes') or []:
+                if a.get('id') in ('GTIN','BRAND','MODEL','COLOR','ITEM_CONDITION','GRADING') and (a.get('value_name') or a.get('value_id')):
+                  attrs.append({k:a[k] for k in ('id','value_id','value_name') if k in a})
+              if not any(a.get('id')=='ITEM_CONDITION' for a in attrs): attrs.append({'id':'ITEM_CONDITION','value_name':{'new':'Nuevo','used':'Usado','refurbished':'Reacondicionado'}[cond]})
+              payload={'site_id':'MLM','family_name':(x.get('family_name') or x.get('title') or '')[:60],'category_id':x['category_id'],'price':float(x.get('price') or 0),'currency_id':'MXN','available_quantity':1,'buying_mode':'buy_it_now','listing_type_id':x.get('listing_type_id','gold_special'),'condition':cond,'catalog_product_id':cp,'catalog_listing':True,'attributes':attrs,'shipping':x.get('shipping') or {'mode':'me2'},'sale_terms':terms}
+              if y:
+                tid=y['id']; rr=requests.put(A+'/items/'+tid,headers=nh,json={'status':'active','available_quantity':1,'price':payload['price']},timeout=TIMEOUT)
+                if not rr.ok: raise RuntimeError('activate '+rr.text[:250])
+                updated+=1; print('UPDATED',sid,tid,cond,'active')
+              else:
+                rr=requests.post(A+'/items',headers=nh,json=payload,timeout=TIMEOUT)
+                if not rr.ok: raise RuntimeError('create '+rr.text[:350])
+                tid=rr.json()['id']; rr2=requests.put(A+'/items/'+tid,headers=nh,json={'status':'active','available_quantity':1,'price':payload['price']},timeout=TIMEOUT)
+                if not rr2.ok: raise RuntimeError('activate '+rr2.text[:250])
+                created+=1; existing[key]=get(tid,nh); print('CREATED',sid,tid,cond,'active')
+            except Exception as e:
+              errors+=1; print('ERROR',sid,str(e))
+          counts={'active':0,'paused':0,'closed':0,'other':0,'zero_stock':0}; total=0
+          for tid in seller(ns['id'],nh):
+            try:
+              x=get(tid,nh); st=x.get('status'); q=int(x.get('available_quantity') or 0); total+=1
+              if st in counts: counts[st]+=1
+              else: counts['other']+=1
+              if q==0: counts['zero_stock']+=1
+            except: pass
+          print('SUMMARY',json.dumps({'source_listings':len(source_ids),'created':created,'updated':updated,'skipped':skipped,'errors':errors,'target_total':total,'counts':counts},ensure_ascii=False))
+          if errors: raise SystemExit(1)
+          PY
