@@ -1,0 +1,72 @@
+name: Natanael unlimited autostock
+on:
+  workflow_dispatch:
+    inputs:
+      duration_sec:
+        required: false
+        default: '19800'
+  schedule:
+    - cron: '7 */6 * * *'
+permissions:
+  actions: write
+  contents: read
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 345
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - run: pip install requests -q
+      - name: Monitor Natanael listings every 30 seconds
+        env:
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+          MELI_APP_ID_NEW: ${{ secrets.MELI_APP_ID_NEW }}
+          MELI_APP_SECRET_NEW: ${{ secrets.MELI_APP_SECRET_NEW }}
+          NATANAEL_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN_NATANAEL }}
+          RUN_DURATION_SEC: ${{ inputs.duration_sec || "19800" }}
+        run: |
+          python3 - <<'PY'
+          import os,time,requests
+          from pathlib import Path
+          A='https://api.mercadolibre.com'; SELLER=3686581136
+          IDS=['MLM6249034526','MLM6248996876','MLM6249065470','MLM6249244762','MLM6249039666','MLM6249244772','MLM6249244774','MLM6249065488','MLM6249244780','MLM6249065498','MLM6249244788','MLM6249065504','MLM6249039696','MLM6249244802','MLM6249039700','MLM3516050833','MLM6249039874','MLM6249244818','MLM6249244820','MLM3516050853','MLM6249039712']
+          def access():
+            for ak,sk in [('MELI_APP_ID_NEW','MELI_APP_SECRET_NEW'),('MELI_APP_ID','MELI_APP_SECRET')]:
+              if os.getenv(ak) and os.getenv(sk):
+                r=requests.post(A+'/oauth/token',data={'grant_type':'refresh_token','client_id':os.getenv(ak),'client_secret':os.getenv(sk),'refresh_token':os.environ['NATANAEL_TOKEN']},timeout=45)
+                if r.ok:
+                  d=r.json(); Path('/tmp/natanael_refresh').write_text(d['refresh_token']); return d['access_token']
+            raise RuntimeError('OAuth refresh failed')
+          h={'Authorization':'Bearer '+access()}; hj={**h,'Content-Type':'application/json'}
+          me=requests.get(A+'/users/me',headers=h,timeout=45).json(); print('TARGET',me.get('id'),me.get('nickname'))
+          if int(me.get('id') or 0)!=SELLER: raise RuntimeError('Natanael token mismatch')
+          def cycle(first=False):
+            for item in IDS:
+              try:
+                r=requests.get(A+'/items/'+item,headers=h,timeout=45); r.raise_for_status(); x=r.json()
+                if int(x.get('seller_id') or 0)!=SELLER: raise RuntimeError('seller mismatch')
+                st=x.get('status'); qty=int(x.get('available_quantity') or 0)
+                if first: print('INITIAL',item,st,qty,flush=True)
+                if st in ('active','paused') and (st!='active' or qty!=1):
+                  u=requests.put(A+'/items/'+item,headers=hj,json={'status':'active','available_quantity':1},timeout=45); u.raise_for_status()
+                  z=requests.get(A+'/items/'+item,headers=h,timeout=45).json()
+                  if z.get('status')!='active' or int(z.get('available_quantity') or 0)!=1: raise RuntimeError('verification failed')
+                  print('RESTOCKED',item,flush=True)
+              except Exception as e: print('ERROR',item,str(e)[:220],flush=True)
+          cycle(True); start=time.time(); duration=int(os.getenv('RUN_DURATION_SEC','19800'))
+          while time.time()-start<duration:
+            time.sleep(30); cycle()
+          PY
+      - name: Save rotated Natanael token
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN_FOR_SECRETS }}
+        run: test ! -s /tmp/natanael_refresh || gh secret set MELI_REFRESH_TOKEN_NATANAEL --repo "${{ github.repository }}" < /tmp/natanael_refresh
+      - name: Continue monitor
+        if: ${{ success() && (github.event_name == "schedule" || inputs.duration_sec == "19800") }}
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN_FOR_SECRETS }}
+        run: gh workflow run natanael_unlimited_autostock.yml --repo "${{ github.repository }}" --ref main
