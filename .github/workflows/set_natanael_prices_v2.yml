@@ -1,0 +1,41 @@
+name: Set Natanael prices
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    env:
+      MELI_APP_ID: ${{ secrets.MELI_APP_ID }}
+      MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET }}
+      MELI_APP_ID_NEW: ${{ secrets.MELI_APP_ID_NEW }}
+      MELI_APP_SECRET_NEW: ${{ secrets.MELI_APP_SECRET_NEW }}
+      NATANAEL_TOKEN: ${{ secrets.MELI_REFRESH_TOKEN_NATANAEL }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - run: pip install requests -q
+      - name: Update three prices
+        run: |
+          python3 - <<'PY'
+          import os, requests
+          A='https://api.mercadolibre.com'
+          ids=['MLM6249244774','MLM6249039666','MLM6249244780']
+          def tok(rt):
+            for aid,sec in [(os.getenv('MELI_APP_ID_NEW'),os.getenv('MELI_APP_SECRET_NEW')),(os.getenv('MELI_APP_ID'),os.getenv('MELI_APP_SECRET'))]:
+              if aid and sec:
+                r=requests.post(A+'/oauth/token',data={'grant_type':'refresh_token','client_id':aid,'client_secret':sec,'refresh_token':rt},timeout=45)
+                if r.ok:return r.json()['access_token']
+            raise RuntimeError('OAuth failed')
+          h={'Authorization':'Bearer '+tok(os.environ['NATANAEL_TOKEN'])}; hj={**h,'Content-Type':'application/json'}
+          me=requests.get(A+'/users/me',headers=h,timeout=45).json(); print('TARGET',me.get('id'),me.get('nickname'))
+          if int(me.get('id') or 0)!=3686581136: raise RuntimeError('Natanael token mismatch')
+          for i in ids:
+            x=requests.get(A+'/items/'+i,headers=h,timeout=45); x.raise_for_status(); d=x.json(); print('BEFORE',i,d.get('seller_id'),d.get('price'),d.get('status'),d.get('title'))
+            if int(d.get('seller_id') or 0)!=3686581136: raise RuntimeError('seller mismatch '+i)
+            r=requests.put(A+'/items/'+i,headers=hj,json={'price':499},timeout=45); r.raise_for_status()
+            z=requests.get(A+'/items/'+i,headers=h,timeout=45).json(); print('AFTER',i,z.get('price'),z.get('status'))
+          print('DONE',len(ids))
+          PY
