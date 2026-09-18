@@ -53,6 +53,7 @@ jobs:
               r=requests.get(f"{A}/users/{js['id']}/items/search",headers=jh,params={'status':st,'limit':100,'offset':off},timeout=TIMEOUT); r.raise_for_status(); z=r.json().get('results',[]); source_ids += z
               if len(z)<100: break
               off += 100
+          source_ids += ['MLM6223274204','MLM6223236012','MLM6222681740','MLM3495200463','MLM3494976933','MLM3494976831','MLM3494966833','MLM3494966071','MLM3494917833','MLM3494915599','MLM3499726141','MLM3506776717','MLM3496356481','MLM6224856606','MLM3496356439','MLM3496344689','MLM3496344649','MLM6224856536','MLM6224856504','MLM3499725875','MLM3496356565','MLM3496356515','MLM6225996112']
           source_ids=list(dict.fromkeys(source_ids)); print('SOURCE_LISTINGS',len(source_ids))
           existing={}
           for tid in seller(ns['id'],nh):
