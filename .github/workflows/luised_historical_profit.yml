@@ -14,6 +14,7 @@ jobs:
           MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET_NEW }}
           MELI_REFRESH_TOKEN_LUISED: ${{ secrets.MELI_REFRESH_TOKEN_LUISED }}
           ACCOUNTING_START_DATE: '2026-08-19'
+          ACCOUNTING_OUTPUT: /tmp/luised_accounting.xlsx
         run: |
           curl -fsSL https://raw.githubusercontent.com/kxmwnzbzhn-spec/meli-autoresponder/main/scripts/accounting_rocioangel.py -o /tmp/acct.py
           python3 - <<'PY'
@@ -34,35 +35,3 @@ jobs:
           gross=fees=ship=refund=costs=0.0; units=orders=0; returns=cancelled=0; reasons=set(); seen=set()
           def f(x):
             try:return float(x or 0)
-            except:return 0.0
-          def q(x):
-            try:return int(float(x or 0))
-            except:return 0
-          for row in ws.iter_rows(min_row=2, values_only=True):
-            oid=row[idx['Order ID']]; status=str(row[idx['Estado']] or ''); title=str(row[idx['Producto']] or '')
-            qty=q(row[idx['Cantidad']]); ref=f(row[idx['Devolución']]); reason=str(row[idx['Motivo devolución']] or '')
-            if oid not in seen: orders+=1; seen.add(oid)
-            if status=='cancelled': cancelled+=1
-            if ref>0:
-              refund+=ref
-              if reason: returns+=1; reasons.add(reason)
-            if status not in ('paid','shipped','delivered','partially_refunded'): continue
-            units+=qty; gross+=f(row[idx['Venta bruta']]); fees+=f(row[idx['Comisión MELI']]); ship+=f(row[idx['Envío seller']])
-            t=title.lower().replace('-',' ')
-            if 'go 5' in t or 'go5' in t: costs+=280*qty
-            elif 'go 4' in t or 'go4' in t: costs+=233*qty
-            elif 'sony' in t or 'xb100' in t: costs+=320*qty
-            elif 'willen' in t: costs+=320*qty
-            elif 'emberton' in t: costs+=430*qty
-          return_cost=returns*140; profit=gross-fees-ship-refund-return_cost-costs
-          out={'orders':orders,'units':units,'gross':round(gross,2),'commissions':round(fees,2),'shipping':round(ship,2),'refunds':round(refund,2),'return_claims':returns,'return_cost_140_each':round(return_cost,2),'cancelled_orders':cancelled,'cogs':round(costs,2),'profit':round(profit,2),'partner_half':round(profit/2,2),'owner':round(costs+profit/2,2),'reasons':sorted(reasons)}
-          print('LUISED_ACCOUNTING_FULL='+json.dumps(out,ensure_ascii=False)); open('/tmp/luised_summary.json','w').write(json.dumps(out,ensure_ascii=False))
-          PY
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: luised-accounting-full
-          path: |
-            /tmp/luised_accounting.xlsx
-            /tmp/luised_summary.json
-          retention-days: 7
