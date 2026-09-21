@@ -13,7 +13,7 @@ jobs:
       - name: Run historical speaker audit
         env:
           MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET_NEW }}
-          MELI_REFRESH_TOKEN_ROCIOANGEL: ${{ secrets.MELI_REFRESH_TOKEN_LUISED }}
+          MELI_REFRESH_TOKEN_LUISED: ${{ secrets.MELI_REFRESH_TOKEN_LUISED }}
         run: |
           curl -fsSL https://raw.githubusercontent.com/kxmwnzbzhn-spec/meli-autoresponder/main/scripts/rocio_historical_partner_profit_v2.py -o /tmp/audit.py
           sed -i 's/MELI_REFRESH_TOKEN_ROCIOANGEL/MELI_REFRESH_TOKEN_LUISED/g; s/rocio_historical_v2_rotated/luised_historical_v2_rotated/g; s/2008666770714005/5211907102822632/g' /tmp/audit.py
