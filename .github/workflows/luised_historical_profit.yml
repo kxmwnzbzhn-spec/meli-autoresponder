@@ -30,33 +30,36 @@ jobs:
           python3 - <<'PY'
           import json, openpyxl
           wb=openpyxl.load_workbook('/tmp/luised_accounting.xlsx',data_only=False)
-          ws=wb['Ventas']
+          ws=wb['Ventas']; headers=[c.value for c in ws[1]]; idx={h:i for i,h in enumerate(headers)}
           gross=fees=ship=refund=costs=0.0; units=orders=0; returns=cancelled=0; reasons=set(); seen=set()
           def f(x):
             try:return float(x or 0)
             except:return 0.0
+          def q(x):
+            try:return int(float(x or 0))
+            except:return 0
           for row in ws.iter_rows(min_row=2, values_only=True):
-            date,month,oid,sid,status,iid,vid,title,color,qty,unit,g,fee,shipping,ref,refdate,reason,*_=row
+            oid=row[idx['Order ID']]; status=str(row[idx['Estado']] or ''); title=str(row[idx['Producto']] or '')
+            qty=q(row[idx['Cantidad']]); ref=f(row[idx['Devolución']]); reason=str(row[idx['Motivo devolución']] or '')
             if oid not in seen: orders+=1; seen.add(oid)
-            if str(status)=='cancelled': cancelled+=1
-            if f(ref)>0:
-              refund+=f(ref)
-              if reason: returns+=1; reasons.add(str(reason))
-            if str(status) not in ('paid','shipped','delivered','partially_refunded'): continue
-            units+=int(qty or 0); gross+=f(g); fees+=f(fee); ship+=f(shipping)
-            t=(title or '').lower().replace('-',' ')
-            if 'go 5' in t or 'go5' in t: costs+=280*int(qty or 0)
-            elif 'go 4' in t or 'go4' in t: costs+=233*int(qty or 0)
-            elif 'sony' in t or 'xb100' in t: costs+=320*int(qty or 0)
-            elif 'willen' in t: costs+=320*int(qty or 0)
-            elif 'emberton' in t: costs+=430*int(qty or 0)
-          return_cost=returns*140
-          profit=gross-fees-ship-refund-return_cost-costs
-          out={'orders_rows':orders,'units':units,'gross':round(gross,2),'commissions':round(fees,2),'shipping':round(ship,2),'refunds':round(refund,2),'return_claims':returns,'return_cost_140_each':round(return_cost,2),'cancelled_orders':cancelled,'cogs':round(costs,2),'profit':round(profit,2),'partner_half':round(profit/2,2),'owner':round(costs+profit/2,2),'reasons':sorted(reasons)}
-          print('LUISED_ACCOUNTING_FULL='+json.dumps(out,ensure_ascii=False))
-          open('/tmp/luised_summary.json','w').write(json.dumps(out,ensure_ascii=False))
+            if status=='cancelled': cancelled+=1
+            if ref>0:
+              refund+=ref
+              if reason: returns+=1; reasons.add(reason)
+            if status not in ('paid','shipped','delivered','partially_refunded'): continue
+            units+=qty; gross+=f(row[idx['Venta bruta']]); fees+=f(row[idx['Comisión MELI']]); ship+=f(row[idx['Envío seller']])
+            t=title.lower().replace('-',' ')
+            if 'go 5' in t or 'go5' in t: costs+=280*qty
+            elif 'go 4' in t or 'go4' in t: costs+=233*qty
+            elif 'sony' in t or 'xb100' in t: costs+=320*qty
+            elif 'willen' in t: costs+=320*qty
+            elif 'emberton' in t: costs+=430*qty
+          return_cost=returns*140; profit=gross-fees-ship-refund-return_cost-costs
+          out={'orders':orders,'units':units,'gross':round(gross,2),'commissions':round(fees,2),'shipping':round(ship,2),'refunds':round(refund,2),'return_claims':returns,'return_cost_140_each':round(return_cost,2),'cancelled_orders':cancelled,'cogs':round(costs,2),'profit':round(profit,2),'partner_half':round(profit/2,2),'owner':round(costs+profit/2,2),'reasons':sorted(reasons)}
+          print('LUISED_ACCOUNTING_FULL='+json.dumps(out,ensure_ascii=False)); open('/tmp/luised_summary.json','w').write(json.dumps(out,ensure_ascii=False))
           PY
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: luised-accounting-full
           path: |
