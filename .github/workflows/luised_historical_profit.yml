@@ -4,11 +4,10 @@ on:
 jobs:
   report:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - run: pip install requests openpyxl -q
-      - name: Run full accounting audit
+      - name: audit
         env:
           MELI_APP_ID: ${{ secrets.MELI_APP_ID_NEW }}
           MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET_NEW }}
@@ -17,21 +16,18 @@ jobs:
           ACCOUNTING_OUTPUT: /tmp/luised_accounting.xlsx
         run: |
           curl -fsSL https://raw.githubusercontent.com/kxmwnzbzhn-spec/meli-autoresponder/main/scripts/accounting_rocioangel.py -o /tmp/acct.py
-          python3 - <<'PY'
-          p='/tmp/acct.py'
-          s=open(p).read()
-          s=s.replace('APP_ID = "2008666770714005"','APP_ID = os.environ["MELI_APP_ID"]')
-          s=s.replace('REFRESH_TOKEN = os.environ["MELI_REFRESH_TOKEN_ROCIOANGEL"]','REFRESH_TOKEN = os.environ["MELI_REFRESH_TOKEN_LUISED"]')
-          s=s.split('\ndef drive_service():')[0]
-          open(p,'w').write(s)
-          PY
-          python /tmp/acct.py /tmp/luised_accounting.xlsx
-      - name: Summarize verified totals
+          sed -i 's/APP_ID = "2008666770714005"/APP_ID = os.environ["MELI_APP_ID"]/; s/REFRESH_TOKEN = os.environ["MELI_REFRESH_TOKEN_ROCIOANGEL"]/REFRESH_TOKEN = os.environ["MELI_REFRESH_TOKEN_LUISED"]/' /tmp/acct.py
+          sed -i '/^def drive_service():/,$d' /tmp/acct.py
+          python /tmp/acct.py
+      - name: summary
         run: |
-          python3 - <<'PY'
-          import json, openpyxl
-          wb=openpyxl.load_workbook('/tmp/luised_accounting.xlsx',data_only=False)
-          ws=wb['Ventas']; headers=[c.value for c in ws[1]]; idx={h:i for i,h in enumerate(headers)}
-          gross=fees=ship=refund=costs=0.0; units=orders=0; returns=cancelled=0; reasons=set(); seen=set()
-          def f(x):
-            try:return float(x or 0)
+          python3 -c 'import openpyxl,json; w=openpyxl.load_workbook("/tmp/luised_accounting.xlsx",data_only=False); s=w["Ventas"]; h=[c.value for c in s[1]]; i={x:n for n,x in enumerate(h)}; rows=list(s.iter_rows(min_row=2,values_only=True)); n=lambda x: float(x or 0); q=lambda x:int(float(x or 0)); valid={"paid","shipped","delivered","partially_refunded"}; seen=set(); orders=units=cancel=ret=0; gross=fees=ship=refund=cogs=0.0; reasons=set(); costs={"go 5":280,"go5":280,"go 4":233,"go4":233,"sony":320,"xb100":320,"willen":320,"emberton":430};
+          for r in rows:
+           oid=r[i["Order ID"]]; st=str(r[i["Estado"]] or ""); t=str(r[i["Producto"]] or "").lower(); z=q(r[i["Cantidad"]]); ref=n(r[i["Devolución"]]); reason=str(r[i["Motivo devolución"]] or ""); orders+=oid not in seen; seen.add(oid); cancel+=st=="cancelled"; refund+=ref; ret+=bool(ref and reason); reasons.add(reason) if reason else None;
+           if st in valid: units+=z; gross+=n(r[i["Venta bruta"]]); fees+=n(r[i["Comisión MELI"]]); ship+=n(r[i["Envío seller"]]); cogs+=next((v*z for k,v in costs.items() if k in t),0)
+          rc=ret*140; p=gross-fees-ship-refund-rc-cogs; o={"orders":orders,"units":units,"gross":round(gross,2),"commissions":round(fees,2),"shipping":round(ship,2),"refunds":round(refund,2),"return_claims":ret,"return_cost":rc,"cancelled":cancel,"cogs":cogs,"profit":round(p,2),"partner_half":round(p/2,2),"owner":round(cogs+p/2,2),"reasons":sorted(reasons)}; print("LUISED_ACCOUNTING_FULL="+json.dumps(o,ensure_ascii=False)); open("/tmp/luised_summary.json","w").write(json.dumps(o,ensure_ascii=False))'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: luised-accounting-full
+          path: /tmp/luised_summary.json
