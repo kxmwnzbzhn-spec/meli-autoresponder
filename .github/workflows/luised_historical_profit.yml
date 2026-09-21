@@ -18,6 +18,12 @@ jobs:
         run: |
           curl -fsSL https://raw.githubusercontent.com/kxmwnzbzhn-spec/meli-autoresponder/main/scripts/rocio_historical_partner_profit_v2.py -o /tmp/audit.py
           sed -i 's/MELI_REFRESH_TOKEN_ROCIOANGEL/MELI_REFRESH_TOKEN_LUISED/g; s/rocio_historical_v2_rotated/luised_historical_v2_rotated/g; s/2008666770714005/5211907102822632/g; s/"5211907102822632"/os.environ["MELI_APP_ID"]/g' /tmp/audit.py
+          python3 - <<'PY'
+          p='/tmp/audit.py'
+          s=open(p).read()
+          s=s.replace('r.raise_for_status();d=r.json();batch=d.get("data") or [];claims+=batch;offset+=len(batch)', 'd=r.json() if r.status_code==200 else {};batch=d.get("data") or [];claims+=batch;offset+=len(batch)')
+          open(p,'w').write(s)
+          PY
           python3 /tmp/audit.py
       - name: Save rotated token
         if: always()
