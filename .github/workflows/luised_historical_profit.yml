@@ -5,29 +5,61 @@ jobs:
   report:
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    permissions:
-      contents: read
     steps:
       - uses: actions/checkout@v4
-      - run: pip install requests -q
-      - name: Run historical speaker audit
+      - run: pip install requests openpyxl -q
+      - name: Run full accounting audit
         env:
           MELI_APP_ID: ${{ secrets.MELI_APP_ID_NEW }}
           MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET_NEW }}
           MELI_REFRESH_TOKEN_LUISED: ${{ secrets.MELI_REFRESH_TOKEN_LUISED }}
+          ACCOUNTING_START_DATE: '2026-08-19'
         run: |
-          curl -fsSL https://raw.githubusercontent.com/kxmwnzbzhn-spec/meli-autoresponder/main/scripts/rocio_historical_partner_profit_v2.py -o /tmp/audit.py
-          sed -i 's/MELI_REFRESH_TOKEN_ROCIOANGEL/MELI_REFRESH_TOKEN_LUISED/g; s/rocio_historical_v2_rotated/luised_historical_v2_rotated/g; s/2008666770714005/5211907102822632/g; s/"5211907102822632"/os.environ["MELI_APP_ID"]/g' /tmp/audit.py
+          curl -fsSL https://raw.githubusercontent.com/kxmwnzbzhn-spec/meli-autoresponder/main/scripts/accounting_rocioangel.py -o /tmp/acct.py
           python3 - <<'PY'
-          p='/tmp/audit.py'
+          p='/tmp/acct.py'
           s=open(p).read()
-          s=s.replace('r.raise_for_status();d=r.json();batch=d.get("data") or [];claims+=batch;offset+=len(batch)', 'd=r.json() if r.status_code==200 else {};batch=d.get("data") or [];claims+=batch;offset+=len(batch)')
+          s=s.replace('APP_ID = "2008666770714005"','APP_ID = os.environ["MELI_APP_ID"]')
+          s=s.replace('REFRESH_TOKEN = os.environ["MELI_REFRESH_TOKEN_ROCIOANGEL"]','REFRESH_TOKEN = os.environ["MELI_REFRESH_TOKEN_LUISED"]')
+          s=s.split('\ndef drive_service():')[0]
           open(p,'w').write(s)
           PY
-          python3 /tmp/audit.py
-      - name: Save rotated token
-        if: always()
-        env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN_FOR_SECRETS }}
+          python /tmp/acct.py /tmp/luised_accounting.xlsx
+      - name: Summarize verified totals
         run: |
-          if [ -s /tmp/luised_historical_v2_rotated ]; then gh secret set MELI_REFRESH_TOKEN_LUISED --repo kxmwnzbzhn-spec/meli-autoresponder < /tmp/luised_historical_v2_rotated; fi
+          python3 - <<'PY'
+          import json, openpyxl
+          wb=openpyxl.load_workbook('/tmp/luised_accounting.xlsx',data_only=False)
+          ws=wb['Ventas']
+          gross=fees=ship=refund=costs=0.0; units=orders=0; returns=cancelled=0; reasons=set(); seen=set()
+          def f(x):
+            try:return float(x or 0)
+            except:return 0.0
+          for row in ws.iter_rows(min_row=2, values_only=True):
+            date,month,oid,sid,status,iid,vid,title,color,qty,unit,g,fee,shipping,ref,refdate,reason,*_=row
+            if oid not in seen: orders+=1; seen.add(oid)
+            if str(status)=='cancelled': cancelled+=1
+            if f(ref)>0:
+              refund+=f(ref)
+              if reason: returns+=1; reasons.add(str(reason))
+            if str(status) not in ('paid','shipped','delivered','partially_refunded'): continue
+            units+=int(qty or 0); gross+=f(g); fees+=f(fee); ship+=f(shipping)
+            t=(title or '').lower().replace('-',' ')
+            if 'go 5' in t or 'go5' in t: costs+=280*int(qty or 0)
+            elif 'go 4' in t or 'go4' in t: costs+=233*int(qty or 0)
+            elif 'sony' in t or 'xb100' in t: costs+=320*int(qty or 0)
+            elif 'willen' in t: costs+=320*int(qty or 0)
+            elif 'emberton' in t: costs+=430*int(qty or 0)
+          return_cost=returns*140
+          profit=gross-fees-ship-refund-return_cost-costs
+          out={'orders_rows':orders,'units':units,'gross':round(gross,2),'commissions':round(fees,2),'shipping':round(ship,2),'refunds':round(refund,2),'return_claims':returns,'return_cost_140_each':round(return_cost,2),'cancelled_orders':cancelled,'cogs':round(costs,2),'profit':round(profit,2),'partner_half':round(profit/2,2),'owner':round(costs+profit/2,2),'reasons':sorted(reasons)}
+          print('LUISED_ACCOUNTING_FULL='+json.dumps(out,ensure_ascii=False))
+          open('/tmp/luised_summary.json','w').write(json.dumps(out,ensure_ascii=False))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: luised-accounting-full
+          path: |
+            /tmp/luised_accounting.xlsx
+            /tmp/luised_summary.json
+          retention-days: 7
