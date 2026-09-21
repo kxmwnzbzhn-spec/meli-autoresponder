@@ -1,0 +1,28 @@
+name: josefina-labels-manual
+on:
+  workflow_dispatch:
+jobs:
+  labels:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: sudo apt-get update && sudo apt-get install -y poppler-utils
+      - run: pip install requests pypdf reportlab pdf2image Pillow -q
+      - name: Generar etiquetas Josefina
+        env:
+          ACCOUNT: Josefina
+          MELI_APP_ID: ${{ secrets.MELI_APP_ID_NEW }}
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET_NEW }}
+          MELI_REFRESH_TOKEN_JOSEFINA: ${{ secrets.MELI_REFRESH_TOKEN_JOSEFINA }}
+          ALLOWED_SUBSTATUSES: ready_to_print,ready_to_ship
+        run: python scripts/labels_one.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: labels-Josefina-ready-print-and-ship
+          path: ETIQUETAS_JOSEFINA.pdf
+          if-no-files-found: error
+          retention-days: 7
