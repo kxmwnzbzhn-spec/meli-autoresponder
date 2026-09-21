@@ -11,12 +11,12 @@ jobs:
         env:
           MELI_APP_ID: ${{ secrets.MELI_APP_ID_NEW }}
           MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET_NEW }}
-          MELI_REFRESH_TOKEN_LUISED: ${{ secrets.MELI_REFRESH_TOKEN_LUISED }}
+          MELI_REFRESH_TOKEN_ROCIOANGEL: ${{ secrets.MELI_REFRESH_TOKEN_ROCIOANGEL }}
           ACCOUNTING_START_DATE: '2026-08-19'
           ACCOUNTING_OUTPUT: /tmp/luised_accounting.xlsx
         run: |
           curl -fsSL https://raw.githubusercontent.com/kxmwnzbzhn-spec/meli-autoresponder/main/scripts/accounting_rocioangel.py -o /tmp/acct.py
-          sed -i 's/APP_ID = "2008666770714005"/APP_ID = os.environ["MELI_APP_ID"]/; s/REFRESH_TOKEN = os.environ["MELI_REFRESH_TOKEN_ROCIOANGEL"]/REFRESH_TOKEN = os.environ["MELI_REFRESH_TOKEN_LUISED"]/' /tmp/acct.py
+          sed -i 's/APP_ID = "2008666770714005"/APP_ID = os.environ["MELI_APP_ID"]/; s/REFRESH_TOKEN = os.environ["MELI_REFRESH_TOKEN_ROCIOANGEL"]/REFRESH_TOKEN = os.environ["MELI_REFRESH_TOKEN_ROCIOANGEL"]/' /tmp/acct.py
           sed -i '/^def drive_service():/,$d' /tmp/acct.py
           python /tmp/acct.py
       - name: summary
