@@ -1,0 +1,26 @@
+name: luised-historical-speaker-profit
+on:
+  workflow_dispatch:
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install requests -q
+      - name: Run historical speaker audit
+        env:
+          MELI_APP_SECRET: ${{ secrets.MELI_APP_SECRET_NEW }}
+          MELI_REFRESH_TOKEN_ROCIOANGEL: ${{ secrets.MELI_REFRESH_TOKEN_LUISED }}
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/kxmwnzbzhn-spec/meli-autoresponder/main/scripts/rocio_historical_partner_profit_v2.py -o /tmp/audit.py
+          sed -i 's/MELI_REFRESH_TOKEN_ROCIOANGEL/MELI_REFRESH_TOKEN_LUISED/g; s/rocio_historical_v2_rotated/luised_historical_v2_rotated/g; s/2008666770714005/5211907102822632/g' /tmp/audit.py
+          python3 /tmp/audit.py
+      - name: Save rotated token
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN_FOR_SECRETS }}
+        run: |
+          if [ -s /tmp/luised_historical_v2_rotated ]; then gh secret set MELI_REFRESH_TOKEN_LUISED --repo kxmwnzbzhn-spec/meli-autoresponder < /tmp/luised_historical_v2_rotated; fi
