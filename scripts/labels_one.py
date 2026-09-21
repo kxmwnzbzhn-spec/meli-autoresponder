@@ -340,7 +340,7 @@ for sid, ord_list in obs.items():
         st=sh.get("status"); sub=sh.get("substatus")
         if SHIPMENT_IDS:
             if str(sid) not in SHIPMENT_IDS: continue
-        elif st!="ready_to_ship" or sub not in ALLOWED_SUBS: continue
+        elif not ((st == "ready_to_ship" and ("ready_to_ship" in ALLOWED_SUBS or sub in ALLOWED_SUBS)) or st in ALLOWED_SUBS): continue
         comp=[]; used=False; skip=False
         for ord_o in ord_list:
             for it in ord_o.get("order_items",[]):
